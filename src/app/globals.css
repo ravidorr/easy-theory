@@ -1,26 +1,135 @@
-@import "tailwindcss";
+@import "../../design-system/styles.css";
 
+/* Wire next/font Rubik variable into the design-system token */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --font-ui: var(--font-rubik, 'Rubik', 'Heebo', sans-serif);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  min-height: 100vh;
 }
+
+/* ── Flashcard flip ──────────────────────────────────────────── */
+.flashcard-wrap {
+  perspective: 1000px;
+  cursor: pointer;
+}
+.flashcard-inner {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform var(--dur-flip, 420ms) var(--ease-spring, cubic-bezier(.34,1.56,.64,1));
+  width: 260px;
+  height: 320px;
+}
+.flashcard-wrap.flipped .flashcard-inner {
+  transform: rotateY(180deg);
+}
+.flashcard-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 20px;
+  box-sizing: border-box;
+}
+.flashcard-back-face {
+  transform: rotateY(180deg);
+  text-align: center;
+}
+
+/* ── Quiz option states ──────────────────────────────────────── */
+.quiz-option {
+  border-radius: var(--radius-lg);
+  padding: 12px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border: 1.5px solid var(--border-strong);
+  background: var(--surface);
+  min-height: var(--hit-min);
+  box-sizing: border-box;
+  cursor: pointer;
+  width: 100%;
+  text-align: right;
+  font-family: var(--font-ui);
+  transition: border-color 120ms, background 120ms;
+}
+.quiz-option:hover { border-color: var(--primary); }
+.quiz-option[data-state="selected"] { border-color: var(--primary); background: var(--primary-soft); }
+.quiz-option[data-state="correct"]  { border-color: var(--success); background: var(--success-soft); }
+.quiz-option[data-state="wrong"]    { border-color: var(--danger);  background: var(--danger-soft); }
+.quiz-option-badge {
+  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700;
+  background: var(--surface-2); color: var(--text-muted);
+}
+.quiz-option[data-state="correct"] .quiz-option-badge { background: var(--success); color: #fff; }
+.quiz-option[data-state="wrong"]   .quiz-option-badge { background: var(--danger);  color: #fff; }
+.quiz-option-explanation {
+  font-size: var(--type-small-size);
+  color: var(--text-muted);
+  line-height: var(--line-body);
+  padding-inline-start: 40px;
+  display: none;
+}
+.quiz-option[data-state="correct"] .quiz-option-explanation { display: block; }
+
+/* ── Button press effect ─────────────────────────────────────── */
+.btn-primary {
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 17px;
+  min-height: 52px;
+  padding: 14px 28px;
+  border-radius: var(--radius-lg);
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary);
+  color: var(--text-on-primary);
+  box-shadow: var(--shadow-press);
+  transition: background 120ms, transform 80ms, box-shadow 80ms;
+  width: 100%;
+}
+.btn-primary:hover  { background: var(--primary-hover); }
+.btn-primary:active { transform: translateY(2px); box-shadow: var(--shadow-press-down); }
+.btn-primary:disabled { opacity: 0.45; cursor: default; }
+.btn-secondary {
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 15.5px;
+  min-height: 52px;
+  padding: 10px 22px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-strong);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  color: var(--text);
+  transition: background 120ms;
+}
+.btn-secondary:hover { background: var(--surface-2); }
