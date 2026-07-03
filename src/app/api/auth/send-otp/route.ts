@@ -17,7 +17,9 @@ export async function POST(request: Request) {
   });
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("send-otp error:", error.name, error.message, error.status, JSON.stringify(error));
+    const msg = error.message || error.name || String(error.status) || "unknown";
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });
