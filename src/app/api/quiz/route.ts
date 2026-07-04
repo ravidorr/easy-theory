@@ -7,6 +7,7 @@ import {
   isMilestoneReached,
 } from "@/lib/quiz";
 import { checkTopicCompletion } from "@/lib/topic-completion";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -16,6 +17,11 @@ export async function POST(request: Request) {
 
   if (!user) {
     return NextResponse.json({ error: "לא מחוברת" }, { status: 401 });
+  }
+
+  const allowed = await checkRateLimit(supabase, `quiz:${user.id}`, 20, 60);
+  if (!allowed) {
+    return NextResponse.json({ error: "יותר מדי בקשות, נסי שוב עוד רגע" }, { status: 429 });
   }
 
   const { question_id, selected_option, topic_id } = await request.json();
