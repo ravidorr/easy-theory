@@ -4,6 +4,11 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ## [Unreleased]
 
+## [0.1.3] — 2026-07-04
+
+### Changed
+- Add Python `__pycache__/` and `*.pyc` entries to `.gitignore`
+
 ## [0.1.2] — 2026-07-04
 
 ### Fixed
