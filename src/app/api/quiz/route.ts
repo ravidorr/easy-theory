@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase";
-
-const STREAK_MILESTONES = [3, 7, 14, 30];
-const POINTS_PER_CORRECT = 10;
+import {
+  STREAK_MILESTONES,
+  POINTS_PER_CORRECT,
+  computeNewStreak,
+  isMilestoneReached,
+} from "@/lib/quiz";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -68,12 +71,12 @@ export async function POST(request: Request) {
       yesterday.setDate(yesterday.getDate() - 1);
       const yesterdayStr = yesterday.toISOString().split("T")[0];
 
-      const newStreak =
-        stats.last_active_date === today
-          ? stats.streak_days
-          : stats.last_active_date === yesterdayStr
-            ? stats.streak_days + 1
-            : 1;
+      const newStreak = computeNewStreak(
+        stats.streak_days,
+        stats.last_active_date,
+        today,
+        yesterdayStr
+      );
 
       await supabase
         .from("user_stats")
@@ -85,10 +88,7 @@ export async function POST(request: Request) {
         .eq("user_id", user.id);
 
       // Streak milestone medals
-      if (
-        newStreak !== stats.streak_days &&
-        STREAK_MILESTONES.includes(newStreak)
-      ) {
+      if (isMilestoneReached(newStreak, stats.streak_days, STREAK_MILESTONES)) {
         const slug = `streak-${newStreak}`;
         const { error } = await supabase
           .from("user_medals")
