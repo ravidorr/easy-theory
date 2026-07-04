@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# דרך ברורה · ClearRoad
 
-## Getting Started
+A Hebrew-first RTL driving theory study app for the Israeli car-B license exam. Built for a 16-year-old — warm, encouraging, no pressure.
 
-First, run the development server:
+**Live:** [easy-theory-omega.vercel.app](https://easy-theory-omega.vercel.app)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Magic-link auth** — no passwords, email only
+- **Quiz practice** — 1,802 official theory questions, organized by topic, with sign images inline
+- **Sign flashcards** — all 277 official Israeli traffic signs with flip animation
+- **Progress tracking** — streak, star points, per-topic progress
+- **Weekly schedule** — pick study days and times
+- **Dark mode** — cookie-persisted, zero flash on load
+- **Hebrew RTL** — Rubik font, feminine voice throughout
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- [Next.js 15](https://nextjs.org) (App Router, Server Components only — no `'use client'`)
+- [Supabase](https://supabase.com) — Postgres + magic-link auth
+- Vanilla JS in `public/js/` for all client interactivity
+- Design system in `design-system/` — CSS tokens + component library
 
-## Learn More
+## Data sources
 
-To learn more about Next.js, take a look at the following resources:
+- **Questions** — 1,802 official theory exam questions from [data.gov.il](https://data.gov.il)
+- **Signs** — 277 official traffic sign PNGs from the Israeli Ministry of Transport (לות״ם, September 2022)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Contributing
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
-## Deploy on Vercel
+## License
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+[MIT](./LICENSE) — traffic sign images are official government artwork and carry their own terms.
