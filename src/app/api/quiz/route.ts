@@ -6,6 +6,7 @@ import {
   computeNewStreak,
   isMilestoneReached,
 } from "@/lib/quiz";
+import { checkTopicCompletion } from "@/lib/topic-completion";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -109,6 +110,8 @@ export async function POST(request: Request) {
   }
 
   // Update topic progress if topic_id provided
+  let topic_completed = false;
+
   if (topic_id && is_correct) {
     const { data: progress } = await supabase
       .from("user_topic_progress")
@@ -134,6 +137,24 @@ export async function POST(request: Request) {
         .eq("user_id", user.id)
         .eq("topic_id", topic_id);
     }
+
+    if (!progress || progress.status !== "completed") {
+      const isComplete = await checkTopicCompletion(supabase, user.id, topic_id);
+      if (isComplete) {
+        topic_completed = true;
+        const origin = new URL(request.url).origin;
+        const cookie = request.headers.get("cookie") ?? "";
+        try {
+          await fetch(`${origin}/api/progress`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Cookie: cookie },
+            body: JSON.stringify({ topic_id, status: "completed" }),
+          });
+        } catch (err) {
+          console.error("[quiz] Failed to mark topic completed:", err);
+        }
+      }
+    }
   }
 
   // Fetch updated stats
@@ -151,5 +172,6 @@ export async function POST(request: Request) {
     new_total_stars: updatedStats?.star_points ?? 0,
     streak_days: updatedStats?.streak_days ?? 0,
     medals_earned,
+    topic_completed,
   });
 }
