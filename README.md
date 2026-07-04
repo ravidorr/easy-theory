@@ -16,7 +16,7 @@ A Hebrew-first RTL driving theory study app for the Israeli car-B license exam. 
 
 ## Stack
 
-- [Next.js 15](https://nextjs.org) (App Router, Server Components only — no `'use client'`)
+- [Next.js 16](https://nextjs.org) (App Router, Server Components only — no `'use client'`)
 - [Supabase](https://supabase.com) — Postgres + magic-link auth
 - Vanilla JS in `public/js/` for all client interactivity
 - Design system in `design-system/` — CSS tokens + component library
