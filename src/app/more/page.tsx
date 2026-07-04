@@ -3,6 +3,7 @@ import Script from "next/script";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase";
 import { TabBar } from "@/components/TabBar";
+import { getUserMedals } from "@/lib/db";
 
 export default async function MorePage() {
   const supabase = await createClient();
@@ -11,8 +12,23 @@ export default async function MorePage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/auth/login");
 
+  const medals = await getUserMedals(supabase, user.id);
+  const earnedSet = new Set(medals.map((m) => m.medal_slug));
+  const earnedDateMap = Object.fromEntries(medals.map((m) => [m.medal_slug, m.earned_at]));
+
   const cookieStore = await cookies();
   const isDark = (cookieStore.get("theme")?.value ?? "dark") === "dark";
+
+  const MILESTONES = [
+    { slug: "streak-3",  label: "3 ימים",   emoji: "🔥" },
+    { slug: "streak-7",  label: "שבוע",      emoji: "⭐" },
+    { slug: "streak-14", label: "שבועיים",   emoji: "💎" },
+    { slug: "streak-30", label: "חודש",      emoji: "🏆" },
+  ];
+
+  function fmtDate(iso: string) {
+    return new Intl.DateTimeFormat("he-IL", { day: "numeric", month: "short" }).format(new Date(iso));
+  }
 
   return (
     <>
@@ -165,6 +181,90 @@ export default async function MorePage() {
               <path d="m15 18-6-6 6-6" />
             </svg>
           </a>
+        </div>
+
+        {/* Medals */}
+        <div
+          style={{
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
+            borderRadius: "var(--radius-xl)",
+            boxShadow: "var(--shadow-card)",
+            padding: "20px",
+          }}
+        >
+          <h2
+            style={{
+              margin: "0 0 16px",
+              fontSize: "var(--type-body-size)",
+              fontWeight: 700,
+              color: "var(--text)",
+            }}
+          >
+            הישגים
+          </h2>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(4, 1fr)",
+              gap: "8px",
+            }}
+          >
+            {MILESTONES.map(({ slug, label, emoji }) => {
+              const earned = earnedSet.has(slug);
+              const date = earnedDateMap[slug];
+              return (
+                <div
+                  key={slug}
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: 6,
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 56,
+                      height: 56,
+                      borderRadius: "50%",
+                      background: earned ? "var(--gold-soft)" : "var(--surface-2)",
+                      border: `3px solid ${earned ? "var(--gold)" : "var(--surface-3)"}`,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 24,
+                      boxShadow: earned ? "var(--shadow-card)" : "none",
+                      filter: earned ? "none" : "grayscale(1)",
+                      opacity: earned ? 1 : 0.45,
+                    }}
+                  >
+                    {emoji}
+                  </div>
+                  <span
+                    style={{
+                      fontSize: "var(--type-caption-size)",
+                      fontWeight: 600,
+                      textAlign: "center",
+                      lineHeight: 1.3,
+                      color: earned ? "var(--text)" : "var(--text-faint)",
+                    }}
+                  >
+                    {label}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "11px",
+                      textAlign: "center",
+                      color: earned ? "var(--text-muted)" : "var(--text-faint)",
+                    }}
+                  >
+                    {earned ? fmtDate(date) : "—"}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* Settings */}
