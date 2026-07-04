@@ -7,6 +7,9 @@ export async function POST(request: Request) {
   if (!email || typeof email !== "string") {
     return NextResponse.json({ error: "כתובת מייל חסרה" }, { status: 400 });
   }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+    return NextResponse.json({ error: "כתובת המייל אינה תקינה" }, { status: 400 });
+  }
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithOtp({

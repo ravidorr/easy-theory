@@ -30,8 +30,24 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "פרמטרים שגויים" }, { status: 400 });
   }
 
-  // Replace schedule: delete existing, insert new
-  await supabase.from("user_schedule").delete().eq("user_id", user.id);
+  // Validate inputs
+  const validDays = days.every((d: unknown) => Number.isInteger(d) && (d as number) >= 0 && (d as number) <= 6);
+  if (!validDays) {
+    return NextResponse.json({ error: "ימים לא תקינים" }, { status: 400 });
+  }
+  if (typeof start_time !== "string" || !/^\d{2}:\d{2}$/.test(start_time)) {
+    return NextResponse.json({ error: "שעה לא תקינה" }, { status: 400 });
+  }
+
+  // Replace schedule: delete existing, insert new rows atomically
+  const { error: deleteError } = await supabase
+    .from("user_schedule")
+    .delete()
+    .eq("user_id", user.id);
+
+  if (deleteError) {
+    return NextResponse.json({ error: "שגיאה בעדכון לוח הזמנים" }, { status: 500 });
+  }
 
   if (days.length > 0) {
     const rows = days.map((day: number) => ({
@@ -41,7 +57,10 @@ export async function PUT(request: Request) {
       duration_minutes: duration_minutes ?? 45,
       notify: notify ?? true,
     }));
-    await supabase.from("user_schedule").insert(rows);
+    const { error: insertError } = await supabase.from("user_schedule").insert(rows);
+    if (insertError) {
+      return NextResponse.json({ error: "שגיאה בשמירת לוח הזמנים" }, { status: 500 });
+    }
   }
 
   return NextResponse.json({ ok: true });

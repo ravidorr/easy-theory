@@ -15,6 +15,7 @@
   let current = 0;
   let flipped = false;
   const dontKnow = []; // indices to repeat
+  let replayMode = false;
 
   function updateUI(index) {
     const display = index + 1;
@@ -39,29 +40,39 @@
     });
   });
 
+  function showDone() {
+    if (countEl) countEl.textContent = "הושלם! " + total + " כרטיסים";
+    if (progressFill) progressFill.style.width = "100%";
+    cards.forEach(function (c) { c.style.display = "none"; });
+    if (yesBtn) yesBtn.disabled = true;
+    if (noBtn) noBtn.disabled = true;
+    const done = document.createElement("div");
+    done.style.cssText = "flex:1;display:flex;align-items:center;justify-content:center;font-size:var(--type-h2-size);color:var(--text-muted);";
+    done.textContent = "כל הכרטיסים עברו!";
+    container.appendChild(done);
+  }
+
   function advance(knew) {
     if (!knew) dontKnow.push(current);
 
-    current++;
-    if (current < total) {
-      showCard(current);
-    } else if (dontKnow.length > 0) {
-      // Replay cards the user didn't know
-      const next = dontKnow.shift();
-      current = next;
-      showCard(next);
+    if (!replayMode) {
+      current++;
+      if (current < total) {
+        showCard(current);
+      } else if (dontKnow.length > 0) {
+        replayMode = true;
+        current = dontKnow.shift();
+        showCard(current);
+      } else {
+        showDone();
+      }
     } else {
-      // All done
-      if (countEl) countEl.textContent = "הושלם! " + total + " כרטיסים";
-      if (progressFill) progressFill.style.width = "100%";
-      cards.forEach(function (c) { c.style.display = "none"; });
-      if (yesBtn) yesBtn.disabled = true;
-      if (noBtn) noBtn.disabled = true;
-
-      const done = document.createElement("div");
-      done.style.cssText = "flex:1;display:flex;align-items:center;justify-content:center;font-size:var(--type-h2-size);color:var(--text-muted);";
-      done.textContent = "כל הכרטיסים עברו!";
-      container.appendChild(done);
+      if (dontKnow.length > 0) {
+        current = dontKnow.shift();
+        showCard(current);
+      } else {
+        showDone();
+      }
     }
   }
 
