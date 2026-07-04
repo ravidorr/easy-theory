@@ -41,7 +41,8 @@ function QuestionSlide({
     ["d", question.option_d],
   ];
 
-  const imageUrl = resolveImageUrl(question.image_url);
+  const allOptionsAreSigns = options.every(([, text]) => /^\d{2,4}$/.test(text.trim()));
+  const imageUrl = allOptionsAreSigns ? null : resolveImageUrl(question.image_url);
   const isWide = imageUrl && imageUrl !== "__placeholder__" && !imageUrl.includes("sign-");
 
   return (
@@ -102,7 +103,7 @@ function QuestionSlide({
               <img
                 src={imageUrl!}
                 alt=""
-                style={{ width: "96px", height: "96px", objectFit: "contain" }}
+                style={{ width: "96px", height: "96px", objectFit: "contain", mixBlendMode: "multiply" }}
               />
             </div>
           )
@@ -133,17 +134,14 @@ function QuestionSlide({
             >
               <span className="quiz-option-badge">{LETTERS[i]}</span>
               {optionSignImg ? (
-                /* Sign-number option: show image + number */
-                <span style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1 }}>
+                /* Sign option: image only, centered */
+                <span style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={optionSignImg}
                     alt=""
-                    style={{ width: "52px", height: "52px", objectFit: "contain", flexShrink: 0 }}
+                    style={{ width: "52px", height: "52px", objectFit: "contain", flexShrink: 0, mixBlendMode: "multiply" }}
                   />
-                  <span style={{ fontSize: "var(--type-small-size)", color: "var(--text-muted)" }}>
-                    {text}
-                  </span>
                 </span>
               ) : (
                 <span
@@ -187,7 +185,11 @@ export default async function TopicQuizPage({
 
   // Fetch extra to account for filtering out questions with missing images
   const raw = await getQuestionsForTopic(supabase, topic.id, 20);
-  const questions = raw.filter(q => resolveImageUrl(q.image_url) !== "__placeholder__");
+  const questions = raw.filter(q => {
+    const imageMissing = resolveImageUrl(q.image_url) === "__placeholder__";
+    if (!imageMissing) return true;
+    return [q.option_a, q.option_b, q.option_c, q.option_d].every(o => /^\d{2,4}$/.test(o.trim()));
+  });
   const total = questions.length;
 
   return (
@@ -320,7 +322,7 @@ export default async function TopicQuizPage({
             disabled
             style={{ display: total === 0 ? "none" : undefined }}
           >
-            לשאלה הבאה
+            בדקי תשובה
           </button>
         </div>
 

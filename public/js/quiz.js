@@ -1,4 +1,4 @@
-/** Quiz interactivity: option selection, API submission, progress, final screen. */
+/** Quiz interactivity: option selection, confirmation, instant feedback, progress, final screen. */
 (function () {
   const container = document.getElementById("quiz-container");
   if (!container) return;
@@ -7,7 +7,7 @@
   if (total === 0) return;
 
   const slides = Array.from(document.querySelectorAll(".quiz-slide"));
-  const nextBtn = document.getElementById("quiz-next");
+  const actionBtn = document.getElementById("quiz-next");
   const progressFill = document.getElementById("quiz-progress-fill");
   const countEl = document.getElementById("quiz-count");
   const rewardBanner = document.getElementById("reward-banner");
@@ -18,7 +18,8 @@
   const footer = document.getElementById("quiz-footer");
 
   let currentIndex = 0;
-  let answered = false;
+  let selectedOption = null;
+  let confirmed = false;
   let score = 0;
 
   function updateProgress(index) {
@@ -32,8 +33,12 @@
       s.style.display = i === index ? "flex" : "none";
     });
     updateProgress(index);
-    answered = false;
-    if (nextBtn) nextBtn.disabled = true;
+    selectedOption = null;
+    confirmed = false;
+    if (actionBtn) {
+      actionBtn.disabled = true;
+      actionBtn.textContent = "בדקי תשובה";
+    }
     if (rewardBanner) rewardBanner.hidden = true;
   }
 
@@ -43,60 +48,97 @@
     });
   }
 
-  async function handleOptionClick(e) {
+  function handleOptionClick(e) {
+    if (confirmed) return;
     const btn = e.currentTarget;
     const slide = btn.closest(".quiz-slide");
-    if (!slide || answered) return;
-    answered = true;
+    if (!slide) return;
 
-    const selected = btn.dataset.option;
-    const questionId = slide.dataset.questionId;
-    const topicId = container.dataset.topicId || slide.dataset.topicId;
+    // Clear previous selection
+    slide.querySelectorAll(".quiz-option").forEach(function (o) {
+      o.dataset.state = "";
+    });
 
-    // Visual: mark selected
+    // Select this option
     btn.dataset.state = "selected";
+    selectedOption = btn.dataset.option;
+
+    if (actionBtn) actionBtn.disabled = false;
+  }
+
+  function handleConfirm(slide) {
+    confirmed = true;
     lockOptions(slide);
 
-    try {
-      const res = await fetch("/api/quiz", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question_id: questionId, selected_option: selected, topic_id: topicId }),
-      });
-      const data = await res.json();
+    const correctOption = slide.dataset.correct;
+    const isCorrect = selectedOption === correctOption;
 
-      // Apply correct/wrong states
-      slide.querySelectorAll(".quiz-option").forEach(function (o) {
-        if (o.dataset.option === data.correct_option) {
-          o.dataset.state = "correct";
-        } else if (o.dataset.option === selected && !data.is_correct) {
-          o.dataset.state = "wrong";
-        } else {
-          o.dataset.state = "";
-        }
-      });
-
-      if (data.is_correct) {
-        score++;
-        if (rewardBanner && rewardAmount) {
-          rewardBanner.hidden = false;
-          rewardBanner.style.display = "flex";
-          rewardAmount.textContent = "+" + (data.stars_earned || 10);
-          if (rewardMessage) rewardMessage.textContent = "יפה מאוד!";
-        }
+    // Instant visual feedback — no API wait
+    slide.querySelectorAll(".quiz-option").forEach(function (o) {
+      if (o.dataset.option === correctOption) {
+        o.dataset.state = "correct";
+      } else if (o.dataset.option === selectedOption && !isCorrect) {
+        o.dataset.state = "wrong";
       } else {
-        if (rewardMessage && rewardBanner) {
-          rewardBanner.hidden = false;
-          rewardBanner.style.display = "flex";
-          rewardAmount.textContent = "";
-          rewardMessage.textContent = "לא נורא, תנסי שוב בפעם הבאה.";
-        }
+        o.dataset.state = "";
       }
-    } catch (_) {
-      // Offline fallback: still advance
+    });
+
+    if (isCorrect) {
+      score++;
+      if (rewardBanner && rewardAmount) {
+        rewardBanner.hidden = false;
+        rewardBanner.style.display = "flex";
+        rewardAmount.textContent = "+10";
+        if (rewardMessage) rewardMessage.textContent = "יפה מאוד!";
+      }
+    } else {
+      if (rewardBanner && rewardMessage) {
+        rewardBanner.hidden = false;
+        rewardBanner.style.display = "flex";
+        if (rewardAmount) rewardAmount.textContent = "";
+        rewardMessage.textContent = "לא נורא, תנסי שוב בפעם הבאה.";
+      }
     }
 
-    if (nextBtn) nextBtn.disabled = false;
+    // Fire-and-forget API call for tracking
+    const questionId = slide.dataset.questionId;
+    const topicId = container.dataset.topicId || slide.dataset.topicId;
+    fetch("/api/quiz", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question_id: questionId, selected_option: selectedOption, topic_id: topicId }),
+    }).catch(function () {});
+
+    if (actionBtn) {
+      actionBtn.textContent = "לשאלה הבאה";
+      actionBtn.disabled = false;
+    }
+  }
+
+  function handleAdvance() {
+    currentIndex++;
+    if (currentIndex >= total) {
+      slides.forEach(function (s) { s.style.display = "none"; });
+      if (footer) footer.style.display = "none";
+      if (finalScreen) finalScreen.style.display = "flex";
+      if (finalScore) finalScore.textContent = score + " מתוך " + total + " נכון";
+      if (progressFill) progressFill.style.width = "100%";
+      if (countEl) countEl.textContent = total + " מתוך " + total;
+
+      const topicId = container.dataset.topicId;
+      if (topicId) {
+        const pct = Math.round((score / total) * 100);
+        const status = pct >= 80 ? "completed" : "in_progress";
+        fetch("/api/progress", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ topic_id: topicId, score: pct, status }),
+        }).catch(function () {});
+      }
+    } else {
+      showSlide(currentIndex);
+    }
   }
 
   // Attach option click handlers
@@ -106,37 +148,15 @@
     });
   });
 
-  // Next button
-  if (nextBtn) {
-    nextBtn.addEventListener("click", function () {
-      currentIndex++;
-      if (currentIndex >= total) {
-        // Show final screen
-        slides.forEach(function (s) { s.style.display = "none"; });
-        if (footer) footer.style.display = "none";
-        if (finalScreen) {
-          finalScreen.style.display = "flex";
-        }
-        if (finalScore) {
-          finalScore.textContent = score + " מתוך " + total + " נכון";
-        }
-        // Update progress to full
-        if (progressFill) progressFill.style.width = "100%";
-        if (countEl) countEl.textContent = total + " מתוך " + total;
-
-        // POST final progress
-        const topicId = container.dataset.topicId;
-        if (topicId) {
-          const pct = Math.round((score / total) * 100);
-          const status = pct >= 80 ? "completed" : "in_progress";
-          fetch("/api/progress", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ topic_id: topicId, score: pct, status }),
-          }).catch(function () {});
-        }
-      } else {
-        showSlide(currentIndex);
+  // Action button: dispatches on confirmed state
+  if (actionBtn) {
+    actionBtn.addEventListener("click", function () {
+      const slide = slides[currentIndex];
+      if (!slide) return;
+      if (!confirmed && selectedOption) {
+        handleConfirm(slide);
+      } else if (confirmed) {
+        handleAdvance();
       }
     });
   }
