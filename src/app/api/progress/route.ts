@@ -16,16 +16,18 @@ export async function POST(request: Request) {
 
   const { data: existing } = await supabase
     .from("user_topic_progress")
-    .select("id, best_score")
+    .select("id, best_score, status")
     .eq("user_id", user.id)
     .eq("topic_id", topic_id)
     .single();
 
   if (existing) {
+    // Never downgrade from completed to a lesser status
+    const effectiveStatus = existing.status === "completed" ? "completed" : safeStatus;
     await supabase
       .from("user_topic_progress")
       .update({
-        status: safeStatus,
+        status: effectiveStatus,
         last_studied_at: new Date().toISOString(),
         best_score:
           score != null && (existing.best_score == null || score > existing.best_score)

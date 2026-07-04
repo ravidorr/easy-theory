@@ -105,13 +105,19 @@
       }
     }
 
-    // Fire-and-forget API call for tracking
+    // Track answer server-side; update message if this answer completes the topic
     const questionId = slide.dataset.questionId;
     const topicId = container.dataset.topicId || slide.dataset.topicId;
     fetch("/api/quiz", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ question_id: questionId, selected_option: selectedOption, topic_id: topicId }),
+    }).then(function (res) {
+      return res.ok ? res.json() : null;
+    }).then(function (data) {
+      if (data && data.topic_completed && rewardMessage) {
+        rewardMessage.textContent = "כל הכבוד! סיימת את כל הנושא!";
+      }
     }).catch(function () {});
 
     if (actionBtn) {

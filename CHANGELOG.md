@@ -4,6 +4,17 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ## [Unreleased]
 
+### Added
+- Topic completion detection: after a correct answer, check if all questions in the topic have been answered correctly at least once; call POST /api/progress with status "completed" automatically
+- Quiz route now returns `topic_completed: boolean` in its response
+- `checkTopicCompletion` helper in `src/lib/topic-completion.ts` with 7 unit tests
+- 8 handler-level tests for POST /api/quiz (auth guard, input validation, completion logic)
+- Vitest test framework with jsdom environment and React Testing Library
+
+### Fixed
+- Progress route no longer downgrades topic status from "completed" to "in_progress"
+- Quiz UI updates reward message to "כל הכבוד! סיימת את כל הנושא!" when topic is completed
+
 ## [0.1.4] — 2026-07-04
 
 ### Fixed
