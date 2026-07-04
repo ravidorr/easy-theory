@@ -10,7 +10,7 @@ import type { Question } from "@/lib/db";
 function resolveImageUrl(url: string | null | undefined): string | null {
   if (!url) return null;
   if (url.startsWith("/questions/")) {
-    if (!existsSync(join(process.cwd(), "public", url))) return "__placeholder__";
+    if (!existsSync(join(process.cwd(), "public", url))) return null;
   }
   return url;
 }
@@ -43,7 +43,7 @@ function QuestionSlide({
 
   const allOptionsAreSigns = options.every(([, text]) => /^\d{2,4}$/.test(text.trim()));
   const imageUrl = allOptionsAreSigns ? null : resolveImageUrl(question.image_url);
-  const isWide = imageUrl && imageUrl !== "__placeholder__" && !imageUrl.includes("sign-");
+  const isWide = imageUrl && !imageUrl.includes("sign-");
 
   return (
     <div
@@ -62,7 +62,7 @@ function QuestionSlide({
           alignItems: "center",
         }}
       >
-        {imageUrl && imageUrl !== "__placeholder__" && (
+        {imageUrl && (
           isWide ? (
             /* Wide road-scene image */
             <div
@@ -182,13 +182,7 @@ export default async function TopicQuizPage({
   const topic = await getTopicBySlug(supabase, slug);
   if (!topic) notFound();
 
-  // Fetch extra to account for filtering out questions with missing images
-  const raw = await getQuestionsForTopic(supabase, topic.id, 20);
-  const questions = raw.filter(q => {
-    const imageMissing = resolveImageUrl(q.image_url) === "__placeholder__";
-    if (!imageMissing) return true;
-    return [q.option_a, q.option_b, q.option_c, q.option_d].every(o => /^\d{2,4}$/.test(o.trim()));
-  });
+  const questions = await getQuestionsForTopic(supabase, topic.id);
   const total = questions.length;
 
   return (
