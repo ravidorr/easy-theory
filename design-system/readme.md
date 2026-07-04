@@ -2,7 +2,7 @@
 
 Design system for **ClearRoad** (Hebrew: **דרך ברורה**), a Hebrew-first (RTL) web app that helps a 16–17 year-old student pass the Israeli driving-theory exam without feeling overwhelmed. Source: internal PRD "QuietDrive v0.1" (3.7.2026), product renamed ClearRoad. Frontend target: vanilla JS/CSS/HTML; this system ships CSS tokens + React reference components for design work.
 
-**Chosen direction:** "עדין ושובב" (soft & playful) — lilac pastels, Rubik, high gamification (streaks, stars, progress paths) with a calm, quiet surface. Approved by the owner from a 3-way exploration (option 1c).
+**Chosen direction:** "לוחית נהג חדש" (new-driver plate) — strong plate blue on cool white, Rubik, high gamification (streaks, stars, progress paths) with a calm, quiet surface. Rebranded from the original lilac direction after user feedback that the pastels felt too blended and didn't convey the app's purpose; the primary blue now derives from the נהג חדש plate sign.
 
 ## Product principles (from PRD)
 1. שקט לפני הכל — clean, no visual noise
@@ -21,9 +21,9 @@ Design system for **ClearRoad** (Hebrew: **דרך ברורה**), a Hebrew-first 
 - **Example copy:** "המשימה להיום: זכות קדימה, חלק 2" · "8 שאלות תרגול · ~20 דק׳" · "3 מתוך 8, את באמצע!"
 
 ## VISUAL FOUNDATIONS
-- **Backgrounds:** flat solid `--bg` (#f8f6fb light / #1a1523 dark). No gradients, no textures, no imagery backgrounds. Quiet above all.
-- **Cards:** white `--surface` on lilac-tinted `--bg`, 1px `--border`, radius `--radius-xl` (20px) for primary cards, `--radius-lg` (16px) nested, shadow `--shadow-card` (soft, purple-tinted). Screens/modals use `--radius-2xl`.
-- **Color:** one primary (lilac purple, oklch hue 300), one reward accent (gold, hue 85), semantic green/red (hues 155/25) at matched chroma. Soft variants (`*-soft`) for chips/badges. Traffic-sign colors (`--sign-*`) are fixed and never themed.
+- **Backgrounds:** flat solid `--bg` (#f5f7fc light / #131829 dark). No gradients, no textures, no imagery backgrounds. Quiet above all.
+- **Cards:** white `--surface` on cool blue-tinted `--bg`, 1px `--border`, radius `--radius-xl` (20px) for primary cards, `--radius-lg` (16px) nested, shadow `--shadow-card` (soft, ink-tinted). Screens/modals use `--radius-2xl`.
+- **Color:** one primary (new-driver plate blue, oklch hue 264), one reward accent (gold, hue 85), semantic green/red (hues 155/25) at matched chroma. Soft variants (`*-soft`) for chips/badges. Traffic-sign colors (`--sign-*`) are fixed and never themed.
 - **Type:** Rubik only, 400–800. Display 32/800, H1 26/700, H2 20/600, body 16/400, small 13.5, caption 12/600. Line-height 1.25 headings, 1.55 body. Minimum UI text 12px.
 - **Theming:** light default; dark via `[data-theme="dark"]` attribute. All components must work in both.
 - **Buttons:** primary is the playful "pressable" pill/rounded button with hard bottom shadow `--shadow-press` (0 4px 0 primary-deep); on press it translates down 2px and shadow shrinks. Secondary is surface + border. Hover = darker fill (`--primary-hover`), never opacity.

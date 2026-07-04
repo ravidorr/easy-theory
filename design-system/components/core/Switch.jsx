@@ -17,7 +17,7 @@ export function Switch({ checked = false, onChange, label, style = {} }) {
         <span style={{
           position: 'absolute', top: 3, insetInlineStart: checked ? 21 : 3,
           width: 22, height: 22, borderRadius: '50%', background: '#fff',
-          boxShadow: '0 1px 3px rgba(45,36,64,0.25)',
+          boxShadow: '0 1px 3px rgba(24,32,60,0.25)',
           transition: 'inset-inline-start var(--dur-med) var(--ease-spring)',
         }}></span>
       </span>

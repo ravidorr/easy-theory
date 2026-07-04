@@ -1,28 +1,29 @@
 /* ClearRoad · דרך ברורה — color tokens
-   Direction: "עדין ושובב" (lilac pastels, playful but calm)
+   Direction: "לוחית נהג חדש" (new-driver plate: strong blue, white, ink)
+   Primary blue derives from the נהג חדש plate sign (oklch hue ~264).
    Light is default; dark via [data-theme="dark"] on <html> or <body>. */
 
 :root {
-  /* Neutrals / surfaces */
-  --bg: #f8f6fb;
+  /* Neutrals / surfaces (cool, ink-blue tinted) */
+  --bg: #f5f7fc;
   --surface: #ffffff;
-  --surface-2: #ece5f6;
-  --surface-3: #e3daf1;
-  --border: #e6e0f0;
-  --border-strong: #ded5ec;
+  --surface-2: #e6ebf7;
+  --surface-3: #dbe2f3;
+  --border: #e2e7f3;
+  --border-strong: #d6ddef;
 
   /* Text */
-  --text: #2d2440;
-  --text-muted: #7c7392;
-  --text-faint: #a99cc4;
+  --text: #1c2337;
+  --text-muted: #6d7690;
+  --text-faint: #9aa5c2;
   --text-on-primary: #ffffff;
 
-  /* Primary (lilac purple) */
-  --primary: oklch(0.60 0.15 300);
-  --primary-hover: oklch(0.55 0.15 300);
-  --primary-deep: oklch(0.48 0.15 300);
-  --primary-soft: oklch(0.93 0.06 300);
-  --primary-soft-text: oklch(0.46 0.15 300);
+  /* Primary (new-driver plate blue) */
+  --primary: oklch(0.51 0.26 264);
+  --primary-hover: oklch(0.46 0.26 264);
+  --primary-deep: oklch(0.39 0.24 264);
+  --primary-soft: oklch(0.93 0.04 264);
+  --primary-soft-text: oklch(0.44 0.24 264);
 
   /* Gold (stars, achievements) */
   --gold: oklch(0.78 0.13 85);
@@ -46,23 +47,23 @@
 }
 
 [data-theme="dark"] {
-  --bg: #1a1523;
-  --surface: #241d31;
-  --surface-2: #2f2741;
-  --surface-3: #382f4d;
-  --border: #382f4d;
-  --border-strong: #443a5c;
+  --bg: #131829;
+  --surface: #1c2337;
+  --surface-2: #262f48;
+  --surface-3: #2e3854;
+  --border: #2e3854;
+  --border-strong: #394465;
 
-  --text: #f0ecf7;
-  --text-muted: #b3a8cc;
-  --text-faint: #8478a0;
+  --text: #edf0f8;
+  --text-muted: #a7b0ca;
+  --text-faint: #77809d;
   --text-on-primary: #ffffff;
 
-  --primary: oklch(0.68 0.14 300);
-  --primary-hover: oklch(0.73 0.13 300);
-  --primary-deep: oklch(0.52 0.15 300);
-  --primary-soft: oklch(0.33 0.07 300);
-  --primary-soft-text: oklch(0.85 0.08 300);
+  --primary: oklch(0.60 0.22 264);
+  --primary-hover: oklch(0.66 0.19 264);
+  --primary-deep: oklch(0.45 0.25 264);
+  --primary-soft: oklch(0.30 0.08 264);
+  --primary-soft-text: oklch(0.84 0.07 264);
 
   --gold: oklch(0.80 0.13 85);
   --gold-soft: oklch(0.34 0.06 85);

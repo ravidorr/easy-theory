@@ -234,7 +234,7 @@ export default async function MorePage() {
                   height: "22px",
                   borderRadius: "50%",
                   background: "#fff",
-                  boxShadow: "0 1px 3px rgba(45,36,64,0.25)",
+                  boxShadow: "0 1px 3px rgba(24,32,60,0.25)",
                   transition: "inset-inline-start 150ms",
                 }}
               />
