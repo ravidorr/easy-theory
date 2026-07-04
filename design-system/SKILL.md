@@ -26,11 +26,11 @@ React reference implementations; each has a `.prompt.md` usage note and `.d.ts` 
 
 - core: `Button` (primary = pressable, `--shadow-press`, translateY(2px) on press), `IconButton`, `Chip`, `Card`, `Input`, `Switch`, `TabBar` (bottom navigation)
 - learning: `QuizOption` (idle/selected/correct/wrong + explanation), `Flashcard` (420ms rotateY flip), `ProgressBar`, `PathProgress` (step circles + connectors), `TopicCard`
-- gamification: `StreakPill` (flame), `StarsPill` (gold, `delta` for "+40" rewards), `Medal`
+- gamification: `StreakPill` (flame), `StarsPill` (gold, `delta` for "+40" rewards), `Medal`, `MedalCelebration` (one-time modal when the quiz API returns `medals_earned`; queue multiple, never auto-dismiss)
 
 ## Screens (`ui_kits/clearroad/`)
 
-Reference layouts: `home.html` (המשימה להיום + path + topics), `quiz.html` (progress bar + options + reward), `flashcards.html` (card + ידעתי/עוד לא), `schedule.html` (week strip + tasks + medals + calm exam card), `login.html` (magic-link email form + sent state), `schedule-setup.html` (day picker + time + duration chips + save), `resources.html` (external link cards, opens in new tab), `videos.html` (YouTube cards with real thumbnails, featured + row variants), `more.html` (עוד page: nav rows + dark mode + logout, tab bar reference markup).
+Reference layouts: `home.html` (המשימה להיום + path + topics), `quiz.html` (progress bar + options + reward), `flashcards.html` (card + ידעתי/עוד לא), `schedule.html` (week strip + tasks + medals + calm exam card), `login.html` (magic-link email form + sent state), `schedule-setup.html` (day picker + time + duration chips + save), `resources.html` (external link cards, opens in new tab), `videos.html` (YouTube cards with real thumbnails, featured + row variants), `more.html` (עוד page: nav rows + dark mode + logout, tab bar reference markup), `medal-earned.html` (celebration modal over quiz summary).
 
 ## Navigation
 
