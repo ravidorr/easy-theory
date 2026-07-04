@@ -4,6 +4,11 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ## [Unreleased]
 
+## [0.1.1] — 2026-07-04
+
+### Added
+- Pre-commit hook (husky): every commit must include a `CHANGELOG.md` update and a `package.json` version bump
+
 ### Changed
 - Rebrand: primary color direction changed from lilac ("עדין ושובב", hue 300) to new-driver plate blue ("לוחית נהג חדש", hue 264)
 
