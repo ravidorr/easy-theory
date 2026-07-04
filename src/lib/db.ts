@@ -152,3 +152,53 @@ export async function getUserMedals(
     .order("earned_at");
   return data ?? [];
 }
+
+export type QuizMistake = Question & {
+  selected_option: "a" | "b" | "c" | "d";
+};
+
+export async function getMistakesForTopic(
+  supabase: SupabaseClient,
+  userId: string,
+  topicId: string
+): Promise<QuizMistake[]> {
+  const { data: topicQuestions } = await supabase
+    .from("questions")
+    .select("id")
+    .eq("topic_id", topicId);
+
+  if (!topicQuestions?.length) return [];
+  const questionIds = topicQuestions.map((q) => q.id);
+
+  const { data: responses } = await supabase
+    .from("user_quiz_responses")
+    .select("question_id, selected_option, is_correct, answered_at")
+    .eq("user_id", userId)
+    .in("question_id", questionIds)
+    .order("answered_at", { ascending: false });
+
+  if (!responses?.length) return [];
+
+  const latestByQuestion = new Map<string, { selected_option: string; is_correct: boolean }>();
+  for (const r of responses) {
+    if (!latestByQuestion.has(r.question_id)) {
+      latestByQuestion.set(r.question_id, r);
+    }
+  }
+
+  const mistakeIds = [...latestByQuestion.entries()]
+    .filter(([, r]) => !r.is_correct)
+    .map(([qId]) => qId);
+
+  if (!mistakeIds.length) return [];
+
+  const { data: questions } = await supabase
+    .from("questions")
+    .select("*")
+    .in("id", mistakeIds);
+
+  return (questions ?? []).map((q) => ({
+    ...q,
+    selected_option: latestByQuestion.get(q.id)!.selected_option as "a" | "b" | "c" | "d",
+  }));
+}

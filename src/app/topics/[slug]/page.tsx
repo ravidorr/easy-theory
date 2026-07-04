@@ -354,6 +354,9 @@ export default async function TopicQuizPage({
           <Link href="/">
             <button className="btn-primary" style={{ minWidth: "200px" }}>חזרה לבית</button>
           </Link>
+          <Link href={`/topics/${slug}/review`}>
+            <button className="btn-secondary" style={{ minWidth: "200px" }}>סקירת טעויות</button>
+          </Link>
         </div>
       </main>
 
