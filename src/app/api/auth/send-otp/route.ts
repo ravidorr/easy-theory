@@ -17,9 +17,7 @@ export async function POST(request: Request) {
   });
 
   if (error) {
-    console.error("send-otp error:", error.name, error.message, error.status, JSON.stringify(error));
-    const msg = error.message || error.name || String(error.status) || "unknown";
-    return NextResponse.json({ error: msg }, { status: 500 });
+    return NextResponse.json({ error: "שגיאה בשליחת הקישור, נסי שוב" }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true });
