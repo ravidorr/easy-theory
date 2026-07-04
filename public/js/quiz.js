@@ -97,7 +97,11 @@
         rewardBanner.hidden = false;
         rewardBanner.style.display = "flex";
         if (rewardAmount) rewardAmount.textContent = "";
-        rewardMessage.textContent = "לא נורא, תנסי שוב בפעם הבאה.";
+        const wrongBtn = slide.querySelector('[data-option="' + selectedOption + '"]');
+        const badge = wrongBtn?.querySelector(".quiz-option-badge")?.textContent?.trim() || "";
+        const signNum = wrongBtn?.querySelector("span:not(.quiz-option-badge):not(.quiz-option-explanation) span")?.textContent?.trim() || "";
+        const suffix = signNum ? " (תמרור " + signNum + ")" : "";
+        rewardMessage.textContent = "בחרת ב" + badge + suffix + " — לא נורא, תנסי שוב בפעם הבאה.";
       }
     }
 
