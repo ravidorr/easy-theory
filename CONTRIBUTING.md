@@ -45,6 +45,15 @@ pnpm dev
 - Open a pull request against `main` — no direct pushes to `main`
 - Keep PRs focused; one thing per PR
 
+## Pre-commit hook
+
+Every commit must include both a `CHANGELOG.md` update and a `package.json` version bump, or the commit will be rejected. The hook is installed automatically via `pnpm install` (husky `prepare` script).
+
+- Add a bullet under the appropriate `## [x.y.z]` section in `CHANGELOG.md`
+- Bump the patch version in `package.json` (e.g. `0.1.4` → `0.1.5`)
+
+Stage both files along with your other changes before committing.
+
 ## Code conventions
 
 - **No `'use client'`** — all components are React Server Components. Client interactivity lives in `public/js/` as vanilla JS loaded via `<Script strategy="afterInteractive">`.
