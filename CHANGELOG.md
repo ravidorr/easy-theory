@@ -4,6 +4,21 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ## [Unreleased]
 
+## [0.1.3] — 2026-07-04
+
+### Changed
+- Add Python `__pycache__/` and `*.pyc` entries to `.gitignore`
+
+## [0.1.2] — 2026-07-04
+
+### Fixed
+- Quiz: hide question image for sign-identification questions (all options are sign numbers) — image was revealing the correct answer
+- Quiz: allow changing answer selection freely before confirming; feedback is now shown only after clicking "בדקי תשובה"
+- Quiz: instant correct/wrong feedback from embedded `data-correct` attribute — no longer blocked on API round-trip
+- Quiz: remove meaningless sign number label from answer options; show sign image only
+- Quiz: sign images with white backgrounds now blend cleanly against green/red feedback colors via `mix-blend-mode: multiply`
+- Quiz: sign-identification questions with missing question images no longer filtered out (image is not shown anyway)
+
 ## [0.1.1] — 2026-07-04
 
 ### Added
