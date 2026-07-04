@@ -18,15 +18,16 @@
       const isDark = !wasDark;
       document.documentElement.dataset.theme = isDark ? "dark" : "light";
       document.cookie =
-        "theme=" + (isDark ? "dark" : "light") + "; path=/; max-age=31536000";
+        "theme=" + (isDark ? "dark" : "light") + "; path=/; max-age=31536000; SameSite=Lax; Secure";
       updateSwitch(isDark);
     });
   }
 
   const logoutBtn = document.getElementById("logout-btn");
   if (logoutBtn) {
-    logoutBtn.addEventListener("click", function () {
-      window.location.href = "/api/auth/logout";
+    logoutBtn.addEventListener("click", async function () {
+      await fetch("/api/auth/logout", { method: "POST" });
+      window.location.href = "/auth/login";
     });
   }
 })();

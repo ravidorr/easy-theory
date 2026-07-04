@@ -51,7 +51,6 @@ function QuestionSlide({
       data-index={index}
       data-question-id={question.id}
       data-topic-id={topicId}
-      data-correct={question.correct_option}
       style={{ display: index === 0 ? "flex" : "none", flexDirection: "column", gap: "20px" }}
     >
       {/* Question + image */}

@@ -36,6 +36,17 @@ export async function POST(request: Request) {
 
   const is_correct = question.correct_option === selected_option;
 
+  // Check if user already answered this question correctly (prevent duplicate star awards)
+  const { data: existingCorrect } = await supabase
+    .from("user_quiz_responses")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("question_id", question_id)
+    .eq("is_correct", true)
+    .maybeSingle();
+
+  const alreadyAnsweredCorrectly = existingCorrect != null;
+
   // Save response
   await supabase.from("user_quiz_responses").insert({
     user_id: user.id,
@@ -47,11 +58,12 @@ export async function POST(request: Request) {
   let stars_earned = 0;
   const medals_earned: string[] = [];
 
-  if (is_correct) {
+  if (is_correct && !alreadyAnsweredCorrectly) {
     stars_earned = POINTS_PER_CORRECT;
 
     // Upsert user_stats
-    const today = new Date().toISOString().split("T")[0];
+    const toIL = (d: Date) => d.toLocaleDateString("sv", { timeZone: "Asia/Jerusalem" });
+    const today = toIL(new Date());
 
     const { data: stats } = await supabase
       .from("user_stats")
@@ -67,9 +79,7 @@ export async function POST(request: Request) {
         last_active_date: today,
       });
     } else {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayStr = yesterday.toISOString().split("T")[0];
+      const yesterdayStr = toIL(new Date(Date.now() - 86_400_000));
 
       const newStreak = computeNewStreak(
         stats.streak_days,

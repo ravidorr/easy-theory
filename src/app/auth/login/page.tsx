@@ -122,6 +122,17 @@ export default function LoginPage() {
               >
                 שלחי לי קישור
               </button>
+              <p
+                id="login-error"
+                role="alert"
+                style={{
+                  display: "none",
+                  margin: 0,
+                  fontSize: "var(--type-small-size)",
+                  color: "var(--danger-text)",
+                  textAlign: "center",
+                }}
+              />
             </form>
           </div>
 

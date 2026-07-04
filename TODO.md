@@ -1,5 +1,9 @@
 # TODO
 
+## Security
+
+- **Add rate limiting** — simplest approach is a Supabase Edge Function or a lightweight in-DB counter (e.g., one row per email per minute in a `rate_limits` table). Takes ~30–60 min. Worth doing before launch.
+
 ## Features
 
 - **Push notifications** — `user_schedule` and `notify` flag are in the DB but no delivery mechanism exists yet
