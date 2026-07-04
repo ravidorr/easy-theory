@@ -5,6 +5,8 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 ## [Unreleased]
 
 ### Added
+- Medal earn celebration: quiz page now shows a modal when `POST /api/quiz` returns `medals_earned`; supports queuing multiple medals, dismiss via button or scrim tap, never auto-dismisses
+- Design system: added `MedalCelebration` component (`components/gamification/`) and `medal-earned.html` reference screen
 - Topic completion detection: after a correct answer, check if all questions in the topic have been answered correctly at least once; call POST /api/progress with status "completed" automatically
 - Quiz route now returns `topic_completed: boolean` in its response
 - `checkTopicCompletion` helper in `src/lib/topic-completion.ts` with 7 unit tests

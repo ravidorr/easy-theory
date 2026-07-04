@@ -22,6 +22,71 @@
   let confirmed = false;
   let score = 0;
 
+  // ── Medal celebration ──────────────────────────────────────────
+  const MEDAL_META = {
+    'streak-3':  { label: '3 ימים ברצף',   description: 'שלושה ימים של למידה ברצף, כל הכבוד!' },
+    'streak-7':  { label: 'שבוע ברצף',     description: 'שבוע שלם של למידה ברצף, מדהים!' },
+    'streak-14': { label: 'שבועיים ברצף',  description: 'ארבעה עשר ימים ברצף, ממש יפה!' },
+    'streak-30': { label: 'חודש ברצף',     description: 'חודש שלם ברצף, הישג מדהים!' },
+  };
+
+  const medalQueue = [];
+
+  function buildMedalModal(meta) {
+    const scrim = document.createElement('div');
+    Object.assign(scrim.style, {
+      position: 'fixed', inset: '0', zIndex: '100',
+      background: 'rgba(24,32,60,0.45)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px',
+    });
+
+    const card = document.createElement('div');
+    card.setAttribute('role', 'dialog');
+    card.setAttribute('aria-modal', 'true');
+    card.setAttribute('aria-label', 'מדליה חדשה');
+    Object.assign(card.style, {
+      background: 'var(--surface)', borderRadius: 'var(--radius-2xl)',
+      boxShadow: 'var(--shadow-pop)', padding: '32px 28px 24px',
+      width: '100%', maxWidth: '320px', boxSizing: 'border-box',
+      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px',
+      textAlign: 'center', fontFamily: 'var(--font-ui)',
+      animation: 'medal-pop var(--dur-med) var(--ease-spring)',
+    });
+
+    card.innerHTML =
+      '<div style="display:inline-flex;flex-direction:column;align-items:center;gap:8px;">' +
+        '<div style="width:76px;height:76px;border-radius:50%;background:var(--gold-soft);color:var(--gold-text);border:3px solid var(--gold);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-card);">' +
+          '<svg width="32" height="32" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1.5c.4 2.2 3.1 3.4 3.9 5.8.9 2.7-.8 6-3.9 6s-4.8-3.3-3.9-6c.4-1.3 1.4-2.2 2.2-3.2.8-1 1.5-1.7 1.7-2.6z"/><circle cx="8" cy="10.6" r="2.1" fill="var(--gold-soft)" opacity="0.85"/></svg>' +
+        '</div>' +
+        '<span style="font-size:var(--type-caption-size);font-weight:600;color:var(--gold-text);">' + meta.label + '</span>' +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:4px;">' +
+        '<h2 style="margin:0;font-size:var(--type-h2-size);font-weight:var(--type-h2-weight);color:var(--text);">מדליה חדשה! 🎉</h2>' +
+        '<span style="font-size:var(--type-small-size);color:var(--text-muted);line-height:var(--line-body);">' + meta.description + '</span>' +
+      '</div>' +
+      '<button style="font-family:var(--font-ui);font-weight:700;font-size:15.5px;min-height:var(--hit-min);padding:10px 22px;width:100%;border-radius:var(--radius-lg);border:1px solid transparent;cursor:pointer;background:var(--primary);color:var(--text-on-primary);box-shadow:var(--shadow-press);">מעולה, ממשיכות!</button>';
+
+    function dismiss() {
+      document.body.removeChild(scrim);
+      showNextMedal();
+    }
+
+    scrim.addEventListener('click', dismiss);
+    card.addEventListener('click', function (e) { e.stopPropagation(); });
+    card.querySelector('button').addEventListener('click', dismiss);
+
+    scrim.appendChild(card);
+    return scrim;
+  }
+
+  function showNextMedal() {
+    if (medalQueue.length === 0) return;
+    const slug = medalQueue.shift();
+    const meta = MEDAL_META[slug];
+    if (!meta) { showNextMedal(); return; }
+    document.body.appendChild(buildMedalModal(meta));
+  }
+
   function updateProgress(index) {
     const pct = ((index + 1) / total) * 100;
     if (progressFill) progressFill.style.width = pct + "%";
@@ -115,8 +180,13 @@
     }).then(function (res) {
       return res.ok ? res.json() : null;
     }).then(function (data) {
-      if (data && data.topic_completed && rewardMessage) {
+      if (!data) return;
+      if (data.topic_completed && rewardMessage) {
         rewardMessage.textContent = "כל הכבוד! סיימת את כל הנושא!";
+      }
+      if (data.medals_earned && data.medals_earned.length) {
+        medalQueue.push.apply(medalQueue, data.medals_earned);
+        showNextMedal();
       }
     }).catch(function () {});
 
