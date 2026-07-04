@@ -4,6 +4,12 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ## [Unreleased]
 
+## [0.1.4] — 2026-07-04
+
+### Fixed
+- README: Next.js version corrected to 16
+- CONTRIBUTING: document pre-commit hook requirement (CHANGELOG + version bump per commit)
+
 ## [0.1.3] — 2026-07-04
 
 ### Changed
