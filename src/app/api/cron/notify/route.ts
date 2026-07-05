@@ -3,7 +3,6 @@ import { Resend } from "resend";
 import { createAdminClient } from "@/lib/supabase";
 import { getUsersDueNow } from "@/lib/db";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 const APP_URL = "https://easy-theory-omega.vercel.app";
 
 function getIsraelDayAndTime(): { dayOfWeek: number; startTimePrefix: string } {
@@ -49,6 +48,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ sent: 0 });
   }
 
+  const resend = new Resend(process.env.RESEND_API_KEY);
   let sent = 0;
   await Promise.all(
     schedules.map(async (s) => {
