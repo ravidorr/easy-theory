@@ -9,9 +9,11 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "prepare": "husky"
+    "prepare": "husky",
+    "generate-explanations": "tsx --env-file=.env.local scripts/generate_explanations.ts"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@supabase/ssr": "^0.12.0",
     "@supabase/supabase-js": "^2.110.0",
     "next": "16.2.10",
@@ -30,6 +32,7 @@
     "eslint-config-next": "16.2.10",
     "husky": "^9.1.7",
     "jsdom": "^29.1.1",
+    "tsx": "^4.23.0",
     "typescript": "^5",
     "vitest": "^4.1.9"
   },
