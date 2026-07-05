@@ -141,6 +141,24 @@ export async function getUserSchedule(
   return data ?? [];
 }
 
+export type ScheduleWithUser = {
+  user_id: string;
+  start_time: string;
+  duration_minutes: number;
+};
+
+export async function getUsersScheduledForDay(
+  supabase: SupabaseClient,
+  dayOfWeek: number
+): Promise<ScheduleWithUser[]> {
+  const { data } = await supabase
+    .from("user_schedule")
+    .select("user_id, start_time, duration_minutes")
+    .eq("day_of_week", dayOfWeek)
+    .eq("notify", true);
+  return data ?? [];
+}
+
 export async function getUserMedals(
   supabase: SupabaseClient,
   userId: string
