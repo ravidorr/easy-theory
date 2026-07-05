@@ -147,17 +147,15 @@ export type ScheduleWithUser = {
   duration_minutes: number;
 };
 
-export async function getUsersDueNow(
+export async function getUsersScheduledForDay(
   supabase: SupabaseClient,
-  dayOfWeek: number,
-  startTimePrefix: string
+  dayOfWeek: number
 ): Promise<ScheduleWithUser[]> {
   const { data } = await supabase
     .from("user_schedule")
     .select("user_id, start_time, duration_minutes")
     .eq("day_of_week", dayOfWeek)
-    .eq("notify", true)
-    .like("start_time", `${startTimePrefix}%`);
+    .eq("notify", true);
   return data ?? [];
 }
 

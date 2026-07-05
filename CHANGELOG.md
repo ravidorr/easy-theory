@@ -6,9 +6,10 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ### Fixed
 - Cron notify route: move Resend client instantiation inside handler to prevent build-time failure when `RESEND_API_KEY` is not set
+- Cron schedule changed from `* * * * *` to `0 5 * * *` (daily at 5 AM UTC = 7–8 AM Israel time) to comply with Vercel Hobby plan limits
 
 ### Added
-- Email study reminders: Vercel Cron fires every minute, queries `user_schedule` for users due in Israel time with `notify = true`, sends Hebrew reminder email via Resend
+- Daily morning digest email: Vercel Cron fires once per day at 5 AM UTC, queries `user_schedule` for users with a session today and `notify = true`, sends a Hebrew digest email via Resend listing the day's session time and duration
 - `createAdminClient()` in `src/lib/supabase.ts` for server-side admin operations using the service role key
 - `getUsersDueNow()` in `src/lib/db.ts` to find scheduled users matching current Israel day and time
 - `GET /api/cron/notify` route protected by `CRON_SECRET`, dispatches emails via Resend
