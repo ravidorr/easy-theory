@@ -5,6 +5,11 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 ## [Unreleased]
 
 ### Added
+- Email study reminders: Vercel Cron fires every minute, queries `user_schedule` for users due in Israel time with `notify = true`, sends Hebrew reminder email via Resend
+- `createAdminClient()` in `src/lib/supabase.ts` for server-side admin operations using the service role key
+- `getUsersDueNow()` in `src/lib/db.ts` to find scheduled users matching current Israel day and time
+- `GET /api/cron/notify` route protected by `CRON_SECRET`, dispatches emails via Resend
+- `vercel.json` registering the cron job on a `* * * * *` schedule
 - Medal earn celebration: quiz page now shows a modal when `POST /api/quiz` returns `medals_earned`; supports queuing multiple medals, dismiss via button or scrim tap, never auto-dismisses
 - Design system: added `MedalCelebration` component (`components/gamification/`) and `medal-earned.html` reference screen
 - Topic completion detection: after a correct answer, check if all questions in the topic have been answered correctly at least once; call POST /api/progress with status "completed" automatically
