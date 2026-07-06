@@ -54,6 +54,7 @@ function buildDb({
         data: { user: authenticated ? { id: USER_ID } : null },
       }),
     },
+    rpc: vi.fn().mockResolvedValue({ data: true }),
     from: vi.fn().mockImplementation((table: string) => {
       const n = nc(table);
 
