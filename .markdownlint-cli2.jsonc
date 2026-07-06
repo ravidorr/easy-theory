@@ -1,0 +1,12 @@
+{
+  "config": {
+    "default": true,
+    "MD013": false
+  },
+  "ignores": [
+    "node_modules/**",
+    ".next/**",
+    ".context/**",
+    "CHANGELOG.md"
+  ]
+}

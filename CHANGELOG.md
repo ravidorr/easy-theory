@@ -5,6 +5,15 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 ## [Unreleased]
 
 ### Added
+- CSS linter (Stylelint + `stylelint-config-standard`), HTML linter (HTMLHint), and Markdown linter (markdownlint-cli2) with `lint:css`, `lint:html`, `lint:md`, and `lint:all` scripts
+- All four linters (ESLint, Stylelint, HTMLHint, markdownlint) enforced in the pre-commit hook
+
+### Fixed
+- ESLint errors in `design-system/support.js`: replaced deprecated `ReactDOM.render` with `createRoot`, renamed `module` variable to avoid shadowing the global
+
+---
+
+### Added
 - Web push notifications: service worker (`public/sw.js`), client subscription helper (`public/js/push.js`), and `POST /DELETE /api/push/subscribe` route to store subscriptions in new `user_push_subscriptions` table
 - Cron now sends web push to subscribed users and falls back to email for everyone else; expired push subscriptions are automatically cleaned up
 - `getPushSubscriptionsForUsers()` helper in `src/lib/db.ts`

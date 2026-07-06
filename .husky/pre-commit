@@ -1,5 +1,11 @@
 #!/bin/sh
 # Require every commit to include a CHANGELOG.md update and a package.json version bump.
+# Also run all linters.
+
+pnpm lint || exit 1
+pnpm lint:css || exit 1
+pnpm lint:html || exit 1
+pnpm lint:md || exit 1
 
 STAGED=$(git diff --cached --name-only)
 
