@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import webpush from "web-push";
 import { createAdminClient } from "@/lib/supabase";
-import { getUsersScheduledForDay } from "@/lib/db";
+import { getUsersScheduledForDay, getPushSubscriptionsForUsers } from "@/lib/db";
 
 const APP_URL = "https://easy-theory-omega.vercel.app";
 
@@ -20,7 +21,6 @@ function getIsraelDayOfWeek(): number {
 }
 
 function formatTime(startTime: string): string {
-  // start_time is stored as "HH:MM:00" — display as "HH:MM"
   return startTime.slice(0, 5);
 }
 
@@ -41,16 +41,52 @@ export async function GET(request: Request) {
     return NextResponse.json({ sent: 0 });
   }
 
+  const userIds = schedules.map((s) => s.user_id);
+  const pushSubs = await getPushSubscriptionsForUsers(admin, userIds);
+  const pushSubsByUser = new Map(pushSubs.map((s) => [s.user_id, s]));
+
+  webpush.setVapidDetails(
+    `mailto:${process.env.VAPID_CONTACT_EMAIL}`,
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+    process.env.VAPID_PRIVATE_KEY!
+  );
+
   const resend = new Resend(process.env.RESEND_API_KEY);
   let sent = 0;
+
   await Promise.all(
     schedules.map(async (s) => {
+      const time = formatTime(s.start_time);
+      const duration = s.duration_minutes;
+      const pushSub = pushSubsByUser.get(s.user_id);
+
+      if (pushSub) {
+        try {
+          await webpush.sendNotification(
+            { endpoint: pushSub.endpoint, keys: { auth: pushSub.auth, p256dh: pushSub.p256dh } },
+            JSON.stringify({
+              title: "לוח הלימודים שלך להיום",
+              body: `📖 שיעור בשעה ${time} — ${duration} דקות`,
+              url: APP_URL,
+            })
+          );
+          sent++;
+        } catch {
+          // Subscription expired — remove it
+          await admin
+            .from("user_push_subscriptions")
+            .delete()
+            .eq("user_id", s.user_id)
+            .eq("endpoint", pushSub.endpoint);
+        }
+        return;
+      }
+
+      // Fallback: email
       const { data: userData } = await admin.auth.admin.getUserById(s.user_id);
       const email = userData?.user?.email;
       if (!email) return;
 
-      const time = formatTime(s.start_time);
-      const duration = s.duration_minutes;
       await resend.emails.send({
         from: "Easy Theory <noreply@easy-theory-omega.vercel.app>",
         to: email,
