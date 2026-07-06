@@ -5,6 +5,12 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 ## [Unreleased]
 
 ### Added
+- Tests for `src/lib/rate-limit.ts`: 4 cases covering true/false/null RPC responses and correct parameter passing
+- Tests for `src/lib/db.ts`: 22 cases covering all query helpers (null fallbacks) and `getMistakesForTopic` deduplication logic (latest-response-per-question, wrong→right and right→wrong sequences)
+
+---
+
+### Added
 - README badges: Vercel deployment status, MIT license, last commit, Next.js, TypeScript, Supabase, pnpm, and Vitest badges
 - Vitest coverage configuration (v8 provider, text + lcov reporters, all-files mode) and `test:coverage` script
 - `coverage/**` added to ESLint ignore list so generated reports are not linted
