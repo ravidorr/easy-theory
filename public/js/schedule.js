@@ -90,6 +90,10 @@
       notifyToggle.style.background = notifyOn ? "var(--primary)" : "var(--surface-3)";
       const knob = notifyToggle.querySelector("span");
       if (knob) knob.style.insetInlineStart = notifyOn ? "21px" : "3px";
+
+      if (!notifyOn && window.pushHelpers) {
+        window.pushHelpers.unsubscribeFromPush();
+      }
     });
   }
 
@@ -104,6 +108,10 @@
     saveBtn.textContent = "שומרת...";
 
     try {
+      if (notifyOn && window.pushHelpers) {
+        await window.pushHelpers.subscribeToPush();
+      }
+
       const res = await fetch("/api/schedule", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },

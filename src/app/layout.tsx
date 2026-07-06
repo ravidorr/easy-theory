@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Rubik } from "next/font/google";
 import { cookies } from "next/headers";
+import Script from "next/script";
 import "./globals.css";
 
 const rubik = Rubik({
@@ -23,9 +24,23 @@ export default async function RootLayout({
   const cookieStore = await cookies();
   const theme = cookieStore.get("theme")?.value ?? "dark";
 
+  const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "";
+
   return (
     <html lang="he" dir="rtl" data-theme={theme} className={rubik.variable}>
-      <body>{children}</body>
+      <head>
+        {vapidPublicKey && (
+          <meta name="vapid-public-key" content={vapidPublicKey} />
+        )}
+      </head>
+      <body>
+        {children}
+        <Script id="register-sw" strategy="afterInteractive">{`
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js');
+          }
+        `}</Script>
+      </body>
     </html>
   );
 }

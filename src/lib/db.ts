@@ -175,6 +175,24 @@ export type QuizMistake = Question & {
   selected_option: "a" | "b" | "c" | "d";
 };
 
+export type PushSubscriptionRow = {
+  user_id: string;
+  endpoint: string;
+  auth: string;
+  p256dh: string;
+};
+
+export async function getPushSubscriptionsForUsers(
+  supabase: SupabaseClient,
+  userIds: string[]
+): Promise<PushSubscriptionRow[]> {
+  const { data } = await supabase
+    .from("user_push_subscriptions")
+    .select("user_id, endpoint, auth, p256dh")
+    .in("user_id", userIds);
+  return data ?? [];
+}
+
 export async function getMistakesForTopic(
   supabase: SupabaseClient,
   userId: string,
