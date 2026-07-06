@@ -7,9 +7,9 @@ about: Something isn't working
 
 **Steps to reproduce**
 
-1. 
-2. 
-3. 
+1.
+2.
+3.
 
 **Expected behavior**
 

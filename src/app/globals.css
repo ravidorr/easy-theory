@@ -1,4 +1,4 @@
-@import "../../design-system/styles.css";
+@import url("../../design-system/styles.css");
 
 /* Wire next/font Rubik variable into the design-system token */
 :root {
@@ -22,8 +22,15 @@ body {
 
 /* ── Medal celebration ───────────────────────────────────────── */
 @keyframes medal-pop {
-  from { transform: scale(0.85); opacity: 0; }
-  to   { transform: scale(1);    opacity: 1; }
+  from {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* ── Flashcard flip ──────────────────────────────────────────── */
@@ -31,6 +38,7 @@ body {
   perspective: 1000px;
   cursor: pointer;
 }
+
 .flashcard-inner {
   position: relative;
   transform-style: preserve-3d;
@@ -38,9 +46,11 @@ body {
   width: 260px;
   height: 320px;
 }
+
 .flashcard-wrap.flipped .flashcard-inner {
   transform: rotateY(180deg);
 }
+
 .flashcard-face {
   position: absolute;
   inset: 0;
@@ -57,6 +67,7 @@ body {
   padding: 20px;
   box-sizing: border-box;
 }
+
 .flashcard-back-face {
   transform: rotateY(180deg);
   text-align: center;
@@ -79,18 +90,48 @@ body {
   font-family: var(--font-ui);
   transition: border-color 120ms, background 120ms;
 }
+
 .quiz-option:hover { border-color: var(--primary); }
-.quiz-option[data-state="selected"] { border-color: var(--primary); background: var(--primary-soft); }
-.quiz-option[data-state="correct"]  { border-color: var(--success); background: var(--success-soft); }
-.quiz-option[data-state="wrong"]    { border-color: var(--danger);  background: var(--danger-soft); }
-.quiz-option-badge {
-  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
-  display: inline-flex; align-items: center; justify-content: center;
-  font-size: 14px; font-weight: 700;
-  background: var(--surface-2); color: var(--text-muted);
+
+.quiz-option[data-state="selected"] {
+  border-color: var(--primary);
+  background: var(--primary-soft);
 }
-.quiz-option[data-state="correct"] .quiz-option-badge { background: var(--success); color: #fff; }
-.quiz-option[data-state="wrong"]   .quiz-option-badge { background: var(--danger);  color: #fff; }
+
+.quiz-option[data-state="correct"] {
+  border-color: var(--success);
+  background: var(--success-soft);
+}
+
+.quiz-option[data-state="wrong"] {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.quiz-option-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  background: var(--surface-2);
+  color: var(--text-muted);
+}
+
+.quiz-option[data-state="correct"] .quiz-option-badge {
+  background: var(--success);
+  color: #fff;
+}
+
+.quiz-option[data-state="wrong"] .quiz-option-badge {
+  background: var(--danger);
+  color: #fff;
+}
+
 .quiz-option-explanation {
   font-size: var(--type-small-size);
   color: var(--text-muted);
@@ -98,6 +139,7 @@ body {
   padding-inline-start: 40px;
   display: none;
 }
+
 .quiz-option[data-state="correct"] .quiz-option-explanation { display: block; }
 
 /* ── Button press effect ─────────────────────────────────────── */
@@ -119,9 +161,19 @@ body {
   transition: background 120ms, transform 80ms, box-shadow 80ms;
   width: 100%;
 }
-.btn-primary:hover  { background: var(--primary-hover); }
-.btn-primary:active { transform: translateY(2px); box-shadow: var(--shadow-press-down); }
-.btn-primary:disabled { opacity: 0.45; cursor: default; }
+
+.btn-primary:hover { background: var(--primary-hover); }
+
+.btn-primary:active {
+  transform: translateY(2px);
+  box-shadow: var(--shadow-press-down);
+}
+
+.btn-primary:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
 .btn-secondary {
   font-family: var(--font-ui);
   font-weight: 700;
@@ -138,4 +190,5 @@ body {
   color: var(--text);
   transition: background 120ms;
 }
+
 .btn-secondary:hover { background: var(--surface-2); }
