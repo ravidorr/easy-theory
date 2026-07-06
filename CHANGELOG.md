@@ -5,6 +5,7 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 ## [Unreleased]
 
 ### Added
+- README badges: Vercel deployment status, MIT license, last commit, Next.js, TypeScript, Supabase, pnpm, and Vitest badges
 - CSS linter (Stylelint + `stylelint-config-standard`), HTML linter (HTMLHint), and Markdown linter (markdownlint-cli2) with `lint:css`, `lint:html`, `lint:md`, and `lint:all` scripts
 - All four linters (ESLint, Stylelint, HTMLHint, markdownlint) enforced in the pre-commit hook
 

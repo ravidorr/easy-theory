@@ -2,6 +2,15 @@
 
 A Hebrew-first RTL driving theory study app for the Israeli car-B license exam. Built for a 16-year-old — warm, encouraging, no pressure.
 
+[![Vercel](https://therealsujitk-vercel-badge.vercel.app/?app=easy-theory-omega)](https://easy-theory-omega.vercel.app)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
+[![Last commit](https://img.shields.io/github/last-commit/ravidorr/easy-theory)](https://github.com/ravidorr/easy-theory/commits/main)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js&logoColor=white)](https://nextjs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com)
+[![pnpm](https://img.shields.io/badge/pnpm-F69220?logo=pnpm&logoColor=white)](https://pnpm.io)
+[![Vitest](https://img.shields.io/badge/tested%20with-Vitest-6E9F18?logo=vitest&logoColor=white)](https://vitest.dev)
+
 **Live:** [easy-theory-omega.vercel.app](https://easy-theory-omega.vercel.app)
 
 ## Features
