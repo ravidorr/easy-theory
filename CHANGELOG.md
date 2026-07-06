@@ -6,6 +6,16 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ### Added
 - README badges: Vercel deployment status, MIT license, last commit, Next.js, TypeScript, Supabase, pnpm, and Vitest badges
+- Vitest coverage configuration (v8 provider, text + lcov reporters, all-files mode) and `test:coverage` script
+- `coverage/**` added to ESLint ignore list so generated reports are not linted
+- `vitest.config.ts` and `vitest.setup.ts` excluded from `tsconfig.json` so Next.js build does not type-check dev-only Vitest configs
+
+### Fixed
+- Quiz route tests: added `rpc` to the Supabase mock in `route.test.ts` so all 7 previously-failing tests now pass (broken when `rate-limit.ts` was introduced)
+
+---
+
+### Added
 - CSS linter (Stylelint + `stylelint-config-standard`), HTML linter (HTMLHint), and Markdown linter (markdownlint-cli2) with `lint:css`, `lint:html`, `lint:md`, and `lint:all` scripts
 - All four linters (ESLint, Stylelint, HTMLHint, markdownlint) enforced in the pre-commit hook
 
