@@ -1,4 +1,17 @@
+import type { Metadata } from "next";
 import Script from "next/script";
+
+export const metadata: Metadata = {
+  title: "דרך ברורה — לומדים לתיאוריה בלי לחץ",
+  description:
+    "אפליקציה חינמית ללימוד מבחן התיאוריה בישראל: שאלות אמיתיות מהמאגר הרשמי, כרטיסיות תמרורים ותוכנית אישית בקצב שלך.",
+  openGraph: {
+    title: "דרך ברורה — לומדים לתיאוריה בלי לחץ",
+    description:
+      "אפליקציה חינמית ללימוד מבחן התיאוריה בישראל: שאלות אמיתיות מהמאגר הרשמי, כרטיסיות תמרורים ותוכנית אישית בקצב שלך.",
+    locale: "he_IL",
+  },
+};
 
 export default function LoginPage() {
   return (
@@ -6,137 +19,153 @@ export default function LoginPage() {
       <main
         style={{
           background: "var(--bg)",
+          margin: "0 auto",
           padding: "20px",
           display: "flex",
           flexDirection: "column",
+          gap: "28px",
           maxWidth: "420px",
-          margin: "0 auto",
           boxSizing: "border-box",
           minHeight: "100vh",
         }}
       >
-        <div
+        {/* Hero */}
+        <header
           style={{
-            flex: 1,
             display: "flex",
             flexDirection: "column",
-            justifyContent: "center",
-            gap: "24px",
+            alignItems: "center",
+            gap: "14px",
+            textAlign: "center",
+            paddingTop: "24px",
           }}
         >
-          {/* Wordmark + welcome */}
-          <div
+          <span
             style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: "12px",
-              textAlign: "center",
+              fontWeight: 800,
+              fontSize: "var(--type-h2-size)",
+              color: "var(--primary-soft-text)",
             }}
           >
-            <span
+            דרך ברורה
+          </span>
+          <h1
+            style={{
+              margin: 0,
+              fontSize: "var(--type-display-size)",
+              fontWeight: "var(--type-display-weight)" as never,
+              lineHeight: "var(--line-tight)",
+              color: "var(--text)",
+            }}
+          >
+            לומדים לתיאוריה,
+            <br />
+            בלי לחץ.
+          </h1>
+          <p
+            style={{
+              margin: 0,
+              fontSize: "var(--type-body-size)",
+              color: "var(--text-muted)",
+              lineHeight: "var(--line-body)",
+              maxWidth: "320px",
+            }}
+          >
+            כל מה שצריך למבחן התיאוריה: שאלות אמיתיות מהמאגר הרשמי, כרטיסיות
+            תמרורים ותוכנית שמתאימה את עצמה לקצב שלך.
+          </p>
+        </header>
+
+        {/* Login card */}
+        <section
+          aria-label="כניסה"
+          style={{
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
+            borderRadius: "var(--radius-xl)",
+            boxShadow: "var(--shadow-card)",
+            padding: "20px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "16px",
+          }}
+        >
+          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+            <h2
               style={{
-                fontWeight: 800,
-                fontSize: "var(--type-display-size)",
-                color: "var(--primary-soft-text)",
+                margin: 0,
+                fontSize: "var(--type-h2-size)",
+                fontWeight: "var(--type-h2-weight)" as never,
+                color: "var(--text)",
               }}
             >
-              דרך ברורה
+              מתחילות עכשיו
+            </h2>
+            <span
+              style={{
+                fontSize: "var(--type-small-size)",
+                color: "var(--text-muted)",
+              }}
+            >
+              מתחברות עם קישור למייל, בלי סיסמה. חינם לגמרי.
             </span>
-            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-              <h1
-                style={{
-                  margin: 0,
-                  fontSize: "var(--type-h1-size)",
-                  fontWeight: "var(--type-h1-weight)" as never,
-                  lineHeight: "var(--line-tight)",
-                  color: "var(--text)",
-                }}
-              >
-                טוב שבאת!
-              </h1>
+          </div>
+
+          <form
+            id="login-form"
+            style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+          >
+            <label style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
               <span
                 style={{
                   fontSize: "var(--type-small-size)",
+                  fontWeight: 600,
                   color: "var(--text-muted)",
-                  lineHeight: "var(--line-body)",
                 }}
               >
-                מתחברות עם קישור למייל, בלי סיסמה.
+                כתובת המייל שלך
               </span>
-            </div>
-          </div>
-
-          {/* Email form */}
-          <div
-            style={{
-              background: "var(--surface)",
-              border: "1px solid var(--border)",
-              borderRadius: "var(--radius-xl)",
-              boxShadow: "var(--shadow-card)",
-              padding: "20px",
-              display: "flex",
-              flexDirection: "column",
-              gap: "16px",
-            }}
-          >
-            <form id="login-form" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              <label style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                <span
-                  style={{
-                    fontSize: "var(--type-small-size)",
-                    fontWeight: 600,
-                    color: "var(--text-muted)",
-                  }}
-                >
-                  כתובת המייל שלך
-                </span>
-                <input
-                  type="email"
-                  name="email"
-                  id="email-input"
-                  placeholder="noa@example.com"
-                  dir="ltr"
-                  autoComplete="email"
-                  required
-                  style={{
-                    fontFamily: "var(--font-ui)",
-                    fontSize: "var(--type-body-size)",
-                    color: "var(--text)",
-                    background: "var(--surface)",
-                    border: "1.5px solid var(--border-strong)",
-                    borderRadius: "var(--radius-md)",
-                    padding: "11px 14px",
-                    minHeight: "var(--hit-min)",
-                    boxSizing: "border-box",
-                    outline: "none",
-                    textAlign: "left",
-                    width: "100%",
-                  }}
-                />
-              </label>
-              <button
-                type="submit"
-                id="send-btn"
-                className="btn-primary"
-              >
-                שלחי לי קישור
-              </button>
-              <p
-                id="login-error"
-                role="alert"
+              <input
+                type="email"
+                name="email"
+                id="email-input"
+                placeholder="noa@example.com"
+                dir="ltr"
+                autoComplete="email"
+                required
                 style={{
-                  display: "none",
-                  margin: 0,
-                  fontSize: "var(--type-small-size)",
-                  color: "var(--danger-text)",
-                  textAlign: "center",
+                  fontFamily: "var(--font-ui)",
+                  fontSize: "var(--type-body-size)",
+                  color: "var(--text)",
+                  background: "var(--surface)",
+                  border: "1.5px solid var(--border-strong)",
+                  borderRadius: "var(--radius-md)",
+                  padding: "11px 14px",
+                  minHeight: "var(--hit-min)",
+                  boxSizing: "border-box",
+                  outline: "none",
+                  textAlign: "left",
+                  width: "100%",
                 }}
               />
-            </form>
-          </div>
+            </label>
+            <button type="submit" id="send-btn" className="btn-primary">
+              שלחי לי קישור
+            </button>
+            <p
+              id="login-error"
+              role="alert"
+              style={{
+                display: "none",
+                margin: 0,
+                fontSize: "var(--type-small-size)",
+                color: "var(--danger-text)",
+                textAlign: "center",
+              }}
+            />
+          </form>
 
-          {/* Sent state — hidden until JS reveals it */}
+          {/* Sent state — hidden until auth.js reveals it */}
           <div
             id="sent-banner"
             style={{
@@ -186,18 +215,260 @@ export default function LoginPage() {
               </span>
             </div>
           </div>
-        </div>
+        </section>
 
-        <span
+        {/* Feature cards */}
+        <section
+          aria-label="מה מקבלים"
+          style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+        >
+          <h2
+            style={{
+              margin: 0,
+              fontSize: "var(--type-h2-size)",
+              fontWeight: "var(--type-h2-weight)" as never,
+              color: "var(--text)",
+            }}
+          >
+            מה מחכה לך בפנים
+          </h2>
+
+          <div
+            style={{
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+              borderRadius: "var(--radius-lg)",
+              boxShadow: "var(--shadow-card)",
+              padding: "16px",
+              display: "flex",
+              alignItems: "center",
+              gap: "14px",
+            }}
+          >
+            <div
+              style={{
+                width: "52px",
+                height: "52px",
+                borderRadius: "var(--radius-md)",
+                background: "var(--surface-2)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/signs/sign-302.png"
+                alt="תמרור עצור"
+                style={{ width: "34px", height: "34px", objectFit: "contain" }}
+              />
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+              <h3
+                style={{
+                  margin: 0,
+                  fontWeight: 600,
+                  fontSize: "var(--type-body-size)",
+                  color: "var(--text)",
+                }}
+              >
+                שאלות אמיתיות מהמבחן
+              </h3>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: "var(--type-small-size)",
+                  color: "var(--text-muted)",
+                  lineHeight: "var(--line-body)",
+                }}
+              >
+                כל השאלות מהמאגר הרשמי של משרד התחבורה, עם הסבר לכל תשובה.
+              </p>
+            </div>
+          </div>
+
+          <div
+            style={{
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+              borderRadius: "var(--radius-lg)",
+              boxShadow: "var(--shadow-card)",
+              padding: "16px",
+              display: "flex",
+              alignItems: "center",
+              gap: "14px",
+            }}
+          >
+            <div
+              style={{
+                width: "52px",
+                height: "52px",
+                borderRadius: "var(--radius-md)",
+                background: "var(--surface-2)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/signs/sign-303.png"
+                alt="תמרור מעגל תנועה"
+                style={{ width: "34px", height: "34px", objectFit: "contain" }}
+              />
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+              <h3
+                style={{
+                  margin: 0,
+                  fontWeight: 600,
+                  fontSize: "var(--type-body-size)",
+                  color: "var(--text)",
+                }}
+              >
+                כרטיסיות תמרורים
+              </h3>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: "var(--type-small-size)",
+                  color: "var(--text-muted)",
+                  lineHeight: "var(--line-body)",
+                }}
+              >
+                משננות תמרורים בשיטת חזרה מרווחת, מה שלא זכרת יחזור מחר.
+              </p>
+            </div>
+          </div>
+
+          <div
+            style={{
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+              borderRadius: "var(--radius-lg)",
+              boxShadow: "var(--shadow-card)",
+              padding: "16px",
+              display: "flex",
+              alignItems: "center",
+              gap: "14px",
+            }}
+          >
+            <div
+              style={{
+                width: "52px",
+                height: "52px",
+                borderRadius: "var(--radius-md)",
+                background: "var(--primary-soft)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                color: "var(--primary-soft-text)",
+              }}
+            >
+              <svg
+                width="26"
+                height="26"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <rect x="3" y="4" width="18" height="17" rx="3" />
+                <path d="M8 2v4M16 2v4M3 9h18" />
+              </svg>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+              <h3
+                style={{
+                  margin: 0,
+                  fontWeight: 600,
+                  fontSize: "var(--type-body-size)",
+                  color: "var(--text)",
+                }}
+              >
+                תוכנית אישית בקצב שלך
+              </h3>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: "var(--type-small-size)",
+                  color: "var(--text-muted)",
+                  lineHeight: "var(--line-body)",
+                }}
+              >
+                בוחרות ימים ושעות, והאפליקציה בונה תוכנית עד למבחן. בלי לחץ,
+                בלי ספירה לאחור.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Reassurance strip */}
+        <section
+          aria-label="בקצרה"
           style={{
-            fontSize: "var(--type-caption-size)",
-            color: "var(--text-faint)",
+            background: "var(--primary-soft)",
+            borderRadius: "var(--radius-xl)",
+            padding: "18px 20px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "4px",
             textAlign: "center",
-            paddingBottom: "8px",
           }}
         >
-          ClearRoad
-        </span>
+          <span
+            style={{
+              fontWeight: 600,
+              fontSize: "var(--type-body-size)",
+              color: "var(--primary-soft-text)",
+            }}
+          >
+            חינם, בעברית, בגובה העיניים.
+          </span>
+          <span
+            style={{
+              fontSize: "var(--type-small-size)",
+              color: "var(--text-muted)",
+              lineHeight: "var(--line-body)",
+            }}
+          >
+            נבנה עם נהגות ונהגים חדשים, בשביל אלה שבדרך.
+          </span>
+        </section>
+
+        <footer
+          style={{
+            marginTop: "auto",
+            paddingBottom: "8px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "2px",
+            textAlign: "center",
+          }}
+        >
+          <span
+            style={{
+              fontSize: "var(--type-caption-size)",
+              color: "var(--text-faint)",
+            }}
+          >
+            ClearRoad · דרך ברורה
+          </span>
+          <span
+            style={{
+              fontSize: "var(--type-caption-size)",
+              color: "var(--text-faint)",
+            }}
+          >
+            לימוד לתיאוריה לרכב פרטי בישראל
+          </span>
+        </footer>
       </main>
 
       <Script src="/js/auth.js" strategy="afterInteractive" />
