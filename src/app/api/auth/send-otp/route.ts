@@ -4,6 +4,8 @@ import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   const { email } = await request.json();
+  const requestUrl = new URL(request.url);
+  const emailOrigin = `${requestUrl.origin}/auth/callback`;
 
   if (!email || typeof email !== "string") {
     return NextResponse.json({ error: "כתובת מייל חסרה" }, { status: 400 });
@@ -22,7 +24,7 @@ export async function POST(request: Request) {
   const { error } = await supabase.auth.signInWithOtp({
     email: email.trim().toLowerCase(),
     options: {
-      emailRedirectTo: `${new URL(request.url).origin}/auth/callback`,
+      emailRedirectTo: emailOrigin,
     },
   });
 

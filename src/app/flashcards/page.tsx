@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import Script from "next/script";
+import { SignImage } from "@/components/SignImage";
 import { createClient } from "@/lib/supabase";
 import { getSigns } from "@/lib/db";
 import type { Sign } from "@/lib/db";
@@ -21,11 +22,11 @@ function SignCard({ sign, index }: { sign: Sign; index: number }) {
       <div className="flashcard-inner">
         {/* Front */}
         <div className="flashcard-face">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <SignImage
             src={sign.image_path}
             alt={sign.name_he}
-            style={{ width: "65%", maxHeight: "60%", objectFit: "contain" }}
+            size="md"
+            style={{ width: "65%", maxHeight: "60%" }}
           />
           <span
             style={{
@@ -39,11 +40,11 @@ function SignCard({ sign, index }: { sign: Sign; index: number }) {
         </div>
         {/* Back */}
         <div className="flashcard-face flashcard-back-face">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <SignImage
             src={sign.image_path}
             alt={sign.name_he}
-            style={{ width: "45%", maxHeight: "40%", objectFit: "contain", opacity: 0.35 }}
+            size="md"
+            style={{ width: "45%", maxHeight: "40%", opacity: 0.35 }}
           />
           <h2
             style={{

@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { existsSync } from "fs";
 import { join } from "path";
+import { SignImage } from "@/components/SignImage";
 import { createClient } from "@/lib/supabase";
 import { getTopicBySlug, getMistakesForTopic } from "@/lib/db";
 import type { QuizMistake } from "@/lib/db";
@@ -79,12 +80,7 @@ function QuestionReview({ question }: { question: QuizMistake }) {
               alignSelf: "center",
             }}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={imageUrl!}
-              alt=""
-              style={{ width: "88px", height: "88px", objectFit: "contain" }}
-            />
+            <SignImage src={imageUrl!} size="md" style={{ width: "88px", height: "88px" }} />
           </div>
         )
       )}
@@ -122,12 +118,7 @@ function QuestionReview({ question }: { question: QuizMistake }) {
               <span className="quiz-option-badge">{LETTERS[i]}</span>
               {optionSignImg ? (
                 <span style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1 }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={optionSignImg}
-                    alt=""
-                    style={{ width: "52px", height: "52px", objectFit: "contain", flexShrink: 0 }}
-                  />
+                  <SignImage src={optionSignImg} size="sm" />
                   <span style={{ fontSize: "var(--type-small-size)", color: "var(--text-muted)" }}>
                     {text}
                   </span>

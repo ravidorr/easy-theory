@@ -142,6 +142,11 @@ body {
 
 .quiz-option[data-state="correct"] .quiz-option-explanation { display: block; }
 
+/* ── Sign images ─────────────────────────────────────────────── */
+.sign-image {
+  object-fit: contain;
+}
+
 /* ── Button press effect ─────────────────────────────────────── */
 .btn-primary {
   font-family: var(--font-ui);
