@@ -2,7 +2,11 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
-## [Unreleased]
+## [0.3.6]
+
+### Fixed
+- Corrected answer key for signs question 409 (sharp right curve sign): was `a`, now `d`
+- Added migration `002_fix_sign_409_correct_answer.sql` to patch the live database
 
 ### Added
 - Tests for 6 page components (phase 4): home, topics list, more, review, resources, videos — covering auth redirects, progress bar rendering, medal earned/unearned display, correct/wrong option highlighting with explanation text, external link target and rel attributes, and YouTube video link rendering
