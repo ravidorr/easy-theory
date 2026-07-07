@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.10]
+
+### Added
+- Design-system: `email-magic-link.html` — branded magic-link email reference (table layout, inline styles, RTL Hebrew); apply in Supabase Auth > Email Templates > Magic Link, replacing `href="#"` with `{{ .ConfirmationURL }}`
+- Design-system: `landing.html` — public landing + login reference screen
+- Design-system SKILL.md: registered both new screens; added Public page & SEO section
+
 ## [0.3.8]
 
 ### Added
@@ -12,8 +19,6 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 - Tests for `src/app/topics/[slug]/page.tsx`: auth redirect, notFound, empty state, question rendering, data attributes for JS interop
 - Tests for `src/app/flashcards/page.tsx`: auth redirect, sign count, name/number display, cleanName truncation and numeric conversion, action buttons
 - Tests for `src/lib/supabase.ts`: createAdminClient/createClient call correct Supabase factories with right keys, cookie delegation
-
----
 
 ## [0.3.7]
 

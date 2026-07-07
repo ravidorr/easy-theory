@@ -1,0 +1,71 @@
+<!-- @dsCard group="Screens" viewport="640x760" subtitle="תבנית מייל קישור כניסה, ממותגת" name="Email · קישור כניסה" -->
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>הקישור שלך לדרך ברורה</title>
+<!--
+  Branded magic-link email for ClearRoad.
+  Email-client constraints honored: table layout, inline styles only,
+  hardcoded hex (no CSS variables / oklch), system font fallback stack.
+  For Supabase: paste the <body> content into Auth > Email Templates > Magic Link
+  and replace the href="#" on the button with {{ .ConfirmationURL }}.
+-->
+</head>
+<body style="margin:0; padding:0; background-color:#f5f7fc;">
+  <!-- Preheader (hidden preview text in inbox list) -->
+  <div style="display:none; max-height:0; overflow:hidden; mso-hide:all;">הקישור שלך לכניסה מהירה, בלי סיסמה. תקף לזמן קצר.</div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f7fc;">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:440px;">
+
+          <!-- Wordmark -->
+          <tr>
+            <td align="center" style="padding-bottom:20px;">
+              <span style="font-family:'Rubik',Arial,'Segoe UI',sans-serif; font-weight:800; font-size:22px; color:#2749d8;">דרך ברורה</span>
+            </td>
+          </tr>
+
+          <!-- Card -->
+          <tr>
+            <td style="background-color:#ffffff; border:1px solid #e2e7f3; border-radius:20px; padding:32px 28px;" dir="rtl" align="right">
+              <h1 style="margin:0 0 8px; font-family:'Rubik',Arial,'Segoe UI',sans-serif; font-weight:700; font-size:22px; line-height:1.3; color:#1c2337; text-align:right;">היי, הקישור שלך מוכן</h1>
+              <p style="margin:0 0 24px; font-family:'Rubik',Arial,'Segoe UI',sans-serif; font-size:16px; line-height:1.6; color:#6d7690; text-align:right;">לחיצה אחת ואת בפנים, בלי סיסמה. הקישור תקף לשעה הקרובה ולכניסה אחת.</p>
+
+              <!-- Button (bulletproof-ish: table cell) -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="background-color:#2749d8; border-radius:16px;">
+                    <a href="#" style="display:block; padding:16px 28px; font-family:'Rubik',Arial,'Segoe UI',sans-serif; font-weight:700; font-size:17px; color:#ffffff; text-decoration:none;">כניסה לדרך ברורה</a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:24px 0 0; font-family:'Rubik',Arial,'Segoe UI',sans-serif; font-size:14px; line-height:1.6; color:#6d7690; text-align:right;">אם הכפתור לא עובד, אפשר להעתיק את הקישור הזה לדפדפן:</p>
+              <p style="margin:6px 0 0; font-family:Arial,sans-serif; font-size:13px; line-height:1.5; color:#2749d8; word-break:break-all; direction:ltr; text-align:left;">https://app.clearroad.example/auth/verify?token=…</p>
+            </td>
+          </tr>
+
+          <!-- Safety note -->
+          <tr>
+            <td align="center" style="padding:20px 12px 0;">
+              <p style="margin:0; font-family:'Rubik',Arial,'Segoe UI',sans-serif; font-size:13px; line-height:1.6; color:#9aa5c2; text-align:center;">לא ביקשת להתחבר? אפשר להתעלם מהמייל הזה בשקט, שום דבר לא יקרה.</p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="padding:20px 12px 0;">
+              <p style="margin:0; font-family:'Rubik',Arial,'Segoe UI',sans-serif; font-size:12px; line-height:1.6; color:#9aa5c2; text-align:center;">ClearRoad · דרך ברורה · לומדים לתיאוריה בלי לחץ</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
