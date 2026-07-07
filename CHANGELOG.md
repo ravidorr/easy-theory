@@ -6,6 +6,13 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ---
 
+## [0.3.22] — 2026-07-08
+
+### Changed
+- Login resend button: show "שולח..." loading text while the resend request is in flight, then restore "נשלח שוב" on completion (`public/js/auth.js`)
+
+---
+
 ## [0.3.21] — 2026-07-08
 
 ### Changed

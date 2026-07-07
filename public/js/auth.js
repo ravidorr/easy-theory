@@ -81,6 +81,7 @@
       if (!lastEmail) return;
 
       resendBtn.disabled = true;
+      resendBtn.textContent = "שולח...";
       hideResendMsg();
 
       try {
@@ -93,6 +94,7 @@
         if (res.status === 429) {
           const { error } = await res.json();
           showResendMsg(error || "יותר מדי ניסיונות, נסי שוב בעוד 15 דקות", true);
+          resendBtn.textContent = "נשלח שוב";
           resendBtn.disabled = false;
           return;
         }
@@ -100,10 +102,12 @@
         if (!res.ok) {
           const { error } = await res.json();
           showResendMsg(error || "שגיאה בשליחת הקישור, נסי שוב.", true);
+          resendBtn.textContent = "נשלח שוב";
           resendBtn.disabled = false;
           return;
         }
 
+        resendBtn.textContent = "נשלח שוב";
         showResendMsg("✓ נשלח שוב!", false);
         setTimeout(function () {
           hideResendMsg();
@@ -111,6 +115,7 @@
         }, 60000);
       } catch {
         showResendMsg("שגיאת רשת, נסי שוב.", true);
+        resendBtn.textContent = "נשלח שוב";
         resendBtn.disabled = false;
       }
     });
