@@ -5,6 +5,11 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 ## [Unreleased]
 
 ### Added
+- Tests for 6 page components (phase 4): home, topics list, more, review, resources, videos — covering auth redirects, progress bar rendering, medal earned/unearned display, correct/wrong option highlighting with explanation text, external link target and rel attributes, and YouTube video link rendering
+
+---
+
+### Added
 - Tests for all 8 API routes (phase 3): logout, send-otp, auth callback, progress, push/subscribe, schedule, topics/[slug], cron/notify — covering auth guards, input validation, business logic branches, and external-service mocking (web-push, Resend)
 
 ---
