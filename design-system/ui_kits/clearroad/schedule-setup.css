@@ -1,0 +1,225 @@
+body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 420px;
+  box-sizing: border-box;
+  min-height: 100vh;
+}
+
+h1 {
+  margin: 0;
+  font-size: var(--type-h1-size);
+  font-weight: var(--type-h1-weight);
+  line-height: var(--line-tight);
+  color: var(--text);
+}
+
+button {
+  font-family: var(--font-ui);
+  cursor: pointer;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+input[type="time"] {
+  font-family: var(--font-ui);
+  font-size: var(--type-body-size);
+  color: var(--text);
+  background: var(--surface);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 11px 14px;
+  min-height: var(--hit-min);
+  box-sizing: border-box;
+  outline: none;
+}
+
+.page-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.page-subtitle {
+  font-size: var(--type-small-size);
+  color: var(--text-muted);
+  line-height: var(--line-body);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.card-label {
+  font-size: var(--type-small-size);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.day-picker {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.btn-day {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  font-size: 15px;
+}
+
+.btn-day--active {
+  background: var(--primary);
+  color: #fff;
+  border: 1px solid transparent;
+  font-weight: 700;
+  box-shadow: var(--shadow-card);
+}
+
+.btn-day--inactive {
+  background: var(--surface);
+  color: var(--text-muted);
+  border: 1px solid var(--border-strong);
+  font-weight: 600;
+}
+
+.day-count {
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  color: var(--text-faint);
+}
+
+.card--time {
+  gap: 16px;
+}
+
+.label-hint {
+  font-size: var(--type-small-size);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.duration-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.duration-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-duration {
+  flex: 1;
+  min-height: var(--hit-min);
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+}
+
+.btn-duration--active {
+  background: var(--primary);
+  color: #fff;
+  border: 1px solid transparent;
+  font-weight: 700;
+  box-shadow: var(--shadow-card);
+}
+
+.btn-duration--inactive {
+  background: var(--surface);
+  color: var(--text-muted);
+  border: 1px solid var(--border-strong);
+  font-weight: 600;
+}
+
+.label-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: var(--hit-min);
+  flex-direction: row;
+}
+
+.toggle {
+  width: 46px;
+  height: 28px;
+  border-radius: var(--radius-pill);
+  position: relative;
+  background: var(--primary);
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.toggle-thumb {
+  position: absolute;
+  top: 3px;
+  inset-inline-start: 21px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgb(24 32 60 / 25%);
+}
+
+.toggle-text {
+  font-size: var(--type-body-size);
+  color: var(--text);
+}
+
+.form-footer {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.schedule-summary {
+  background: var(--primary-soft);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.summary-title {
+  font-size: var(--type-body-size);
+  font-weight: 600;
+  color: var(--primary-soft-text);
+}
+
+.summary-sub {
+  font-size: var(--type-small-size);
+  color: var(--text-muted);
+  line-height: var(--line-body);
+}
+
+.btn-save {
+  font-weight: 700;
+  font-size: 17px;
+  min-height: 52px;
+  padding: 14px 28px;
+  border-radius: var(--radius-lg);
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  background: var(--primary);
+  color: var(--text-on-primary);
+  box-shadow: var(--shadow-press);
+}

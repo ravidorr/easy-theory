@@ -1,35 +1,35 @@
 <!-- @dsCard group="Screens" viewport="420x900" subtitle="חזרה על תמרורים, ידעתי / עוד לא" name="Flashcards · כרטיסיות" -->
 <!DOCTYPE html>
-<html lang="he" dir="rtl"><head><meta charset="utf-8"><title>ClearRoad – Flashcards</title><link rel="stylesheet" href="../../styles.css"></head>
-<body style="background:var(--bg); margin:0; padding:20px; display:flex; flex-direction:column; gap:20px; max-width:420px; box-sizing:border-box; min-height:100vh;">
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><title>ClearRoad – Flashcards</title><link rel="stylesheet" href="../../styles.css"><link rel="stylesheet" href="flashcards.css"></head>
+<body>
 
   <!-- Top bar -->
-  <div style="display:flex; align-items:center; gap:14px;">
-    <button style="width:44px; height:44px; border-radius:50%; border:1px solid var(--border-strong); background:var(--surface); color:var(--text-muted); font-size:20px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; font-family:var(--font-ui);">→</button>
-    <div style="flex:1; display:flex; flex-direction:column; gap:2px;">
-      <span style="font-weight:600; font-size:var(--type-body-size); color:var(--text);">תמרורים: חזרה</span>
-      <span style="font-size:var(--type-caption-size); font-weight:var(--type-caption-weight); color:var(--text-faint);">כרטיס 4 מתוך 12</span>
+  <div class="top-bar">
+    <button class="btn-icon">→</button>
+    <div class="top-bar-text">
+      <span class="top-bar-title">תמרורים: חזרה</span>
+      <span class="top-bar-counter">כרטיס 4 מתוך 12</span>
     </div>
   </div>
 
   <!-- Progress -->
-  <div style="height:8px; border-radius:var(--radius-pill); background:var(--surface-2); overflow:hidden;">
-    <div style="width:33%; height:100%; border-radius:var(--radius-pill); background:var(--gold);"></div>
+  <div class="progress-bar">
+    <div class="progress-fill"></div>
   </div>
 
   <!-- Flashcard (front) -->
-  <div style="flex:1; display:flex; align-items:center; justify-content:center;">
-    <div style="width:260px; height:320px; border-radius:var(--radius-xl); border:1px solid var(--border); background:var(--surface); box-shadow:var(--shadow-card); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:20px; box-sizing:border-box; cursor:pointer;">
-      <img src="../../assets/signs/sign-302-stop.png" alt="תמרור עצור" style="width:65%; max-height:60%; object-fit:contain;">
-      <span style="font-size:var(--type-caption-size); font-weight:600; color:var(--text-faint);">הקליקי להיפוך</span>
+  <div class="flashcard-stage">
+    <div class="flashcard">
+      <img src="../../assets/signs/sign-302-stop.png" alt="תמרור עצור">
+      <span class="flip-hint">הקליקי להיפוך</span>
     </div>
   </div>
 
   <!-- Know / don't know -->
-  <div style="display:flex; gap:12px;">
-    <button style="flex:1; font-family:var(--font-ui); font-weight:700; font-size:15.5px; min-height:52px; padding:10px 22px; border-radius:var(--radius-lg); border:1px solid var(--border-strong); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; background:var(--surface); color:var(--text);">עוד לא</button>
-    <button style="flex:1; font-family:var(--font-ui); font-weight:700; font-size:15.5px; min-height:52px; padding:10px 22px; border-radius:var(--radius-lg); border:1px solid transparent; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; background:var(--success); color:#fff;">ידעתי ✓</button>
+  <div class="flashcard-actions">
+    <button class="btn-secondary">עוד לא</button>
+    <button class="btn-primary">ידעתי ✓</button>
   </div>
-  <span style="font-size:var(--type-small-size); color:var(--text-muted); text-align:center;">כרטיסים שסימנת "עוד לא" יחזרו אלייך מחר.</span>
+  <span class="flashcard-hint">כרטיסים שסימנת "עוד לא" יחזרו אלייך מחר.</span>
 
 </body></html>

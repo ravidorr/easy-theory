@@ -1,17 +1,17 @@
 <!-- @dsCard group="Screens" viewport="420x900" subtitle="המשימה להיום, מסלול, נושאים" name="Home · המשימה להיום" -->
 <!DOCTYPE html>
-<html lang="he" dir="rtl"><head><meta charset="utf-8"><title>ClearRoad – Home</title><link rel="stylesheet" href="../../styles.css"></head>
-<body style="background:var(--bg); margin:0; padding:20px 20px 96px; display:flex; flex-direction:column; gap:20px; max-width:420px; box-sizing:border-box; min-height:100vh;">
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><title>ClearRoad – Home</title><link rel="stylesheet" href="../../styles.css"><link rel="stylesheet" href="home.css"></head>
+<body>
 
   <!-- Top bar: wordmark + gamification pills -->
-  <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
-    <span style="font-weight:800; font-size:20px; color:var(--text);">דרך ברורה</span>
-    <div style="display:flex; align-items:center; gap:8px;">
-      <span style="display:inline-flex; align-items:center; gap:6px; background:var(--primary-soft); color:var(--primary-soft-text); border-radius:var(--radius-pill); padding:6px 14px; font-weight:700; font-size:14px;">
+  <div class="top-bar">
+    <span class="wordmark">דרך ברורה</span>
+    <div class="pill-group">
+      <span class="pill pill--streak">
         <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1.5c.4 2.2 3.1 3.4 3.9 5.8.9 2.7-.8 6-3.9 6s-4.8-3.3-3.9-6c.4-1.3 1.4-2.2 2.2-3.2.8-1 1.5-1.7 1.7-2.6z"/><circle cx="8" cy="10.6" r="2.1" fill="var(--surface)" opacity="0.85"/></svg>
         5
       </span>
-      <span style="display:inline-flex; align-items:center; gap:6px; background:var(--gold-soft); color:var(--gold-text); border-radius:var(--radius-pill); padding:6px 14px; font-weight:700; font-size:14px;">
+      <span class="pill pill--points">
         <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1.2l2 4.2 4.6.6-3.4 3.2.9 4.6L8 11.6l-4.1 2.2.9-4.6L1.4 6l4.6-.6z"/></svg>
         240
       </span>
@@ -19,103 +19,103 @@
   </div>
 
   <!-- Greeting -->
-  <div style="display:flex; flex-direction:column; gap:4px;">
-    <h1 style="margin:0; font-size:var(--type-h1-size); font-weight:var(--type-h1-weight); line-height:var(--line-tight); color:var(--text);">בוקר טוב, נועה!</h1>
-    <span style="font-size:var(--type-small-size); color:var(--text-muted);">5 ימים ברצף, ממשיכות בקצב שלך.</span>
+  <div class="greeting">
+    <h1>בוקר טוב, נועה!</h1>
+    <span class="greeting-sub">5 ימים ברצף, ממשיכות בקצב שלך.</span>
   </div>
 
   <!-- Today's task card -->
-  <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-xl); box-shadow:var(--shadow-card); padding:20px; display:flex; flex-direction:column; gap:16px;">
-    <span style="align-self:flex-start; background:var(--primary-soft); color:var(--primary-soft-text); border-radius:var(--radius-sm); padding:3px 10px; font-size:var(--type-caption-size); font-weight:var(--type-caption-weight);">המשימה להיום</span>
-    <div style="display:flex; flex-direction:column; gap:4px;">
-      <h2 style="margin:0; font-size:var(--type-h2-size); font-weight:var(--type-h2-weight); line-height:var(--line-tight); color:var(--text);">זכות קדימה, חלק 2</h2>
-      <span style="font-size:var(--type-small-size); color:var(--text-muted);">8 שאלות תרגול · ~20 דק׳</span>
+  <div class="card">
+    <span class="badge">המשימה להיום</span>
+    <div class="task-info">
+      <h2>זכות קדימה, חלק 2</h2>
+      <span class="task-sub">8 שאלות תרגול · ~20 דק׳</span>
     </div>
     <!-- Path progress: step 3 of 5 -->
-    <div style="display:flex; align-items:center; width:100%;">
-      <span style="width:34px; height:34px; border-radius:50%; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; background:var(--primary); color:#fff; border:3px solid transparent; box-sizing:border-box;">✓</span>
-      <span style="flex:1; height:4px; min-width:12px; background:var(--primary);"></span>
-      <span style="width:34px; height:34px; border-radius:50%; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; background:var(--primary); color:#fff; border:3px solid transparent; box-sizing:border-box;">✓</span>
-      <span style="flex:1; height:4px; min-width:12px; background:var(--primary);"></span>
-      <span style="width:44px; height:44px; border-radius:50%; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; font-weight:700; font-size:15px; background:var(--surface); color:var(--primary-soft-text); border:3px solid var(--primary); box-shadow:var(--shadow-card); box-sizing:border-box;">3</span>
-      <span style="flex:1; height:4px; min-width:12px; background:var(--surface-3);"></span>
-      <span style="width:34px; height:34px; border-radius:50%; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; background:var(--surface-2); color:var(--text-faint); border:3px solid transparent; box-sizing:border-box;">4</span>
-      <span style="flex:1; height:4px; min-width:12px; background:var(--surface-3);"></span>
-      <span style="width:34px; height:34px; border-radius:50%; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; background:var(--surface-2); color:var(--text-faint); border:3px solid transparent; box-sizing:border-box;">🏁</span>
+    <div class="path-steps">
+      <span class="path-step path-step--done">✓</span>
+      <span class="path-line path-line--done"></span>
+      <span class="path-step path-step--done">✓</span>
+      <span class="path-line path-line--done"></span>
+      <span class="path-step path-step--current">3</span>
+      <span class="path-line path-line--future"></span>
+      <span class="path-step path-step--future">4</span>
+      <span class="path-line path-line--future"></span>
+      <span class="path-step path-step--future">🏁</span>
     </div>
-    <button style="font-family:var(--font-ui); font-weight:700; font-size:17px; min-height:52px; padding:14px 28px; border-radius:var(--radius-lg); border:1px solid transparent; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; width:100%; background:var(--primary); color:var(--text-on-primary); box-shadow:var(--shadow-press);">יאללה, מתחילות!</button>
+    <button>יאללה, מתחילות!</button>
   </div>
 
   <!-- Topics -->
-  <div style="display:flex; flex-direction:column; gap:12px;">
-    <div style="display:flex; align-items:baseline; justify-content:space-between;">
-      <h2 style="margin:0; font-size:var(--type-h2-size); font-weight:var(--type-h2-weight); color:var(--text);">הנושאים שלך</h2>
-      <span style="font-size:var(--type-caption-size); font-weight:var(--type-caption-weight); color:var(--text-faint);">3 מתוך 12</span>
+  <div class="section">
+    <div class="section-header">
+      <h2>הנושאים שלך</h2>
+      <span class="section-count">3 מתוך 12</span>
     </div>
 
-    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow-card); padding:16px; display:flex; align-items:center; gap:14px;">
-      <div style="width:52px; height:52px; border-radius:var(--radius-md); background:var(--surface-2); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-        <img src="../../assets/signs/sign-303-roundabout.png" alt="" style="width:34px; height:34px; object-fit:contain;">
+    <div class="topic-card">
+      <div class="topic-icon">
+        <img src="../../assets/signs/sign-303-roundabout.png" alt="">
       </div>
-      <div style="flex:1; display:flex; flex-direction:column; gap:8px; min-width:0;">
-        <div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px;">
-          <span style="font-weight:600; font-size:var(--type-body-size); color:var(--text);">תמרורי הוריה</span>
-          <span style="font-size:var(--type-caption-size); font-weight:600; color:var(--text-faint);">80%</span>
+      <div class="topic-body">
+        <div class="topic-row">
+          <span class="topic-name">תמרורי הוריה</span>
+          <span class="topic-pct">80%</span>
         </div>
-        <div style="height:6px; border-radius:var(--radius-pill); background:var(--surface-2); overflow:hidden;">
-          <div style="width:80%; height:100%; border-radius:var(--radius-pill); background:var(--primary);"></div>
-        </div>
-      </div>
-    </div>
-
-    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow-card); padding:16px; display:flex; align-items:center; gap:14px;">
-      <div style="width:52px; height:52px; border-radius:var(--radius-md); background:var(--surface-2); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-        <img src="../../assets/signs/sign-301-yield.png" alt="" style="width:34px; height:34px; object-fit:contain;">
-      </div>
-      <div style="flex:1; display:flex; flex-direction:column; gap:8px; min-width:0;">
-        <div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px;">
-          <span style="font-weight:600; font-size:var(--type-body-size); color:var(--text);">זכות קדימה</span>
-          <span style="font-size:var(--type-caption-size); font-weight:600; color:var(--text-faint);">45%</span>
-        </div>
-        <div style="height:6px; border-radius:var(--radius-pill); background:var(--surface-2); overflow:hidden;">
-          <div style="width:45%; height:100%; border-radius:var(--radius-pill); background:var(--primary);"></div>
+        <div class="progress-track">
+          <div class="progress-fill progress-fill--80"></div>
         </div>
       </div>
     </div>
 
-    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow-card); padding:16px; display:flex; align-items:center; gap:14px;">
-      <div style="width:52px; height:52px; border-radius:var(--radius-md); background:var(--surface-2); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-        <img src="../../assets/signs/sign-no-parking.png" alt="" style="width:34px; height:34px; object-fit:contain;">
+    <div class="topic-card">
+      <div class="topic-icon">
+        <img src="../../assets/signs/sign-301-yield.png" alt="">
       </div>
-      <div style="flex:1; display:flex; flex-direction:column; gap:8px; min-width:0;">
-        <div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px;">
-          <span style="font-weight:600; font-size:var(--type-body-size); color:var(--text);">חנייה ועצירה</span>
-          <span style="font-size:var(--type-caption-size); font-weight:600; color:var(--success-text);">✓ הושלם</span>
+      <div class="topic-body">
+        <div class="topic-row">
+          <span class="topic-name">זכות קדימה</span>
+          <span class="topic-pct">45%</span>
         </div>
-        <div style="height:6px; border-radius:var(--radius-pill); background:var(--surface-2); overflow:hidden;">
-          <div style="width:100%; height:100%; border-radius:var(--radius-pill); background:var(--success);"></div>
+        <div class="progress-track">
+          <div class="progress-fill progress-fill--45"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic-card">
+      <div class="topic-icon">
+        <img src="../../assets/signs/sign-no-parking.png" alt="">
+      </div>
+      <div class="topic-body">
+        <div class="topic-row">
+          <span class="topic-name">חנייה ועצירה</span>
+          <span class="topic-pct topic-pct--done">✓ הושלם</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill progress-fill--success progress-fill--100"></div>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Tab bar: הבית active -->
-  <nav style="position:fixed; bottom:0; inset-inline-start:0; width:100%; max-width:420px; box-sizing:border-box; background:var(--surface); border-top:1px solid var(--border); display:flex; padding:6px 8px calc(6px + env(safe-area-inset-bottom));">
-    <a href="home.html" style="flex:1; min-height:var(--hit-min); text-decoration:none; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; color:var(--primary-soft-text);">
+  <nav>
+    <a href="home.html" class="nav-active">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
-      <span style="font-size:var(--type-caption-size); font-weight:700;">הבית</span>
+      <span>הבית</span>
     </a>
-    <a href="#" style="flex:1; min-height:var(--hit-min); text-decoration:none; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; color:var(--text-faint);">
+    <a href="#">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/></svg>
-      <span style="font-size:var(--type-caption-size); font-weight:600;">נושאים</span>
+      <span>נושאים</span>
     </a>
-    <a href="flashcards.html" style="flex:1; min-height:var(--hit-min); text-decoration:none; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; color:var(--text-faint);">
+    <a href="flashcards.html">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
-      <span style="font-size:var(--type-caption-size); font-weight:600;">כרטיסיות</span>
+      <span>כרטיסיות</span>
     </a>
-    <a href="more.html" style="flex:1; min-height:var(--hit-min); text-decoration:none; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; color:var(--text-faint);">
+    <a href="more.html">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
-      <span style="font-size:var(--type-caption-size); font-weight:600;">עוד</span>
+      <span>עוד</span>
     </a>
   </nav>
 
