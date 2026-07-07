@@ -234,7 +234,7 @@ export default function LoginPage() {
                     fontFamily: "inherit",
                   }}
                 >
-                  שלחי שוב
+                  נשלח שוב
                 </button>
                 <span id="resend-msg" style={{ display: "none", marginRight: "6px" }} />
               </span>

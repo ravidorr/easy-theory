@@ -6,6 +6,14 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ---
 
+## [0.3.21] — 2026-07-08
+
+### Changed
+- Login landing page: button loading state changed from "שולחת..." to "נשלח..." (`public/js/auth.js`)
+- Login landing page: resend link label changed from "שלחי שוב" to "נשלח שוב"
+
+---
+
 ## [0.3.20] — 2026-07-08
 
 ### Changed
