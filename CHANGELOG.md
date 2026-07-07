@@ -2,7 +2,11 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
-## [Unreleased]
+## [0.3.6]
+
+### Fixed
+- Corrected answer key for signs question 409 (sharp right curve sign): was `a`, now `d`
+- Added migration `002_fix_sign_409_correct_answer.sql` to patch the live database
 
 ### Added
 - Tests for all 8 API routes (phase 3): logout, send-otp, auth callback, progress, push/subscribe, schedule, topics/[slug], cron/notify — covering auth guards, input validation, business logic branches, and external-service mocking (web-push, Resend)
