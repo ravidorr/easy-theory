@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.15]
+
+### Added
+- Login page: "לא קיבלת? שלחי שוב" resend link inside the sent-banner — clicking it re-posts to `/api/auth/send-otp` with the stored email, shows "✓ נשלח שוב!" on success, disables the button for 60 s to respect rate limits, and surfaces the server's Hebrew error message (including the 429 rate-limit copy) inline
+
+---
+
 ## [0.3.14]
 
 ### Added

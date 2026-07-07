@@ -213,6 +213,31 @@ export default function LoginPage() {
               >
                 בדקי את המייל ולחצי על הקישור כדי להיכנס.
               </span>
+              <span
+                style={{
+                  fontSize: "var(--type-small-size)",
+                  color: "var(--text-muted)",
+                  marginTop: "6px",
+                }}
+              >
+                לא קיבלת?{" "}
+                <button
+                  id="resend-btn"
+                  style={{
+                    background: "none",
+                    border: "none",
+                    padding: 0,
+                    color: "var(--primary-soft-text)",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    fontSize: "inherit",
+                    fontFamily: "inherit",
+                  }}
+                >
+                  שלחי שוב
+                </button>
+                <span id="resend-msg" style={{ display: "none", marginRight: "6px" }} />
+              </span>
             </div>
           </div>
         </section>
