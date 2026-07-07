@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.13]
+
+### Added
+- Branded favicon set: ל (lamed) learner-sign in plate blue — `icon.svg` (SVG, modern browsers), `apple-icon.png` (180×180, iOS home-screen), `favicon.ico` (32×32 PNG-in-ICO, legacy fallback), and `favicon-512.png` for the future web-app manifest
+
+---
+
 ## [0.3.12]
 
 ### Fixed
