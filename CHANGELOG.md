@@ -6,6 +6,13 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ---
 
+## [0.3.20] — 2026-07-08
+
+### Changed
+- Login landing page: updated CTA heading from "מתחילות עכשיו" to "להתחיל עכשיו" and subtitle from "מתחברות עם" to "להתחברות עם"
+
+---
+
 ## [0.3.19] — 2026-07-08
 
 ### Changed

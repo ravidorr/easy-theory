@@ -99,7 +99,7 @@ export default function LoginPage() {
                 color: "var(--text)",
               }}
             >
-              מתחילות עכשיו
+              להתחיל עכשיו
             </h2>
             <span
               style={{
@@ -107,7 +107,7 @@ export default function LoginPage() {
                 color: "var(--text-muted)",
               }}
             >
-              מתחברות עם קישור למייל, בלי סיסמה. חינם לגמרי.
+              להתחברות עם קישור למייל, בלי סיסמה. חינם לגמרי.
             </span>
           </div>
 
