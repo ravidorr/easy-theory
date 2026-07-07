@@ -30,50 +30,58 @@ export default function LoginPage() {
         }}
       >
         {/* Hero */}
-        <header
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "14px",
-            textAlign: "center",
-            paddingTop: "24px",
-          }}
-        >
-          <span
+        <header>
+          <div
             style={{
-              fontWeight: 800,
-              fontSize: "var(--type-h2-size)",
-              color: "var(--primary-soft-text)",
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+              borderRadius: "var(--radius-xl)",
+              boxShadow: "var(--shadow-card)",
+              padding: "20px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "14px",
+              textAlign: "center",
+              paddingTop: "24px",
             }}
           >
-            דרך ברורה
-          </span>
-          <h1
-            style={{
-              margin: 0,
-              fontSize: "var(--type-display-size)",
-              fontWeight: "var(--type-display-weight)" as never,
-              lineHeight: "var(--line-tight)",
-              color: "var(--text)",
-            }}
-          >
-            לומדים לתיאוריה,
-            <br />
-            בלי לחץ.
-          </h1>
-          <p
-            style={{
-              margin: 0,
-              fontSize: "var(--type-body-size)",
-              color: "var(--text-muted)",
-              lineHeight: "var(--line-body)",
-              maxWidth: "320px",
-            }}
-          >
-            כל מה שצריך למבחן התיאוריה: שאלות אמיתיות מהמאגר הרשמי, כרטיסיות
-            תמרורים ותוכנית שמתאימה את עצמה לקצב שלך.
-          </p>
+            <h1
+              style={{
+                margin: 0,
+                fontWeight: 800,
+                fontSize: "var(--type-h2-size)",
+                color: "var(--primary-soft-text)",
+              }}
+            >
+              דרך ברורה
+            </h1>
+            <h2
+              style={{
+                margin: 0,
+                fontSize: "var(--type-display-size)",
+                fontWeight: "var(--type-display-weight)" as never,
+                lineHeight: "var(--line-tight)",
+                color: "var(--text)",
+              }}
+            >
+              לומדים לתיאוריה,
+              <br />
+              בלי לחץ.
+            </h2>
+            <p
+              style={{
+                margin: 0,
+                fontSize: "var(--type-body-size)",
+                color: "var(--text-muted)",
+                lineHeight: "var(--line-body)",
+                maxWidth: "320px",
+              }}
+            >
+              כל מה שצריך למבחן התיאוריה: שאלות אמיתיות מהמאגר הרשמי, כרטיסיות
+              תמרורים ותוכנית שמתאימה את עצמה לקצב שלך.
+            </p>
+          </div>
         </header>
 
         {/* Login card */}
@@ -101,14 +109,15 @@ export default function LoginPage() {
             >
               להתחיל עכשיו
             </h2>
-            <span
+            <p
               style={{
+                margin: 0,
                 fontSize: "var(--type-small-size)",
                 color: "var(--text-muted)",
               }}
             >
               להתחברות עם קישור למייל, בלי סיסמה. חינם לגמרי.
-            </span>
+            </p>
           </div>
 
           <form
@@ -195,26 +204,29 @@ export default function LoginPage() {
               ✓
             </span>
             <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-              <span
+              <h3
                 style={{
+                  margin: 0,
                   fontSize: "var(--type-body-size)",
                   fontWeight: 600,
                   color: "var(--success-text)",
                 }}
               >
                 הקישור בדרך אלייך
-              </span>
-              <span
+              </h3>
+              <p
                 style={{
+                  margin: 0,
                   fontSize: "var(--type-small-size)",
                   color: "var(--text-muted)",
                   lineHeight: "var(--line-body)",
                 }}
               >
                 בדקי את המייל ולחצי על הקישור כדי להיכנס.
-              </span>
-              <span
+              </p>
+              <p
                 style={{
+                  margin: 0,
                   fontSize: "var(--type-small-size)",
                   color: "var(--text-muted)",
                   marginTop: "6px",
@@ -237,7 +249,7 @@ export default function LoginPage() {
                   נשלח שוב
                 </button>
                 <span id="resend-msg" style={{ display: "none", marginRight: "6px" }} />
-              </span>
+              </p>
             </div>
           </div>
         </section>
@@ -434,36 +446,39 @@ export default function LoginPage() {
         </section>
 
         {/* Reassurance strip */}
-        <section
-          aria-label="בקצרה"
-          style={{
-            background: "var(--primary-soft)",
-            borderRadius: "var(--radius-xl)",
-            padding: "18px 20px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "4px",
-            textAlign: "center",
-          }}
-        >
-          <span
+        <section aria-label="בקצרה">
+          <div
             style={{
-              fontWeight: 600,
-              fontSize: "var(--type-body-size)",
-              color: "var(--primary-soft-text)",
+              background: "var(--primary-soft)",
+              borderRadius: "var(--radius-xl)",
+              padding: "18px 20px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "4px",
+              textAlign: "center",
             }}
           >
-            חינם, בעברית, בגובה העיניים.
-          </span>
-          <span
-            style={{
-              fontSize: "var(--type-small-size)",
-              color: "var(--text-muted)",
-              lineHeight: "var(--line-body)",
-            }}
-          >
-            נבנה בשביל הנהגות והנהגים שבדרך.
-          </span>
+            <h2
+              style={{
+                margin: 0,
+                fontWeight: 600,
+                fontSize: "var(--type-body-size)",
+                color: "var(--primary-soft-text)",
+              }}
+            >
+              חינם, בעברית, בגובה העיניים.
+            </h2>
+            <p
+              style={{
+                margin: 0,
+                fontSize: "var(--type-small-size)",
+                color: "var(--text-muted)",
+                lineHeight: "var(--line-body)",
+              }}
+            >
+              נבנה בשביל הנהגות והנהגים שבדרך.
+            </p>
+          </div>
         </section>
 
         <footer
@@ -476,22 +491,24 @@ export default function LoginPage() {
             textAlign: "center",
           }}
         >
-          <span
+          <p
             style={{
+              margin: 0,
               fontSize: "var(--type-caption-size)",
               color: "var(--text-faint)",
             }}
           >
             ClearRoad · דרך ברורה
-          </span>
-          <span
+          </p>
+          <p
             style={{
+              margin: 0,
               fontSize: "var(--type-caption-size)",
               color: "var(--text-faint)",
             }}
           >
             לימוד לתיאוריה לרכב פרטי בישראל
-          </span>
+          </p>
         </footer>
       </main>
 
