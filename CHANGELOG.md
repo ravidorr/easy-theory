@@ -2,6 +2,16 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.14]
+
+### Added
+- `public/robots.txt`: allows all crawlers, disallows `/api/` and `/auth/callback`; references sitemap
+- `public/agents.txt`: AI-agent crawl policy (robots.txt-style) with a plain-English description of the app
+- `public/llms.txt`: LLM context file following the llmstxt.org spec — app summary, links to key pages, and auth notes
+- Pre-commit hook: interactive prompt when `app/**/page.tsx` or `app/**/route.ts` files are staged but crawler files (`robots.txt`, `agents.txt`, `llms.txt`) are not — asks whether they need updating; skips in CI/GUI clients (no TTY)
+
+---
+
 ## [0.3.13]
 
 ### Added
