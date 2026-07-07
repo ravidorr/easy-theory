@@ -6,6 +6,13 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ---
 
+## [0.3.19] — 2026-07-08
+
+### Changed
+- Login landing page: updated three copy strings — flashcard description now reads "שינון תמרורים… מה שלא נזכר", study plan description reworded to "בימים ושעות שנוח לך… ובלי ספירה לאחור", and reassurance strip simplified to "נבנה בשביל הנהגות והנהגים שבדרך"
+
+---
+
 ## [0.3.18] — 2026-07-08
 
 ### Changed

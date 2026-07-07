@@ -363,7 +363,7 @@ export default function LoginPage() {
                   lineHeight: "var(--line-body)",
                 }}
               >
-                משננות תמרורים בשיטת חזרה מרווחת, מה שלא זכרת יחזור מחר.
+                שינון תמרורים בשיטת חזרה מרווחת, מה שלא נזכר יחזור מחר.
               </p>
             </div>
           </div>
@@ -427,8 +427,7 @@ export default function LoginPage() {
                   lineHeight: "var(--line-body)",
                 }}
               >
-                בוחרות ימים ושעות, והאפליקציה בונה תוכנית עד למבחן. בלי לחץ,
-                בלי ספירה לאחור.
+                בימים ושעות שנוח לך, והאפליקציה בונה תוכנית עד למבחן. בלי לחץ, ובלי ספירה לאחור.
               </p>
             </div>
           </div>
@@ -463,7 +462,7 @@ export default function LoginPage() {
               lineHeight: "var(--line-body)",
             }}
           >
-            נבנה עם נהגות ונהגים חדשים, בשביל אלה שבדרך.
+            נבנה בשביל הנהגות והנהגים שבדרך.
           </span>
         </section>
 
