@@ -4,6 +4,10 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ## [Unreleased]
 
+---
+
+## [0.3.24] — 2026-07-08
+
 ### Changed
 - Login page: replaced generic `<span>` elements with semantic `h1`, `h2`, `h3`, and `p` elements; wrapped hero and reassurance strip content in card divs
 
