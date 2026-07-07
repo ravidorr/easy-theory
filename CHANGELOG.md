@@ -2,6 +2,12 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.7]
+
+### Changed
+- Transformed `/auth/login` from a minimal centered form into a full public landing + login page: hero with h1, login card with heading and subtitle, feature cards (real exam questions, sign flashcards, personal schedule) with traffic sign images, reassurance strip, and footer
+- Added SEO metadata and Open Graph tags (title, description, `he_IL` locale) to the login page
+
 ## [0.3.6]
 
 ### Fixed
