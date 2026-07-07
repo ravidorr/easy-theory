@@ -30,7 +30,18 @@ React reference implementations; each has a `.prompt.md` usage note and `.d.ts` 
 
 ## Screens (`ui_kits/clearroad/`)
 
-Reference layouts: `home.html` (המשימה להיום + path + topics), `quiz.html` (progress bar + options + reward), `flashcards.html` (card + ידעתי/עוד לא), `schedule.html` (week strip + tasks + medals + calm exam card), `login.html` (magic-link email form + sent state), `schedule-setup.html` (day picker + time + duration chips + save), `resources.html` (external link cards, opens in new tab), `videos.html` (YouTube cards with real thumbnails, featured + row variants), `more.html` (עוד page: nav rows + dark mode + logout, tab bar reference markup), `medal-earned.html` (celebration modal over quiz summary).
+Reference layouts: `landing.html` (public landing + login: hero h1, login card, feature sections — the app's front door and only SEO surface), `home.html` (המשימה להיום + path + topics), `quiz.html` (progress bar + options + reward), `flashcards.html` (card + ידעתי/עוד לא), `schedule.html` (week strip + tasks + medals + calm exam card), `login.html` (magic-link email form + sent state), `schedule-setup.html` (day picker + time + duration chips + save), `resources.html` (external link cards, opens in new tab), `videos.html` (YouTube cards with real thumbnails, featured + row variants), `more.html` (עוד page: nav rows + dark mode + logout, tab bar reference markup), `medal-earned.html` (celebration modal over quiz summary), `email-magic-link.html` (branded sign-in email; table layout + hardcoded hex — subject: "הקישור שלך לדרך ברורה"; paste into the auth provider's Magic Link template and point the button at its link variable).
+
+## Public page & SEO
+
+The landing/login page (`landing.html`) is the only page crawlers see — everything else is behind auth. Requirements:
+
+- Server-render it (or static HTML); no client-only rendering for this page.
+- `<title>` דרך ברורה · לומדים לתיאוריה בלי לחץ + `<meta name="description">` in Hebrew (see landing.html head).
+- One `<h1>` with the value proposition; features as `<section>`/`<h3>` with real descriptive copy — never a bare form.
+- Semantic elements (`header`/`section`/`footer`), `alt` text on sign images, `lang="he"` + `dir="rtl"` on `<html>`.
+- Add Open Graph tags (`og:title`, `og:description`, `og:locale=he_IL`) and a canonical URL in the app.
+- Voice rules apply to meta text too: warm, no pressure framing.
 
 ## Navigation
 
