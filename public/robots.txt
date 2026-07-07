@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /api/
+Disallow: /auth/callback
+
+Sitemap: https://easy-theory-omega.vercel.app/sitemap.xml

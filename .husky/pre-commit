@@ -35,3 +35,22 @@ if [ -n "$HEAD_VERSION" ] && [ "$HEAD_VERSION" = "$STAGED_VERSION" ]; then
   echo ""
   exit 1
 fi
+
+# If route files changed and crawler files are not staged, ask whether they need updating.
+ROUTE_CHANGES=$(echo "$STAGED" | grep -E "^app/.*(page|route)\.(ts|tsx)$" || true)
+CRAWLER_STAGED=$(echo "$STAGED" | grep -E "^public/(robots|agents|llms)\.txt$" || true)
+
+if [ -n "$ROUTE_CHANGES" ] && [ -z "$CRAWLER_STAGED" ] && [ -t 1 ]; then
+  echo ""
+  echo "  Route changes detected:"
+  echo "$ROUTE_CHANGES" | sed 's/^/    /'
+  echo ""
+  printf "  Should robots.txt, agents.txt, or llms.txt be updated? [y/N] "
+  read -r CRAWLER_RESPONSE </dev/tty
+  if echo "$CRAWLER_RESPONSE" | grep -qiE "^y(es)?$"; then
+    echo ""
+    echo "  Update public/robots.txt, public/agents.txt, and/or public/llms.txt, then re-stage and commit."
+    echo ""
+    exit 1
+  fi
+fi

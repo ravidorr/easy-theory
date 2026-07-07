@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /auth/callback
+
+# ClearRoad (דרך ברורה) is a Hebrew-first driving theory study app for
+# the Israeli car-B license exam. Content is for educational use.
+# Most study content requires a free account (magic-link, no password).

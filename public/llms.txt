@@ -1,0 +1,14 @@
+# ClearRoad (דרך ברורה)
+
+> Hebrew-first driving theory study app for the Israeli car-B license exam, designed for 16-year-olds.
+
+## Study content
+- [Topics](/topics): 1,802 official exam questions organised by topic, with inline traffic-sign images
+- [Flashcards](/flashcards): 277 official Israeli traffic-sign flashcards with flip animation
+- [Videos](/videos): Video resources for exam preparation
+- [Resources](/resources): Additional study resources
+
+## About
+ClearRoad helps Israeli learners prepare for the official car-B driving theory exam. The interface is fully in Hebrew (RTL) with a warm, encouraging feminine tone throughout. Progress tracking, streaks, star points, and a weekly study schedule are built in.
+
+Authentication is magic-link (email only, no password). Most content requires a free account.
