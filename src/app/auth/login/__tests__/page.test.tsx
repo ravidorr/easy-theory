@@ -29,7 +29,7 @@ describe("LoginPage", () => {
 
   it("renders the login card heading", () => {
     render(React.createElement(LoginPage));
-    expect(screen.getByRole("heading", { name: "מתחילות עכשיו" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "להתחיל עכשיו" })).toBeInTheDocument();
   });
 
   it("renders the ClearRoad brand name in the footer", () => {

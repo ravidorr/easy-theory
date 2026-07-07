@@ -99,7 +99,7 @@ export default function LoginPage() {
                 color: "var(--text)",
               }}
             >
-              מתחילות עכשיו
+              להתחיל עכשיו
             </h2>
             <span
               style={{
@@ -107,7 +107,7 @@ export default function LoginPage() {
                 color: "var(--text-muted)",
               }}
             >
-              מתחברות עם קישור למייל, בלי סיסמה. חינם לגמרי.
+              להתחברות עם קישור למייל, בלי סיסמה. חינם לגמרי.
             </span>
           </div>
 
@@ -234,7 +234,7 @@ export default function LoginPage() {
                     fontFamily: "inherit",
                   }}
                 >
-                  שלחי שוב
+                  נשלח שוב
                 </button>
                 <span id="resend-msg" style={{ display: "none", marginRight: "6px" }} />
               </span>

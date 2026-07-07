@@ -47,7 +47,7 @@
     }
 
     btn.disabled = true;
-    btn.textContent = "שולחת...";
+    btn.textContent = "נשלח...";
 
     try {
       const res = await fetch("/api/auth/send-otp", {
