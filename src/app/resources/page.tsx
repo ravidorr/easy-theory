@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { SignImage } from "@/components/SignImage";
 import { createClient } from "@/lib/supabase";
 
 const ExternalIcon = () => (
@@ -110,8 +111,7 @@ export default async function ResourcesPage() {
               flexShrink: 0,
             }}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/signs/sign-301.png" alt="" style={{ width: "32px", height: "32px", objectFit: "contain" }} />
+            <SignImage src="/signs/sign-301.png" size="xs" />
           </div>
           <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "2px", minWidth: 0 }}>
             <span style={{ fontWeight: 600, fontSize: "var(--type-body-size)", color: "var(--text)" }}>

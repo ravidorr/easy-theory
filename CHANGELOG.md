@@ -7,10 +7,15 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 ### Added
 - Tests for `src/lib/rate-limit.ts`: 4 cases covering true/false/null RPC responses and correct parameter passing
 - Tests for `src/lib/db.ts`: 22 cases covering all query helpers (null fallbacks) and `getMistakesForTopic` deduplication logic (latest-response-per-question, wrong→right and right→wrong sequences)
+- Shared `SignImage` component with consistent sizing (`xs`/`sm`/`md`) used across quiz, review, flashcards, and resources pages
+- Unit tests for `SignImage` (no multiply blend mode, style overrides)
+- Migration `002_fix_correct_options.sql` to correct `correct_option` values misparsed from zero-padded XML `correctAnswer` IDs
+
+### Fixed
+- Sign images no longer use `mix-blend-mode: multiply`, which washed out colors on light backgrounds
+- Question seed data regenerated with corrected answer keys and image URLs
 
 ---
-
-### Added
 - README badges: Vercel deployment status, MIT license, last commit, Next.js, TypeScript, Supabase, pnpm, and Vitest badges
 - Vitest coverage configuration (v8 provider, text + lcov reporters, all-files mode) and `test:coverage` script
 - `coverage/**` added to ESLint ignore list so generated reports are not linted

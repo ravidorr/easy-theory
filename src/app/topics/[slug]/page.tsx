@@ -3,6 +3,7 @@ import Link from "next/link";
 import Script from "next/script";
 import { existsSync } from "fs";
 import { join } from "path";
+import { SignImage } from "@/components/SignImage";
 import { createClient } from "@/lib/supabase";
 import { getTopicBySlug, getQuestionsForTopic } from "@/lib/db";
 import type { Question } from "@/lib/db";
@@ -51,6 +52,7 @@ function QuestionSlide({
       data-index={index}
       data-question-id={question.id}
       data-topic-id={topicId}
+      data-correct={question.correct_option}
       style={{ display: index === 0 ? "flex" : "none", flexDirection: "column", gap: "20px" }}
     >
       {/* Question + image */}
@@ -98,12 +100,7 @@ function QuestionSlide({
                 justifyContent: "center",
               }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={imageUrl!}
-                alt=""
-                style={{ width: "96px", height: "96px", objectFit: "contain", mixBlendMode: "multiply" }}
-              />
+              <SignImage src={imageUrl!} size="md" />
             </div>
           )
         )}
@@ -135,12 +132,7 @@ function QuestionSlide({
               {optionSignImg ? (
                 /* Sign option: image only, centered */
                 <span style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={optionSignImg}
-                    alt=""
-                    style={{ width: "52px", height: "52px", objectFit: "contain", flexShrink: 0, mixBlendMode: "multiply" }}
-                  />
+                  <SignImage src={optionSignImg} size="sm" />
                 </span>
               ) : (
                 <span
