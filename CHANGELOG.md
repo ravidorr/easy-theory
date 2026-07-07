@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.12]
+
+### Fixed
+- CI: remove explicit `version` from `pnpm/action-setup` step so it reads from `packageManager` in `package.json`, avoiding version conflict
+
+---
+
 ## [0.3.11]
 
 ### Added
