@@ -2,6 +2,14 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.9]
+
+### Added
+- GitHub Actions workflow (`.github/workflows/coverage.yml`): runs `pnpm test:coverage` on every PR and posts a per-file coverage table as a PR comment via `davelosert/vitest-coverage-report-action@v2`
+- `json-summary` reporter added to Vitest coverage config (required by the coverage report action)
+
+---
+
 ## [0.3.8]
 
 ### Added

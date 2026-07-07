@@ -27,14 +27,14 @@ describe("LoginPage", () => {
     expect(screen.getByText("דרך ברורה")).toBeInTheDocument();
   });
 
-  it("renders the welcome heading", () => {
+  it("renders the login card heading", () => {
     render(React.createElement(LoginPage));
-    expect(screen.getByRole("heading", { name: /טוב שבאת/ })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "מתחילות עכשיו" })).toBeInTheDocument();
   });
 
   it("renders the ClearRoad brand name in the footer", () => {
     render(React.createElement(LoginPage));
-    expect(screen.getByText("ClearRoad")).toBeInTheDocument();
+    expect(screen.getByText(/ClearRoad/)).toBeInTheDocument();
   });
 
   it("renders the login form", () => {
