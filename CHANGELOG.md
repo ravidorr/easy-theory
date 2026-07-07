@@ -4,6 +4,10 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ## [Unreleased]
 
+---
+
+## [0.3.18] — 2026-07-08
+
 ### Changed
 - Sign images (`public/signs/*.png`): removed external white background via edge flood fill + anti-aliased fringe removal — white content inside signs (borders, text, arrows) is preserved; transparent background renders cleanly on any page color
 - Signs where white is integral to the design (sign-112, 113, 148, 508, 618, 635, 713–715, 720–722, 725) kept as original white-background PNGs
