@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import MorePage from "../page";
 import { createClient } from "@/lib/supabase";
-import { getUserMedals } from "@/lib/db";
+import { getUserMedals, getUserStats } from "@/lib/db";
 
 vi.mock("next/navigation", () => ({
   redirect: vi.fn().mockImplementation(() => {
@@ -11,7 +11,7 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
-vi.mock("@/lib/db", () => ({ getUserMedals: vi.fn() }));
+vi.mock("@/lib/db", () => ({ getUserMedals: vi.fn(), getUserStats: vi.fn() }));
 vi.mock("next/headers", () => ({
   cookies: vi.fn().mockResolvedValue({
     get: vi.fn().mockReturnValue({ value: "dark" }),
@@ -24,6 +24,7 @@ vi.mock("@/components/TabBar", () => ({
 
 const mockCreateClient = vi.mocked(createClient);
 const mockGetMedals = vi.mocked(getUserMedals);
+const mockGetStats = vi.mocked(getUserStats);
 
 function makeClient(user: { id: string } | null = { id: "u1" }) {
   return { auth: { getUser: vi.fn().mockResolvedValue({ data: { user } }) } };
@@ -34,6 +35,12 @@ describe("MorePage", () => {
     vi.clearAllMocks();
     mockCreateClient.mockResolvedValue(makeClient() as never);
     mockGetMedals.mockResolvedValue([]);
+    mockGetStats.mockResolvedValue({
+      user_id: "u1",
+      star_points: 42,
+      streak_days: 3,
+      last_active_date: null,
+    });
   });
 
   it("redirects to /auth/login when not authenticated", async () => {

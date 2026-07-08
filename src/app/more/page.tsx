@@ -3,7 +3,7 @@ import Script from "next/script";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase";
 import { TabBar } from "@/components/TabBar";
-import { getUserMedals } from "@/lib/db";
+import { getUserMedals, getUserStats } from "@/lib/db";
 import styles from "./page.module.css";
 
 export default async function MorePage() {
@@ -13,7 +13,10 @@ export default async function MorePage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/auth/login");
 
-  const medals = await getUserMedals(supabase, user.id);
+  const [medals, stats] = await Promise.all([
+    getUserMedals(supabase, user.id),
+    getUserStats(supabase, user.id),
+  ]);
   const earnedSet = new Set(medals.map((m) => m.medal_slug));
   const earnedDateMap = Object.fromEntries(medals.map((m) => [m.medal_slug, m.earned_at]));
 
@@ -35,6 +38,29 @@ export default async function MorePage() {
     <>
       <main className={styles.page}>
         <h1>עוד</h1>
+
+        {/* Stats summary */}
+        <div className={styles.statsCard}>
+          <div className={styles.statCell}>
+            <span className={`${styles.statIcon} ${styles.statIconStreak}`}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
+              </svg>
+            </span>
+            <span className={styles.statValue}>{stats.streak_days}</span>
+            <span className={styles.statLabel}>יום רצף</span>
+          </div>
+          <div className={styles.statDivider} />
+          <div className={styles.statCell}>
+            <span className={`${styles.statIcon} ${styles.statIconPoints}`}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14 2 9.27l6.91-1.01L12 2z" />
+              </svg>
+            </span>
+            <span className={styles.statValue}>{stats.star_points}</span>
+            <span className={styles.statLabel}>נקודות</span>
+          </div>
+        </div>
 
         {/* Navigation rows */}
         <div className={styles.navCard}>
