@@ -5,6 +5,8 @@ import ReviewPage from "../page";
 import { createClient } from "@/lib/supabase";
 import { getTopicBySlug, getMistakesForTopic } from "@/lib/db";
 
+const mockExistsSync = vi.hoisted(() => vi.fn().mockReturnValue(false));
+
 vi.mock("next/navigation", () => ({
   redirect: vi.fn().mockImplementation(() => {
     throw new Error("redirect");
@@ -28,7 +30,7 @@ vi.mock("next/link", () => ({
 }));
 vi.mock("fs", async (importOriginal) => {
   const actual = await importOriginal<typeof import("fs")>();
-  return { ...actual, existsSync: vi.fn().mockReturnValue(false) };
+  return { ...actual, existsSync: mockExistsSync };
 });
 
 const mockCreateClient = vi.mocked(createClient);
@@ -70,6 +72,7 @@ function makeClient(user: { id: string } | null = { id: "u1" }) {
 describe("ReviewPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockExistsSync.mockReturnValue(false);
     mockCreateClient.mockResolvedValue(makeClient() as never);
     mockGetTopicBySlug.mockResolvedValue(TOPIC as never);
     mockGetMistakes.mockResolvedValue([]);
@@ -153,5 +156,49 @@ describe("ReviewPage", () => {
     const jsx = await ReviewPage({ params: Promise.resolve({ slug: "signs" }) });
     render(jsx);
     expect(screen.getByText("מה המשמעות של תמרור זה?")).toBeInTheDocument();
+  });
+
+  it("does not render image when /questions/ file does not exist", async () => {
+    const m = { ...MISTAKE_A, image_url: "/questions/img.png" };
+    mockGetMistakes.mockResolvedValue([m] as never);
+    const jsx = await ReviewPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    expect(container.querySelector("img")).toBeNull();
+  });
+
+  it("renders wide image for non-questions non-sign URL", async () => {
+    // URL without /questions/ prefix skips existsSync and isWide=true (no "sign-")
+    const m = { ...MISTAKE_A, image_url: "/images/wide.jpg" };
+    mockGetMistakes.mockResolvedValue([m] as never);
+    const jsx = await ReviewPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    expect(container.querySelector("img[src='/images/wide.jpg']")).toBeTruthy();
+  });
+
+  it("renders sign image for sign- image URL", async () => {
+    const m = { ...MISTAKE_A, image_url: "/signs/sign-100.png" };
+    mockGetMistakes.mockResolvedValue([m] as never);
+    const jsx = await ReviewPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    expect(container.querySelector("[data-testid='sign-img']")).toBeTruthy();
+  });
+
+  it("renders text for digit option when sign file does not exist", async () => {
+    // "9999" is a valid 4-digit sign code but sign-9999.png does not exist on disk
+    const m = { ...MISTAKE_A, option_a: "9999" };
+    mockGetMistakes.mockResolvedValue([m] as never);
+    const jsx = await ReviewPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    // option_a is correct_option "a" → data-state="correct"; file absent → no sign img
+    const correctOption = container.querySelector('[data-state="correct"]');
+    expect(correctOption?.querySelector("img")).toBeNull();
+  });
+
+  it("renders sign image for digit option when sign file exists", async () => {
+    const m = { ...MISTAKE_A, option_a: "100" };
+    mockGetMistakes.mockResolvedValue([m] as never);
+    const jsx = await ReviewPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    expect(container.querySelector("img[src='/signs/sign-100.png']")).toBeTruthy();
   });
 });

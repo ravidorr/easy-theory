@@ -125,4 +125,21 @@ describe("GET /api/cron/notify", () => {
     expect(admin.from).toHaveBeenCalledWith("user_push_subscriptions");
     expect(body).toEqual({ sent: 0 });
   });
+
+  it("skips email when user has no email address", async () => {
+    mockGetSchedules.mockResolvedValue([SCHEDULE]);
+    mockGetPushSubs.mockResolvedValue([]);
+
+    const admin = makeAdminClient();
+    admin.auth.admin.getUserById = vi.fn().mockResolvedValue({
+      data: { user: { email: null } },
+    });
+    mockCreateAdminClient.mockReturnValue(admin as never);
+
+    const res = await GET(makeRequest());
+    const body = await res.json();
+
+    expect(mockEmailSend).not.toHaveBeenCalled();
+    expect(body).toEqual({ sent: 0 });
+  });
 });

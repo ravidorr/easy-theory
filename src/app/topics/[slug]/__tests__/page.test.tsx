@@ -5,6 +5,8 @@ import TopicQuizPage from "../page";
 import { createClient } from "@/lib/supabase";
 import { getTopicBySlug, getQuestionsForTopic } from "@/lib/db";
 
+const mockExistsSync = vi.hoisted(() => vi.fn().mockReturnValue(false));
+
 vi.mock("next/navigation", () => ({
   redirect: vi.fn().mockImplementation(() => {
     throw new Error("redirect");
@@ -31,7 +33,7 @@ vi.mock("next/script", () => ({
 }));
 vi.mock("fs", async (importOriginal) => {
   const actual = await importOriginal<typeof import("fs")>();
-  return { ...actual, existsSync: vi.fn().mockReturnValue(false) };
+  return { ...actual, existsSync: mockExistsSync };
 });
 
 const mockCreateClient = vi.mocked(createClient);
@@ -58,6 +60,7 @@ function makeClient(user: { id: string } | null = { id: "u1" }) {
 describe("TopicQuizPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockExistsSync.mockReturnValue(false);
     mockCreateClient.mockResolvedValue(makeClient() as never);
     mockGetTopicBySlug.mockResolvedValue(TOPIC as never);
     mockGetQuestions.mockResolvedValue([]);
@@ -126,5 +129,72 @@ describe("TopicQuizPage", () => {
     const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs" }) });
     const { container } = render(jsx);
     expect(container.querySelector('a[href="/topics/signs/review"]')).toBeTruthy();
+  });
+
+  it("renders explanation text when explanation_he is present", async () => {
+    const q = { ...QUESTION, explanation_he: "תמרור זה משמעותו עצור" };
+    mockGetQuestions.mockResolvedValue([q] as never);
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs" }) });
+    render(jsx);
+    // explanation renders once per option button
+    expect(screen.getAllByText("תמרור זה משמעותו עצור").length).toBeGreaterThan(0);
+  });
+
+  it("does not render image when /questions/ file does not exist", async () => {
+    const q = { ...QUESTION, image_url: "/questions/img.png" };
+    mockGetQuestions.mockResolvedValue([q] as never);
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    expect(container.querySelector("img")).toBeNull();
+  });
+
+  it("renders wide image for non-questions non-sign URL", async () => {
+    // URL without /questions/ prefix skips existsSync and isWide=true (no "sign-")
+    const q = { ...QUESTION, image_url: "/images/wide.jpg" };
+    mockGetQuestions.mockResolvedValue([q] as never);
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    expect(container.querySelector("img[src='/images/wide.jpg']")).toBeTruthy();
+  });
+
+  it("renders sign image (non-wide) for sign- image URL", async () => {
+    const q = { ...QUESTION, image_url: "/signs/sign-100.png" };
+    mockGetQuestions.mockResolvedValue([q] as never);
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    expect(container.querySelector("img[src='/signs/sign-100.png']")).toBeTruthy();
+  });
+
+  it("renders text for digit option when sign file does not exist", async () => {
+    // "9999" is a valid 4-digit sign code but sign-9999.png does not exist on disk
+    const q = { ...QUESTION, option_a: "9999" };
+    mockGetQuestions.mockResolvedValue([q] as never);
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    const optionA = container.querySelector('[data-option="a"]');
+    expect(optionA).toBeTruthy();
+    expect(optionA?.querySelector("img")).toBeNull();
+  });
+
+  it("skips question image when all options are sign numbers", async () => {
+    const q = {
+      ...QUESTION,
+      option_a: "101",
+      option_b: "102",
+      option_c: "103",
+      option_d: "104",
+    };
+    mockGetQuestions.mockResolvedValue([q] as never);
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    expect(container.querySelector("img[src='/signs/sign-101.png']")).toBeTruthy();
+  });
+
+  it("renders sign image for digit option when sign file exists", async () => {
+    const q = { ...QUESTION, option_a: "100" };
+    mockGetQuestions.mockResolvedValue([q] as never);
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    expect(container.querySelector("img[src='/signs/sign-100.png']")).toBeTruthy();
   });
 });

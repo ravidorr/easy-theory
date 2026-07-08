@@ -4,6 +4,7 @@ import React from "react";
 import MorePage from "../page";
 import { createClient } from "@/lib/supabase";
 import { getUserMedals, getUserStats } from "@/lib/db";
+import { cookies } from "next/headers";
 
 vi.mock("next/navigation", () => ({
   redirect: vi.fn().mockImplementation(() => {
@@ -25,6 +26,7 @@ vi.mock("@/components/TabBar", () => ({
 const mockCreateClient = vi.mocked(createClient);
 const mockGetMedals = vi.mocked(getUserMedals);
 const mockGetStats = vi.mocked(getUserStats);
+const mockCookies = vi.mocked(cookies);
 
 function makeClient(user: { id: string } | null = { id: "u1" }) {
   return { auth: { getUser: vi.fn().mockResolvedValue({ data: { user } }) } };
@@ -90,5 +92,23 @@ describe("MorePage", () => {
     render(jsx);
     const toggle = screen.getByRole("switch");
     expect(toggle).toHaveAttribute("aria-checked", "true");
+  });
+
+  it("defaults to dark mode when theme cookie is absent", async () => {
+    mockCookies.mockResolvedValue({ get: vi.fn().mockReturnValue(undefined) } as never);
+    const jsx = await MorePage();
+    render(jsx);
+    const toggle = screen.getByRole("switch");
+    expect(toggle).toHaveAttribute("aria-checked", "true");
+  });
+
+  it("renders light mode toggle when theme is light", async () => {
+    mockCookies.mockResolvedValue({
+      get: vi.fn().mockReturnValue({ value: "light" }),
+    } as never);
+    const jsx = await MorePage();
+    render(jsx);
+    const toggle = screen.getByRole("switch");
+    expect(toggle).toHaveAttribute("aria-checked", "false");
   });
 });

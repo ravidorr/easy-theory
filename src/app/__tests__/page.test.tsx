@@ -115,4 +115,74 @@ describe("HomePage", () => {
     const { container } = render(jsx);
     expect(container.querySelector("[data-active]")).toBeTruthy();
   });
+
+  it("shows 'יאללה, לעבודה!' greeting when streak_days is 0", async () => {
+    mockGetStats.mockResolvedValue({ streak_days: 0, star_points: 0 } as never);
+    const jsx = await HomePage();
+    render(jsx);
+    expect(screen.getAllByText("יאללה, לעבודה!")[0]).toBeInTheDocument();
+  });
+
+  it("shows '1 day' streak greeting when streak_days is 1", async () => {
+    mockGetStats.mockResolvedValue({ streak_days: 1, star_points: 5 } as never);
+    const jsx = await HomePage();
+    render(jsx);
+    expect(screen.getByText("יום ראשון ברצף, קצב טוב.")).toBeInTheDocument();
+  });
+
+  it("calculates step 6 when best_score is 100", async () => {
+    mockGetProgress.mockResolvedValue([
+      { topic_id: "t1", status: "in_progress", best_score: 100 },
+    ] as never);
+    const jsx = await HomePage();
+    const { container } = render(jsx);
+    // All 5 nodes are done — no active node
+    expect(container.querySelector("[data-active]")).toBeNull();
+    expect(screen.getAllByText("✓")).toHaveLength(5);
+  });
+
+  it("calculates step 4 when best_score is 70", async () => {
+    mockGetProgress.mockResolvedValue([
+      { topic_id: "t1", status: "in_progress", best_score: 70 },
+    ] as never);
+    const jsx = await HomePage();
+    const { container } = render(jsx);
+    expect(container.querySelector("[data-active]")).toBeTruthy();
+    expect(screen.getAllByText("✓")).toHaveLength(3);
+  });
+
+  it("calculates step 2 when best_score is 20", async () => {
+    mockGetProgress.mockResolvedValue([
+      { topic_id: "t1", status: "in_progress", best_score: 20 },
+    ] as never);
+    const jsx = await HomePage();
+    const { container } = render(jsx);
+    expect(container.querySelector("[data-active]")).toBeTruthy();
+    expect(screen.getAllByText("✓")).toHaveLength(1);
+  });
+
+  it("renders icon image when topic has an icon", async () => {
+    const topicWithIcon = { id: "t1", slug: "signs", name_he: "תמרורים", icon: "/icons/signs.png" };
+    mockGetTopics.mockResolvedValue([topicWithIcon] as never);
+    const jsx = await HomePage();
+    const { container } = render(jsx);
+    expect(container.querySelector("img[src='/icons/signs.png']")).toBeTruthy();
+  });
+
+  it("renders description when topic has description_he", async () => {
+    const topicWithDesc = { id: "t1", slug: "signs", name_he: "תמרורים", icon: null, description_he: "לימוד תמרורים" };
+    mockGetTopics.mockResolvedValue([topicWithDesc] as never);
+    const jsx = await HomePage();
+    render(jsx);
+    expect(screen.getByText("לימוד תמרורים")).toBeInTheDocument();
+  });
+
+  it("shows percentage badge when topic is in_progress", async () => {
+    mockGetProgress.mockResolvedValue([
+      { topic_id: "t1", status: "in_progress", best_score: 50 },
+    ] as never);
+    const jsx = await HomePage();
+    render(jsx);
+    expect(screen.getByText("50%")).toBeInTheDocument();
+  });
 });
