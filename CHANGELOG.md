@@ -6,6 +6,13 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ---
 
+## [0.3.30] — 2026-07-08
+
+### Fixed
+- Sign images in quiz answer options increased from 52px to 96px so they are clearly visible
+
+---
+
 ## [0.3.29] — 2026-07-08
 
 ### Fixed

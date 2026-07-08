@@ -86,7 +86,7 @@ function QuestionSlide({
               <span className="quiz-option-badge">{LETTERS[i]}</span>
               {optionSignImg ? (
                 <span className={styles.optionSignContent}>
-                  <SignImage src={optionSignImg} size="sm" />
+                  <SignImage src={optionSignImg} size="md" />
                 </span>
               ) : (
                 <span className={styles.optionTextContent}>{text}</span>
