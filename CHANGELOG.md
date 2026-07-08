@@ -16,11 +16,18 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ---
 
+## [0.3.40] — 2026-07-08
+
+### Changed
+- Raise vitest branch threshold from 85% to 90%
+
+---
+
 ## [0.3.39] — 2026-07-08
 
 ### Changed
 - Increase branch coverage from 84.53% to 95.61% (371/388) by adding targeted tests across 6 test files
-- Raise vitest branch threshold from 80% to 85%
+- Raise vitest branch threshold from 80% to 90%
 
 ---
 
