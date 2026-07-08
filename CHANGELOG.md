@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.37] — 2026-07-08
+
+### Added
+- Enforce test coverage minimums that fail CI when coverage drops below the baseline: lines 84%, branches 76%, functions 83%, statements 83%
+
+---
+
 ## [Unreleased]
 
 ### Added

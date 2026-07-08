@@ -31,3 +31,6 @@ jobs:
       - name: Post coverage report
         uses: davelosert/vitest-coverage-report-action@v2
         if: always()
+        with:
+          min-coverage-overall: 76
+          min-coverage-changed-files: 76
