@@ -11,7 +11,7 @@ export default async function MorePage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/login");
+  if (!user) redirect("/auth/login?next=/more");
 
   const [medals, stats] = await Promise.all([
     getUserMedals(supabase, user.id),

@@ -46,6 +46,8 @@
       return;
     }
 
+    const nextPath = document.getElementById("next-path")?.value || "/";
+
     btn.disabled = true;
     btn.textContent = "נשלח...";
 
@@ -53,7 +55,7 @@
       const res = await fetch("/api/auth/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, next: nextPath }),
       });
 
       if (!res.ok) {
@@ -85,10 +87,11 @@
       hideResendMsg();
 
       try {
+        const nextPath = document.getElementById("next-path")?.value || "/";
         const res = await fetch("/api/auth/send-otp", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: lastEmail }),
+          body: JSON.stringify({ email: lastEmail, next: nextPath }),
         });
 
         if (res.status === 429) {

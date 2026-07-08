@@ -62,7 +62,7 @@ export default async function HomePage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/login");
+  if (!user) redirect("/auth/login?next=/");
 
   const [stats, topics, progressRows] = await Promise.all([
     getUserStats(supabase, user.id),

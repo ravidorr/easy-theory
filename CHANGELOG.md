@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.41] — 2026-07-08
+
+### Added
+- Magic link redirect payload: after clicking the login link, users are sent back to the page they were originally trying to reach instead of the home page
+
+---
+
 ## [0.3.38] — 2026-07-08
 
 ### Changed

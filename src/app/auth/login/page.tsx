@@ -14,7 +14,17 @@ export const metadata: Metadata = {
   },
 };
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
+  const { next } = await searchParams;
+  const safeNext =
+    typeof next === "string" && next.startsWith("/") && !next.startsWith("//")
+      ? next
+      : "/";
+
   return (
     <>
       <main className={styles.page}>
@@ -42,6 +52,7 @@ export default function LoginPage() {
           </div>
 
           <form id="login-form" className={styles.loginForm}>
+            <input type="hidden" id="next-path" value={safeNext} />
             <label className={styles.emailLabel}>
               <span className={styles.emailLabelText}>כתובת המייל שלך</span>
               <input

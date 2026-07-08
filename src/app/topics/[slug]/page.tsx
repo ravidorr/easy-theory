@@ -114,7 +114,7 @@ export default async function TopicQuizPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/login");
+  if (!user) redirect(`/auth/login?next=/topics/${slug}`);
 
   const topic = await getTopicBySlug(supabase, slug);
   if (!topic) notFound();

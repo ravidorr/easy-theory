@@ -3,9 +3,13 @@ import { createClient } from "@/lib/supabase";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
-  const { email } = await request.json();
+  const { email, next } = await request.json();
   const requestUrl = new URL(request.url);
-  const emailOrigin = `${requestUrl.origin}/auth/callback`;
+  const safeNext =
+    typeof next === "string" && next.startsWith("/") && !next.startsWith("//")
+      ? next
+      : "/";
+  const emailOrigin = `${requestUrl.origin}/auth/callback?next=${encodeURIComponent(safeNext)}`;
 
   if (!email || typeof email !== "string") {
     return NextResponse.json({ error: "כתובת מייל חסרה" }, { status: 400 });

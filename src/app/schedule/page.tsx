@@ -13,7 +13,7 @@ export default async function SchedulePage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/login");
+  if (!user) redirect("/auth/login?next=/schedule");
 
   const schedule = await getUserSchedule(supabase, user.id);
   const scheduledDays = new Set(schedule.map((s) => s.day_of_week));

@@ -15,7 +15,7 @@ export default async function ResourcesPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/login");
+  if (!user) redirect("/auth/login?next=/resources");
 
   return (
     <>

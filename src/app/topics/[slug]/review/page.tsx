@@ -100,7 +100,7 @@ export default async function ReviewPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/login");
+  if (!user) redirect(`/auth/login?next=/topics/${slug}/review`);
 
   const topic = await getTopicBySlug(supabase, slug);
   if (!topic) notFound();
