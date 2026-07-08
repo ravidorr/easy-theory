@@ -8,73 +8,74 @@
   <title>דרך ברורה · לומדים לתיאוריה בלי לחץ</title>
   <meta name="description" content="אפליקציה חינמית ללימוד מבחן התיאוריה בישראל: שאלות אמיתיות מהמאגר הרשמי, כרטיסיות תמרורים ותוכנית אישית בקצב שלך.">
   <link rel="stylesheet" href="../../styles.css">
+  <link rel="stylesheet" href="landing.css">
 </head>
-<body style="background:var(--bg); margin:0; padding:20px; display:flex; flex-direction:column; gap:28px; max-width:420px; box-sizing:border-box; min-height:100vh;">
+<body>
 
   <!-- Hero -->
-  <header style="display:flex; flex-direction:column; align-items:center; gap:14px; text-align:center; padding-top:24px;">
-    <span style="font-weight:800; font-size:var(--type-h2-size); color:var(--primary-soft-text);">דרך ברורה</span>
-    <h1 style="margin:0; font-size:var(--type-display-size); font-weight:var(--type-display-weight); line-height:var(--line-tight); color:var(--text);">לומדים לתיאוריה,<br>בלי לחץ.</h1>
-    <p style="margin:0; font-size:var(--type-body-size); color:var(--text-muted); line-height:var(--line-body); max-width:320px;">כל מה שצריך למבחן התיאוריה: שאלות אמיתיות מהמאגר הרשמי, כרטיסיות תמרורים ותוכנית שמתאימה את עצמה לקצב שלך.</p>
+  <header>
+    <span class="wordmark">דרך ברורה</span>
+    <h1>לומדים לתיאוריה,<br>בלי לחץ.</h1>
+    <p class="hero-desc">כל מה שצריך למבחן התיאוריה: שאלות אמיתיות מהמאגר הרשמי, כרטיסיות תמרורים ותוכנית שמתאימה את עצמה לקצב שלך.</p>
   </header>
 
   <!-- Login card (the action, high on the page) -->
-  <section aria-label="כניסה" style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-xl); box-shadow:var(--shadow-card); padding:20px; display:flex; flex-direction:column; gap:16px;">
-    <div style="display:flex; flex-direction:column; gap:2px;">
-      <h2 style="margin:0; font-size:var(--type-h2-size); font-weight:var(--type-h2-weight); color:var(--text);">מתחילות עכשיו</h2>
-      <span style="font-size:var(--type-small-size); color:var(--text-muted);">מתחברות עם קישור למייל, בלי סיסמה. חינם לגמרי.</span>
+  <section aria-label="כניסה" class="login-section">
+    <div class="login-section-header">
+      <h2>מתחילות עכשיו</h2>
+      <span class="login-subtitle">מתחברות עם קישור למייל, בלי סיסמה. חינם לגמרי.</span>
     </div>
-    <label style="display:flex; flex-direction:column; gap:6px;">
-      <span style="font-size:var(--type-small-size); font-weight:600; color:var(--text-muted);">כתובת המייל שלך</span>
-      <input type="email" placeholder="noa@example.com" dir="ltr" style="font-family:var(--font-ui); font-size:var(--type-body-size); color:var(--text); background:var(--surface); border:1.5px solid var(--border-strong); border-radius:var(--radius-md); padding:11px 14px; min-height:var(--hit-min); box-sizing:border-box; outline:none; text-align:left;">
+    <label>
+      <span class="label-hint">כתובת המייל שלך</span>
+      <input type="email" placeholder="noa@example.com" dir="ltr">
     </label>
-    <button style="font-family:var(--font-ui); font-weight:700; font-size:17px; min-height:52px; padding:14px 28px; border-radius:var(--radius-lg); border:1px solid transparent; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; width:100%; background:var(--primary); color:var(--text-on-primary); box-shadow:var(--shadow-press);">שלחי לי קישור</button>
+    <button>שלחי לי קישור</button>
   </section>
 
   <!-- What you get (crawlable feature content) -->
-  <section aria-label="מה מקבלים" style="display:flex; flex-direction:column; gap:12px;">
-    <h2 style="margin:0; font-size:var(--type-h2-size); font-weight:var(--type-h2-weight); color:var(--text);">מה מחכה לך בפנים</h2>
+  <section aria-label="מה מקבלים" class="features-section">
+    <h2>מה מחכה לך בפנים</h2>
 
-    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow-card); padding:16px; display:flex; align-items:center; gap:14px;">
-      <div style="width:52px; height:52px; border-radius:var(--radius-md); background:var(--surface-2); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-        <img src="../../assets/signs/sign-302-stop.png" alt="תמרור עצור" style="width:34px; height:34px; object-fit:contain;">
+    <div class="feature-card">
+      <div class="feature-icon">
+        <img src="../../assets/signs/sign-302-stop.png" alt="תמרור עצור">
       </div>
-      <div style="display:flex; flex-direction:column; gap:2px;">
-        <h3 style="margin:0; font-weight:600; font-size:var(--type-body-size); color:var(--text);">שאלות אמיתיות מהמבחן</h3>
-        <p style="margin:0; font-size:var(--type-small-size); color:var(--text-muted); line-height:var(--line-body);">כל השאלות מהמאגר הרשמי של משרד התחבורה, עם הסבר לכל תשובה.</p>
+      <div class="feature-body">
+        <h3>שאלות אמיתיות מהמבחן</h3>
+        <p>כל השאלות מהמאגר הרשמי של משרד התחבורה, עם הסבר לכל תשובה.</p>
       </div>
     </div>
 
-    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow-card); padding:16px; display:flex; align-items:center; gap:14px;">
-      <div style="width:52px; height:52px; border-radius:var(--radius-md); background:var(--surface-2); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-        <img src="../../assets/signs/sign-303-roundabout.png" alt="תמרור מעגל תנועה" style="width:34px; height:34px; object-fit:contain;">
+    <div class="feature-card">
+      <div class="feature-icon">
+        <img src="../../assets/signs/sign-303-roundabout.png" alt="תמרור מעגל תנועה">
       </div>
-      <div style="display:flex; flex-direction:column; gap:2px;">
-        <h3 style="margin:0; font-weight:600; font-size:var(--type-body-size); color:var(--text);">כרטיסיות תמרורים</h3>
-        <p style="margin:0; font-size:var(--type-small-size); color:var(--text-muted); line-height:var(--line-body);">שינון תמרורים בשיטת חזרה מרווחת, מה שלא נזכר יחזור מחר.</p>
+      <div class="feature-body">
+        <h3>כרטיסיות תמרורים</h3>
+        <p>שינון תמרורים בשיטת חזרה מרווחת, מה שלא נזכר יחזור מחר.</p>
       </div>
     </div>
 
-    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow-card); padding:16px; display:flex; align-items:center; gap:14px;">
-      <div style="width:52px; height:52px; border-radius:var(--radius-md); background:var(--primary-soft); display:flex; align-items:center; justify-content:center; flex-shrink:0; color:var(--primary-soft-text);">
+    <div class="feature-card">
+      <div class="feature-icon feature-icon--primary">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 9h18"/></svg>
       </div>
-      <div style="display:flex; flex-direction:column; gap:2px;">
-        <h3 style="margin:0; font-weight:600; font-size:var(--type-body-size); color:var(--text);">תוכנית אישית בקצב שלך</h3>
-        <p style="margin:0; font-size:var(--type-small-size); color:var(--text-muted); line-height:var(--line-body);">בימים ושעות שנוח לך, והאפליקציה בונה תוכנית עד למבחן. בלי לחץ, ובלי ספירה לאחור.</p>
+      <div class="feature-body">
+        <h3>תוכנית אישית בקצב שלך</h3>
+        <p>בימים ושעות שנוח לך, והאפליקציה בונה תוכנית עד למבחן. בלי לחץ, ובלי ספירה לאחור.</p>
       </div>
     </div>
   </section>
 
   <!-- Reassurance strip -->
-  <section aria-label="בקצרה" style="background:var(--primary-soft); border-radius:var(--radius-xl); padding:18px 20px; display:flex; flex-direction:column; gap:4px; text-align:center;">
-    <span style="font-weight:600; font-size:var(--type-body-size); color:var(--primary-soft-text);">חינם, בעברית, בגובה העיניים.</span>
-    <span style="font-size:var(--type-small-size); color:var(--text-muted); line-height:var(--line-body);">נבנה בשביל הנהגות והנהגים שבדרך.</span>
+  <section aria-label="בקצרה" class="reassurance">
+    <span class="reassurance-title">חינם, בעברית, בגובה העיניים.</span>
+    <span class="reassurance-sub">נבנה בשביל הנהגות והנהגים שבדרך.</span>
   </section>
 
-  <footer style="margin-top:auto; padding-bottom:8px; display:flex; flex-direction:column; gap:2px; text-align:center;">
-    <span style="font-size:var(--type-caption-size); color:var(--text-faint);">ClearRoad · דרך ברורה</span>
-    <span style="font-size:var(--type-caption-size); color:var(--text-faint);">לימוד לתיאוריה לרכב פרטי בישראל</span>
+  <footer>
+    <span>ClearRoad · דרך ברורה</span>
+    <span>לימוד לתיאוריה לרכב פרטי בישראל</span>
   </footer>
 
 </body></html>

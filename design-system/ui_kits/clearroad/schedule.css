@@ -1,0 +1,222 @@
+body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 420px;
+  box-sizing: border-box;
+  min-height: 100vh;
+}
+
+h1 {
+  margin: 0;
+  font-size: var(--type-h1-size);
+  font-weight: var(--type-h1-weight);
+  line-height: var(--line-tight);
+  color: var(--text);
+}
+
+h2 {
+  margin: 0;
+  font-size: var(--type-h2-size);
+  font-weight: var(--type-h2-weight);
+  color: var(--text);
+}
+
+.page-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.page-subtitle {
+  font-size: var(--type-small-size);
+  color: var(--text-muted);
+}
+
+.week-strip {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.week-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.week-day-label {
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  color: var(--text-faint);
+}
+
+.week-day-label--current {
+  color: var(--primary-soft-text);
+}
+
+.week-step {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.week-step--done {
+  background: var(--primary);
+  color: #fff;
+}
+
+.week-step--current {
+  background: var(--surface);
+  color: var(--primary-soft-text);
+  border: 3px solid var(--primary);
+}
+
+.week-step--future {
+  background: var(--surface-2);
+  color: var(--text-faint);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.task-row {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.task-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.task-name {
+  font-weight: 600;
+  font-size: var(--type-body-size);
+  color: var(--text);
+}
+
+.task-sub {
+  font-size: var(--type-small-size);
+  color: var(--text-muted);
+}
+
+.time-badge {
+  background: var(--primary-soft);
+  color: var(--primary-soft-text);
+  border-radius: var(--radius-sm);
+  padding: 3px 10px;
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  flex-shrink: 0;
+}
+
+.medals-row {
+  display: flex;
+  justify-content: space-around;
+  gap: 8px;
+}
+
+.medal {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 88px;
+}
+
+.medal-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--gold-soft);
+  color: var(--gold-text);
+  border: 3px solid var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-card);
+}
+
+.medal-icon--locked {
+  background: var(--surface-2);
+  color: var(--text-faint);
+  border-color: var(--surface-3);
+  box-shadow: none;
+}
+
+.medal-icon--locked span {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.medal-label {
+  font-size: var(--type-caption-size);
+  font-weight: 600;
+  text-align: center;
+  color: var(--text);
+  line-height: 1.35;
+}
+
+.medal-label--locked {
+  color: var(--text-faint);
+}
+
+.exam-banner {
+  background: var(--primary-soft);
+  border-radius: var(--radius-xl);
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.exam-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.exam-label {
+  font-weight: 600;
+  font-size: var(--type-body-size);
+  color: var(--primary-soft-text);
+}
+
+.exam-sub {
+  font-size: var(--type-small-size);
+  color: var(--text-muted);
+}
+
+.exam-date {
+  font-weight: 800;
+  font-size: var(--type-h2-size);
+  color: var(--primary-soft-text);
+  flex-shrink: 0;
+}

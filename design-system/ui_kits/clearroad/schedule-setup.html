@@ -1,58 +1,58 @@
 <!-- @dsCard group="Screens" viewport="420x900" subtitle="בחירת ימים ושעות, טופס הגדרה" name="Schedule Setup · קביעת התוכנית" -->
 <!DOCTYPE html>
-<html lang="he" dir="rtl"><head><meta charset="utf-8"><title>ClearRoad – Schedule Setup</title><link rel="stylesheet" href="../../styles.css"></head>
-<body style="background:var(--bg); margin:0; padding:20px; display:flex; flex-direction:column; gap:20px; max-width:420px; box-sizing:border-box; min-height:100vh;">
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><title>ClearRoad – Schedule Setup</title><link rel="stylesheet" href="../../styles.css"><link rel="stylesheet" href="schedule-setup.css"></head>
+<body>
 
   <!-- Header -->
-  <div style="display:flex; flex-direction:column; gap:4px;">
-    <h1 style="margin:0; font-size:var(--type-h1-size); font-weight:var(--type-h1-weight); line-height:var(--line-tight); color:var(--text);">מתי נוח לך ללמוד?</h1>
-    <span style="font-size:var(--type-small-size); color:var(--text-muted); line-height:var(--line-body);">בוחרות ימים ושעה, ואפשר לשנות מתי שרוצים.</span>
+  <div class="page-header">
+    <h1>מתי נוח לך ללמוד?</h1>
+    <span class="page-subtitle">בוחרות ימים ושעה, ואפשר לשנות מתי שרוצים.</span>
   </div>
 
   <!-- Day picker -->
-  <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-xl); box-shadow:var(--shadow-card); padding:20px; display:flex; flex-direction:column; gap:14px;">
-    <span style="font-size:var(--type-small-size); font-weight:600; color:var(--text-muted);">באילו ימים?</span>
-    <div style="display:flex; justify-content:space-between; gap:4px;">
-      <button style="width:44px; height:44px; border-radius:50%; border:1px solid transparent; font-family:var(--font-ui); font-weight:700; font-size:15px; cursor:pointer; background:var(--primary); color:#fff; box-shadow:var(--shadow-card);">א</button>
-      <button style="width:44px; height:44px; border-radius:50%; border:1px solid var(--border-strong); font-family:var(--font-ui); font-weight:600; font-size:15px; cursor:pointer; background:var(--surface); color:var(--text-muted);">ב</button>
-      <button style="width:44px; height:44px; border-radius:50%; border:1px solid transparent; font-family:var(--font-ui); font-weight:700; font-size:15px; cursor:pointer; background:var(--primary); color:#fff; box-shadow:var(--shadow-card);">ג</button>
-      <button style="width:44px; height:44px; border-radius:50%; border:1px solid var(--border-strong); font-family:var(--font-ui); font-weight:600; font-size:15px; cursor:pointer; background:var(--surface); color:var(--text-muted);">ד</button>
-      <button style="width:44px; height:44px; border-radius:50%; border:1px solid transparent; font-family:var(--font-ui); font-weight:700; font-size:15px; cursor:pointer; background:var(--primary); color:#fff; box-shadow:var(--shadow-card);">ה</button>
-      <button style="width:44px; height:44px; border-radius:50%; border:1px solid var(--border-strong); font-family:var(--font-ui); font-weight:600; font-size:15px; cursor:pointer; background:var(--surface); color:var(--text-muted);">ו</button>
-      <button style="width:44px; height:44px; border-radius:50%; border:1px solid var(--border-strong); font-family:var(--font-ui); font-weight:600; font-size:15px; cursor:pointer; background:var(--surface); color:var(--text-muted);">ש</button>
+  <div class="card">
+    <span class="card-label">באילו ימים?</span>
+    <div class="day-picker">
+      <button class="btn-day btn-day--active">א</button>
+      <button class="btn-day btn-day--inactive">ב</button>
+      <button class="btn-day btn-day--active">ג</button>
+      <button class="btn-day btn-day--inactive">ד</button>
+      <button class="btn-day btn-day--active">ה</button>
+      <button class="btn-day btn-day--inactive">ו</button>
+      <button class="btn-day btn-day--inactive">ש</button>
     </div>
-    <span style="font-size:var(--type-caption-size); font-weight:var(--type-caption-weight); color:var(--text-faint);">נבחרו 3 ימים</span>
+    <span class="day-count">נבחרו 3 ימים</span>
   </div>
 
   <!-- Time + duration -->
-  <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-xl); box-shadow:var(--shadow-card); padding:20px; display:flex; flex-direction:column; gap:16px;">
-    <label style="display:flex; flex-direction:column; gap:6px;">
-      <span style="font-size:var(--type-small-size); font-weight:600; color:var(--text-muted);">באיזו שעה?</span>
-      <input type="time" value="17:00" style="font-family:var(--font-ui); font-size:var(--type-body-size); color:var(--text); background:var(--surface); border:1.5px solid var(--border-strong); border-radius:var(--radius-md); padding:11px 14px; min-height:var(--hit-min); box-sizing:border-box; outline:none;">
+  <div class="card card--time">
+    <label>
+      <span class="label-hint">באיזו שעה?</span>
+      <input type="time" value="17:00">
     </label>
-    <div style="display:flex; flex-direction:column; gap:8px;">
-      <span style="font-size:var(--type-small-size); font-weight:600; color:var(--text-muted);">כמה זמן בכל פעם?</span>
-      <div style="display:flex; gap:8px;">
-        <button style="flex:1; min-height:var(--hit-min); border-radius:var(--radius-pill); border:1px solid var(--border-strong); font-family:var(--font-ui); font-weight:600; font-size:14px; cursor:pointer; background:var(--surface); color:var(--text-muted);">30 דק׳</button>
-        <button style="flex:1; min-height:var(--hit-min); border-radius:var(--radius-pill); border:1px solid transparent; font-family:var(--font-ui); font-weight:700; font-size:14px; cursor:pointer; background:var(--primary); color:#fff; box-shadow:var(--shadow-card);">45 דק׳</button>
-        <button style="flex:1; min-height:var(--hit-min); border-radius:var(--radius-pill); border:1px solid var(--border-strong); font-family:var(--font-ui); font-weight:600; font-size:14px; cursor:pointer; background:var(--surface); color:var(--text-muted);">60 דק׳</button>
+    <div class="duration-group">
+      <span class="label-hint">כמה זמן בכל פעם?</span>
+      <div class="duration-buttons">
+        <button class="btn-duration btn-duration--inactive">30 דק׳</button>
+        <button class="btn-duration btn-duration--active">45 דק׳</button>
+        <button class="btn-duration btn-duration--inactive">60 דק׳</button>
       </div>
     </div>
-    <label style="display:inline-flex; align-items:center; gap:10px; cursor:pointer; min-height:var(--hit-min);">
-      <span role="switch" aria-checked="true" style="width:46px; height:28px; border-radius:var(--radius-pill); position:relative; background:var(--primary); flex-shrink:0; display:inline-block;">
-        <span style="position:absolute; top:3px; inset-inline-start:21px; width:22px; height:22px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(24,32,60,0.25);"></span>
+    <label class="label-toggle">
+      <span role="switch" aria-checked="true" class="toggle">
+        <span class="toggle-thumb"></span>
       </span>
-      <span style="font-size:var(--type-body-size); color:var(--text);">תזכורת עדינה לפני כל מפגש</span>
+      <span class="toggle-text">תזכורת עדינה לפני כל מפגש</span>
     </label>
   </div>
 
   <!-- Summary + save -->
-  <div style="margin-top:auto; display:flex; flex-direction:column; gap:14px;">
-    <div style="background:var(--primary-soft); border-radius:var(--radius-lg); padding:14px 16px; display:flex; flex-direction:column; gap:2px;">
-      <span style="font-size:var(--type-body-size); font-weight:600; color:var(--primary-soft-text);">3 מפגשים בשבוע, 45 דק׳ כל אחד</span>
-      <span style="font-size:var(--type-small-size); color:var(--text-muted); line-height:var(--line-body);">קצב נעים שמספיק בדיוק לחומר.</span>
+  <div class="form-footer">
+    <div class="schedule-summary">
+      <span class="summary-title">3 מפגשים בשבוע, 45 דק׳ כל אחד</span>
+      <span class="summary-sub">קצב נעים שמספיק בדיוק לחומר.</span>
     </div>
-    <button style="font-family:var(--font-ui); font-weight:700; font-size:17px; min-height:52px; padding:14px 28px; border-radius:var(--radius-lg); border:1px solid transparent; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; width:100%; background:var(--primary); color:var(--text-on-primary); box-shadow:var(--shadow-press);">שמרי את התוכנית</button>
+    <button class="btn-save">שמרי את התוכנית</button>
   </div>
 
 </body></html>

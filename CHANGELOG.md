@@ -6,6 +6,19 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ---
 
+## [0.3.26] — 2026-07-08
+
+### Changed
+- Design system: extracted all inline `style="..."` attributes from 17 HTML files (6 guideline swatches + 11 UI kit screen mockups) into companion `.css` files — one per HTML file
+- CSS strategy: element selectors (`h1`, `h2`, `button`, `input`, `nav a`, etc.) for semantic elements; classes for layout containers and variants
+- `medal-earned.html`: moved embedded `<style>` block (`@keyframes medal-pop`) into `medal-earned.css`
+- Replaced hardcoded `12px` font sizes with `var(--type-caption-size)` and `20px` wordmark with `var(--type-h2-size)` across guideline and UI kit CSS files
+- Expanded all compact single-line CSS variant rules (swatch modifiers, `@keyframes` steps) to multi-line blocks; `rgba()` converted to modern `rgb()` notation
+- Stylelint: added BEM `--` modifier support to `selector-class-pattern`
+- TODO: added SVG sprite and CSS Modules tasks under a new Design System section
+
+---
+
 ## [0.3.24] — 2026-07-08
 
 ### Changed

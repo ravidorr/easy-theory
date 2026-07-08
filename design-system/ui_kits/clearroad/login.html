@@ -1,40 +1,40 @@
 <!-- @dsCard group="Screens" viewport="420x900" subtitle="כניסה עם קישור במייל, בלי סיסמה" name="Login · כניסה" -->
 <!DOCTYPE html>
-<html lang="he" dir="rtl"><head><meta charset="utf-8"><title>ClearRoad – Login</title><link rel="stylesheet" href="../../styles.css"></head>
-<body style="background:var(--bg); margin:0; padding:20px; display:flex; flex-direction:column; max-width:420px; box-sizing:border-box; min-height:100vh;">
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><title>ClearRoad – Login</title><link rel="stylesheet" href="../../styles.css"><link rel="stylesheet" href="login.css"></head>
+<body>
 
   <!-- Centered login card -->
-  <div style="flex:1; display:flex; flex-direction:column; justify-content:center; gap:24px;">
+  <div class="login-content">
 
     <!-- Wordmark + welcome -->
-    <div style="display:flex; flex-direction:column; align-items:center; gap:12px; text-align:center;">
-      <span style="font-weight:800; font-size:var(--type-display-size); color:var(--primary-soft-text);">דרך ברורה</span>
-      <div style="display:flex; flex-direction:column; gap:4px;">
-        <h1 style="margin:0; font-size:var(--type-h1-size); font-weight:var(--type-h1-weight); line-height:var(--line-tight); color:var(--text);">טוב שבאת!</h1>
-        <span style="font-size:var(--type-small-size); color:var(--text-muted); line-height:var(--line-body);">מתחברות עם קישור למייל, בלי סיסמה.</span>
+    <div class="login-header">
+      <span class="wordmark">דרך ברורה</span>
+      <div class="login-title-group">
+        <h1>טוב שבאת!</h1>
+        <span class="login-subtitle">מתחברות עם קישור למייל, בלי סיסמה.</span>
       </div>
     </div>
 
     <!-- Email form card -->
-    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-xl); box-shadow:var(--shadow-card); padding:20px; display:flex; flex-direction:column; gap:16px;">
-      <label style="display:flex; flex-direction:column; gap:6px;">
-        <span style="font-size:var(--type-small-size); font-weight:600; color:var(--text-muted);">כתובת המייל שלך</span>
-        <input type="email" placeholder="noa@example.com" dir="ltr" style="font-family:var(--font-ui); font-size:var(--type-body-size); color:var(--text); background:var(--surface); border:1.5px solid var(--border-strong); border-radius:var(--radius-md); padding:11px 14px; min-height:var(--hit-min); box-sizing:border-box; outline:none; text-align:left;">
+    <div class="login-card">
+      <label>
+        <span class="label-hint">כתובת המייל שלך</span>
+        <input type="email" placeholder="noa@example.com" dir="ltr">
       </label>
-      <button style="font-family:var(--font-ui); font-weight:700; font-size:17px; min-height:52px; padding:14px 28px; border-radius:var(--radius-lg); border:1px solid transparent; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; width:100%; background:var(--primary); color:var(--text-on-primary); box-shadow:var(--shadow-press);">שלחי לי קישור</button>
+      <button>שלחי לי קישור</button>
     </div>
 
     <!-- Sent state (shown after submit; hidden by default in app) -->
-    <div style="background:var(--success-soft); border-radius:var(--radius-lg); padding:14px 16px; display:flex; align-items:center; gap:12px;">
-      <span style="width:28px; height:28px; border-radius:50%; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; background:var(--success); color:#fff;">✓</span>
-      <div style="display:flex; flex-direction:column; gap:2px;">
-        <span style="font-size:var(--type-body-size); font-weight:600; color:var(--success-text);">הקישור בדרך אלייך</span>
-        <span style="font-size:var(--type-small-size); color:var(--text-muted); line-height:var(--line-body);">בדקי את המייל ולחצי על הקישור כדי להיכנס.</span>
+    <div class="login-sent">
+      <span class="sent-icon">✓</span>
+      <div class="sent-body">
+        <span class="sent-title">הקישור בדרך אלייך</span>
+        <span class="sent-hint">בדקי את המייל ולחצי על הקישור כדי להיכנס.</span>
       </div>
     </div>
 
   </div>
 
-  <span style="font-size:var(--type-caption-size); color:var(--text-faint); text-align:center; padding-bottom:8px;">ClearRoad</span>
+  <span class="login-footer">ClearRoad</span>
 
 </body></html>
