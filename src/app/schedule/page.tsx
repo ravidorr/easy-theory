@@ -3,6 +3,7 @@ import Link from "next/link";
 import Script from "next/script";
 import { createClient } from "@/lib/supabase";
 import { getUserSchedule } from "@/lib/db";
+import styles from "./page.module.css";
 
 const DAYS = ["א", "ב", "ג", "ד", "ה", "ו", "ש"];
 const DURATIONS = [30, 45, 60];
@@ -22,172 +23,66 @@ export default async function SchedulePage() {
 
   return (
     <>
-      <main
-        style={{
-          background: "var(--bg)",
-          padding: "20px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "20px",
-          maxWidth: "440px",
-          margin: "0 auto",
-          minHeight: "100vh",
-          boxSizing: "border-box",
-        }}
-      >
+      <main className={styles.page}>
         {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-          <Link
-            href="/more"
-            style={{
-              width: "44px",
-              height: "44px",
-              borderRadius: "50%",
-              border: "1px solid var(--border-strong)",
-              background: "var(--surface)",
-              color: "var(--text-muted)",
-              fontSize: "20px",
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              textDecoration: "none",
-              flexShrink: 0,
-            }}
-          >
+        <div className={styles.topBar}>
+          <Link href="/more" className={styles.backBtn}>
             →
           </Link>
-          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-            <h1
-              style={{
-                margin: 0,
-                fontSize: "var(--type-h1-size)",
-                fontWeight: "var(--type-h1-weight)" as never,
-                lineHeight: "var(--line-tight)",
-                color: "var(--text)",
-              }}
-            >
-              מתי נוח לך ללמוד?
-            </h1>
-            <span style={{ fontSize: "var(--type-small-size)", color: "var(--text-muted)", lineHeight: "var(--line-body)" }}>
+          <div className={styles.titleCol}>
+            <h1>מתי נוח לך ללמוד?</h1>
+            <span className={styles.subtitle}>
               בוחרות ימים ושעה, ואפשר לשנות מתי שרוצות.
             </span>
           </div>
         </div>
 
         {/* Day picker */}
-        <div
-          style={{
-            background: "var(--surface)",
-            border: "1px solid var(--border)",
-            borderRadius: "var(--radius-xl)",
-            boxShadow: "var(--shadow-card)",
-            padding: "20px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "14px",
-          }}
-        >
-          <span style={{ fontSize: "var(--type-small-size)", fontWeight: 600, color: "var(--text-muted)" }}>
-            באילו ימים?
-          </span>
-          <div id="day-picker" style={{ display: "flex", justifyContent: "space-between", gap: "4px" }}>
+        <div className={styles.card}>
+          <span className={styles.cardLabel}>באילו ימים?</span>
+          <div id="day-picker" className={styles.dayRow}>
             {DAYS.map((label, i) => {
               const selected = scheduledDays.has(i);
               return (
                 <button
                   key={i}
-                  className="day-btn"
+                  className={`day-btn ${styles.btnDay} ${selected ? styles.btnDaySelected : ""}`}
                   data-day={i}
                   data-selected={selected ? "true" : "false"}
-                  style={{
-                    width: "44px",
-                    height: "44px",
-                    borderRadius: "50%",
-                    border: selected ? "1px solid transparent" : "1px solid var(--border-strong)",
-                    fontFamily: "var(--font-ui)",
-                    fontWeight: selected ? 700 : 600,
-                    fontSize: "15px",
-                    cursor: "pointer",
-                    background: selected ? "var(--primary)" : "var(--surface)",
-                    color: selected ? "#fff" : "var(--text-muted)",
-                    boxShadow: selected ? "var(--shadow-card)" : "none",
-                    transition: "background 120ms, color 120ms, border-color 120ms",
-                  }}
                 >
                   {label}
                 </button>
               );
             })}
           </div>
-          <span id="days-label" style={{ fontSize: "var(--type-caption-size)", fontWeight: "var(--type-caption-weight)" as never, color: "var(--text-faint)" }}>
+          <span id="days-label" className={styles.daysLabel}>
             {scheduledDays.size > 0 ? `נבחרו ${scheduledDays.size} ימים` : "טרם נבחרו ימים"}
           </span>
         </div>
 
         {/* Time + duration */}
-        <div
-          style={{
-            background: "var(--surface)",
-            border: "1px solid var(--border)",
-            borderRadius: "var(--radius-xl)",
-            boxShadow: "var(--shadow-card)",
-            padding: "20px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "16px",
-          }}
-        >
-          <label style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-            <span style={{ fontSize: "var(--type-small-size)", fontWeight: 600, color: "var(--text-muted)" }}>
-              באיזו שעה?
-            </span>
+        <div className={styles.timeCard}>
+          <label className={styles.timeLabel}>
+            <span className={styles.cardLabel}>באיזו שעה?</span>
             <input
               type="time"
               id="time-input"
               defaultValue={startTime.slice(0, 5)}
-              style={{
-                fontFamily: "var(--font-ui)",
-                fontSize: "var(--type-body-size)",
-                color: "var(--text)",
-                background: "var(--surface)",
-                border: "1.5px solid var(--border-strong)",
-                borderRadius: "var(--radius-md)",
-                padding: "11px 14px",
-                minHeight: "var(--hit-min)",
-                boxSizing: "border-box",
-                outline: "none",
-                width: "100%",
-              }}
+              className={styles.timeInput}
             />
           </label>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            <span style={{ fontSize: "var(--type-small-size)", fontWeight: 600, color: "var(--text-muted)" }}>
-              כמה זמן בכל פעם?
-            </span>
-            <div id="duration-picker" style={{ display: "flex", gap: "8px" }}>
+          <div className={styles.durationWrapper}>
+            <span className={styles.cardLabel}>כמה זמן בכל פעם?</span>
+            <div id="duration-picker" className={styles.durationRow}>
               {DURATIONS.map((d) => {
                 const active = d === duration;
                 return (
                   <button
                     key={d}
-                    className="duration-btn"
+                    className={`duration-btn ${styles.btnDuration} ${active ? styles.btnDurationActive : ""}`}
                     data-duration={d}
                     data-selected={active ? "true" : "false"}
-                    style={{
-                      flex: 1,
-                      minHeight: "var(--hit-min)",
-                      borderRadius: "var(--radius-pill)",
-                      border: active ? "1px solid transparent" : "1px solid var(--border-strong)",
-                      fontFamily: "var(--font-ui)",
-                      fontWeight: active ? 700 : 600,
-                      fontSize: "14px",
-                      cursor: "pointer",
-                      background: active ? "var(--primary)" : "var(--surface)",
-                      color: active ? "#fff" : "var(--text-muted)",
-                      boxShadow: active ? "var(--shadow-card)" : "none",
-                      transition: "background 120ms",
-                    }}
                   >
                     {d} דק׳
                   </button>
@@ -197,68 +92,29 @@ export default async function SchedulePage() {
           </div>
 
           {/* Notification toggle */}
-          <label style={{ display: "inline-flex", alignItems: "center", gap: "10px", cursor: "pointer", minHeight: "var(--hit-min)" }}>
+          <label className={styles.notifyLabel}>
             <span
               id="notify-toggle"
               role="switch"
               aria-checked={notify ? "true" : "false"}
               data-on={notify ? "true" : "false"}
-              style={{
-                width: "46px",
-                height: "28px",
-                borderRadius: "var(--radius-pill)",
-                position: "relative",
-                background: notify ? "var(--primary)" : "var(--surface-3)",
-                flexShrink: 0,
-                display: "inline-block",
-                transition: "background 150ms",
-                cursor: "pointer",
-              }}
+              className={`${styles.toggle} ${notify ? styles.toggleOn : ""}`}
             >
-              <span
-                style={{
-                  position: "absolute",
-                  top: "3px",
-                  insetInlineStart: notify ? "21px" : "3px",
-                  width: "22px",
-                  height: "22px",
-                  borderRadius: "50%",
-                  background: "#fff",
-                  boxShadow: "0 1px 3px rgba(24,32,60,0.25)",
-                  transition: "inset-inline-start 150ms",
-                }}
-              />
+              <span className={`${styles.toggleThumb} ${notify ? styles.toggleThumbOn : ""}`} />
             </span>
-            <span style={{ fontSize: "var(--type-body-size)", color: "var(--text)" }}>
-              תזכורת עדינה לפני כל מפגש
-            </span>
+            <span className={styles.notifyText}>תזכורת עדינה לפני כל מפגש</span>
           </label>
         </div>
 
         {/* Summary + save */}
-        <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: "14px" }}>
-          <div
-            id="schedule-summary"
-            style={{
-              background: "var(--primary-soft)",
-              borderRadius: "var(--radius-lg)",
-              padding: "14px 16px",
-              display: "flex",
-              flexDirection: "column",
-              gap: "2px",
-            }}
-          >
-            <span
-              id="summary-text"
-              style={{ fontSize: "var(--type-body-size)", fontWeight: 600, color: "var(--primary-soft-text)" }}
-            >
+        <div className={styles.saveArea}>
+          <div id="schedule-summary" className={styles.summaryCard}>
+            <span id="summary-text" className={styles.summaryText}>
               {scheduledDays.size > 0
                 ? `${scheduledDays.size} מפגשים בשבוע, ${duration} דק׳ כל אחד`
                 : "בחרי ימים כדי להתחיל"}
             </span>
-            <span style={{ fontSize: "var(--type-small-size)", color: "var(--text-muted)", lineHeight: "var(--line-body)" }}>
-              קצב נעים שמספיק בדיוק לחומר.
-            </span>
+            <span className={styles.summaryHint}>קצב נעים שמספיק בדיוק לחומר.</span>
           </div>
           <button id="save-schedule-btn" className="btn-primary">
             שמרי את התוכנית

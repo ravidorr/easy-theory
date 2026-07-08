@@ -1,0 +1,133 @@
+.page {
+  background: var(--bg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 440px;
+  margin: 0 auto;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.backBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.topBarBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.topBarTitle {
+  font-weight: 600;
+  font-size: var(--type-body-size);
+  color: var(--text);
+}
+
+.topBarCount {
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  color: var(--text-faint);
+}
+
+.progressTrack {
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--gold);
+  transition: width 300ms ease;
+}
+
+.cardsContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.flashcardItem {
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+.actionsRow {
+  display: flex;
+  gap: 12px;
+}
+
+.btnYes {
+  flex: 1;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 15.5px;
+  min-height: 52px;
+  padding: 10px 22px;
+  border-radius: var(--radius-lg);
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--success);
+  color: #fff;
+  transition: background 120ms;
+}
+
+.btnSecondaryFlex {
+  flex: 1;
+}
+
+.footerNote {
+  font-size: var(--type-small-size);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.flashcardHint {
+  font-size: var(--type-caption-size);
+  font-weight: 600;
+  color: var(--text-faint);
+}
+
+.signNumberBadge {
+  font-size: var(--type-caption-size);
+  color: var(--text-faint);
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  padding: 2px 8px;
+}
+
+.flashcardBackH2 {
+  margin: 0;
+  font-size: var(--type-h2-size);
+  font-weight: var(--type-h2-weight);
+  color: var(--text);
+  line-height: var(--line-tight);
+  text-align: center;
+}

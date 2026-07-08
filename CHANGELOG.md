@@ -6,6 +6,18 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ---
 
+## [0.3.27] — 2026-07-08
+
+### Changed
+- Extracted all `style={{...}}` inline styles from 11 TSX files in `src/` into co-located `.module.css` files
+- Static styles become CSS classes; binary state toggles (`isActive`, `done`, `earned`, `isDark`, `selected`) become base + modifier class pairs
+- Truly dynamic values (`width: \`${pct}%\``, JS-managed display toggling) stay as inline styles
+- Added `aria-current="page"` on active TabBar links in place of inline `fontWeight`
+- Fixed `.page .optionStatic { cursor: default }` specificity override for review page quiz options (beats global `.quiz-option`)
+- Added `data-active` attribute on active PathProgress step nodes to allow reliable test assertions
+
+---
+
 ## [0.3.26] — 2026-07-08
 
 ### Changed

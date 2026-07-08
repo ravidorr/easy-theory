@@ -6,6 +6,7 @@ import { SignImage } from "@/components/SignImage";
 import { createClient } from "@/lib/supabase";
 import { getTopicBySlug, getMistakesForTopic } from "@/lib/db";
 import type { QuizMistake } from "@/lib/db";
+import styles from "./page.module.css";
 
 function resolveImageUrl(url: string | null | undefined): string | null {
   if (!url) return null;
@@ -35,70 +36,23 @@ function QuestionReview({ question }: { question: QuizMistake }) {
   const isWide = imageUrl && imageUrl !== "__placeholder__" && !imageUrl.includes("sign-");
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "16px",
-        padding: "20px",
-        background: "var(--surface)",
-        border: "1px solid var(--border)",
-        borderRadius: "var(--radius-xl)",
-        boxShadow: "var(--shadow-card)",
-      }}
-    >
+    <div className={styles.questionCard}>
       {imageUrl && imageUrl !== "__placeholder__" && (
         isWide ? (
-          <div
-            style={{
-              width: "100%",
-              borderRadius: "var(--radius-lg)",
-              background: "var(--surface-2)",
-              border: "1px solid var(--border)",
-              overflow: "hidden",
-              aspectRatio: "16/9",
-            }}
-          >
+          <div className={styles.imgWide}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={imageUrl}
-              alt=""
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-            />
+            <img src={imageUrl} alt="" className={styles.imgEl} />
           </div>
         ) : (
-          <div
-            style={{
-              width: "120px",
-              height: "120px",
-              borderRadius: "var(--radius-lg)",
-              background: "var(--surface-2)",
-              border: "1px solid var(--border)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              alignSelf: "center",
-            }}
-          >
+          <div className={styles.imgSquare}>
             <SignImage src={imageUrl!} size="md" style={{ width: "88px", height: "88px" }} />
           </div>
         )
       )}
 
-      <h3
-        style={{
-          margin: 0,
-          fontSize: "var(--type-body-size)",
-          fontWeight: "var(--type-h2-weight)" as never,
-          lineHeight: "var(--line-body)",
-          color: "var(--text)",
-          textAlign: "center",
-        }}
-      >
-        {question.question_he}
-      </h3>
+      <h3>{question.question_he}</h3>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+      <div className={styles.optionsList}>
         {options.map(([key, text], i) => {
           const optionSignImg = resolveOptionSignImage(text);
           const state =
@@ -111,29 +65,17 @@ function QuestionReview({ question }: { question: QuizMistake }) {
           return (
             <div
               key={key}
-              className="quiz-option"
+              className={`quiz-option ${styles.optionStatic}`}
               data-state={state}
-              style={{ cursor: "default" }}
             >
               <span className="quiz-option-badge">{LETTERS[i]}</span>
               {optionSignImg ? (
-                <span style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1 }}>
+                <span className={styles.optionSignContent}>
                   <SignImage src={optionSignImg} size="sm" />
-                  <span style={{ fontSize: "var(--type-small-size)", color: "var(--text-muted)" }}>
-                    {text}
-                  </span>
+                  <span className={styles.optionSignLabel}>{text}</span>
                 </span>
               ) : (
-                <span
-                  style={{
-                    fontSize: "var(--type-body-size)",
-                    lineHeight: "var(--line-body)",
-                    color: "var(--text)",
-                    flex: 1,
-                  }}
-                >
-                  {text}
-                </span>
+                <span className={styles.optionTextContent}>{text}</span>
               )}
               {state === "correct" && question.explanation_he && (
                 <span className="quiz-option-explanation">
@@ -166,98 +108,33 @@ export default async function ReviewPage({
   const mistakes = await getMistakesForTopic(supabase, user.id, topic.id);
 
   return (
-    <main
-      style={{
-        background: "var(--bg)",
-        padding: "20px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "20px",
-        maxWidth: "440px",
-        margin: "0 auto",
-        minHeight: "100vh",
-        boxSizing: "border-box",
-      }}
-    >
+    <main className={styles.page}>
       {/* Top bar */}
-      <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-        <Link
-          href={`/topics/${slug}`}
-          style={{
-            width: "44px",
-            height: "44px",
-            borderRadius: "50%",
-            border: "1px solid var(--border-strong)",
-            background: "var(--surface)",
-            color: "var(--text-muted)",
-            fontSize: "18px",
-            cursor: "pointer",
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-            textDecoration: "none",
-          }}
-        >
+      <div className={styles.topBar}>
+        <Link href={`/topics/${slug}`} className={styles.closeBtn}>
           ✕
         </Link>
-        <h1
-          style={{
-            margin: 0,
-            fontSize: "var(--type-h2-size)",
-            fontWeight: "var(--type-h2-weight)" as never,
-            color: "var(--text)",
-          }}
-        >
-          סקירת טעויות
-        </h1>
+        <h1>סקירת טעויות</h1>
       </div>
 
       {mistakes.length === 0 ? (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "16px",
-            padding: "60px 0",
-            textAlign: "center",
-          }}
-        >
-          <span style={{ fontSize: "48px" }}>🎉</span>
-          <p
-            style={{
-              margin: 0,
-              fontSize: "var(--type-body-size)",
-              color: "var(--text-muted)",
-            }}
-          >
-            אין טעויות! עשית הכל נכון
-          </p>
+        <div className={styles.emptyState}>
+          <span className={styles.emptyEmoji}>🎉</span>
+          <p className={styles.emptyHint}>אין טעויות! עשית הכל נכון</p>
           <Link href="/">
-            <button className="btn-primary" style={{ minWidth: "180px" }}>
-              חזרה לבית
-            </button>
+            <button className={`btn-primary ${styles.btnWide}`}>חזרה לבית</button>
           </Link>
         </div>
       ) : (
         <>
-          <p
-            style={{
-              margin: 0,
-              fontSize: "var(--type-small-size)",
-              color: "var(--text-muted)",
-            }}
-          >
+          <p className={styles.mistakeCount}>
             {mistakes.length === 1 ? "שאלה אחת שגית" : `${mistakes.length} שאלות שגית`}
           </p>
           {mistakes.map((mistake) => (
             <QuestionReview key={mistake.id} question={mistake} />
           ))}
-          <Link href="/" style={{ marginTop: "8px" }}>
-            <button className="btn-primary" style={{ width: "100%" }}>
-              חזרה לבית
-            </button>
+          <Link href="/" className={styles.returnLink}>
+            <button className={`btn-primary ${styles.btnFull}`}>חזרה לבית</button>
           </Link>
         </>
       )}

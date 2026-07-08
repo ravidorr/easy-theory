@@ -24,11 +24,11 @@ describe("TabBar", () => {
     }
   });
 
-  it("applies bold font weight only to the active tab label", () => {
+  it("marks only the active tab with aria-current", () => {
     render(<TabBar active="topics" />);
-    expect(screen.getByText("נושאים")).toHaveStyle({ fontWeight: 700 });
-    expect(screen.getByText("הבית")).toHaveStyle({ fontWeight: 600 });
-    expect(screen.getByText("כרטיסיות")).toHaveStyle({ fontWeight: 600 });
-    expect(screen.getByText("עוד")).toHaveStyle({ fontWeight: 600 });
+    expect(screen.getByText("נושאים").closest("a")).toHaveAttribute("aria-current", "page");
+    expect(screen.getByText("הבית").closest("a")).not.toHaveAttribute("aria-current");
+    expect(screen.getByText("כרטיסיות").closest("a")).not.toHaveAttribute("aria-current");
+    expect(screen.getByText("עוד").closest("a")).not.toHaveAttribute("aria-current");
   });
 });
