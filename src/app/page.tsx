@@ -176,6 +176,9 @@ export default async function HomePage() {
                       {done ? "✓ הושלם" : pct > 0 ? `${pct}%` : "טרם התחלת"}
                     </span>
                   </div>
+                  {topic.description_he && (
+                    <span className={styles.topicDesc}>{topic.description_he}</span>
+                  )}
                   <div className={styles.progressTrack}>
                     <div
                       className={`${styles.progressFill} ${done ? styles.progressFillDone : ""}`}

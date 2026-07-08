@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { SignImage } from "@/components/SignImage";
 import { createClient } from "@/lib/supabase";
+import { TabBar } from "@/components/TabBar";
 import styles from "./page.module.css";
 
 const ExternalIcon = () => (
@@ -18,16 +18,11 @@ export default async function ResourcesPage() {
   if (!user) redirect("/auth/login");
 
   return (
+    <>
     <main className={styles.page}>
-      {/* Top bar */}
-      <div className={styles.topBar}>
-        <Link href="/more" className={styles.backBtn}>
-          →
-        </Link>
-        <div className={styles.titleCol}>
-          <h1>חומרים שימושיים</h1>
-          <span className={styles.subtitle}>מקורות רשמיים ואתרי תרגול, הכל במקום אחד.</span>
-        </div>
+      <div>
+        <h1>חומרים שימושיים</h1>
+        <span className={styles.subtitle}>מקורות רשמיים ואתרי תרגול, הכל במקום אחד.</span>
       </div>
 
       {/* Official sources */}
@@ -106,5 +101,7 @@ export default async function ResourcesPage() {
 
       <span className={styles.pageNote}>הקישורים נפתחים בחלון חדש</span>
     </main>
+    <TabBar active="links" />
+    </>
   );
 }

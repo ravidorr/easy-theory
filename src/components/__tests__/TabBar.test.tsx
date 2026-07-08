@@ -5,12 +5,13 @@ import { TabBar } from "../TabBar";
 describe("TabBar", () => {
   const tabs = [
     { label: "הבית", href: "/" },
-    { label: "נושאים", href: "/topics" },
+    { label: "סרטונים", href: "/videos" },
     { label: "כרטיסיות", href: "/flashcards" },
+    { label: "קישורים", href: "/resources" },
     { label: "עוד", href: "/more" },
   ];
 
-  it("renders all four tab labels", () => {
+  it("renders all five tab labels", () => {
     render(<TabBar active="home" />);
     for (const { label } of tabs) {
       expect(screen.getByText(label)).toBeInTheDocument();
@@ -25,10 +26,11 @@ describe("TabBar", () => {
   });
 
   it("marks only the active tab with aria-current", () => {
-    render(<TabBar active="topics" />);
-    expect(screen.getByText("נושאים").closest("a")).toHaveAttribute("aria-current", "page");
+    render(<TabBar active="videos" />);
+    expect(screen.getByText("סרטונים").closest("a")).toHaveAttribute("aria-current", "page");
     expect(screen.getByText("הבית").closest("a")).not.toHaveAttribute("aria-current");
     expect(screen.getByText("כרטיסיות").closest("a")).not.toHaveAttribute("aria-current");
+    expect(screen.getByText("קישורים").closest("a")).not.toHaveAttribute("aria-current");
     expect(screen.getByText("עוד").closest("a")).not.toHaveAttribute("aria-current");
   });
 });
