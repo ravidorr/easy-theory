@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.42] — 2026-07-08
+
+### Added
+- Tests for `send-otp` route: next param appended to emailRedirectTo, default to `/` when omitted, open-redirect rejection for non-relative and `//`-prefixed values
+
+---
+
 ## [0.3.41] — 2026-07-08
 
 ### Added
