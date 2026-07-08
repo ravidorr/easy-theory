@@ -6,6 +6,13 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ---
 
+## [0.3.28] — 2026-07-08
+
+### Fixed
+- Resend status message on the login sent-banner no longer runs directly into the "נשלח שוב" button — corrected `margin-inline-start` direction for RTL and added a whitespace separator in JSX
+
+---
+
 ## [0.3.27] — 2026-07-08
 
 ### Changed
