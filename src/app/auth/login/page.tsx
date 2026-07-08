@@ -81,6 +81,7 @@ export default function LoginPage() {
                 <button id="resend-btn" className={styles.resendBtn}>
                   נשלח שוב
                 </button>
+                {" "}
                 <span id="resend-msg" className={`${styles.resendMsg} ${styles.hidden}`} />
               </p>
             </div>
