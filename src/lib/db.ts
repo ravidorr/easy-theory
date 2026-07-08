@@ -238,3 +238,32 @@ export async function getMistakesForTopic(
     selected_option: latestByQuestion.get(q.id)!.selected_option as "a" | "b" | "c" | "d",
   }));
 }
+
+export async function markTopicCompleted(
+  supabase: SupabaseClient,
+  userId: string,
+  topicId: string
+): Promise<void> {
+  const { data: existing } = await supabase
+    .from("user_topic_progress")
+    .select("id, status")
+    .eq("user_id", userId)
+    .eq("topic_id", topicId)
+    .single();
+
+  if (existing) {
+    if (existing.status !== "completed") {
+      await supabase
+        .from("user_topic_progress")
+        .update({ status: "completed", last_studied_at: new Date().toISOString() })
+        .eq("id", existing.id);
+    }
+  } else {
+    await supabase.from("user_topic_progress").insert({
+      user_id: userId,
+      topic_id: topicId,
+      status: "completed",
+      last_studied_at: new Date().toISOString(),
+    });
+  }
+}

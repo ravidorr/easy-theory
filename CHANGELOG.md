@@ -2,6 +2,14 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.43] — 2026-07-08
+
+### Fixed
+- CodeQL: replace internal `fetch` to `/api/progress` in quiz route with a direct db call (`markTopicCompleted`), eliminating the SSRF alert
+- CodeQL: cap email to 254 chars before regex validation in `send-otp` route, eliminating the polynomial ReDoS alert
+
+---
+
 ## [0.3.42] — 2026-07-08
 
 ### Added

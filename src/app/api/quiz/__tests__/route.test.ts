@@ -2,12 +2,15 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { POST } from "../route";
 import { createClient } from "@/lib/supabase";
 import { checkTopicCompletion } from "@/lib/topic-completion";
+import { markTopicCompleted } from "@/lib/db";
 
 vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
 vi.mock("@/lib/topic-completion", () => ({ checkTopicCompletion: vi.fn() }));
+vi.mock("@/lib/db", () => ({ markTopicCompleted: vi.fn() }));
 
 const mockCreateClient = vi.mocked(createClient);
 const mockCheckTopicCompletion = vi.mocked(checkTopicCompletion);
+const mockMarkTopicCompleted = vi.mocked(markTopicCompleted);
 
 const QUESTION_ID = "q-uuid";
 const TOPIC_ID = "topic-uuid";
@@ -145,12 +148,9 @@ function buildDb({
 }
 
 describe("POST /api/quiz", () => {
-  let mockFetch: ReturnType<typeof vi.fn>;
-
   beforeEach(() => {
     vi.clearAllMocks();
-    mockFetch = vi.fn().mockResolvedValue({ ok: true });
-    vi.stubGlobal("fetch", mockFetch);
+    mockMarkTopicCompleted.mockResolvedValue(undefined);
     mockCheckTopicCompletion.mockResolvedValue(false);
   });
 
@@ -190,27 +190,25 @@ describe("POST /api/quiz", () => {
     expect(body.stars_earned).toBe(0);
   });
 
-  it("returns topic_completed: false and does not call /api/progress when topic is incomplete", async () => {
+  it("returns topic_completed: false and does not mark topic completed when topic is incomplete", async () => {
     mockCheckTopicCompletion.mockResolvedValue(false);
     mockCreateClient.mockResolvedValue(buildDb() as never);
     const res = await POST(makeRequest(defaultBody));
     const body = await res.json();
     expect(body.topic_completed).toBe(false);
-    expect(mockFetch).not.toHaveBeenCalled();
+    expect(mockMarkTopicCompleted).not.toHaveBeenCalled();
   });
 
-  it("returns topic_completed: true and calls POST /api/progress when all questions answered correctly", async () => {
+  it("returns topic_completed: true and marks topic completed when all questions answered correctly", async () => {
     mockCheckTopicCompletion.mockResolvedValue(true);
     mockCreateClient.mockResolvedValue(buildDb() as never);
     const res = await POST(makeRequest(defaultBody));
     const body = await res.json();
     expect(body.topic_completed).toBe(true);
-    expect(mockFetch).toHaveBeenCalledWith(
-      "http://localhost:3000/api/progress",
-      expect.objectContaining({
-        method: "POST",
-        body: JSON.stringify({ topic_id: TOPIC_ID, status: "completed" }),
-      })
+    expect(mockMarkTopicCompleted).toHaveBeenCalledWith(
+      expect.anything(),
+      USER_ID,
+      TOPIC_ID
     );
   });
 
@@ -222,7 +220,7 @@ describe("POST /api/quiz", () => {
     const body = await res.json();
     expect(body.topic_completed).toBe(false);
     expect(mockCheckTopicCompletion).not.toHaveBeenCalled();
-    expect(mockFetch).not.toHaveBeenCalled();
+    expect(mockMarkTopicCompleted).not.toHaveBeenCalled();
   });
 
   it("returns 429 when rate limit is exceeded", async () => {
@@ -261,9 +259,9 @@ describe("POST /api/quiz", () => {
     expect(body.medals_earned).toContain("streak-3");
   });
 
-  it("handles fetch error gracefully when marking topic completed", async () => {
+  it("handles db error gracefully when marking topic completed", async () => {
     mockCheckTopicCompletion.mockResolvedValue(true);
-    mockFetch.mockRejectedValue(new Error("Network error"));
+    mockMarkTopicCompleted.mockRejectedValue(new Error("DB error"));
     mockCreateClient.mockResolvedValue(buildDb() as never);
     const res = await POST(makeRequest(defaultBody));
     const body = await res.json();

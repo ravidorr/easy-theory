@@ -8,6 +8,7 @@ import {
 } from "@/lib/quiz";
 import { checkTopicCompletion } from "@/lib/topic-completion";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { markTopicCompleted } from "@/lib/db";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -150,14 +151,8 @@ export async function POST(request: Request) {
       const isComplete = await checkTopicCompletion(supabase, user.id, topic_id);
       if (isComplete) {
         topic_completed = true;
-        const origin = new URL(request.url).origin;
-        const cookie = request.headers.get("cookie") ?? "";
         try {
-          await fetch(`${origin}/api/progress`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json", Cookie: cookie },
-            body: JSON.stringify({ topic_id, status: "completed" }),
-          });
+          await markTopicCompleted(supabase, user.id, topic_id);
         } catch (err) {
           console.error("[quiz] Failed to mark topic completed:", err);
         }

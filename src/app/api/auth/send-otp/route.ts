@@ -14,19 +14,20 @@ export async function POST(request: Request) {
   if (!email || typeof email !== "string") {
     return NextResponse.json({ error: "כתובת מייל חסרה" }, { status: 400 });
   }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+  const trimmedEmail = email.trim().slice(0, 254);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
     return NextResponse.json({ error: "כתובת המייל אינה תקינה" }, { status: 400 });
   }
 
   const supabase = await createClient();
 
-  const allowed = await checkRateLimit(supabase, `otp:${email.trim().toLowerCase()}`, 3, 900);
+  const allowed = await checkRateLimit(supabase, `otp:${trimmedEmail.toLowerCase()}`, 3, 900);
   if (!allowed) {
     return NextResponse.json({ error: "יותר מדי ניסיונות, נסי שוב בעוד 15 דקות" }, { status: 429 });
   }
 
   const { error } = await supabase.auth.signInWithOtp({
-    email: email.trim().toLowerCase(),
+    email: trimmedEmail.toLowerCase(),
     options: {
       emailRedirectTo: emailOrigin,
     },
