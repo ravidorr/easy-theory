@@ -31,6 +31,7 @@ type DbConfig = {
   stats?: { star_points: number; streak_days: number; last_active_date: string | null } | null;
   updatedStats?: { star_points: number; streak_days: number };
   noQuestion?: boolean;
+  rateLimitPass?: boolean;
 };
 
 function buildDb({
@@ -41,6 +42,7 @@ function buildDb({
   stats = { star_points: 0, streak_days: 0, last_active_date: null },
   updatedStats = { star_points: 10, streak_days: 1 },
   noQuestion = false,
+  rateLimitPass = true,
 }: DbConfig = {}) {
   const calls: Record<string, number> = {};
   const nc = (t: string) => {
@@ -54,7 +56,7 @@ function buildDb({
         data: { user: authenticated ? { id: USER_ID } : null },
       }),
     },
-    rpc: vi.fn().mockResolvedValue({ data: true }),
+    rpc: vi.fn().mockResolvedValue({ data: rateLimitPass }),
     from: vi.fn().mockImplementation((table: string) => {
       const n = nc(table);
 
@@ -221,5 +223,51 @@ describe("POST /api/quiz", () => {
     expect(body.topic_completed).toBe(false);
     expect(mockCheckTopicCompletion).not.toHaveBeenCalled();
     expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it("returns 429 when rate limit is exceeded", async () => {
+    mockCreateClient.mockResolvedValue(buildDb({ rateLimitPass: false }) as never);
+    const res = await POST(makeRequest(defaultBody));
+    expect(res.status).toBe(429);
+  });
+
+  it("inserts new stats row for first-time user when stats are null", async () => {
+    mockCreateClient.mockResolvedValue(buildDb({ stats: null }) as never);
+    const res = await POST(makeRequest(defaultBody));
+    const body = await res.json();
+    expect(res.status).toBe(200);
+    expect(body.is_correct).toBe(true);
+  });
+
+  it("updates existing in_progress topic progress", async () => {
+    mockCreateClient.mockResolvedValue(
+      buildDb({ existingProgress: { status: "in_progress" } }) as never
+    );
+    const res = await POST(makeRequest(defaultBody));
+    const body = await res.json();
+    expect(res.status).toBe(200);
+    expect(body.topic_completed).toBe(false);
+  });
+
+  it("awards streak milestone medal when streak reaches 3", async () => {
+    const yesterday = new Date(Date.now() - 86_400_000).toLocaleDateString("sv", {
+      timeZone: "Asia/Jerusalem",
+    });
+    mockCreateClient.mockResolvedValue(
+      buildDb({ stats: { star_points: 0, streak_days: 2, last_active_date: yesterday } }) as never
+    );
+    const res = await POST(makeRequest(defaultBody));
+    const body = await res.json();
+    expect(body.medals_earned).toContain("streak-3");
+  });
+
+  it("handles fetch error gracefully when marking topic completed", async () => {
+    mockCheckTopicCompletion.mockResolvedValue(true);
+    mockFetch.mockRejectedValue(new Error("Network error"));
+    mockCreateClient.mockResolvedValue(buildDb() as never);
+    const res = await POST(makeRequest(defaultBody));
+    const body = await res.json();
+    expect(res.status).toBe(200);
+    expect(body.topic_completed).toBe(true);
   });
 });
