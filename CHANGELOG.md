@@ -2,6 +2,14 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.44] — 2026-07-08
+
+### Changed
+- Send button now shows a spinning indicator and reads "שולח..." (present tense) instead of "נשלח..." while the magic-link request is in flight
+- Added tests covering the button's loading state, text content, and reset behaviour on fetch error and network failure
+
+---
+
 ## [0.3.43] — 2026-07-08
 
 ### Fixed

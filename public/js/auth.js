@@ -49,7 +49,7 @@
     const nextPath = document.getElementById("next-path")?.value || "/";
 
     btn.disabled = true;
-    btn.textContent = "נשלח...";
+    btn.innerHTML = '<span class="btn-spinner"></span>שולח...';
 
     try {
       const res = await fetch("/api/auth/send-otp", {

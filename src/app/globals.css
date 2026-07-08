@@ -179,6 +179,23 @@ body {
   cursor: default;
 }
 
+@keyframes btn-spin {
+  to { transform: rotate(360deg); }
+}
+
+.btn-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgb(255 255 255 / 35%);
+  border-top-color: var(--text-on-primary);
+  animation: btn-spin 0.7s linear infinite;
+  margin-inline-end: 8px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
 .btn-secondary {
   font-family: var(--font-ui);
   font-weight: 700;
