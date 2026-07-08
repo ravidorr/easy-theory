@@ -18,6 +18,62 @@
   color: var(--text);
 }
 
+.statsCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  padding: 20px 16px;
+}
+
+.statCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.statIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.statIconStreak {
+  background: var(--primary-soft);
+  color: var(--primary-soft-text);
+}
+
+.statIconPoints {
+  background: var(--gold-soft);
+  color: var(--gold-text);
+}
+
+.statValue {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: var(--type-caption-size);
+  color: var(--text-faint);
+  font-weight: 500;
+}
+
+.statDivider {
+  width: 1px;
+  background: var(--border);
+  margin: 4px 16px;
+}
+
 .navCard {
   background: var(--surface);
   border: 1px solid var(--border);
