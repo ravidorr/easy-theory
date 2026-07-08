@@ -41,12 +41,12 @@ describe("MorePage", () => {
     await expect(MorePage()).rejects.toThrow("redirect");
   });
 
-  it("renders navigation links to schedule, videos and resources", async () => {
+  it("renders navigation link to schedule", async () => {
     const jsx = await MorePage();
     const { container } = render(jsx);
     expect(container.querySelector('a[href="/schedule"]')).toBeTruthy();
-    expect(container.querySelector('a[href="/videos"]')).toBeTruthy();
-    expect(container.querySelector('a[href="/resources"]')).toBeTruthy();
+    expect(container.querySelector('a[href="/videos"]')).toBeFalsy();
+    expect(container.querySelector('a[href="/resources"]')).toBeFalsy();
   });
 
   it("shows '—' for all medals when none are earned", async () => {

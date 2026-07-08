@@ -6,6 +6,15 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ---
 
+## [0.3.34] — 2026-07-08
+
+### Fixed
+- Deleted orphaned `src/app/topics/__tests__/page.test.tsx` (topics listing page was removed)
+- Updated `TabBar.test.tsx` to reflect new 5-tab structure (סרטונים, קישורים replace נושאים)
+- Updated `more/__tests__/page.test.tsx` to assert videos/resources links no longer appear
+
+---
+
 ## [0.3.33] — 2026-07-08
 
 ### Changed
