@@ -15,7 +15,7 @@ Design system for **ClearRoad** (Hebrew: **דרך ברורה**), a Hebrew-first 
 ## CONTENT FUNDAMENTALS
 
 - **Language:** Hebrew only, full RTL. English never appears in UI copy (brand name "ClearRoad" may appear in the logotype).
-- **Voice:** warm, encouraging, speaks directly to the learner in second person **feminine** (את): "ממשיכות", "יאללה, מתחילות!", "את באמצע". Short sentences. No jargon.
+- **Voice:** warm, encouraging, speaks directly to the learner in second person **feminine** (את): "ממשיכות", "יאללה, לעבודה!", "את באמצע". Short sentences. No jargon.
 - **Tone of reinforcement:** celebratory but gentle. "כל הכבוד, שלב 3 הושלם!" — never pressuring ("נשארו רק X ימים" is forbidden framing).
 - **Punctuation:** NO em-dashes (—) in copy. Use commas, periods, or restructure. Exclamation marks allowed sparingly for wins.
 - **Emoji:** used very sparingly, at most one per screen, only for celebration moments. Prefer the icon set (Lucide) and the star/flame glyph components over emoji.
