@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.38] — 2026-07-08
+
+### Changed
+- Raise coverage thresholds: lines 90%, statements 90%, functions 90%, branches 80%
+
+---
+
 ## [0.3.37] — 2026-07-08
 
 ### Added
