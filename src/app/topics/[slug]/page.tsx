@@ -7,6 +7,7 @@ import { SignImage } from "@/components/SignImage";
 import { createClient } from "@/lib/supabase";
 import { getTopicBySlug, getQuestionsForTopic } from "@/lib/db";
 import type { Question } from "@/lib/db";
+import styles from "./page.module.css";
 
 function resolveImageUrl(url: string | null | undefined): string | null {
   if (!url) return null;
@@ -48,78 +49,32 @@ function QuestionSlide({
 
   return (
     <div
-      className="quiz-slide"
+      className={`quiz-slide ${styles.slideItem}`}
       data-index={index}
       data-question-id={question.id}
       data-topic-id={topicId}
       data-correct={question.correct_option}
-      style={{ display: index === 0 ? "flex" : "none", flexDirection: "column", gap: "20px" }}
+      style={{ display: index === 0 ? "flex" : "none" }}
     >
       {/* Question + image */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "16px",
-          alignItems: "center",
-        }}
-      >
+      <div className={styles.questionContainer}>
         {imageUrl && (
           isWide ? (
-            /* Wide road-scene image */
-            <div
-              style={{
-                width: "100%",
-                borderRadius: "var(--radius-xl)",
-                background: "var(--surface)",
-                border: "1px solid var(--border)",
-                boxShadow: "var(--shadow-card)",
-                overflow: "hidden",
-                aspectRatio: "16/9",
-              }}
-            >
+            <div className={styles.imgWide}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={imageUrl}
-                alt=""
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              />
+              <img src={imageUrl} alt="" className={styles.imgEl} />
             </div>
           ) : (
-            /* Square sign image */
-            <div
-              style={{
-                width: "140px",
-                height: "140px",
-                borderRadius: "var(--radius-xl)",
-                background: "var(--surface)",
-                border: "1px solid var(--border)",
-                boxShadow: "var(--shadow-card)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
+            <div className={styles.imgSquare}>
               <SignImage src={imageUrl!} size="md" />
             </div>
           )
         )}
-        <h2
-          style={{
-            margin: 0,
-            fontSize: "var(--type-h2-size)",
-            fontWeight: "var(--type-h2-weight)" as never,
-            lineHeight: "var(--line-tight)",
-            color: "var(--text)",
-            textAlign: "center",
-          }}
-        >
-          {question.question_he}
-        </h2>
+        <h2>{question.question_he}</h2>
       </div>
 
       {/* Options */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+      <div className={styles.optionsList}>
         {options.map(([key, text], i) => {
           const optionSignImg = resolveOptionSignImage(text);
           return (
@@ -130,21 +85,11 @@ function QuestionSlide({
             >
               <span className="quiz-option-badge">{LETTERS[i]}</span>
               {optionSignImg ? (
-                /* Sign option: image only, centered */
-                <span style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>
+                <span className={styles.optionSignContent}>
                   <SignImage src={optionSignImg} size="sm" />
                 </span>
               ) : (
-                <span
-                  style={{
-                    fontSize: "var(--type-body-size)",
-                    lineHeight: "var(--line-body)",
-                    color: "var(--text)",
-                    flex: 1,
-                  }}
-                >
-                  {text}
-                </span>
+                <span className={styles.optionTextContent}>{text}</span>
               )}
               {question.explanation_he && (
                 <span className="quiz-option-explanation">
@@ -183,76 +128,28 @@ export default async function TopicQuizPage({
         id="quiz-container"
         data-topic-id={topic.id}
         data-total={total}
-        style={{
-          background: "var(--bg)",
-          padding: "20px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "20px",
-          maxWidth: "440px",
-          margin: "0 auto",
-          minHeight: "100vh",
-          boxSizing: "border-box",
-        }}
+        className={styles.page}
       >
         {/* Top bar */}
-        <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-          <Link
-            href="/"
-            style={{
-              width: "44px",
-              height: "44px",
-              borderRadius: "50%",
-              border: "1px solid var(--border-strong)",
-              background: "var(--surface)",
-              color: "var(--text-muted)",
-              fontSize: "18px",
-              cursor: "pointer",
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-              textDecoration: "none",
-            }}
-          >
+        <div className={styles.topBar}>
+          <Link href="/" className={styles.closeBtn}>
             ✕
           </Link>
-          <div
-            style={{
-              flex: 1,
-              height: "8px",
-              borderRadius: "var(--radius-pill)",
-              background: "var(--surface-2)",
-              overflow: "hidden",
-            }}
-          >
+          <div className={styles.progressTrack}>
             <div
               id="quiz-progress-fill"
-              style={{
-                width: total > 0 ? `${(1 / total) * 100}%` : "0%",
-                height: "100%",
-                borderRadius: "var(--radius-pill)",
-                background: "var(--primary)",
-                transition: "width 300ms ease",
-              }}
+              className={styles.progressFill}
+              style={{ width: total > 0 ? `${(1 / total) * 100}%` : "0%" }}
             />
           </div>
-          <span
-            id="quiz-count"
-            style={{
-              fontSize: "var(--type-caption-size)",
-              fontWeight: "var(--type-caption-weight)" as never,
-              color: "var(--text-faint)",
-              flexShrink: 0,
-            }}
-          >
+          <span id="quiz-count" className={styles.quizCount}>
             1 מתוך {total}
           </span>
         </div>
 
         {/* Questions */}
         {total === 0 ? (
-          <div style={{ textAlign: "center", color: "var(--text-muted)", padding: "40px 0" }}>
+          <div className={styles.emptyQuestions}>
             <p>אין שאלות זמינות לנושא זה עדיין.</p>
           </div>
         ) : (
@@ -268,37 +165,15 @@ export default async function TopicQuizPage({
         )}
 
         {/* Footer */}
-        <div
-          id="quiz-footer"
-          style={{
-            marginTop: "auto",
-            display: "flex",
-            flexDirection: "column",
-            gap: "14px",
-          }}
-        >
-          <div id="reward-banner" hidden style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
-            <span
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                background: "var(--gold-soft)",
-                color: "var(--gold-text)",
-                borderRadius: "var(--radius-sm)",
-                padding: "3px 9px",
-                fontWeight: 700,
-                fontSize: "12.5px",
-              }}
-            >
+        <div id="quiz-footer" className={styles.quizFooter}>
+          <div id="reward-banner" hidden className={styles.rewardBanner}>
+            <span className={styles.rewardPill}>
               <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
                 <path d="M8 1.2l2 4.2 4.6.6-3.4 3.2.9 4.6L8 11.6l-4.1 2.2.9-4.6L1.4 6l4.6-.6z" />
               </svg>
               <span id="reward-amount">+10</span>
             </span>
-            <span id="reward-message" style={{ fontSize: "var(--type-small-size)", color: "var(--text-muted)" }}>
-              יפה מאוד!
-            </span>
+            <span id="reward-message" className={styles.rewardMsg}>יפה מאוד!</span>
           </div>
 
           <button
@@ -314,35 +189,18 @@ export default async function TopicQuizPage({
         {/* Final screen — hidden until quiz ends */}
         <div
           id="quiz-final"
-          style={{
-            display: "none",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "20px",
-            textAlign: "center",
-            padding: "40px 0",
-          }}
+          className={`${styles.hidden} ${styles.quizFinal}`}
         >
-          <span style={{ fontSize: "48px" }}>🎉</span>
-          <h2
-            style={{
-              margin: 0,
-              fontSize: "var(--type-h1-size)",
-              fontWeight: "var(--type-h1-weight)" as never,
-              color: "var(--text)",
-            }}
-          >
-            סיימת!
-          </h2>
-          <span style={{ fontSize: "var(--type-body-size)", color: "var(--text-muted)" }}>
+          <span className={styles.finalEmoji}>🎉</span>
+          <h2>סיימת!</h2>
+          <span className={styles.finalScore}>
             <span id="final-score"></span>
           </span>
           <Link href="/">
-            <button className="btn-primary" style={{ minWidth: "200px" }}>חזרה לבית</button>
+            <button className={`btn-primary ${styles.btnWide}`}>חזרה לבית</button>
           </Link>
           <Link href={`/topics/${slug}/review`}>
-            <button className="btn-secondary" style={{ minWidth: "200px" }}>סקירת טעויות</button>
+            <button className={`btn-secondary ${styles.btnWide}`}>סקירת טעויות</button>
           </Link>
         </div>
       </main>

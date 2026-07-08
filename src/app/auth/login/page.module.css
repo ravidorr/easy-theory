@@ -1,0 +1,296 @@
+.page {
+  background: var(--bg);
+  margin: 0 auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  max-width: 420px;
+  box-sizing: border-box;
+  min-height: 100vh;
+}
+
+.page h1 {
+  margin: 0;
+  font-weight: 800;
+  font-size: var(--type-h2-size);
+  color: var(--primary-soft-text);
+}
+
+.page footer {
+  margin-top: auto;
+  padding-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: center;
+}
+
+.page footer p {
+  margin: 0;
+  font-size: var(--type-caption-size);
+  color: var(--text-faint);
+}
+
+.heroCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  padding: 24px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+
+.heroH2 {
+  margin: 0;
+  font-size: var(--type-display-size);
+  font-weight: var(--type-display-weight);
+  line-height: var(--line-tight);
+  color: var(--text);
+}
+
+.heroDesc {
+  margin: 0;
+  font-size: var(--type-body-size);
+  color: var(--text-muted);
+  line-height: var(--line-body);
+  max-width: 320px;
+}
+
+.loginCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.loginHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.loginCardTitle {
+  margin: 0;
+  font-size: var(--type-h2-size);
+  font-weight: var(--type-h2-weight);
+  color: var(--text);
+}
+
+.loginCardHint {
+  margin: 0;
+  font-size: var(--type-small-size);
+  color: var(--text-muted);
+}
+
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.emailLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.emailLabelText {
+  font-size: var(--type-small-size);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.emailInput {
+  font-family: var(--font-ui);
+  font-size: var(--type-body-size);
+  color: var(--text);
+  background: var(--surface);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 11px 14px;
+  min-height: var(--hit-min);
+  box-sizing: border-box;
+  outline: none;
+  text-align: left;
+  width: 100%;
+}
+
+.loginError {
+  margin: 0;
+  font-size: var(--type-small-size);
+  color: var(--danger-text);
+  text-align: center;
+}
+
+.hidden {
+  display: none;
+}
+
+.sentBanner {
+  background: var(--success-soft);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  align-items: center;
+  gap: 12px;
+}
+
+.sentIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  background: var(--success);
+  color: #fff;
+}
+
+.sentBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sentTitle {
+  margin: 0;
+  font-size: var(--type-body-size);
+  font-weight: 600;
+  color: var(--success-text);
+}
+
+.sentHint {
+  margin: 0;
+  font-size: var(--type-small-size);
+  color: var(--text-muted);
+  line-height: var(--line-body);
+}
+
+.resendRow {
+  margin: 0;
+  font-size: var(--type-small-size);
+  color: var(--text-muted);
+}
+
+.page .resendRow {
+  margin-top: 6px;
+}
+
+.resendBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--primary-soft-text);
+  font-weight: 600;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+}
+
+.resendMsg {
+  margin-inline-end: 6px;
+}
+
+.featuresSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: var(--type-h2-size);
+  font-weight: var(--type-h2-weight);
+  color: var(--text);
+}
+
+.featureCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.iconWrap {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.iconWrapNeutral {
+  background: var(--surface-2);
+}
+
+.iconWrapPrimary {
+  background: var(--primary-soft);
+  color: var(--primary-soft-text);
+}
+
+.featureBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.featureTitle {
+  margin: 0;
+  font-weight: 600;
+  font-size: var(--type-body-size);
+  color: var(--text);
+}
+
+.featureDesc {
+  margin: 0;
+  font-size: var(--type-small-size);
+  color: var(--text-muted);
+  line-height: var(--line-body);
+}
+
+.iconImg {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+}
+
+.reassurance {
+  background: var(--primary-soft);
+  border-radius: var(--radius-xl);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: center;
+}
+
+.reassuranceTitle {
+  margin: 0;
+  font-weight: 600;
+  font-size: var(--type-body-size);
+  color: var(--primary-soft-text);
+}
+
+.reassuranceDesc {
+  margin: 0;
+  font-size: var(--type-small-size);
+  color: var(--text-muted);
+  line-height: var(--line-body);
+}

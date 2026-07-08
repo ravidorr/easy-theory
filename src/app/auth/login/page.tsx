@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import styles from "./page.module.css";
 
 export const metadata: Metadata = {
   title: "דרך ברורה — לומדים לתיאוריה בלי לחץ",
@@ -16,68 +17,17 @@ export const metadata: Metadata = {
 export default function LoginPage() {
   return (
     <>
-      <main
-        style={{
-          background: "var(--bg)",
-          margin: "0 auto",
-          padding: "20px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "28px",
-          maxWidth: "420px",
-          boxSizing: "border-box",
-          minHeight: "100vh",
-        }}
-      >
+      <main className={styles.page}>
         {/* Hero */}
         <header>
-          <div
-            style={{
-              background: "var(--surface)",
-              border: "1px solid var(--border)",
-              borderRadius: "var(--radius-xl)",
-              boxShadow: "var(--shadow-card)",
-              padding: "20px",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: "14px",
-              textAlign: "center",
-              paddingTop: "24px",
-            }}
-          >
-            <h1
-              style={{
-                margin: 0,
-                fontWeight: 800,
-                fontSize: "var(--type-h2-size)",
-                color: "var(--primary-soft-text)",
-              }}
-            >
-              דרך ברורה
-            </h1>
-            <h2
-              style={{
-                margin: 0,
-                fontSize: "var(--type-display-size)",
-                fontWeight: "var(--type-display-weight)" as never,
-                lineHeight: "var(--line-tight)",
-                color: "var(--text)",
-              }}
-            >
+          <div className={styles.heroCard}>
+            <h1>דרך ברורה</h1>
+            <h2 className={styles.heroH2}>
               לומדים לתיאוריה,
               <br />
               בלי לחץ.
             </h2>
-            <p
-              style={{
-                margin: 0,
-                fontSize: "var(--type-body-size)",
-                color: "var(--text-muted)",
-                lineHeight: "var(--line-body)",
-                maxWidth: "320px",
-              }}
-            >
+            <p className={styles.heroDesc}>
               כל מה שצריך למבחן התיאוריה: שאלות אמיתיות מהמאגר הרשמי, כרטיסיות
               תמרורים ותוכנית שמתאימה את עצמה לקצב שלך.
             </p>
@@ -85,55 +35,15 @@ export default function LoginPage() {
         </header>
 
         {/* Login card */}
-        <section
-          aria-label="כניסה"
-          style={{
-            background: "var(--surface)",
-            border: "1px solid var(--border)",
-            borderRadius: "var(--radius-xl)",
-            boxShadow: "var(--shadow-card)",
-            padding: "20px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "16px",
-          }}
-        >
-          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-            <h2
-              style={{
-                margin: 0,
-                fontSize: "var(--type-h2-size)",
-                fontWeight: "var(--type-h2-weight)" as never,
-                color: "var(--text)",
-              }}
-            >
-              להתחיל עכשיו
-            </h2>
-            <p
-              style={{
-                margin: 0,
-                fontSize: "var(--type-small-size)",
-                color: "var(--text-muted)",
-              }}
-            >
-              להתחברות עם קישור למייל, בלי סיסמה. חינם לגמרי.
-            </p>
+        <section aria-label="כניסה" className={styles.loginCard}>
+          <div className={styles.loginHeader}>
+            <h2 className={styles.loginCardTitle}>להתחיל עכשיו</h2>
+            <p className={styles.loginCardHint}>להתחברות עם קישור למייל, בלי סיסמה. חינם לגמרי.</p>
           </div>
 
-          <form
-            id="login-form"
-            style={{ display: "flex", flexDirection: "column", gap: "12px" }}
-          >
-            <label style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-              <span
-                style={{
-                  fontSize: "var(--type-small-size)",
-                  fontWeight: 600,
-                  color: "var(--text-muted)",
-                }}
-              >
-                כתובת המייל שלך
-              </span>
+          <form id="login-form" className={styles.loginForm}>
+            <label className={styles.emailLabel}>
+              <span className={styles.emailLabelText}>כתובת המייל שלך</span>
               <input
                 type="email"
                 name="email"
@@ -142,20 +52,7 @@ export default function LoginPage() {
                 dir="ltr"
                 autoComplete="email"
                 required
-                style={{
-                  fontFamily: "var(--font-ui)",
-                  fontSize: "var(--type-body-size)",
-                  color: "var(--text)",
-                  background: "var(--surface)",
-                  border: "1.5px solid var(--border-strong)",
-                  borderRadius: "var(--radius-md)",
-                  padding: "11px 14px",
-                  minHeight: "var(--hit-min)",
-                  boxSizing: "border-box",
-                  outline: "none",
-                  textAlign: "left",
-                  width: "100%",
-                }}
+                className={styles.emailInput}
               />
             </label>
             <button type="submit" id="send-btn" className="btn-primary">
@@ -164,247 +61,72 @@ export default function LoginPage() {
             <p
               id="login-error"
               role="alert"
-              style={{
-                display: "none",
-                margin: 0,
-                fontSize: "var(--type-small-size)",
-                color: "var(--danger-text)",
-                textAlign: "center",
-              }}
+              className={`${styles.loginError} ${styles.hidden}`}
             />
           </form>
 
           {/* Sent state — hidden until auth.js reveals it */}
           <div
             id="sent-banner"
-            style={{
-              display: "none",
-              background: "var(--success-soft)",
-              borderRadius: "var(--radius-lg)",
-              padding: "14px 16px",
-              alignItems: "center",
-              gap: "12px",
-            }}
+            className={`${styles.sentBanner} ${styles.hidden}`}
           >
-            <span
-              style={{
-                width: "28px",
-                height: "28px",
-                borderRadius: "50%",
-                flexShrink: 0,
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "14px",
-                fontWeight: 700,
-                background: "var(--success)",
-                color: "#fff",
-              }}
-            >
-              ✓
-            </span>
-            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-              <h3
-                style={{
-                  margin: 0,
-                  fontSize: "var(--type-body-size)",
-                  fontWeight: 600,
-                  color: "var(--success-text)",
-                }}
-              >
-                הקישור בדרך אלייך
-              </h3>
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: "var(--type-small-size)",
-                  color: "var(--text-muted)",
-                  lineHeight: "var(--line-body)",
-                }}
-              >
+            <span className={styles.sentIcon}>✓</span>
+            <div className={styles.sentBody}>
+              <h3 className={styles.sentTitle}>הקישור בדרך אלייך</h3>
+              <p className={styles.sentHint}>
                 בדקי את המייל ולחצי על הקישור כדי להיכנס.
               </p>
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: "var(--type-small-size)",
-                  color: "var(--text-muted)",
-                  marginTop: "6px",
-                }}
-              >
+              <p className={styles.resendRow}>
                 לא קיבלת?{" "}
-                <button
-                  id="resend-btn"
-                  style={{
-                    background: "none",
-                    border: "none",
-                    padding: 0,
-                    color: "var(--primary-soft-text)",
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    fontSize: "inherit",
-                    fontFamily: "inherit",
-                  }}
-                >
+                <button id="resend-btn" className={styles.resendBtn}>
                   נשלח שוב
                 </button>
-                <span id="resend-msg" style={{ display: "none", marginRight: "6px" }} />
+                <span id="resend-msg" className={`${styles.resendMsg} ${styles.hidden}`} />
               </p>
             </div>
           </div>
         </section>
 
         {/* Feature cards */}
-        <section
-          aria-label="מה מקבלים"
-          style={{ display: "flex", flexDirection: "column", gap: "12px" }}
-        >
-          <h2
-            style={{
-              margin: 0,
-              fontSize: "var(--type-h2-size)",
-              fontWeight: "var(--type-h2-weight)" as never,
-              color: "var(--text)",
-            }}
-          >
-            מה מחכה לך בפנים
-          </h2>
+        <section aria-label="מה מקבלים" className={styles.featuresSection}>
+          <h2 className={styles.sectionTitle}>מה מחכה לך בפנים</h2>
 
-          <div
-            style={{
-              background: "var(--surface)",
-              border: "1px solid var(--border)",
-              borderRadius: "var(--radius-lg)",
-              boxShadow: "var(--shadow-card)",
-              padding: "16px",
-              display: "flex",
-              alignItems: "center",
-              gap: "14px",
-            }}
-          >
-            <div
-              style={{
-                width: "52px",
-                height: "52px",
-                borderRadius: "var(--radius-md)",
-                background: "var(--surface-2)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-              }}
-            >
+          <div className={styles.featureCard}>
+            <div className={`${styles.iconWrap} ${styles.iconWrapNeutral}`}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/signs/sign-302.png"
                 alt="תמרור עצור"
-                style={{ width: "34px", height: "34px", objectFit: "contain" }}
+                className={styles.iconImg}
               />
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-              <h3
-                style={{
-                  margin: 0,
-                  fontWeight: 600,
-                  fontSize: "var(--type-body-size)",
-                  color: "var(--text)",
-                }}
-              >
-                שאלות אמיתיות מהמבחן
-              </h3>
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: "var(--type-small-size)",
-                  color: "var(--text-muted)",
-                  lineHeight: "var(--line-body)",
-                }}
-              >
+            <div className={styles.featureBody}>
+              <h3 className={styles.featureTitle}>שאלות אמיתיות מהמבחן</h3>
+              <p className={styles.featureDesc}>
                 כל השאלות מהמאגר הרשמי של משרד התחבורה, עם הסבר לכל תשובה.
               </p>
             </div>
           </div>
 
-          <div
-            style={{
-              background: "var(--surface)",
-              border: "1px solid var(--border)",
-              borderRadius: "var(--radius-lg)",
-              boxShadow: "var(--shadow-card)",
-              padding: "16px",
-              display: "flex",
-              alignItems: "center",
-              gap: "14px",
-            }}
-          >
-            <div
-              style={{
-                width: "52px",
-                height: "52px",
-                borderRadius: "var(--radius-md)",
-                background: "var(--surface-2)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-              }}
-            >
+          <div className={styles.featureCard}>
+            <div className={`${styles.iconWrap} ${styles.iconWrapNeutral}`}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/signs/sign-303.png"
                 alt="תמרור מעגל תנועה"
-                style={{ width: "34px", height: "34px", objectFit: "contain" }}
+                className={styles.iconImg}
               />
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-              <h3
-                style={{
-                  margin: 0,
-                  fontWeight: 600,
-                  fontSize: "var(--type-body-size)",
-                  color: "var(--text)",
-                }}
-              >
-                כרטיסיות תמרורים
-              </h3>
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: "var(--type-small-size)",
-                  color: "var(--text-muted)",
-                  lineHeight: "var(--line-body)",
-                }}
-              >
+            <div className={styles.featureBody}>
+              <h3 className={styles.featureTitle}>כרטיסיות תמרורים</h3>
+              <p className={styles.featureDesc}>
                 שינון תמרורים בשיטת חזרה מרווחת, מה שלא נזכר יחזור מחר.
               </p>
             </div>
           </div>
 
-          <div
-            style={{
-              background: "var(--surface)",
-              border: "1px solid var(--border)",
-              borderRadius: "var(--radius-lg)",
-              boxShadow: "var(--shadow-card)",
-              padding: "16px",
-              display: "flex",
-              alignItems: "center",
-              gap: "14px",
-            }}
-          >
-            <div
-              style={{
-                width: "52px",
-                height: "52px",
-                borderRadius: "var(--radius-md)",
-                background: "var(--primary-soft)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-                color: "var(--primary-soft-text)",
-              }}
-            >
+          <div className={styles.featureCard}>
+            <div className={`${styles.iconWrap} ${styles.iconWrapPrimary}`}>
               <svg
                 width="26"
                 height="26"
@@ -420,25 +142,9 @@ export default function LoginPage() {
                 <path d="M8 2v4M16 2v4M3 9h18" />
               </svg>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-              <h3
-                style={{
-                  margin: 0,
-                  fontWeight: 600,
-                  fontSize: "var(--type-body-size)",
-                  color: "var(--text)",
-                }}
-              >
-                תוכנית אישית בקצב שלך
-              </h3>
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: "var(--type-small-size)",
-                  color: "var(--text-muted)",
-                  lineHeight: "var(--line-body)",
-                }}
-              >
+            <div className={styles.featureBody}>
+              <h3 className={styles.featureTitle}>תוכנית אישית בקצב שלך</h3>
+              <p className={styles.featureDesc}>
                 בימים ושעות שנוח לך, והאפליקציה בונה תוכנית עד למבחן. בלי לחץ, ובלי ספירה לאחור.
               </p>
             </div>
@@ -447,68 +153,15 @@ export default function LoginPage() {
 
         {/* Reassurance strip */}
         <section aria-label="בקצרה">
-          <div
-            style={{
-              background: "var(--primary-soft)",
-              borderRadius: "var(--radius-xl)",
-              padding: "18px 20px",
-              display: "flex",
-              flexDirection: "column",
-              gap: "4px",
-              textAlign: "center",
-            }}
-          >
-            <h2
-              style={{
-                margin: 0,
-                fontWeight: 600,
-                fontSize: "var(--type-body-size)",
-                color: "var(--primary-soft-text)",
-              }}
-            >
-              חינם, בעברית, בגובה העיניים.
-            </h2>
-            <p
-              style={{
-                margin: 0,
-                fontSize: "var(--type-small-size)",
-                color: "var(--text-muted)",
-                lineHeight: "var(--line-body)",
-              }}
-            >
-              נבנה בשביל הנהגות והנהגים שבדרך.
-            </p>
+          <div className={styles.reassurance}>
+            <h2 className={styles.reassuranceTitle}>חינם, בעברית, בגובה העיניים.</h2>
+            <p className={styles.reassuranceDesc}>נבנה בשביל הנהגות והנהגים שבדרך.</p>
           </div>
         </section>
 
-        <footer
-          style={{
-            marginTop: "auto",
-            paddingBottom: "8px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "2px",
-            textAlign: "center",
-          }}
-        >
-          <p
-            style={{
-              margin: 0,
-              fontSize: "var(--type-caption-size)",
-              color: "var(--text-faint)",
-            }}
-          >
-            ClearRoad · דרך ברורה
-          </p>
-          <p
-            style={{
-              margin: 0,
-              fontSize: "var(--type-caption-size)",
-              color: "var(--text-faint)",
-            }}
-          >
-            לימוד לתיאוריה לרכב פרטי בישראל
-          </p>
+        <footer>
+          <p>ClearRoad · דרך ברורה</p>
+          <p>לימוד לתיאוריה לרכב פרטי בישראל</p>
         </footer>
       </main>
 

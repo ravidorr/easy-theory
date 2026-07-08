@@ -7,6 +7,7 @@ import {
   getTopicProgress,
 } from "@/lib/db";
 import { TabBar } from "@/components/TabBar";
+import styles from "./page.module.css";
 
 function PathProgress({ total = 5, current = 1 }: { total?: number; current?: number }) {
   const items = [];
@@ -16,23 +17,8 @@ function PathProgress({ total = 5, current = 1 }: { total?: number; current?: nu
     items.push(
       <span
         key={`s${i}`}
-        style={{
-          width: active ? "44px" : "34px",
-          height: active ? "44px" : "34px",
-          borderRadius: "50%",
-          flexShrink: 0,
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontFamily: "var(--font-ui)",
-          fontWeight: 700,
-          fontSize: active ? "15px" : "14px",
-          background: done ? "var(--primary)" : active ? "var(--surface)" : "var(--surface-2)",
-          color: done ? "#fff" : active ? "var(--primary-soft-text)" : "var(--text-faint)",
-          border: active ? "3px solid var(--primary)" : "3px solid transparent",
-          boxShadow: active ? "var(--shadow-card)" : "none",
-          boxSizing: "border-box",
-        }}
+        className={`${styles.stepNode} ${done ? styles.stepNodeDone : ""} ${active ? styles.stepNodeActive : ""}`}
+        data-active={active || undefined}
       >
         {done ? "✓" : i === total ? "🏁" : i}
       </span>
@@ -41,18 +27,13 @@ function PathProgress({ total = 5, current = 1 }: { total?: number; current?: nu
       items.push(
         <span
           key={`c${i}`}
-          style={{
-            flex: 1,
-            height: "4px",
-            minWidth: "12px",
-            background: i < current ? "var(--primary)" : "var(--surface-3)",
-          }}
+          className={`${styles.connector} ${i < current ? styles.connectorDone : ""}`}
         />
       );
     }
   }
   return (
-    <div style={{ display: "flex", alignItems: "center", width: "100%" }}>{items}</div>
+    <div className={styles.pathProgress}>{items}</div>
   );
 }
 
@@ -102,42 +83,16 @@ export default async function HomePage() {
 
   return (
     <>
-    <main
-      style={{
-        background: "var(--bg)",
-        padding: "20px 20px 96px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "20px",
-        maxWidth: "440px",
-        margin: "0 auto",
-        minHeight: "100vh",
-        boxSizing: "border-box",
-      }}
-    >
+    <main className={styles.page}>
       {/* Top bar */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
-        <span style={{ fontWeight: 800, fontSize: "20px", color: "var(--text)" }}>דרך ברורה</span>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span
-            style={{
-              display: "inline-flex", alignItems: "center", gap: "6px",
-              background: "var(--primary-soft)", color: "var(--primary-soft-text)",
-              borderRadius: "var(--radius-pill)", padding: "6px 14px",
-              fontWeight: 700, fontSize: "14px",
-            }}
-          >
+      <div className={styles.topBar}>
+        <span className={styles.wordmark}>דרך ברורה</span>
+        <div className={styles.pillsRow}>
+          <span className={`${styles.pill} ${styles.pillStreak}`}>
             <FlameIcon />
             {stats.streak_days}
           </span>
-          <span
-            style={{
-              display: "inline-flex", alignItems: "center", gap: "6px",
-              background: "var(--gold-soft)", color: "var(--gold-text)",
-              borderRadius: "var(--radius-pill)", padding: "6px 14px",
-              fontWeight: 700, fontSize: "14px",
-            }}
-          >
+          <span className={`${styles.pill} ${styles.pillPoints}`}>
             <StarIcon />
             {stats.star_points}
           </span>
@@ -145,19 +100,9 @@ export default async function HomePage() {
       </div>
 
       {/* Greeting */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-        <h1
-          style={{
-            margin: 0,
-            fontSize: "var(--type-h1-size)",
-            fontWeight: "var(--type-h1-weight)" as never,
-            lineHeight: "var(--line-tight)",
-            color: "var(--text)",
-          }}
-        >
-          {timeGreeting()}!
-        </h1>
-        <span style={{ fontSize: "var(--type-small-size)", color: "var(--text-muted)" }}>
+      <div className={styles.greeting}>
+        <h1>{timeGreeting()}!</h1>
+        <span className={styles.greetingText}>
           {stats.streak_days === 0
             ? "יאללה, מתחילות ללמוד!"
             : stats.streak_days === 1
@@ -168,46 +113,11 @@ export default async function HomePage() {
 
       {/* Today's task card */}
       {todayTopic ? (
-        <div
-          style={{
-            background: "var(--surface)",
-            border: "1px solid var(--border)",
-            borderRadius: "var(--radius-xl)",
-            boxShadow: "var(--shadow-card)",
-            padding: "20px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "16px",
-          }}
-        >
-          <span
-            style={{
-              alignSelf: "flex-start",
-              background: "var(--primary-soft)",
-              color: "var(--primary-soft-text)",
-              borderRadius: "var(--radius-sm)",
-              padding: "3px 10px",
-              fontSize: "var(--type-caption-size)",
-              fontWeight: "var(--type-caption-weight)" as never,
-            }}
-          >
-            המשימה להיום
-          </span>
-          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-            <h2
-              style={{
-                margin: 0,
-                fontSize: "var(--type-h2-size)",
-                fontWeight: "var(--type-h2-weight)" as never,
-                lineHeight: "var(--line-tight)",
-                color: "var(--text)",
-              }}
-            >
-              {todayTopic.name_he}
-            </h2>
-            <span style={{ fontSize: "var(--type-small-size)", color: "var(--text-muted)" }}>
-              8 שאלות תרגול · ~20 דק׳
-            </span>
+        <div className={styles.todayCard}>
+          <span className={styles.todayBadge}>המשימה להיום</span>
+          <div className={styles.todayTaskInfo}>
+            <h2>{todayTopic.name_he}</h2>
+            <span className={styles.todayTaskDesc}>8 שאלות תרגול · ~20 דק׳</span>
           </div>
           {/* Step path */}
           {(() => {
@@ -215,60 +125,25 @@ export default async function HomePage() {
             const current = pct >= 100 ? 6 : pct >= 67 ? 4 : pct >= 34 ? 3 : pct >= 1 ? 2 : 1;
             return <PathProgress total={5} current={current} />;
           })()}
-          <Link href={`/topics/${todayTopic.slug}`} style={{ textDecoration: "none" }}>
+          <Link href={`/topics/${todayTopic.slug}`} className={styles.noUnderline}>
             <button className="btn-primary">יאללה, מתחילות!</button>
           </Link>
         </div>
       ) : (
-        <div
-          style={{
-            background: "var(--primary-soft)",
-            borderRadius: "var(--radius-xl)",
-            padding: "20px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "12px",
-          }}
-        >
-          <h2
-            style={{
-              margin: 0,
-              fontSize: "var(--type-h2-size)",
-              fontWeight: "var(--type-h2-weight)" as never,
-              color: "var(--primary-soft-text)",
-            }}
-          >
-            מתי נוח לך ללמוד?
-          </h2>
-          <span style={{ fontSize: "var(--type-small-size)", color: "var(--text-muted)" }}>
-            קבעי תוכנית שבועית ונתחיל.
-          </span>
-          <Link href="/schedule" style={{ textDecoration: "none" }}>
+        <div className={styles.emptyStateCard}>
+          <h2>מתי נוח לך ללמוד?</h2>
+          <span className={styles.emptyCardDesc}>קבעי תוכנית שבועית ונתחיל.</span>
+          <Link href="/schedule" className={styles.noUnderline}>
             <button className="btn-primary">קבעי תוכנית</button>
           </Link>
         </div>
       )}
 
       {/* Topics */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
-          <h2
-            style={{
-              margin: 0,
-              fontSize: "var(--type-h2-size)",
-              fontWeight: "var(--type-h2-weight)" as never,
-              color: "var(--text)",
-            }}
-          >
-            הנושאים שלך
-          </h2>
-          <span
-            style={{
-              fontSize: "var(--type-caption-size)",
-              fontWeight: "var(--type-caption-weight)" as never,
-              color: "var(--text-faint)",
-            }}
-          >
+      <div className={styles.topicsSection}>
+        <div className={styles.topicsHeader}>
+          <h2>הנושאים שלך</h2>
+          <span className={styles.topicsCount}>
             {completedCount} מתוך {topics.length}
           </span>
         </div>
@@ -281,93 +156,30 @@ export default async function HomePage() {
             <Link
               key={topic.id}
               href={`/topics/${topic.slug}`}
-              style={{ textDecoration: "none" }}
+              className={styles.noUnderline}
             >
-              <div
-                style={{
-                  background: "var(--surface)",
-                  border: "1px solid var(--border)",
-                  borderRadius: "var(--radius-lg)",
-                  boxShadow: "var(--shadow-card)",
-                  padding: "16px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "14px",
-                }}
-              >
+              <div className={styles.topicLink}>
                 {topic.icon && (
-                  <div
-                    style={{
-                      width: "52px",
-                      height: "52px",
-                      borderRadius: "var(--radius-md)",
-                      background: "var(--surface-2)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flexShrink: 0,
-                    }}
-                  >
+                  <div className={styles.topicIconWrap}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={topic.icon}
                       alt=""
-                      style={{ width: "34px", height: "34px", objectFit: "contain" }}
+                      className={styles.topicIconImg}
                     />
                   </div>
                 )}
-                <div
-                  style={{
-                    flex: 1,
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "8px",
-                    minWidth: 0,
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "baseline",
-                      gap: "8px",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontWeight: 600,
-                        fontSize: "var(--type-body-size)",
-                        color: "var(--text)",
-                      }}
-                    >
-                      {topic.name_he}
-                    </span>
-                    <span
-                      style={{
-                        fontSize: "var(--type-caption-size)",
-                        fontWeight: 600,
-                        color: done ? "var(--success-text)" : "var(--text-faint)",
-                        flexShrink: 0,
-                      }}
-                    >
+                <div className={styles.topicBody}>
+                  <div className={styles.topicTitleRow}>
+                    <span className={styles.topicName}>{topic.name_he}</span>
+                    <span className={`${styles.topicStatus} ${done ? styles.topicStatusDone : ""}`}>
                       {done ? "✓ הושלם" : pct > 0 ? `${pct}%` : "טרם התחלת"}
                     </span>
                   </div>
-                  <div
-                    style={{
-                      height: "6px",
-                      borderRadius: "var(--radius-pill)",
-                      background: "var(--surface-2)",
-                      overflow: "hidden",
-                    }}
-                  >
+                  <div className={styles.progressTrack}>
                     <div
-                      style={{
-                        width: `${pct}%`,
-                        height: "100%",
-                        borderRadius: "var(--radius-pill)",
-                        background: done ? "var(--success)" : "var(--primary)",
-                      }}
+                      className={`${styles.progressFill} ${done ? styles.progressFillDone : ""}`}
+                      style={{ width: `${pct}%` }}
                     />
                   </div>
                 </div>

@@ -4,5 +4,13 @@
   "rules": {
     "selector-class-pattern": ["^[a-z][a-z0-9]*(-{1,2}[a-z0-9]+)*$", { "message": "Class names must be kebab-case (BEM -- modifier allowed)" }],
     "declaration-block-single-line-max-declarations": 1
-  }
+  },
+  "overrides": [
+    {
+      "files": ["**/*.module.css"],
+      "rules": {
+        "selector-class-pattern": ["^[a-z][a-zA-Z0-9]*$", { "message": "CSS Module class names must be camelCase" }]
+      }
+    }
+  ]
 }

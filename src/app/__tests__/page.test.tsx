@@ -113,8 +113,6 @@ describe("HomePage", () => {
     mockGetProgress.mockResolvedValue([]);
     const jsx = await HomePage();
     const { container } = render(jsx);
-    // PathProgress with current=1 renders step 1 as active (44x44px circle)
-    // and steps 2-4 as smaller (34x34px) circles
-    expect(container.querySelector('[style*="width: 44px"]')).toBeTruthy();
+    expect(container.querySelector("[data-active]")).toBeTruthy();
   });
 });

@@ -5,6 +5,7 @@ import { SignImage } from "@/components/SignImage";
 import { createClient } from "@/lib/supabase";
 import { getSigns } from "@/lib/db";
 import type { Sign } from "@/lib/db";
+import styles from "./page.module.css";
 
 function cleanName(name: string, signNumber: string): string {
   if (/^\d+$/.test(name.trim())) return `תמרור ${signNumber}`;
@@ -15,9 +16,9 @@ function cleanName(name: string, signNumber: string): string {
 function SignCard({ sign, index }: { sign: Sign; index: number }) {
   return (
     <div
-      className="flashcard-wrap"
+      className={`flashcard-wrap ${styles.flashcardItem}`}
       data-index={index}
-      style={{ display: index === 0 ? "flex" : "none", alignItems: "center", justifyContent: "center", flex: 1 }}
+      style={{ display: index === 0 ? "flex" : "none" }}
     >
       <div className="flashcard-inner">
         {/* Front */}
@@ -28,15 +29,7 @@ function SignCard({ sign, index }: { sign: Sign; index: number }) {
             size="md"
             style={{ width: "65%", maxHeight: "60%" }}
           />
-          <span
-            style={{
-              fontSize: "var(--type-caption-size)",
-              fontWeight: 600,
-              color: "var(--text-faint)",
-            }}
-          >
-            הקליקי להיפוך
-          </span>
+          <span className={styles.flashcardHint}>הקליקי להיפוך</span>
         </div>
         {/* Back */}
         <div className="flashcard-face flashcard-back-face">
@@ -46,29 +39,10 @@ function SignCard({ sign, index }: { sign: Sign; index: number }) {
             size="md"
             style={{ width: "45%", maxHeight: "40%", opacity: 0.35 }}
           />
-          <h2
-            style={{
-              margin: 0,
-              fontSize: "var(--type-h2-size)",
-              fontWeight: "var(--type-h2-weight)" as never,
-              color: "var(--text)",
-              lineHeight: "var(--line-tight)",
-              textAlign: "center",
-            }}
-          >
+          <h2 className={styles.flashcardBackH2}>
             {cleanName(sign.name_he, sign.sign_number)}
           </h2>
-          <span
-            style={{
-              fontSize: "var(--type-caption-size)",
-              color: "var(--text-faint)",
-              background: "var(--surface-2)",
-              borderRadius: "var(--radius-sm)",
-              padding: "2px 8px",
-            }}
-          >
-            תמרור {sign.sign_number}
-          </span>
+          <span className={styles.signNumberBadge}>תמרור {sign.sign_number}</span>
         </div>
       </div>
     </div>
@@ -87,81 +61,26 @@ export default async function FlashcardsPage() {
 
   return (
     <>
-      <main
-        style={{
-          background: "var(--bg)",
-          padding: "20px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "20px",
-          maxWidth: "440px",
-          margin: "0 auto",
-          minHeight: "100vh",
-          boxSizing: "border-box",
-        }}
-      >
+      <main className={styles.page}>
         {/* Top bar */}
-        <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-          <Link
-            href="/"
-            style={{
-              width: "44px",
-              height: "44px",
-              borderRadius: "50%",
-              border: "1px solid var(--border-strong)",
-              background: "var(--surface)",
-              color: "var(--text-muted)",
-              fontSize: "20px",
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              textDecoration: "none",
-              flexShrink: 0,
-            }}
-          >
+        <div className={styles.topBar}>
+          <Link href="/" className={styles.backBtn}>
             →
           </Link>
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "2px" }}>
-            <span
-              style={{
-                fontWeight: 600,
-                fontSize: "var(--type-body-size)",
-                color: "var(--text)",
-              }}
-            >
-              תמרורים: חזרה
-            </span>
-            <span
-              id="fc-count"
-              style={{
-                fontSize: "var(--type-caption-size)",
-                fontWeight: "var(--type-caption-weight)" as never,
-                color: "var(--text-faint)",
-              }}
-            >
+          <div className={styles.topBarBody}>
+            <span className={styles.topBarTitle}>תמרורים: חזרה</span>
+            <span id="fc-count" className={styles.topBarCount}>
               כרטיס 1 מתוך {total}
             </span>
           </div>
         </div>
 
         {/* Progress bar */}
-        <div
-          style={{
-            height: "8px",
-            borderRadius: "var(--radius-pill)",
-            background: "var(--surface-2)",
-            overflow: "hidden",
-          }}
-        >
+        <div className={styles.progressTrack}>
           <div
             id="fc-progress"
-            style={{
-              width: total > 0 ? `${(1 / total) * 100}%` : "0%",
-              height: "100%",
-              borderRadius: "var(--radius-pill)",
-              background: "var(--gold)",
-              transition: "width 300ms ease",
-            }}
+            className={styles.progressFill}
+            style={{ width: total > 0 ? `${(1 / total) * 100}%` : "0%" }}
           />
         </div>
 
@@ -169,7 +88,7 @@ export default async function FlashcardsPage() {
         <div
           id="flashcards-container"
           data-total={total}
-          style={{ flex: 1, display: "flex", flexDirection: "column" }}
+          className={styles.cardsContainer}
         >
           {signs.map((sign, i) => (
             <SignCard key={sign.id} sign={sign} index={i} />
@@ -177,44 +96,15 @@ export default async function FlashcardsPage() {
         </div>
 
         {/* Actions */}
-        <div style={{ display: "flex", gap: "12px" }}>
-          <button
-            id="fc-no"
-            className="btn-secondary"
-            style={{ flex: 1 }}
-          >
+        <div className={styles.actionsRow}>
+          <button id="fc-no" className={`btn-secondary ${styles.btnSecondaryFlex}`}>
             עוד לא
           </button>
-          <button
-            id="fc-yes"
-            style={{
-              flex: 1,
-              fontFamily: "var(--font-ui)",
-              fontWeight: 700,
-              fontSize: "15.5px",
-              minHeight: "52px",
-              padding: "10px 22px",
-              borderRadius: "var(--radius-lg)",
-              border: "1px solid transparent",
-              cursor: "pointer",
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: "var(--success)",
-              color: "#fff",
-              transition: "background 120ms",
-            }}
-          >
+          <button id="fc-yes" className={styles.btnYes}>
             ידעתי ✓
           </button>
         </div>
-        <span
-          style={{
-            fontSize: "var(--type-small-size)",
-            color: "var(--text-muted)",
-            textAlign: "center",
-          }}
-        >
+        <span className={styles.footerNote}>
           כרטיסים שסימנת &quot;עוד לא&quot; יחזרו אלייך מחר.
         </span>
       </main>

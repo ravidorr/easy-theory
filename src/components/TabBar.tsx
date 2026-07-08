@@ -1,4 +1,5 @@
 import Link from "next/link";
+import styles from "./TabBar.module.css";
 
 type ActiveTab = "home" | "topics" | "cards" | "more";
 
@@ -47,41 +48,18 @@ export function TabBar({ active }: { active: ActiveTab }) {
   ];
 
   return (
-    <nav
-      style={{
-        position: "fixed",
-        bottom: 0,
-        left: "50%",
-        transform: "translateX(-50%)",
-        width: "100%",
-        maxWidth: "440px",
-        boxSizing: "border-box",
-        background: "var(--surface)",
-        borderTop: "1px solid var(--border)",
-        display: "flex",
-        padding: "6px 8px calc(6px + env(safe-area-inset-bottom))",
-      }}
-    >
+    <nav className={styles.nav}>
       {tabs.map((tab) => {
         const isActive = tab.key === active;
         return (
           <Link
             key={tab.key}
             href={tab.href}
-            style={{
-              flex: 1,
-              minHeight: "var(--hit-min)",
-              textDecoration: "none",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "2px",
-              color: isActive ? "var(--primary-soft-text)" : "var(--text-faint)",
-            }}
+            aria-current={isActive ? "page" : undefined}
+            className={styles.navItem}
           >
             {tab.icon}
-            <span style={{ fontSize: "var(--type-caption-size)", fontWeight: isActive ? 700 : 600 }}>
+            <span className={styles.navLabel}>
               {tab.label}
             </span>
           </Link>
