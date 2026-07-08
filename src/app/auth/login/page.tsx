@@ -74,7 +74,7 @@ export default function LoginPage() {
             <div className={styles.sentBody}>
               <h3 className={styles.sentTitle}>הקישור בדרך אלייך</h3>
               <p className={styles.sentHint}>
-                בדקי את המייל ולחצי על הקישור כדי להיכנס.
+                יש ללחוץ על הקישור כדי להיכנס.
               </p>
               <p className={styles.resendRow}>
                 לא קיבלת?{" "}

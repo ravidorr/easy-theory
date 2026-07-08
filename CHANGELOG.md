@@ -6,6 +6,13 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ---
 
+## [0.3.31] — 2026-07-08
+
+### Changed
+- Login page "magic link sent" hint text updated to gender-neutral phrasing: "יש ללחוץ על הקישור כדי להיכנס."
+
+---
+
 ## [0.3.30] — 2026-07-08
 
 ### Fixed
