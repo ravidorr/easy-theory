@@ -6,6 +6,14 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ---
 
+## [0.3.32] — 2026-07-08
+
+### Changed
+- Home screen CTA button text updated from "יאללה, מתחילות!" to "יאללה, לעבודה!"
+- Streak subtitle updated from "X ימים ברצף, ממשיכות בקצב שלך." to "X ימים ברצף, קצב טוב."
+
+---
+
 ## [0.3.31] — 2026-07-08
 
 ### Changed

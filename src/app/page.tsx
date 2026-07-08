@@ -104,10 +104,10 @@ export default async function HomePage() {
         <h1>{timeGreeting()}!</h1>
         <span className={styles.greetingText}>
           {stats.streak_days === 0
-            ? "יאללה, מתחילות ללמוד!"
+            ? "יאללה, לעבודה!"
             : stats.streak_days === 1
-            ? "יום ראשון ברצף, ממשיכות בקצב שלך!"
-            : `${stats.streak_days} ימים ברצף, ממשיכות בקצב שלך.`}
+            ? "יום ראשון ברצף, קצב טוב."
+            : `${stats.streak_days} ימים ברצף, קצב טוב.`}
         </span>
       </div>
 
@@ -126,7 +126,7 @@ export default async function HomePage() {
             return <PathProgress total={5} current={current} />;
           })()}
           <Link href={`/topics/${todayTopic.slug}`} className={styles.noUnderline}>
-            <button className="btn-primary">יאללה, מתחילות!</button>
+            <button className="btn-primary">יאללה, לעבודה!</button>
           </Link>
         </div>
       ) : (

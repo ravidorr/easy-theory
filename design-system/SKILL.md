@@ -61,7 +61,7 @@ Bottom **TabBar** with exactly 4 tabs: הבית (home) · נושאים (topics) 
 ## Hard rules
 
 1. Quiet surfaces: flat `--bg`, no gradients, no textures, no ambient animation.
-2. Voice: warm, feminine second person ("יאללה, מתחילות!"). NO em-dashes. No pressure framing (never countdowns like "נשארו רק X ימים").
+2. Voice: warm, feminine second person ("יאללה, לעבודה!"). NO em-dashes. No pressure framing (never countdowns like "נשארו רק X ימים").
 3. Emoji: max one per screen, celebrations only.
 4. Hit targets ≥ 44px; corners ≥ 8px; pills for counters/CTAs.
 5. Progress everywhere, pressure nowhere: streak, stars, path, percent — always visible, always gentle.
