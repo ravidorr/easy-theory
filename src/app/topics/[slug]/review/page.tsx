@@ -71,7 +71,7 @@ function QuestionReview({ question }: { question: QuizMistake }) {
               <span className="quiz-option-badge">{LETTERS[i]}</span>
               {optionSignImg ? (
                 <span className={styles.optionSignContent}>
-                  <SignImage src={optionSignImg} size="sm" />
+                  <SignImage src={optionSignImg} size="md" />
                   <span className={styles.optionSignLabel}>{text}</span>
                 </span>
               ) : (
