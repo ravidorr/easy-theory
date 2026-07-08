@@ -4,7 +4,7 @@
 INSERT INTO signs (id, sign_number, name_he, meaning_he, image_path, category) VALUES
   (gen_random_uuid(), '100', '4 X 4 בלבד . יער , חורש או פארק', '4 X 4 בלבד . יער , חורש או פארק דרך מסומנת לטיול המיועדת לרכב שהוכשר לביקורי', '/signs/sign-100.png', 'warning'),
   (gen_random_uuid(), '101', 'כביש משובש.', 'כביש משובש. בדרך שלפניך.', '/signs/sign-101.png', 'warning'),
-  (gen_random_uuid(), '102', 'עקומה חדה ימינה או שמאלה, בהתאמה.', 'עקומה חדה ימינה או שמאלה, בהתאמה. בדרך שלפניך.', '/signs/sign-102.png', 'warning'),
+  (gen_random_uuid(), '102', 'עקומה חדה ימינה.', 'עקומה חדה ימינה. בדרך שלפניך.', '/signs/sign-102.png', 'warning'),
   (gen_random_uuid(), '103', '103', '', '/signs/sign-103.png', 'warning'),
   (gen_random_uuid(), '104', 'עקומה ימינה ואח"כ שמאלה או שמאלה ואח"כ ימינה, בהתאמה.', 'עקומה ימינה ואח"כ שמאלה או שמאלה ואח"כ ימינה, בהתאמה. בדרך שלפניך.', '/signs/sign-104.png', 'warning'),
   (gen_random_uuid(), '105', 'דרך מפותלת', 'דרך מפותלת בדרך שלפניך.', '/signs/sign-105.png', 'warning'),

@@ -39,6 +39,11 @@ yarn-error.log*
 # claude code local workspace
 .claude/
 
+# conductor / mcp tooling
+.agents/
+.mcp.json
+skills-lock.json
+
 # python
 __pycache__/
 *.pyc
