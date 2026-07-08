@@ -54,13 +54,15 @@ export async function POST(request: Request) {
 
   const alreadyAnsweredCorrectly = existingCorrect != null;
 
-  // Save response
-  await supabase.from("user_quiz_responses").insert({
+  // Save response — upsert so retaking the quiz updates the existing row
+  // (the DB has UNIQUE(user_id, question_id) from migration 001)
+  await supabase.from("user_quiz_responses").upsert({
     user_id: user.id,
     question_id,
     selected_option,
     is_correct,
-  });
+    answered_at: new Date().toISOString(),
+  }, { onConflict: "user_id,question_id" });
 
   let stars_earned = 0;
   const medals_earned: string[] = [];

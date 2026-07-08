@@ -6,6 +6,13 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ---
 
+## [0.3.29] — 2026-07-08
+
+### Fixed
+- Quiz responses now upsert on `(user_id, question_id)` instead of inserting, so re-answering a question correctly updates the stored row rather than silently failing against the UNIQUE constraint — the mistake review page now reflects the user's latest answer
+
+---
+
 ## [0.3.28] — 2026-07-08
 
 ### Fixed
