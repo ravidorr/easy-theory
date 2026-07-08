@@ -18,6 +18,10 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ## [Unreleased]
 
+### Fixed
+
+- Correct sign 102 Hebrew name to "sharp curve right" (sign 103 is the left variant)
+
 ### Added
 - Stats card at the top of the more page showing streak days and star points side by side
 
