@@ -2,6 +2,20 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.38] — 2026-07-08
+
+### Changed
+- Raise coverage thresholds: lines 90%, statements 90%, functions 90%, branches 80%
+
+---
+
+## [0.3.37] — 2026-07-08
+
+### Added
+- Enforce test coverage minimums that fail CI when coverage drops below the baseline: lines 84%, branches 76%, functions 83%, statements 83%
+
+---
+
 ## [Unreleased]
 
 ### Added
