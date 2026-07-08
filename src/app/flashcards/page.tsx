@@ -54,7 +54,7 @@ export default async function FlashcardsPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/login");
+  if (!user) redirect("/auth/login?next=/flashcards");
 
   const signs = await getSigns(supabase, 277);
   const total = signs.length;

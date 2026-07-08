@@ -87,4 +87,48 @@ describe("POST /api/auth/send-otp", () => {
       })
     );
   });
+
+  it("appends next param to emailRedirectTo when valid", async () => {
+    const client = makeClient();
+    mockCreateClient.mockResolvedValue(client as never);
+    await POST(makeRequest({ email: "user@example.com", next: "/topics/signs/review" }));
+    expect(client.auth.signInWithOtp).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: expect.objectContaining({
+          emailRedirectTo: expect.stringContaining("next=%2Ftopics%2Fsigns%2Freview"),
+        }),
+      })
+    );
+  });
+
+  it("defaults next to / when omitted", async () => {
+    const client = makeClient();
+    mockCreateClient.mockResolvedValue(client as never);
+    await POST(makeRequest({ email: "user@example.com" }));
+    expect(client.auth.signInWithOtp).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: expect.objectContaining({
+          emailRedirectTo: expect.stringContaining("next=%2F"),
+        }),
+      })
+    );
+  });
+
+  it("ignores next when it does not start with /", async () => {
+    const client = makeClient();
+    mockCreateClient.mockResolvedValue(client as never);
+    await POST(makeRequest({ email: "user@example.com", next: "https://evil.com" }));
+    const call = client.auth.signInWithOtp.mock.calls[0][0];
+    expect(call.options.emailRedirectTo).toContain("next=%2F");
+    expect(call.options.emailRedirectTo).not.toContain("evil");
+  });
+
+  it("ignores next when it starts with //", async () => {
+    const client = makeClient();
+    mockCreateClient.mockResolvedValue(client as never);
+    await POST(makeRequest({ email: "user@example.com", next: "//evil.com/path" }));
+    const call = client.auth.signInWithOtp.mock.calls[0][0];
+    expect(call.options.emailRedirectTo).toContain("next=%2F");
+    expect(call.options.emailRedirectTo).not.toContain("evil");
+  });
 });
