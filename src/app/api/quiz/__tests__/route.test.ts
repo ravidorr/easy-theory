@@ -70,7 +70,7 @@ function buildDb({
       }
 
       if (table === "user_quiz_responses") {
-        // call 1: existingCorrect check (maybeSingle); call 2: insert
+        // call 1: existingCorrect check (maybeSingle); call 2: upsert
         if (n === 1) {
           return {
             select: vi.fn().mockReturnThis(),
@@ -81,7 +81,7 @@ function buildDb({
             }),
           };
         }
-        return { insert: vi.fn().mockResolvedValue({ error: null }) };
+        return { upsert: vi.fn().mockResolvedValue({ error: null }) };
       }
 
       if (table === "user_stats") {
