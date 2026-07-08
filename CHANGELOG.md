@@ -7,6 +7,9 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 ### Added
 - Stats card at the top of the more page showing streak days and star points side by side
 
+### Fixed
+- More page test mock was missing `getUserStats` after it was added to the page
+
 ---
 
 ## [0.3.34] — 2026-07-08
