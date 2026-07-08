@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase";
+import { TabBar } from "@/components/TabBar";
 import styles from "./page.module.css";
 
 const PlayIcon = ({ size = 20 }: { size?: number }) => (
@@ -17,16 +17,11 @@ export default async function VideosPage() {
   if (!user) redirect("/auth/login");
 
   return (
+    <>
     <main className={styles.page}>
-      {/* Top bar */}
-      <div className={styles.topBar}>
-        <Link href="/more" className={styles.backBtn}>
-          →
-        </Link>
-        <div className={styles.titleCol}>
-          <h1>סרטוני לימוד</h1>
-          <span className={styles.subtitle}>שיעורים קצרים ומרתונים, לפי נושא.</span>
-        </div>
+      <div>
+        <h1>סרטוני לימוד</h1>
+        <span className={styles.subtitle}>שיעורים קצרים ומרתונים, לפי נושא.</span>
       </div>
 
       {/* Marathons */}
@@ -132,5 +127,7 @@ export default async function VideosPage() {
 
       <span className={styles.pageNote}>הסרטונים נפתחים ביוטיוב</span>
     </main>
+    <TabBar active="videos" />
+    </>
   );
 }

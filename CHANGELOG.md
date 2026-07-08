@@ -6,6 +6,17 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ---
 
+## [0.3.33] — 2026-07-08
+
+### Changed
+- Merged topic descriptions into the home page topic cards
+- Removed the redundant נושאים (/topics) listing page
+- Replaced the נושאים tab in the bottom nav with two new tabs: סרטונים (/videos) and קישורים (/resources)
+- Promoted סרטוני לימוד and חומרים שימושיים from the "more" page to first-class TabBar tabs
+- Videos and resources pages now show the TabBar instead of a back-button header
+
+---
+
 ## [0.3.32] — 2026-07-08
 
 ### Changed

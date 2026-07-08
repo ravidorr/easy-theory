@@ -228,6 +228,12 @@
   background: var(--success);
 }
 
+.topicDesc {
+  font-size: var(--type-small-size);
+  color: var(--text-muted);
+  line-height: var(--line-body);
+}
+
 .noUnderline {
   text-decoration: none;
 }

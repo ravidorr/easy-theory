@@ -38,7 +38,7 @@ export default async function MorePage() {
 
         {/* Navigation rows */}
         <div className={styles.navCard}>
-          <a href="/schedule" className={`${styles.navRow} ${styles.navRowBordered}`}>
+          <a href="/schedule" className={styles.navRow}>
             <span className={styles.navIcon}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="4" width="18" height="17" rx="3" /><path d="M8 2v4M16 2v4M3 9h18" />
@@ -50,29 +50,7 @@ export default async function MorePage() {
             </svg>
           </a>
 
-          <a href="/videos" className={`${styles.navRow} ${styles.navRowBordered}`}>
-            <span className={styles.navIcon}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="2" y="5" width="20" height="14" rx="3" /><path d="m14 12-4-2.5v5z" fill="currentColor" stroke="none" />
-              </svg>
-            </span>
-            <span className={styles.navRowLabel}>סרטוני לימוד</span>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={styles.navChevron}>
-              <path d="m15 18-6-6 6-6" />
-            </svg>
-          </a>
 
-          <a href="/resources" className={styles.navRow}>
-            <span className={styles.navIcon}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7" /><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7" />
-              </svg>
-            </span>
-            <span className={styles.navRowLabel}>חומרים שימושיים</span>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={styles.navChevron}>
-              <path d="m15 18-6-6 6-6" />
-            </svg>
-          </a>
         </div>
 
         {/* Medals */}

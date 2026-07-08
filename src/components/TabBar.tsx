@@ -1,7 +1,7 @@
 import Link from "next/link";
 import styles from "./TabBar.module.css";
 
-type ActiveTab = "home" | "topics" | "cards" | "more";
+type ActiveTab = "home" | "videos" | "cards" | "links" | "more";
 
 export function TabBar({ active }: { active: ActiveTab }) {
   const tabs = [
@@ -16,12 +16,12 @@ export function TabBar({ active }: { active: ActiveTab }) {
       ),
     },
     {
-      key: "topics" as ActiveTab,
-      href: "/topics",
-      label: "נושאים",
+      key: "videos" as ActiveTab,
+      href: "/videos",
+      label: "סרטונים",
       icon: (
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z" />
+          <rect x="2" y="5" width="20" height="14" rx="3" /><path d="m14 12-4-2.5v5z" fill="currentColor" stroke="none" />
         </svg>
       ),
     },
@@ -32,6 +32,16 @@ export function TabBar({ active }: { active: ActiveTab }) {
       icon: (
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <rect x="8" y="8" width="12" height="12" rx="2" /><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" />
+        </svg>
+      ),
+    },
+    {
+      key: "links" as ActiveTab,
+      href: "/resources",
+      label: "קישורים",
+      icon: (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7" /><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7" />
         </svg>
       ),
     },
