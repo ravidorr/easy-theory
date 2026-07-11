@@ -2,6 +2,11 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.51] — 2026-07-11
+
+### Fixed
+- Review page no longer shows the previous wrong answer (red highlight) after a user answers a question correctly on retry — caused by a missing RLS UPDATE policy on `user_quiz_responses` that silently blocked the upsert from overwriting the stale row
+
 ## [0.3.50] — 2026-07-11
 
 ### Fixed

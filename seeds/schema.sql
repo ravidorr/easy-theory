@@ -79,7 +79,8 @@ CREATE TABLE IF NOT EXISTS user_quiz_responses (
   question_id     UUID REFERENCES questions(id),
   selected_option CHAR(1),
   is_correct      BOOLEAN NOT NULL,
-  answered_at     TIMESTAMPTZ DEFAULT NOW()
+  answered_at     TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, question_id)
 );
 
 CREATE TABLE IF NOT EXISTS user_push_subscriptions (
@@ -127,6 +128,7 @@ CREATE POLICY "own update" ON user_topic_progress FOR UPDATE USING (user_id = au
 
 CREATE POLICY "own select" ON user_quiz_responses FOR SELECT USING (user_id = auth.uid());
 CREATE POLICY "own insert" ON user_quiz_responses FOR INSERT WITH CHECK (user_id = auth.uid());
+CREATE POLICY "own update" ON user_quiz_responses FOR UPDATE USING (user_id = auth.uid());
 
 ALTER TABLE user_push_subscriptions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "own select" ON user_push_subscriptions FOR SELECT USING (user_id = auth.uid());
