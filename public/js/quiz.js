@@ -102,7 +102,7 @@
     confirmed = false;
     if (actionBtn) {
       actionBtn.disabled = true;
-      actionBtn.textContent = "בדקי תשובה";
+      actionBtn.textContent = "מה התשובה?";
     }
     if (rewardBanner) rewardBanner.hidden = true;
   }
