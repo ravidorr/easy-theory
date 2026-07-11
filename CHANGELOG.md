@@ -2,6 +2,22 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.46] — 2026-07-11
+
+### Changed
+- Remove completed CSS Modules item from TODO.md
+
+---
+
+## [0.3.45] — 2026-07-11
+
+### Changed
+- Extract static inline styles from `SignImage`: add `className` prop, move `flex-shrink`/`display` to `SignImage.module.css`
+- Replace conditional `style={{display}}` on quiz-next button with `className` toggle using the existing `styles.hidden` module class
+- Remove hardcoded 88px inline style override from review page sign image (uses `size="md"` default)
+
+---
+
 ## [0.3.44] — 2026-07-08
 
 ### Changed

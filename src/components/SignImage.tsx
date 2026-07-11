@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import styles from "./SignImage.module.css";
 
 const SIZES = {
   xs: 32,
@@ -12,10 +13,11 @@ type SignImageProps = {
   src: string;
   alt?: string;
   size?: SignImageSize;
+  className?: string;
   style?: CSSProperties;
 };
 
-export function SignImage({ src, alt = "", size = "sm", style }: SignImageProps) {
+export function SignImage({ src, alt = "", size = "sm", className, style }: SignImageProps) {
   const px = SIZES[size];
 
   return (
@@ -23,15 +25,8 @@ export function SignImage({ src, alt = "", size = "sm", style }: SignImageProps)
     <img
       src={src}
       alt={alt}
-      className="sign-image"
-      style={{
-        width: px,
-        height: px,
-        objectFit: "contain",
-        flexShrink: 0,
-        display: "block",
-        ...style,
-      }}
+      className={["sign-image", styles.root, className].filter(Boolean).join(" ")}
+      style={{ width: px, height: px, ...style }}
     />
   );
 }
