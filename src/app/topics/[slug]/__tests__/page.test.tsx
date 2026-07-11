@@ -140,12 +140,12 @@ describe("TopicQuizPage", () => {
     expect(container.querySelector("img[src='/questions/TEST_IMAGE_DO_NOT_DELETE.png']")).toBeTruthy();
   });
 
-  it("does not render image when /questions/ file does not exist", async () => {
+  it("renders placeholder image when /questions/ file does not exist", async () => {
     const q = { ...QUESTION, image_url: "/questions/TEST_IMAGE_DOES_NOT_EXIST.png" };
     mockGetQuestions.mockResolvedValue([q] as never);
     const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs" }) });
     const { container } = render(jsx);
-    expect(container.querySelector("img")).toBeNull();
+    expect(container.querySelector("img[src='/placeholder.svg']")).toBeTruthy();
   });
 
   it("renders wide image for non-questions non-sign URL", async () => {
