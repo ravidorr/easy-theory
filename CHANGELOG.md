@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.50] — 2026-07-11
+
+### Fixed
+- Add missing assertions to the `setAll` cookie-callback tests in `proxy.test.ts` and `auth/callback/route.test.ts`
+
+---
+
 ## [0.3.49] — 2026-07-11
 
 ### Changed

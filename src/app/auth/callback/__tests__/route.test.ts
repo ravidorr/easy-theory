@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { GET } from "../route";
 import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 
 // vi.mock is hoisted — use vi.hoisted() so the variable is available inside the factory.
 const mockExchangeCode = vi.hoisted(() => vi.fn().mockResolvedValue({ error: null }));
@@ -81,7 +82,9 @@ describe("GET /auth/callback", () => {
           setAll: (c: Array<{ name: string; value: string; options?: unknown }>) => void;
         };
       };
+      const cookieStore = await vi.mocked(cookies)();
       options.cookies.setAll([{ name: "a", value: "b", options: {} }]);
+      expect(cookieStore.set).toHaveBeenCalledWith("a", "b", {});
     });
   });
 });

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { proxy } from "../proxy";
 import { createServerClient } from "@supabase/ssr";
+import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 const mockGetUser = vi.hoisted(() =>
@@ -148,6 +149,8 @@ describe("proxy middleware", () => {
         };
       };
       options.cookies.setAll([{ name: "session", value: "tok", options: { httpOnly: true } }]);
+      // setAll reassigns supabaseResponse via a second NextResponse.next call
+      expect(vi.mocked(NextResponse.next)).toHaveBeenCalledTimes(2);
     });
   });
 
