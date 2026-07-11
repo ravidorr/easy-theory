@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.47] — 2026-07-11
+
+### Added
+- Integrate Vercel Analytics (`@vercel/analytics`) into the root layout for page-view tracking
+
+---
+
 ## [0.3.46] — 2026-07-11
 
 ### Changed
