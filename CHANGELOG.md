@@ -2,6 +2,14 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.53] — 2026-07-11
+
+### Fixed
+- "Identify the sign" quiz questions no longer display the correct-answer sign above the question text — the top image is now suppressed whenever `image_url` is a `/signs/` path and at least one answer option is a sign number. Previously, the `every()` check broke on questions with a "none of the above" text option, revealing the answer before the user could choose.
+- Same fix applied to the review page, which had no suppression at all and showed the answer sign at the top for all 53 Type B questions.
+
+---
+
 ## [0.3.52] — 2026-07-11
 
 ### Fixed
