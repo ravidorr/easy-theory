@@ -195,4 +195,19 @@ describe("HomePage", () => {
     render(jsx);
     expect(screen.getByText("50%")).toBeInTheDocument();
   });
+
+  it("shows days-to-next-medal nudge based on streak_days", async () => {
+    // streak=7 → next milestone is 14 → 7 days away
+    mockGetStats.mockResolvedValue({ streak_days: 7, star_points: 10 } as never);
+    const jsx = await HomePage();
+    render(jsx);
+    expect(screen.getByText(/עוד 7 ימים לאות הבא/)).toBeInTheDocument();
+  });
+
+  it("shows all-medals-earned message when streak_days >= 30", async () => {
+    mockGetStats.mockResolvedValue({ streak_days: 30, star_points: 300 } as never);
+    const jsx = await HomePage();
+    render(jsx);
+    expect(screen.getByText(/השגת את כל האותות/)).toBeInTheDocument();
+  });
 });
