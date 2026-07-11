@@ -64,7 +64,7 @@ export default async function MorePage() {
 
         {/* Navigation rows */}
         <div className={styles.navCard}>
-          <a href="/schedule" className={styles.navRow}>
+          <a href="/schedule" className={`${styles.navRow} ${styles.navRowBordered}`}>
             <span className={styles.navIcon}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="4" width="18" height="17" rx="3" /><path d="M8 2v4M16 2v4M3 9h18" />
@@ -76,7 +76,17 @@ export default async function MorePage() {
             </svg>
           </a>
 
-
+          <a href="/credits" className={styles.navRow}>
+            <span className={styles.navIcon}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+              </svg>
+            </span>
+            <span className={styles.navRowLabel}>קרדיטים</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={styles.navChevron}>
+              <path d="m15 18-6-6 6-6" />
+            </svg>
+          </a>
         </div>
 
         {/* Medals */}
