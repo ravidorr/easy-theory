@@ -2,6 +2,16 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.54] — 2026-07-11
+
+### Changed
+- Improved branch test coverage from 95.82% to 97.05% by adding tests for previously-untested branches: PathProgress step 3 (pct 34–66), `cleanName` delimiter splitting, schedule route insert-error 500 response, schedule route default `duration_minutes`/`notify` values, and `/questions/` image file-existence check in both the quiz and review pages
+- Removed non-functional `fs` mock infrastructure (`vi.hoisted`, `vi.mock("fs", ...)`, `mockExistsSync`) from the quiz and review page test files — the real `existsSync` was always called; the mocks had no effect
+- Added `public/questions/TEST_IMAGE_DO_NOT_DELETE.png` (1×1 PNG) so file-existence tests use a stable, clearly-named fixture rather than an arbitrary production image
+- Standardised non-existent-image references in tests to `TEST_IMAGE_DOES_NOT_EXIST.png`
+
+---
+
 ## [0.3.53] — 2026-07-11
 
 ### Fixed

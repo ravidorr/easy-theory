@@ -161,6 +161,16 @@ describe("HomePage", () => {
     expect(screen.getAllByText("✓")).toHaveLength(1);
   });
 
+  it("calculates step 3 when best_score is 50", async () => {
+    mockGetProgress.mockResolvedValue([
+      { topic_id: "t1", status: "in_progress", best_score: 50 },
+    ] as never);
+    const jsx = await HomePage();
+    const { container } = render(jsx);
+    expect(container.querySelector("[data-active]")).toBeTruthy();
+    expect(screen.getAllByText("✓")).toHaveLength(2);
+  });
+
   it("renders icon image when topic has an icon", async () => {
     const topicWithIcon = { id: "t1", slug: "signs", name_he: "תמרורים", icon: "/icons/signs.png" };
     mockGetTopics.mockResolvedValue([topicWithIcon] as never);

@@ -84,6 +84,14 @@ describe("FlashcardsPage", () => {
     expect(screen.getByText("הקליקי להיפוך")).toBeInTheDocument();
   });
 
+  it("trims name at first comma when name contains a comma", async () => {
+    const sign = { ...SIGN_1, name_he: "חנייה אסורה, מוחלטת" };
+    mockGetSigns.mockResolvedValue([sign] as never);
+    const jsx = await FlashcardsPage();
+    render(jsx);
+    expect(screen.getByRole("heading", { name: "חנייה אסורה" })).toBeInTheDocument();
+  });
+
   it("converts a purely-numeric name_he to 'תמרור <sign_number>'", async () => {
     const numericSign = { ...SIGN_1, name_he: "9999" };
     mockGetSigns.mockResolvedValue([numericSign] as never);
