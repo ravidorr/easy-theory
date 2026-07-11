@@ -19,3 +19,7 @@ export function isMilestoneReached(
 ): boolean {
   return newStreak !== oldStreak && milestones.includes(newStreak);
 }
+
+export function nextMedalTarget(streakDays: number): number | null {
+  return STREAK_MILESTONES.find((m) => m > streakDays) ?? null;
+}

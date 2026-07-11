@@ -2,6 +2,17 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.59] — 2026-07-11
+
+### Added
+- Streak-to-next-medal nudge on the home page: shows "עוד X ימים לאות הבא" under the greeting so users know how close they are to the next milestone (3 / 7 / 14 / 30 days); displays a congratulatory message once all medals are earned
+- `nextMedalTarget()` helper exported from `src/lib/quiz.ts`
+
+### Removed
+- "Thank you / Credits" and "Gamification" sections from TODO.md (both shipped)
+
+---
+
 ## [0.3.58] — 2026-07-11
 
 ### Changed

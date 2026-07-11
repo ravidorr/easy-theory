@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   computeNewStreak,
   isMilestoneReached,
+  nextMedalTarget,
   STREAK_MILESTONES,
 } from "../quiz";
 
@@ -45,5 +46,27 @@ describe("isMilestoneReached", () => {
 
   it("returns false when streak resets to 1 (1 is not a milestone)", () => {
     expect(isMilestoneReached(1, 15, STREAK_MILESTONES)).toBe(false);
+  });
+});
+
+describe("nextMedalTarget", () => {
+  it("returns first milestone (3) when streak is 0", () => {
+    expect(nextMedalTarget(0)).toBe(3);
+  });
+
+  it("returns next milestone after a reached one", () => {
+    expect(nextMedalTarget(3)).toBe(7);
+    expect(nextMedalTarget(7)).toBe(14);
+    expect(nextMedalTarget(14)).toBe(30);
+  });
+
+  it("returns the next milestone mid-way between milestones", () => {
+    expect(nextMedalTarget(5)).toBe(7);
+    expect(nextMedalTarget(29)).toBe(30);
+  });
+
+  it("returns null when all milestones are earned (streak >= 30)", () => {
+    expect(nextMedalTarget(30)).toBeNull();
+    expect(nextMedalTarget(45)).toBeNull();
   });
 });

@@ -6,6 +6,7 @@ import {
   getUserStats,
   getTopicProgress,
 } from "@/lib/db";
+import { nextMedalTarget } from "@/lib/quiz";
 import { TabBar } from "@/components/TabBar";
 import styles from "./page.module.css";
 
@@ -81,6 +82,10 @@ export default async function HomePage() {
 
   const completedCount = progressRows.filter((p) => p.status === "completed").length;
 
+  const MEDAL_EMOJI: Record<number, string> = { 3: "🔥", 7: "⭐", 14: "💎", 30: "🏆" };
+  const nextMedal = nextMedalTarget(stats.streak_days);
+  const daysToNextMedal = nextMedal !== null ? nextMedal - stats.streak_days : null;
+
   return (
     <>
     <main className={styles.page}>
@@ -109,6 +114,13 @@ export default async function HomePage() {
             ? "יום ראשון ברצף, קצב טוב."
             : `${stats.streak_days} ימים ברצף, קצב טוב.`}
         </span>
+        {daysToNextMedal !== null ? (
+          <span className={styles.medalNudge}>
+            עוד {daysToNextMedal} {daysToNextMedal === 1 ? "יום" : "ימים"} לאות הבא {MEDAL_EMOJI[nextMedal!]}
+          </span>
+        ) : stats.streak_days >= 30 ? (
+          <span className={styles.medalNudge}>השגת את כל האותות! 🏆</span>
+        ) : null}
       </div>
 
       {/* Today's task card */}

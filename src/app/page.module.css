@@ -76,6 +76,12 @@
   color: var(--text-muted);
 }
 
+.medalNudge {
+  font-size: var(--type-caption-size);
+  font-weight: 600;
+  color: var(--primary-soft-text);
+}
+
 .todayCard {
   background: var(--surface);
   border: 1px solid var(--border);
