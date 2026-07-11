@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { proxy } from "../proxy";
+import { createServerClient } from "@supabase/ssr";
 import type { NextRequest } from "next/server";
 
 const mockGetUser = vi.hoisted(() =>
@@ -14,7 +15,7 @@ vi.mock("@supabase/ssr", () => ({
 
 vi.mock("next/server", () => ({
   NextResponse: {
-    next: vi.fn().mockReturnValue(new Response(null, { status: 200 })),
+    next: vi.fn().mockImplementation(() => ({ status: 200, cookies: { set: vi.fn() } })),
     redirect: vi.fn().mockImplementation((url: URL | string) =>
       new Response(null, {
         status: 307,
@@ -121,6 +122,32 @@ describe("proxy middleware", () => {
     it("allows /favicon.ico through", async () => {
       const res = await proxy(makeRequest("/favicon.ico"));
       expect(res.status).toBe(200);
+    });
+  });
+
+  describe("cookie callbacks passed to createServerClient", () => {
+    it("getAll returns the request cookies", async () => {
+      const request = makeRequest("/topics");
+      await proxy(request);
+      const options = vi.mocked(createServerClient).mock.calls[0][2] as {
+        cookies: {
+          getAll: () => unknown[];
+          setAll: (c: Array<{ name: string; value: string; options?: unknown }>) => void;
+        };
+      };
+      expect(options.cookies.getAll()).toEqual([]);
+    });
+
+    it("setAll sets cookies on the request and updates the response", async () => {
+      const request = makeRequest("/topics");
+      await proxy(request);
+      const options = vi.mocked(createServerClient).mock.calls[0][2] as {
+        cookies: {
+          getAll: () => unknown[];
+          setAll: (c: Array<{ name: string; value: string; options?: unknown }>) => void;
+        };
+      };
+      options.cookies.setAll([{ name: "session", value: "tok", options: { httpOnly: true } }]);
     });
   });
 

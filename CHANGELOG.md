@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.49] — 2026-07-11
+
+### Changed
+- Bump Vitest functions coverage from 92% to 100% by exercising the Supabase SSR cookie callbacks (`getAll`/`setAll`) in proxy and auth callback tests, and adding full test coverage for `markTopicCompleted` in `db.test.ts`
+
+---
+
 ## [0.3.48] — 2026-07-11
 
 ### Added

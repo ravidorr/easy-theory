@@ -11,6 +11,7 @@ import {
   getUserMedals,
   getPushSubscriptionsForUsers,
   getMistakesForTopic,
+  markTopicCompleted,
 } from "../db";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -265,5 +266,56 @@ describe("getMistakesForTopic", () => {
       ],
     });
     expect(await getMistakesForTopic(supabase, "u1", "t1")).toEqual([]);
+  });
+});
+
+// ─── markTopicCompleted ──────────────────────────────────────────────────────
+
+function makeMarkTopicClient(existing: { id: string; status: string } | null) {
+  const updateEq = vi.fn().mockResolvedValue({ data: null });
+  const updateFn = vi.fn().mockReturnValue({ eq: updateEq });
+  const insertFn = vi.fn().mockResolvedValue({ data: null });
+
+  const fromMock = {
+    select: vi.fn().mockReturnValue({
+      eq: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({ data: existing }),
+        }),
+      }),
+    }),
+    update: updateFn,
+    insert: insertFn,
+  };
+
+  return {
+    client: { from: vi.fn().mockReturnValue(fromMock) } as unknown as SupabaseClient,
+    updateFn,
+    insertFn,
+  };
+}
+
+describe("markTopicCompleted", () => {
+  it("inserts a new record when none exists", async () => {
+    const { client, insertFn } = makeMarkTopicClient(null);
+    await markTopicCompleted(client, "u1", "t1");
+    expect(insertFn).toHaveBeenCalledWith(
+      expect.objectContaining({ user_id: "u1", topic_id: "t1", status: "completed" })
+    );
+  });
+
+  it("updates status when existing record is not completed", async () => {
+    const { client, updateFn } = makeMarkTopicClient({ id: "r1", status: "in-progress" });
+    await markTopicCompleted(client, "u1", "t1");
+    expect(updateFn).toHaveBeenCalledWith(
+      expect.objectContaining({ status: "completed" })
+    );
+  });
+
+  it("skips update when existing record is already completed", async () => {
+    const { client, updateFn, insertFn } = makeMarkTopicClient({ id: "r1", status: "completed" });
+    await markTopicCompleted(client, "u1", "t1");
+    expect(updateFn).not.toHaveBeenCalled();
+    expect(insertFn).not.toHaveBeenCalled();
   });
 });
