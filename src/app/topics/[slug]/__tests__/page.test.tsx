@@ -190,6 +190,37 @@ describe("TopicQuizPage", () => {
     expect(container.querySelector("img[src='/signs/sign-101.png']")).toBeTruthy();
   });
 
+  it("skips question image when image_url is a sign path and all options are sign numbers", async () => {
+    const q = {
+      ...QUESTION,
+      image_url: "/signs/sign-999.png",
+      option_a: "101",
+      option_b: "102",
+      option_c: "103",
+      option_d: "104",
+    };
+    mockGetQuestions.mockResolvedValue([q] as never);
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    expect(container.querySelector("img[src='/signs/sign-999.png']")).toBeNull();
+  });
+
+  it("skips question image when image_url is a sign path and one option is non-numeric text", async () => {
+    // Bug fix: old every() check failed when one option was e.g. "כל ארבעת התמרורים."
+    const q = {
+      ...QUESTION,
+      image_url: "/signs/sign-999.png",
+      option_a: "101",
+      option_b: "102",
+      option_c: "103",
+      option_d: "כל ארבעת התמרורים.",
+    };
+    mockGetQuestions.mockResolvedValue([q] as never);
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    expect(container.querySelector("img[src='/signs/sign-999.png']")).toBeNull();
+  });
+
   it("renders sign image for digit option when sign file exists", async () => {
     const q = { ...QUESTION, option_a: "100" };
     mockGetQuestions.mockResolvedValue([q] as never);

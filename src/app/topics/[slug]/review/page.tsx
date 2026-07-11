@@ -32,7 +32,10 @@ function QuestionReview({ question }: { question: QuizMistake }) {
     ["d", question.option_d],
   ];
 
-  const imageUrl = resolveImageUrl(question.image_url);
+  const isSignQuestion =
+    question.image_url?.includes("/signs/") &&
+    options.some(([, text]) => /^\d{2,4}$/.test(text.trim()));
+  const imageUrl = isSignQuestion ? null : resolveImageUrl(question.image_url);
   const isWide = imageUrl && imageUrl !== "__placeholder__" && !imageUrl.includes("sign-");
 
   return (

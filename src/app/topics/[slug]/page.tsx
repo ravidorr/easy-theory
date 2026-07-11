@@ -41,8 +41,10 @@ function QuestionSlide({
     ["d", question.option_d],
   ];
 
-  const allOptionsAreSigns = options.every(([, text]) => /^\d{2,4}$/.test(text.trim()));
-  const imageUrl = allOptionsAreSigns ? null : resolveImageUrl(question.image_url);
+  const isSignQuestion =
+    question.image_url?.includes("/signs/") &&
+    options.some(([, text]) => /^\d{2,4}$/.test(text.trim()));
+  const imageUrl = isSignQuestion ? null : resolveImageUrl(question.image_url);
   const isWide = imageUrl && !imageUrl.includes("sign-");
 
   return (

@@ -183,6 +183,41 @@ describe("ReviewPage", () => {
     expect(container.querySelector("[data-testid='sign-img']")).toBeTruthy();
   });
 
+  it("skips sign image at top when image_url is a sign path and all options are sign numbers", async () => {
+    const m = {
+      ...MISTAKE_A,
+      image_url: "/signs/sign-999.png",
+      option_a: "101",
+      option_b: "102",
+      option_c: "103",
+      option_d: "104",
+    };
+    mockGetMistakes.mockResolvedValue([m] as never);
+    const jsx = await ReviewPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    expect(
+      container.querySelector("[data-testid='sign-img'][src='/signs/sign-999.png']")
+    ).toBeNull();
+  });
+
+  it("skips sign image at top when image_url is a sign path and one option is non-numeric text", async () => {
+    // Bug fix: review page had no suppression for sign questions at all
+    const m = {
+      ...MISTAKE_A,
+      image_url: "/signs/sign-999.png",
+      option_a: "101",
+      option_b: "102",
+      option_c: "103",
+      option_d: "כל ארבעת התמרורים.",
+    };
+    mockGetMistakes.mockResolvedValue([m] as never);
+    const jsx = await ReviewPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    expect(
+      container.querySelector("[data-testid='sign-img'][src='/signs/sign-999.png']")
+    ).toBeNull();
+  });
+
   it("renders text for digit option when sign file does not exist", async () => {
     // "9999" is a valid 4-digit sign code but sign-9999.png does not exist on disk
     const m = { ...MISTAKE_A, option_a: "9999" };
