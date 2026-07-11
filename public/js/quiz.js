@@ -102,7 +102,7 @@
     confirmed = false;
     if (actionBtn) {
       actionBtn.disabled = true;
-      actionBtn.textContent = "מה התשובה?";
+      actionBtn.textContent = "צדקתי?";
     }
     if (rewardBanner) rewardBanner.hidden = true;
   }

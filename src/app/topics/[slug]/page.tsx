@@ -180,7 +180,7 @@ export default async function TopicQuizPage({
             className={`btn-primary${total === 0 ? ` ${styles.hidden}` : ""}`}
             disabled
           >
-            מה התשובה?
+            צדקתי?
           </button>
         </div>
 
