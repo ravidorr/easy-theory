@@ -2,6 +2,14 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.56] — 2026-07-11
+
+### Added
+- Credits page (`/credits`) acknowledging data sources (the official theory exam question bank from data.gov.il, Ministry of Transport sign book, Wikimedia Commons SVGs) and key open-source dependencies (Next.js, Supabase, Google Gemini, Rubik)
+- Credits nav row (heart icon) added to the `/more` nav card, below the schedule row
+
+---
+
 ## [0.3.54] — 2026-07-11
 
 ### Changed
