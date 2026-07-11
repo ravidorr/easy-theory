@@ -1,3 +1,5 @@
+"use client";
+
 import type { CSSProperties } from "react";
 import styles from "./SignImage.module.css";
 
@@ -27,6 +29,7 @@ export function SignImage({ src, alt = "", size = "sm", className, style }: Sign
       alt={alt}
       className={["sign-image", styles.root, className].filter(Boolean).join(" ")}
       style={{ width: px, height: px, ...style }}
+      onError={(e) => { e.currentTarget.src = "/placeholder.svg"; e.currentTarget.onerror = null; }}
     />
   );
 }

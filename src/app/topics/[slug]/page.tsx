@@ -12,7 +12,7 @@ import styles from "./page.module.css";
 function resolveImageUrl(url: string | null | undefined): string | null {
   if (!url) return null;
   if (url.startsWith("/questions/")) {
-    if (!existsSync(join(process.cwd(), "public", url))) return null;
+    if (!existsSync(join(process.cwd(), "public", url))) return "/placeholder.svg";
   }
   return url;
 }

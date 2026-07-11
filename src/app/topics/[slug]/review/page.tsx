@@ -11,7 +11,7 @@ import styles from "./page.module.css";
 function resolveImageUrl(url: string | null | undefined): string | null {
   if (!url) return null;
   if (url.startsWith("/questions/")) {
-    if (!existsSync(join(process.cwd(), "public", url))) return "__placeholder__";
+    if (!existsSync(join(process.cwd(), "public", url))) return "/placeholder.svg";
   }
   return url;
 }
@@ -36,11 +36,11 @@ function QuestionReview({ question }: { question: QuizMistake }) {
     question.image_url?.includes("/signs/") &&
     options.some(([, text]) => /^\d{2,4}$/.test(text.trim()));
   const imageUrl = isSignQuestion ? null : resolveImageUrl(question.image_url);
-  const isWide = imageUrl && imageUrl !== "__placeholder__" && !imageUrl.includes("sign-");
+  const isWide = imageUrl && !imageUrl.includes("sign-");
 
   return (
     <div className={styles.questionCard}>
-      {imageUrl && imageUrl !== "__placeholder__" && (
+      {imageUrl && (
         isWide ? (
           <div className={styles.imgWide}>
             {/* eslint-disable-next-line @next/next/no-img-element */}

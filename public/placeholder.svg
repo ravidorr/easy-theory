@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none">
+  <rect width="400" height="300" fill="#F3F4F6"/>
+  <rect x="1.5" y="1.5" width="397" height="297" rx="8" stroke="#D1D5DB" stroke-width="2" stroke-dasharray="8 4"/>
+  <g transform="translate(200,135)">
+    <rect x="-36" y="-36" width="72" height="72" rx="6" stroke="#9CA3AF" stroke-width="2"/>
+    <circle cx="-12" cy="-12" r="8" stroke="#9CA3AF" stroke-width="2"/>
+    <path d="M-36,18 L-18,-2 L-2,14 L12,-4 L36,18 Z" stroke="#9CA3AF" stroke-width="2" stroke-linejoin="round"/>
+    <line x1="28" y1="-36" x2="44" y2="-52" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round"/>
+    <line x1="44" y1="-36" x2="28" y2="-52" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round"/>
+  </g>
+  <text x="200" y="222" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#9CA3AF">תמונה לא זמינה</text>
+</svg>

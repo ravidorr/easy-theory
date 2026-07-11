@@ -16,6 +16,14 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ---
 
+## [Unreleased]
+
+### Added
+- Image placeholder (`public/placeholder.svg`) shown when a question's image file is missing on disk; previously the image slot was silently empty
+- `SignImage` now falls back to the placeholder on client-side load errors (`onError`)
+
+---
+
 ## [0.3.56] — 2026-07-11
 
 ### Added
