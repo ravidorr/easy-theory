@@ -2,6 +2,15 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.52] — 2026-07-11
+
+### Fixed
+- `getQuestionsForTopic` no longer caps results at 8 — removed the hardcoded limit so all questions for a topic are fetched, enabling topic completion for topics with more than 8 questions
+- Added `order("question_number")` to `getQuestionsForTopic` for deterministic question ordering
+- Removed the separate `.limit(20)` cap from the `/api/topics/[slug]` REST endpoint
+
+---
+
 ## [0.3.51] — 2026-07-11
 
 ### Fixed
