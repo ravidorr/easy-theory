@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.57] — 2026-07-11
+
+### Changed
+- Quiz action button label changed from "בדקי תשובה" to "מה התשובה?"
+
+---
+
 ## [0.3.56] — 2026-07-11
 
 ### Added
