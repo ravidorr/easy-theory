@@ -5,8 +5,6 @@ import TopicQuizPage from "../page";
 import { createClient } from "@/lib/supabase";
 import { getTopicBySlug, getQuestionsForTopic } from "@/lib/db";
 
-const mockExistsSync = vi.hoisted(() => vi.fn().mockReturnValue(false));
-
 vi.mock("next/navigation", () => ({
   redirect: vi.fn().mockImplementation(() => {
     throw new Error("redirect");
@@ -31,11 +29,6 @@ vi.mock("next/link", () => ({
 vi.mock("next/script", () => ({
   default: () => React.createElement("div", null),
 }));
-vi.mock("fs", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("fs")>();
-  return { ...actual, existsSync: mockExistsSync };
-});
-
 const mockCreateClient = vi.mocked(createClient);
 const mockGetTopicBySlug = vi.mocked(getTopicBySlug);
 const mockGetQuestions = vi.mocked(getQuestionsForTopic);
@@ -60,7 +53,6 @@ function makeClient(user: { id: string } | null = { id: "u1" }) {
 describe("TopicQuizPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockExistsSync.mockReturnValue(false);
     mockCreateClient.mockResolvedValue(makeClient() as never);
     mockGetTopicBySlug.mockResolvedValue(TOPIC as never);
     mockGetQuestions.mockResolvedValue([]);
@@ -140,8 +132,16 @@ describe("TopicQuizPage", () => {
     expect(screen.getAllByText("תמרור זה משמעותו עצור").length).toBeGreaterThan(0);
   });
 
+  it("renders image when /questions/ file exists on disk", async () => {
+    const q = { ...QUESTION, image_url: "/questions/TEST_IMAGE_DO_NOT_DELETE.png" };
+    mockGetQuestions.mockResolvedValue([q] as never);
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    expect(container.querySelector("img[src='/questions/TEST_IMAGE_DO_NOT_DELETE.png']")).toBeTruthy();
+  });
+
   it("does not render image when /questions/ file does not exist", async () => {
-    const q = { ...QUESTION, image_url: "/questions/img.png" };
+    const q = { ...QUESTION, image_url: "/questions/TEST_IMAGE_DOES_NOT_EXIST.png" };
     mockGetQuestions.mockResolvedValue([q] as never);
     const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs" }) });
     const { container } = render(jsx);
@@ -149,7 +149,6 @@ describe("TopicQuizPage", () => {
   });
 
   it("renders wide image for non-questions non-sign URL", async () => {
-    // URL without /questions/ prefix skips existsSync and isWide=true (no "sign-")
     const q = { ...QUESTION, image_url: "/images/wide.jpg" };
     mockGetQuestions.mockResolvedValue([q] as never);
     const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs" }) });

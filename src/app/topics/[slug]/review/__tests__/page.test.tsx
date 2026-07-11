@@ -5,8 +5,6 @@ import ReviewPage from "../page";
 import { createClient } from "@/lib/supabase";
 import { getTopicBySlug, getMistakesForTopic } from "@/lib/db";
 
-const mockExistsSync = vi.hoisted(() => vi.fn().mockReturnValue(false));
-
 vi.mock("next/navigation", () => ({
   redirect: vi.fn().mockImplementation(() => {
     throw new Error("redirect");
@@ -28,11 +26,6 @@ vi.mock("next/link", () => ({
   default: ({ href, children }: { href: string; children: unknown }) =>
     React.createElement("a", { href }, children as React.ReactNode),
 }));
-vi.mock("fs", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("fs")>();
-  return { ...actual, existsSync: mockExistsSync };
-});
-
 const mockCreateClient = vi.mocked(createClient);
 const mockGetTopicBySlug = vi.mocked(getTopicBySlug);
 const mockGetMistakes = vi.mocked(getMistakesForTopic);
@@ -72,7 +65,6 @@ function makeClient(user: { id: string } | null = { id: "u1" }) {
 describe("ReviewPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockExistsSync.mockReturnValue(false);
     mockCreateClient.mockResolvedValue(makeClient() as never);
     mockGetTopicBySlug.mockResolvedValue(TOPIC as never);
     mockGetMistakes.mockResolvedValue([]);
@@ -158,8 +150,16 @@ describe("ReviewPage", () => {
     expect(screen.getByText("מה המשמעות של תמרור זה?")).toBeInTheDocument();
   });
 
+  it("renders image when /questions/ file exists on disk", async () => {
+    const m = { ...MISTAKE_A, image_url: "/questions/TEST_IMAGE_DO_NOT_DELETE.png" };
+    mockGetMistakes.mockResolvedValue([m] as never);
+    const jsx = await ReviewPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    expect(container.querySelector("img[src='/questions/TEST_IMAGE_DO_NOT_DELETE.png']")).toBeTruthy();
+  });
+
   it("does not render image when /questions/ file does not exist", async () => {
-    const m = { ...MISTAKE_A, image_url: "/questions/img.png" };
+    const m = { ...MISTAKE_A, image_url: "/questions/TEST_IMAGE_DOES_NOT_EXIST.png" };
     mockGetMistakes.mockResolvedValue([m] as never);
     const jsx = await ReviewPage({ params: Promise.resolve({ slug: "signs" }) });
     const { container } = render(jsx);
@@ -167,7 +167,6 @@ describe("ReviewPage", () => {
   });
 
   it("renders wide image for non-questions non-sign URL", async () => {
-    // URL without /questions/ prefix skips existsSync and isWide=true (no "sign-")
     const m = { ...MISTAKE_A, image_url: "/images/wide.jpg" };
     mockGetMistakes.mockResolvedValue([m] as never);
     const jsx = await ReviewPage({ params: Promise.resolve({ slug: "signs" }) });

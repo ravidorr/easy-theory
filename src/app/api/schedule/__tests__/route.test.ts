@@ -112,6 +112,19 @@ describe("PUT /api/schedule", () => {
     expect(res.status).toBe(500);
   });
 
+  it("returns 500 when insert fails", async () => {
+    mockCreateClient.mockResolvedValue(makeClient({ insertError: true }) as never);
+    const res = await PUT(makePutRequest({ days: [0], start_time: "08:00" }));
+    expect(res.status).toBe(500);
+  });
+
+  it("succeeds when duration_minutes and notify are omitted, using defaults", async () => {
+    mockCreateClient.mockResolvedValue(makeClient() as never);
+    const res = await PUT(makePutRequest({ days: [1], start_time: "09:00" }));
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ ok: true });
+  });
+
   it("succeeds with valid days and time, returns { ok: true }", async () => {
     mockCreateClient.mockResolvedValue(makeClient() as never);
     const res = await PUT(makePutRequest({ days: [0, 3, 5], start_time: "08:00", duration_minutes: 30, notify: true }));
