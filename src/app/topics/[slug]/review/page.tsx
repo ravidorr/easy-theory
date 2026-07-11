@@ -45,7 +45,7 @@ function QuestionReview({ question }: { question: QuizMistake }) {
           </div>
         ) : (
           <div className={styles.imgSquare}>
-            <SignImage src={imageUrl!} size="md" style={{ width: "88px", height: "88px" }} />
+            <SignImage src={imageUrl!} size="md" />
           </div>
         )
       )}

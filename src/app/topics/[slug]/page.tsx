@@ -28,12 +28,10 @@ const LETTERS = ["א", "ב", "ג", "ד"];
 function QuestionSlide({
   question,
   index,
-  total,
   topicId,
 }: {
   question: Question;
   index: number;
-  total: number;
   topicId: string;
 }) {
   const options: [string, string][] = [
@@ -158,7 +156,6 @@ export default async function TopicQuizPage({
               key={q.id}
               question={q}
               index={i}
-              total={total}
               topicId={topic.id}
             />
           ))
@@ -178,9 +175,8 @@ export default async function TopicQuizPage({
 
           <button
             id="quiz-next"
-            className="btn-primary"
+            className={`btn-primary${total === 0 ? ` ${styles.hidden}` : ""}`}
             disabled
-            style={{ display: total === 0 ? "none" : undefined }}
           >
             בדקי תשובה
           </button>
