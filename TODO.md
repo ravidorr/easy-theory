@@ -4,7 +4,6 @@
 
 - **Push notifications** — `user_schedule` and `notify` flag are in the DB but no delivery mechanism exists yet
 - **Retry mistakes** — a "practice mode" that re-queues only wrong questions as a mini-quiz (link from the review page)
-- **More questions per topic** — `getQuestionsForTopic` is capped at 20; increase limit or paginate
 
 ## Gamification
 

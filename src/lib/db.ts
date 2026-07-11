@@ -76,14 +76,13 @@ export async function getTopicBySlug(
 
 export async function getQuestionsForTopic(
   supabase: SupabaseClient,
-  topicId: string,
-  limit = 8
+  topicId: string
 ): Promise<Question[]> {
   const { data } = await supabase
     .from("questions")
     .select("*")
     .eq("topic_id", topicId)
-    .limit(limit);
+    .order("question_number");
   return data ?? [];
 }
 

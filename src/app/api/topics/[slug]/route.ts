@@ -22,8 +22,7 @@ export async function GET(
     .from("questions")
     .select("id, question_number, question_he, option_a, option_b, option_c, option_d, image_url")
     .eq("topic_id", topic.id)
-    .order("question_number")
-    .limit(20);
+    .order("question_number");
 
   return NextResponse.json(questions ?? []);
 }
