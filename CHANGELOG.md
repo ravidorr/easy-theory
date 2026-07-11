@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.48] — 2026-07-11
+
+### Added
+- Integrate Vercel Speed Insights (`@vercel/speed-insights`) into the root layout for performance metrics collection
+
+---
+
 ## [0.3.47] — 2026-07-11
 
 ### Added

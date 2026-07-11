@@ -1,4 +1,5 @@
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { Rubik } from "next/font/google";
 import { cookies } from "next/headers";
@@ -37,6 +38,7 @@ export default async function RootLayout({
       <body>
         {children}
         <Analytics />
+        <SpeedInsights />
         <Script id="register-sw" strategy="afterInteractive">{`
           if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js');
