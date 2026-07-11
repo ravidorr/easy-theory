@@ -13,6 +13,10 @@
 
 - **SVG sprite** — inline SVGs are scattered across all UI kit HTML mockups; consolidate into a single `design-system/icons.svg` sprite (`<symbol id="icon-home">` etc.) and reference with `<svg><use href="icons.svg#icon-home"/></svg>` to keep HTML clean while preserving `currentColor` theming
 
+## Credits
+
+- **Thank you section** — add a page or section acknowledging contributors, open-source libraries, and data sources (e.g. Wikimedia Commons for sign SVGs, the official Ministry of Transport PDF)
+
 ## Polish
 
 - **Review page scope** — currently shows all-time mistakes; consider filtering to the most recent quiz session only

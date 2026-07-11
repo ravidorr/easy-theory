@@ -145,6 +145,7 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ### Added
 - Stats card at the top of the more page showing streak days and star points side by side
+- High-quality SVG traffic sign images from Wikimedia Commons, replacing PDF-extracted PNGs (202/277 signs upgraded; 75 with no SVG on Commons keep their PNG)
 
 ### Fixed
 - More page test mock was missing `getUserStats` after it was added to the page
