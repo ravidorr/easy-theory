@@ -5,17 +5,23 @@ import { cookies } from "next/headers";
 
 // vi.mock is hoisted — use vi.hoisted() so the variable is available inside the factory.
 const mockExchangeCode = vi.hoisted(() => vi.fn().mockResolvedValue({ error: null }));
+const mockVerifyOtp = vi.hoisted(() => vi.fn().mockResolvedValue({ error: null }));
+const mockCookieGet = vi.hoisted(() => vi.fn().mockReturnValue(undefined));
 
 vi.mock("next/headers", () => ({
   cookies: vi.fn().mockResolvedValue({
     getAll: vi.fn().mockReturnValue([]),
     set: vi.fn(),
+    get: mockCookieGet,
   }),
 }));
 
 vi.mock("@supabase/ssr", () => ({
   createServerClient: vi.fn().mockReturnValue({
-    auth: { exchangeCodeForSession: mockExchangeCode },
+    auth: {
+      exchangeCodeForSession: mockExchangeCode,
+      verifyOtp: mockVerifyOtp,
+    },
   }),
 }));
 
@@ -29,9 +35,11 @@ describe("GET /auth/callback", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockExchangeCode.mockResolvedValue({ error: null });
+    mockVerifyOtp.mockResolvedValue({ error: null });
+    mockCookieGet.mockReturnValue(undefined);
   });
 
-  it("redirects to /auth/login?error=1 when no code param", async () => {
+  it("redirects to /auth/login?error=1 when no code or token_hash param", async () => {
     const res = await GET(makeRequest({}));
     expect(res.status).toBe(307);
     expect(res.headers.get("location")).toContain("/auth/login?error=1");
@@ -58,6 +66,41 @@ describe("GET /auth/callback", () => {
   it("redirects to /auth/login?error=1 when code exchange fails", async () => {
     mockExchangeCode.mockResolvedValue({ error: { message: "invalid code" } });
     const res = await GET(makeRequest({ code: "bad-code" }));
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toContain("/auth/login?error=1");
+  });
+
+  it("redirects to auth_redirect cookie value when next param is absent", async () => {
+    mockCookieGet.mockReturnValue({ value: "/dashboard" });
+    const res = await GET(makeRequest({ code: "abc123" }));
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toBe("http://localhost/dashboard");
+  });
+
+  it("prefers next search param over auth_redirect cookie", async () => {
+    mockCookieGet.mockReturnValue({ value: "/dashboard" });
+    const res = await GET(makeRequest({ code: "abc123", next: "/topics" }));
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toBe("http://localhost/topics");
+  });
+
+  it("clears auth_redirect cookie on successful auth", async () => {
+    const res = await GET(makeRequest({ code: "abc123" }));
+    expect(res.status).toBe(307);
+    const setCookie = res.headers.get("set-cookie") ?? "";
+    expect(setCookie).toMatch(/auth_redirect=;|auth_redirect=.*Max-Age=0/);
+  });
+
+  it("uses token_hash flow when token_hash and type are present", async () => {
+    const res = await GET(makeRequest({ token_hash: "abc", type: "email" }));
+    expect(mockVerifyOtp).toHaveBeenCalledWith({ token_hash: "abc", type: "email" });
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toBe("http://localhost/");
+  });
+
+  it("redirects to /auth/login?error=1 when verifyOtp fails", async () => {
+    mockVerifyOtp.mockResolvedValue({ error: { message: "invalid token" } });
+    const res = await GET(makeRequest({ token_hash: "bad", type: "email" }));
     expect(res.status).toBe(307);
     expect(res.headers.get("location")).toContain("/auth/login?error=1");
   });

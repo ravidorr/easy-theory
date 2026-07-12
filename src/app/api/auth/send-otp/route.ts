@@ -9,7 +9,7 @@ export async function POST(request: Request) {
     typeof next === "string" && next.startsWith("/") && !next.startsWith("//")
       ? next
       : "/";
-  const emailOrigin = `${requestUrl.origin}/auth/callback?next=${encodeURIComponent(safeNext)}`;
+  const emailRedirectTo = `${requestUrl.origin}/auth/callback`;
 
   if (!email || typeof email !== "string") {
     return NextResponse.json({ error: "כתובת מייל חסרה" }, { status: 400 });
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
   const { error } = await supabase.auth.signInWithOtp({
     email: trimmedEmail.toLowerCase(),
     options: {
-      emailRedirectTo: emailOrigin,
+      emailRedirectTo,
     },
   });
 
@@ -37,5 +37,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "שגיאה בשליחת הקישור, נסי שוב" }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true });
+  const response = NextResponse.json({ ok: true });
+  response.cookies.set("auth_redirect", safeNext, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 600,
+  });
+  return response;
 }
