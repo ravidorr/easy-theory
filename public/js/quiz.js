@@ -206,15 +206,17 @@
       if (progressFill) progressFill.style.width = "100%";
       if (countEl) countEl.textContent = total + " מתוך " + total;
 
-      const topicId = container.dataset.topicId;
-      if (topicId) {
-        const pct = Math.round((score / total) * 100);
-        const status = pct >= 80 ? "completed" : "in_progress";
-        fetch("/api/progress", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ topic_id: topicId, score: pct, status }),
-        }).catch(function () {});
+      if (container.dataset.quizMode !== "retry") {
+        const topicId = container.dataset.topicId;
+        if (topicId) {
+          const pct = Math.round((score / total) * 100);
+          const status = pct >= 80 ? "completed" : "in_progress";
+          fetch("/api/progress", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ topic_id: topicId, score: pct, status }),
+          }).catch(function () {});
+        }
       }
     } else {
       showSlide(currentIndex);

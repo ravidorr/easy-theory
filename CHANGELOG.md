@@ -2,6 +2,14 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.62] — 2026-07-12
+
+### Added
+- Retry mistakes: new `/topics/[slug]/retry` page re-queues only wrong answers as a mini-quiz, accessible via a button on the review page
+- Push notification icon: added `public/icons/icon-192.png` so the service worker can display the notification icon
+
+---
+
 ## [0.3.60] — 2026-07-12
 
 ### Added

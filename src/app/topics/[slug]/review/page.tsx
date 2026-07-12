@@ -133,6 +133,9 @@ export default async function ReviewPage({
           <p className={styles.mistakeCount}>
             {mistakes.length === 1 ? "שאלה אחת שגית" : `${mistakes.length} שאלות שגית`}
           </p>
+          <Link href={`/topics/${slug}/retry`}>
+            <button className={`btn-primary ${styles.btnFull}`}>חזור על הטעויות</button>
+          </Link>
           {mistakes.map((mistake) => (
             <QuestionReview key={mistake.id} question={mistake} />
           ))}
