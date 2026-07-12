@@ -17,9 +17,9 @@ export const metadata: Metadata = {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string }>;
+  searchParams: Promise<{ next?: string; error?: string }>;
 }) {
-  const { next } = await searchParams;
+  const { next, error } = await searchParams;
   const safeNext =
     typeof next === "string" && next.startsWith("/") && !next.startsWith("//")
       ? next
@@ -50,6 +50,12 @@ export default async function LoginPage({
             <h2 className={styles.loginCardTitle}>להתחיל עכשיו</h2>
             <p className={styles.loginCardHint}>להתחברות עם קישור למייל, בלי סיסמה. חינם לגמרי.</p>
           </div>
+
+          {error === '1' && (
+            <p role="alert" className={styles.loginError}>
+              הקישור פג תוקף או כבר נוצל. אנא בקשי קישור חדש.
+            </p>
+          )}
 
           <form id="login-form" className={styles.loginForm}>
             <input type="hidden" id="next-path" value={safeNext} />
@@ -86,6 +92,7 @@ export default async function LoginPage({
               <h3 className={styles.sentTitle}>הקישור בדרך אלייך</h3>
               <p className={styles.sentHint}>
                 יש ללחוץ על הקישור כדי להיכנס.
+                {" "}חשוב: יש לפתוח את הקישור <strong>בדפדפן הזה</strong>.
               </p>
               <p className={styles.resendRow}>
                 לא קיבלת?{" "}

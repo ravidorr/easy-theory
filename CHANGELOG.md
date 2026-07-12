@@ -187,6 +187,13 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ## [Unreleased]
 
+## [0.3.61] — 2026-07-12
+
+### Fixed
+- Magic link auth failure: show a clear Hebrew error message on the login page when the link has expired or already been used (previously `?error=1` was silently ignored)
+- Login page sent-banner now reminds users to open the magic link in the same browser (PKCE verifier is tied to the requesting browser session)
+- Auth callback now handles `token_hash` + `type` query params via `verifyOtp()` in addition to the PKCE `code` param, preparing for cross-device magic links once the Supabase email template is updated
+
 ### Fixed
 
 - Correct sign 102 Hebrew name to "sharp curve right" (sign 103 is the left variant)
