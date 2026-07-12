@@ -98,6 +98,11 @@ export default async function VideosPage() {
             title: "התנהגות בצמתים מורכבים",
             tag: "זכות קדימה",
           },
+          {
+            id: "kJ5y5JlkMjc",
+            title: "שיעור נהיגה לפני טסט",
+            tag: "מהשטח",
+          },
         ].map((video) => (
           <a
             key={video.id}

@@ -38,8 +38,8 @@ describe("VideosPage", () => {
     const youtubeLinks = container.querySelectorAll(
       'a[href*="youtube.com"][target="_blank"]'
     );
-    // 2 marathon videos + 3 topic lessons = 5 total
-    expect(youtubeLinks).toHaveLength(5);
+    // 2 marathon videos + 4 topic lessons = 6 total
+    expect(youtubeLinks).toHaveLength(6);
   });
 
   it("renders the featured marathon video link", async () => {
@@ -67,6 +67,7 @@ describe("VideosPage", () => {
     expect(screen.getByText("מבוא לתמרורים")).toBeInTheDocument();
     expect(screen.getByText("זכות קדימה בצמתים")).toBeInTheDocument();
     expect(screen.getByText("התנהגות בצמתים מורכבים")).toBeInTheDocument();
+    expect(screen.getByText("שיעור נהיגה לפני טסט")).toBeInTheDocument();
   });
 
   it("renders the featured video title", async () => {

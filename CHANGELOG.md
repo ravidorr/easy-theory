@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.60] — 2026-07-12
+
+### Added
+- ליאור טל driving lesson video ("שיעור נהיגה לפני טסט", `kJ5y5JlkMjc`) added to the topic lessons section on the videos page, tagged "מהשטח"
+
+---
+
 ## [0.3.59] — 2026-07-11
 
 ### Added
