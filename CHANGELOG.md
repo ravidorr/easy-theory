@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.68] — 2026-07-13
+
+### Fixed
+- `generate_explanations.ts`: type the `supabase` param as `any` to resolve TS2345 build error (untyped client incompatible with inferred generic)
+
+---
+
 ## [0.3.67] — 2026-07-13
 
 ### Added

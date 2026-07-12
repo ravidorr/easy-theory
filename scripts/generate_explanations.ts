@@ -32,30 +32,6 @@ async function generateExplanation(
   return result.response.text().trim();
 }
 
-async function processQuestion(
-  model: ReturnType<InstanceType<typeof GoogleGenerativeAI>["getGenerativeModel"]>,
-  supabase: ReturnType<typeof createClient>,
-  q: Question,
-  idx: number,
-  total: number
-): Promise<void> {
-  try {
-    const explanation = await generateExplanation(model, q);
-    if (DRY_RUN) {
-      console.log(`[${idx}/${total}] Q#${q.question_number} — ${explanation} [DRY RUN]`);
-      return;
-    }
-    const { error } = await supabase.from("questions").update({ explanation_he: explanation }).eq("id", q.id);
-    if (error) {
-      console.error(`[${idx}/${total}] Q#${q.question_number} — update failed: ${error.message}`);
-    } else {
-      console.log(`[${idx}/${total}] Q#${q.question_number} — done`);
-    }
-  } catch (err) {
-    console.error(`[${idx}/${total}] Q#${q.question_number} — error: ${err}`);
-  }
-}
-
 async function main() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -108,7 +84,27 @@ async function main() {
 
   for (const batch of batches) {
     await Promise.all(
-      batch.map((q) => processQuestion(model, supabase, q, ++processed, total))
+      batch.map(async (q) => {
+        const idx = ++processed;
+        try {
+          const explanation = await generateExplanation(model, q);
+          if (DRY_RUN) {
+            console.log(`[${idx}/${total}] Q#${q.question_number} — ${explanation} [DRY RUN]`);
+            return;
+          }
+          const { error } = await supabase
+            .from("questions")
+            .update({ explanation_he: explanation })
+            .eq("id", q.id);
+          if (error) {
+            console.error(`[${idx}/${total}] Q#${q.question_number} — update failed: ${error.message}`);
+          } else {
+            console.log(`[${idx}/${total}] Q#${q.question_number} — done`);
+          }
+        } catch (err) {
+          console.error(`[${idx}/${total}] Q#${q.question_number} — error: ${err}`);
+        }
+      })
     );
   }
 
