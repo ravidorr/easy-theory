@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.64] — 2026-07-13
+
+### Changed
+- Consolidate 32 inline SVGs across 8 UI kit HTML mockups into a single `design-system/icons.svg` sprite; icons are now referenced via `<svg><use href="...#icon-id"/>`, eliminating duplication and preserving `currentColor` theming
+
+---
+
 ## [0.3.63] — 2026-07-13
 
 ### Fixed
@@ -201,6 +208,9 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 ---
 
 ## [Unreleased]
+
+### Changed
+- Consolidate 32 inline SVGs across 8 UI kit HTML mockups into a single `design-system/icons.svg` sprite; reference icons via `<svg><use href="...#icon-id"/>` to eliminate duplication and preserve `currentColor` theming
 
 ## [0.3.61] — 2026-07-12
 
