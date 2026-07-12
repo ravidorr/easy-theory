@@ -98,6 +98,20 @@ describe("ReviewPage", () => {
     expect(screen.getByText("שאלה אחת שגית")).toBeInTheDocument();
   });
 
+  it("shows retry link when there are mistakes", async () => {
+    mockGetMistakes.mockResolvedValue([MISTAKE_A] as never);
+    const jsx = await ReviewPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    expect(container.querySelector('a[href="/topics/signs/retry"]')).toBeTruthy();
+  });
+
+  it("does not show retry link when there are no mistakes", async () => {
+    mockGetMistakes.mockResolvedValue([]);
+    const jsx = await ReviewPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    expect(container.querySelector('a[href="/topics/signs/retry"]')).toBeNull();
+  });
+
   it("shows plural text with count for multiple mistakes", async () => {
     mockGetMistakes.mockResolvedValue([MISTAKE_A, MISTAKE_B] as never);
     const jsx = await ReviewPage({ params: Promise.resolve({ slug: "signs" }) });
