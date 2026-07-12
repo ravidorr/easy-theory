@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.66] — 2026-07-13
+
+### Added
+- Document source of exam questions, answers, and images in LICENSE — attributed to the Israeli Ministry of Transport theory exam database, not covered by the MIT license
+
+---
+
 ## [0.3.65] — 2026-07-13
 
 ### Fixed

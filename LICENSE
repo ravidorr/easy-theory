@@ -24,3 +24,8 @@ SOFTWARE.
 
 The traffic sign images in public/signs/ are official artwork from the Israeli
 Ministry of Transport (לות״ם, September 2022) and are not covered by this license.
+
+The driving theory exam questions, answers, and associated images in seeds/ and
+public/questions/ are sourced from the Israeli Ministry of Transport theory exam
+database (https://www.gov.il/he/departments/dynamiccollectors/theoryexamhe_data)
+and are not covered by this license.
