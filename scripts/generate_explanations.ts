@@ -2,8 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createClient } from "@supabase/supabase-js";
 
 const DRY_RUN = process.argv.includes("--dry-run");
-const BATCH_SIZE = 50;
-const BATCH_DELAY_MS = 2000;
+const CONCURRENCY = 10;
 
 type Question = {
   id: string;
@@ -22,35 +21,24 @@ function chunk<T>(arr: T[], size: number): T[][] {
   return chunks;
 }
 
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 async function generateExplanation(
   model: ReturnType<InstanceType<typeof GoogleGenerativeAI>["getGenerativeModel"]>,
   q: Question
 ): Promise<string> {
-  const optionMap = {
-    a: q.option_a,
-    b: q.option_b,
-    c: q.option_c,
-    d: q.option_d,
-  };
+  const optionMap = { a: q.option_a, b: q.option_b, c: q.option_c, d: q.option_d };
   const correctAnswer = optionMap[q.correct_option];
-
   const prompt = `אתה עוזר לימוד לנהיגה בישראל. כתוב הסבר קצר בעברית (2-3 משפטים) לשאלה הבאה:\n\nשאלה: ${q.question_he}\nתשובה נכונה: ${correctAnswer}\n\nכתוב הסבר ברור ותמציתי שמסביר מדוע התשובה נכונה.`;
-
   const result = await model.generateContent(prompt);
   return result.response.text().trim();
 }
 
 async function main() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const geminiKey = process.env.GEMINI_API_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
-    console.error("Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY");
+    console.error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
     process.exit(1);
   }
   if (!geminiKey) {
@@ -59,65 +47,68 @@ async function main() {
   }
 
   const supabase = createClient(supabaseUrl, supabaseKey);
-
   const genai = new GoogleGenerativeAI(geminiKey);
   const model = genai.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-  const { data: questions, error } = await supabase
-    .from("questions")
-    .select("id, question_number, question_he, option_a, option_b, option_c, option_d, correct_option")
-    .or("explanation_he.is.null,explanation_he.eq.");
+  let allQuestions: Question[] = [];
+  let from = 0;
+  const pageSize = 1000;
 
-  if (error) {
-    console.error("Failed to fetch questions:", error.message);
-    process.exit(1);
+  while (true) {
+    const { data, error } = await supabase
+      .from("questions")
+      .select("id, question_number, question_he, option_a, option_b, option_c, option_d, correct_option")
+      .or("explanation_he.is.null,explanation_he.eq.")
+      .range(from, from + pageSize - 1);
+
+    if (error) {
+      console.error("Failed to fetch questions:", error.message);
+      process.exit(1);
+    }
+    if (!data || data.length === 0) break;
+    allQuestions = allQuestions.concat(data as Question[]);
+    if (data.length < pageSize) break;
+    from += pageSize;
   }
 
-  if (!questions || questions.length === 0) {
+  const total = allQuestions.length;
+  if (total === 0) {
     console.log("No questions need explanations.");
     return;
   }
 
-  const total = questions.length;
   console.log(`Found ${total} questions without explanations.${DRY_RUN ? " [DRY RUN]" : ""}`);
 
-  const batches = chunk(questions as Question[], BATCH_SIZE);
+  const batches = chunk(allQuestions, CONCURRENCY);
   let processed = 0;
 
-  for (let batchIdx = 0; batchIdx < batches.length; batchIdx++) {
-    const batch = batches[batchIdx];
-
-    for (const q of batch) {
-      processed++;
-      try {
-        const explanation = await generateExplanation(model, q);
-
-        if (DRY_RUN) {
-          console.log(`[${processed}/${total}] Q#${q.question_number} — ${explanation} [DRY RUN]`);
-        } else {
-          const { error: updateError } = await supabase
+  for (const batch of batches) {
+    await Promise.all(
+      batch.map(async (q) => {
+        const idx = ++processed;
+        try {
+          const explanation = await generateExplanation(model, q);
+          if (DRY_RUN) {
+            console.log(`[${idx}/${total}] Q#${q.question_number} — ${explanation} [DRY RUN]`);
+            return;
+          }
+          const { error } = await supabase
             .from("questions")
             .update({ explanation_he: explanation })
             .eq("id", q.id);
-
-          if (updateError) {
-            console.error(`[${processed}/${total}] Q#${q.question_number} — update failed: ${updateError.message}`);
+          if (error) {
+            console.error(`[${idx}/${total}] Q#${q.question_number} — update failed: ${error.message}`);
           } else {
-            console.log(`[${processed}/${total}] Q#${q.question_number} — done`);
+            console.log(`[${idx}/${total}] Q#${q.question_number} — done`);
           }
+        } catch (err) {
+          console.error(`[${idx}/${total}] Q#${q.question_number} — error: ${err}`);
         }
-      } catch (err) {
-        console.error(`[${processed}/${total}] Q#${q.question_number} — error: ${err}`);
-      }
-    }
-
-    if (batchIdx < batches.length - 1) {
-      console.log(`Batch ${batchIdx + 1}/${batches.length} complete. Waiting ${BATCH_DELAY_MS}ms...`);
-      await sleep(BATCH_DELAY_MS);
-    }
+      })
+    );
   }
 
-  console.log(`Done. Processed ${processed} questions.`);
+  console.log(`Done. Processed ${total} questions.`);
 }
 
 main();

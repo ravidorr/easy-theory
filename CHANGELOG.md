@@ -2,6 +2,23 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.68] — 2026-07-13
+
+### Fixed
+- `generate_explanations.ts`: type the `supabase` param as `any` to resolve TS2345 build error (untyped client incompatible with inferred generic)
+
+---
+
+## [0.3.67] — 2026-07-13
+
+### Added
+- Populated `explanation_he` for all 1,273 questions via Gemini 2.5 Flash
+
+### Changed
+- `generate_explanations.ts`: switched to `SUPABASE_SERVICE_ROLE_KEY` for writes, added pagination to handle >1,000 questions, replaced sequential batches with 10-way concurrency
+
+---
+
 ## [0.3.66] — 2026-07-13
 
 ### Added

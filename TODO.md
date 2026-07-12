@@ -7,4 +7,3 @@
 ## Polish
 
 - **Review page scope** — currently shows all-time mistakes; consider filtering to the most recent quiz session only
-- **Explanation coverage** — many questions have `explanation_he = null`; populate or remove the field
