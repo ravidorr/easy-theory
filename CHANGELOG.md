@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.63] — 2026-07-13
+
+### Fixed
+- Magic link emails now redirect correctly: removed `next` query param from `emailRedirectTo` (Supabase was treating it as a path prefix, producing `//auth/callback` double-slash URLs that Vercel intercepted as SSO). The post-auth destination is now preserved in a short-lived `auth_redirect` cookie instead.
+
+---
+
 ## [0.3.62] — 2026-07-12
 
 ### Added

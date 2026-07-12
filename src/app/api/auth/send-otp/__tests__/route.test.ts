@@ -75,60 +75,48 @@ describe("POST /api/auth/send-otp", () => {
     );
   });
 
-  it("passes the request origin as redirect URL", async () => {
+  it("passes clean callback URL with no query params as emailRedirectTo", async () => {
     const client = makeClient();
     mockCreateClient.mockResolvedValue(client as never);
     await POST(makeRequest({ email: "user@example.com" }));
     expect(client.auth.signInWithOtp).toHaveBeenCalledWith(
       expect.objectContaining({
         options: expect.objectContaining({
-          emailRedirectTo: expect.stringContaining("/auth/callback"),
+          emailRedirectTo: "http://localhost/auth/callback",
         }),
       })
     );
   });
 
-  it("appends next param to emailRedirectTo when valid", async () => {
+  it("sets auth_redirect cookie to next path on success", async () => {
     const client = makeClient();
     mockCreateClient.mockResolvedValue(client as never);
-    await POST(makeRequest({ email: "user@example.com", next: "/topics/signs/review" }));
-    expect(client.auth.signInWithOtp).toHaveBeenCalledWith(
-      expect.objectContaining({
-        options: expect.objectContaining({
-          emailRedirectTo: expect.stringContaining("next=%2Ftopics%2Fsigns%2Freview"),
-        }),
-      })
-    );
+    const res = await POST(makeRequest({ email: "user@example.com", next: "/topics/signs/review" }));
+    expect(res.headers.get("set-cookie")).toMatch(/auth_redirect=.*topics.*signs.*review/);
   });
 
-  it("defaults next to / when omitted", async () => {
+  it("sets auth_redirect cookie to / when next is omitted", async () => {
     const client = makeClient();
     mockCreateClient.mockResolvedValue(client as never);
-    await POST(makeRequest({ email: "user@example.com" }));
-    expect(client.auth.signInWithOtp).toHaveBeenCalledWith(
-      expect.objectContaining({
-        options: expect.objectContaining({
-          emailRedirectTo: expect.stringContaining("next=%2F"),
-        }),
-      })
-    );
+    const res = await POST(makeRequest({ email: "user@example.com" }));
+    expect(res.headers.get("set-cookie")).toMatch(/auth_redirect=%2F/);
   });
 
-  it("ignores next when it does not start with /", async () => {
+  it("ignores next when it does not start with / and defaults cookie to /", async () => {
     const client = makeClient();
     mockCreateClient.mockResolvedValue(client as never);
-    await POST(makeRequest({ email: "user@example.com", next: "https://evil.com" }));
+    const res = await POST(makeRequest({ email: "user@example.com", next: "https://evil.com" }));
     const call = client.auth.signInWithOtp.mock.calls[0][0];
-    expect(call.options.emailRedirectTo).toContain("next=%2F");
     expect(call.options.emailRedirectTo).not.toContain("evil");
+    expect(res.headers.get("set-cookie")).toMatch(/auth_redirect=%2F/);
   });
 
-  it("ignores next when it starts with //", async () => {
+  it("ignores next when it starts with // and defaults cookie to /", async () => {
     const client = makeClient();
     mockCreateClient.mockResolvedValue(client as never);
-    await POST(makeRequest({ email: "user@example.com", next: "//evil.com/path" }));
+    const res = await POST(makeRequest({ email: "user@example.com", next: "//evil.com/path" }));
     const call = client.auth.signInWithOtp.mock.calls[0][0];
-    expect(call.options.emailRedirectTo).toContain("next=%2F");
     expect(call.options.emailRedirectTo).not.toContain("evil");
+    expect(res.headers.get("set-cookie")).toMatch(/auth_redirect=%2F/);
   });
 });

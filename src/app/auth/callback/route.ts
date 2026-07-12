@@ -5,10 +5,13 @@ import type { EmailOtpType } from "@supabase/supabase-js";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
-  const next = searchParams.get("next") ?? "/";
-  const safeNext = next.startsWith("/") && !next.startsWith("//") ? next : "/";
 
   const cookieStore = await cookies();
+
+  const nextRaw =
+    searchParams.get("next") ?? cookieStore.get("auth_redirect")?.value ?? "/";
+  const safeNext = nextRaw.startsWith("/") && !nextRaw.startsWith("//") ? nextRaw : "/";
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -26,13 +29,19 @@ export async function GET(request: Request) {
     }
   );
 
+  function successRedirect() {
+    const response = NextResponse.redirect(`${origin}${safeNext}`);
+    response.cookies.delete("auth_redirect");
+    return response;
+  }
+
   // Token-hash flow (cross-device, no PKCE cookie required)
   const token_hash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
   if (token_hash && type) {
     const { error } = await supabase.auth.verifyOtp({ token_hash, type });
     if (!error) {
-      return NextResponse.redirect(`${origin}${safeNext}`);
+      return successRedirect();
     }
   }
 
@@ -41,7 +50,7 @@ export async function GET(request: Request) {
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      return NextResponse.redirect(`${origin}${safeNext}`);
+      return successRedirect();
     }
   }
 
