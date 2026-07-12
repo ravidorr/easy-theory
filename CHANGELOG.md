@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.65] — 2026-07-13
+
+### Fixed
+- Schedule save was always failing with "שגיאה בשמירה" — the client was sending `start_time` as `HH:MM:SS` but the API only accepts `HH:MM`, causing a 400 on every save attempt
+
+---
+
 ## [0.3.64] — 2026-07-13
 
 ### Changed

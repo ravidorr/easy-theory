@@ -117,7 +117,7 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           days: Array.from(selectedDays),
-          start_time: timeInput ? timeInput.value + ":00" : "17:00:00",
+          start_time: timeInput ? timeInput.value : "17:00",
           duration_minutes: selectedDuration,
           notify: notifyOn,
         }),
