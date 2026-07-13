@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Rubik } from "next/font/google";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
@@ -20,6 +20,12 @@ const rubik = Rubik({
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
+}
+
+export async function generateViewport(): Promise<Viewport> {
+  const cookieStore = await cookies();
+  const theme = cookieStore.get("theme")?.value ?? "dark";
+  return { themeColor: theme === "light" ? "#f5f7fc" : "#131829" };
 }
 
 export async function generateMetadata({

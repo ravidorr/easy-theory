@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase";
 import { TabBar } from "@/components/TabBar";
 import { Icon } from "@/components/Icon";
 import { getTranslations } from "next-intl/server";
-import styles from "@/app/videos/page.module.css";
+import styles from "./page.module.css";
 
 const PlayIcon = ({ size = 20 }: { size?: number }) => (
   <Icon name="play" size={size} className={styles.playIcon} />

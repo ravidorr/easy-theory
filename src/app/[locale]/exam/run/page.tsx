@@ -13,7 +13,7 @@ import {
   EXAM_PASS_MARK,
 } from "@/lib/exam";
 import { getTranslations, getLocale } from "next-intl/server";
-import styles from "@/app/exam/run/page.module.css";
+import styles from "./page.module.css";
 
 function resolveImageUrl(url: string | null | undefined): string | null {
   if (!url) return null;

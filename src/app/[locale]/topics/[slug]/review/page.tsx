@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase";
 import { getTopicBySlug, getMistakesForTopic } from "@/lib/db";
 import type { MistakeScope, QuizMistake } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
-import styles from "@/app/topics/[slug]/review/page.module.css";
+import styles from "./page.module.css";
 
 function resolveImageUrl(url: string | null | undefined): string | null {
   if (!url) return null;

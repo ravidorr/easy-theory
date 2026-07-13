@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { getTranslations } from "next-intl/server";
 import { Icon } from "@/components/Icon";
-import styles from "@/app/auth/login/page.module.css";
+import styles from "./page.module.css";
 
 export async function generateMetadata({
   params,

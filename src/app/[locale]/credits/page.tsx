@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase";
 import { SignImage } from "@/components/SignImage";
 import { Icon } from "@/components/Icon";
 import { getTranslations } from "next-intl/server";
-import styles from "@/app/credits/page.module.css";
+import styles from "./page.module.css";
 
 const ExternalIcon = () => <Icon name="external" size={18} className={styles.externalIcon} />;
 

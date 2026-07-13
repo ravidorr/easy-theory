@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase";
 import { TabBar } from "@/components/TabBar";
 import { Icon } from "@/components/Icon";
 import { getTranslations } from "next-intl/server";
-import styles from "@/app/resources/page.module.css";
+import styles from "./page.module.css";
 
 const ExternalIcon = () => <Icon name="external" size={18} className={styles.externalIcon} />;
 
