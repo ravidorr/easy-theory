@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.95] — 2026-07-14
+
+### Fixed
+- Gender agreement in the home streak banner: "עוד {count} ימים למדליה הבא" → "למדליה הבאה", and `daysToMedalOne` now uses מדליה instead of אות for consistency (Arabic strings were already correct)
+
+---
+
 ## [0.3.94] — 2026-07-14
 
 ### Fixed
