@@ -129,7 +129,12 @@
     "backHome": "חזרה לבית",
     "mistakeCountOne": "שאלה אחת שגית",
     "mistakeCountMany": "{count} שאלות שגית",
-    "retryBtn": "חזור על הטעויות"
+    "retryBtn": "חזור על הטעויות",
+    "scopeLabel": "טווח הטעויות",
+    "scopeLastSession": "התרגול האחרון",
+    "scopeAllTime": "כל הזמנים",
+    "emptyHintLastSession": "אין טעויות בתרגול האחרון!",
+    "viewAllMistakes": "לצפייה בכל הטעויות"
   },
   "Schedule": {
     "pageTitle": "מתי נוח לך ללמוד?",

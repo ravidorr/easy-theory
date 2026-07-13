@@ -192,10 +192,13 @@ export async function getPushSubscriptionsForUsers(
   return data ?? [];
 }
 
+export type MistakeScope = "all" | "lastSession";
+
 export async function getMistakesForTopic(
   supabase: SupabaseClient,
   userId: string,
-  topicId: string
+  topicId: string,
+  scope: MistakeScope = "all"
 ): Promise<QuizMistake[]> {
   const { data: topicQuestions } = await supabase
     .from("questions")
@@ -207,17 +210,32 @@ export async function getMistakesForTopic(
 
   const { data: responses } = await supabase
     .from("user_quiz_responses")
-    .select("question_id, selected_option, is_correct, answered_at")
+    .select("question_id, selected_option, is_correct, answered_at, session_id")
     .eq("user_id", userId)
     .in("question_id", questionIds)
     .order("answered_at", { ascending: false });
 
   if (!responses?.length) return [];
 
-  const latestByQuestion = new Map<string, { selected_option: string; is_correct: boolean }>();
+  const latestByQuestion = new Map<
+    string,
+    { selected_option: string; is_correct: boolean; session_id: string | null }
+  >();
   for (const r of responses) {
     if (!latestByQuestion.has(r.question_id)) {
       latestByQuestion.set(r.question_id, r);
+    }
+  }
+
+  if (scope === "lastSession") {
+    // Responses are ordered newest-first, so the first row belongs to the latest session.
+    // Legacy rows (null session_id, pre-migration 006) can't be grouped into sessions —
+    // when the newest row is legacy, fall back to all-time rather than hiding real mistakes.
+    const lastSessionId = responses[0].session_id;
+    if (lastSessionId != null) {
+      for (const [qId, r] of latestByQuestion) {
+        if (r.session_id !== lastSessionId) latestByQuestion.delete(qId);
+      }
     }
   }
 

@@ -9,6 +9,12 @@
   const total = parseInt(container.dataset.total, 10) || 0;
   if (total === 0) return;
 
+  // One session id per quiz run — lets the review page scope mistakes to the latest run.
+  const sessionId =
+    window.crypto && typeof window.crypto.randomUUID === "function"
+      ? window.crypto.randomUUID()
+      : null;
+
   const slides = Array.from(document.querySelectorAll(".quiz-slide"));
   const actionBtn = document.getElementById("quiz-next");
   const progressFill = document.getElementById("quiz-progress-fill");
@@ -182,7 +188,7 @@
     fetch("/api/quiz", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question_id: questionId, selected_option: selectedOption, topic_id: topicId }),
+      body: JSON.stringify({ question_id: questionId, selected_option: selectedOption, topic_id: topicId, session_id: sessionId }),
     }).then(function (res) {
       return res.ok ? res.json() : null;
     }).then(function (data) {

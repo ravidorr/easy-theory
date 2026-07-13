@@ -2,6 +2,18 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.85] — 2026-07-13
+
+### Added
+- Quiz-session tracking: `quiz.js` now generates one `session_id` (UUID) per quiz run and sends it with every answer; `/api/quiz` validates it and stamps it on the `user_quiz_responses` upsert (migration `006_quiz_responses_session_id.sql` adds the nullable column)
+- Review page scope toggle — "last session" (default) / "all time" segmented control driven by a `?scope=all` search param; `getMistakesForTopic` gained a `MistakeScope` parameter. When the newest response predates the migration (no `session_id`), the last-session view falls back to all-time so real mistakes are never hidden
+- Dedicated empty state for a clean last session that still has older mistakes: "אין טעויות בתרגול האחרון!" plus a button jumping to the all-time view
+
+### Changed
+- Retry page now practices the **last session's** mistakes instead of all-time; the review page hides its retry button whenever the last session is clean, so it can't bounce straight back to an empty review
+
+---
+
 ## [0.3.84] — 2026-07-13
 
 ### Changed

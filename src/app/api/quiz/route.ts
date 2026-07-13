@@ -25,11 +25,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "יותר מדי בקשות, נסי שוב עוד רגע" }, { status: 429 });
   }
 
-  const { question_id, selected_option, topic_id } = await request.json();
+  const { question_id, selected_option, topic_id, session_id } = await request.json();
 
   if (!question_id || !selected_option) {
     return NextResponse.json({ error: "חסרים פרמטרים" }, { status: 400 });
   }
+
+  // The column is a Postgres UUID — coerce anything invalid to null so the upsert can't fail on it
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const sessionId = typeof session_id === "string" && UUID_RE.test(session_id) ? session_id : null;
 
   // Fetch question to check correct answer
   const { data: question } = await supabase
@@ -63,6 +67,7 @@ export async function POST(request: Request) {
     selected_option,
     is_correct,
     answered_at: new Date().toISOString(),
+    session_id: sessionId,
   }, { onConflict: "user_id,question_id" });
   if (upsertError) console.error("[quiz] upsert failed:", upsertError);
 

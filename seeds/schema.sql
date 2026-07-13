@@ -80,6 +80,7 @@ CREATE TABLE IF NOT EXISTS user_quiz_responses (
   selected_option CHAR(1),
   is_correct      BOOLEAN NOT NULL,
   answered_at     TIMESTAMPTZ DEFAULT NOW(),
+  session_id      UUID,
   UNIQUE(user_id, question_id)
 );
 

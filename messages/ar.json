@@ -129,7 +129,12 @@
     "backHome": "العودة للرئيسية",
     "mistakeCountOne": "سؤال واحد أخطأت فيه",
     "mistakeCountMany": "{count} أسئلة أخطأت فيها",
-    "retryBtn": "راجع الأخطاء"
+    "retryBtn": "راجع الأخطاء",
+    "scopeLabel": "نطاق الأخطاء",
+    "scopeLastSession": "آخر تدريب",
+    "scopeAllTime": "كل الأوقات",
+    "emptyHintLastSession": "لا أخطاء في آخر تدريب!",
+    "viewAllMistakes": "عرض كل الأخطاء"
   },
   "Schedule": {
     "pageTitle": "متى يناسبك التعلم؟",

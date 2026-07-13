@@ -162,6 +162,7 @@ type Response = {
   selected_option: string;
   is_correct: boolean;
   answered_at: string;
+  session_id?: string | null;
 };
 
 type QuestionRow = Record<string, unknown> & { id: string };
@@ -277,6 +278,86 @@ describe("getMistakesForTopic", () => {
       ],
     });
     expect(await getMistakesForTopic(supabase, "u1", "t1")).toEqual([]);
+  });
+
+  describe("lastSession scope", () => {
+    it("includes latest-session mistakes and excludes older-session mistakes", async () => {
+      const supabase = makeMistakesClient({
+        questionIds: ["q1", "q2"],
+        responses: [
+          // latest session s2: q1 wrong
+          { question_id: "q1", selected_option: "b", is_correct: false, answered_at: "2024-01-02", session_id: "s2" },
+          // older session s1: q2 wrong — should be excluded
+          { question_id: "q2", selected_option: "c", is_correct: false, answered_at: "2024-01-01", session_id: "s1" },
+        ],
+        questionDetails: [{ id: "q1", question_he: "What?", correct_option: "a" }],
+      });
+      const result = await getMistakesForTopic(supabase, "u1", "t1", "lastSession");
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe("q1");
+    });
+
+    it("returns [] when the last session is clean even if older sessions have mistakes", async () => {
+      const supabase = makeMistakesClient({
+        questionIds: ["q1", "q2"],
+        responses: [
+          { question_id: "q1", selected_option: "a", is_correct: true, answered_at: "2024-01-02", session_id: "s2" },
+          { question_id: "q2", selected_option: "c", is_correct: false, answered_at: "2024-01-01", session_id: "s1" },
+        ],
+      });
+      expect(await getMistakesForTopic(supabase, "u1", "t1", "lastSession")).toEqual([]);
+    });
+
+    it("falls back to all-time when the newest response has no session_id (legacy data)", async () => {
+      const supabase = makeMistakesClient({
+        questionIds: ["q1", "q2"],
+        responses: [
+          { question_id: "q1", selected_option: "b", is_correct: false, answered_at: "2024-01-02", session_id: null },
+          { question_id: "q2", selected_option: "c", is_correct: false, answered_at: "2024-01-01", session_id: null },
+        ],
+        questionDetails: [
+          { id: "q1", question_he: "What?", correct_option: "a" },
+          { id: "q2", question_he: "Which?", correct_option: "a" },
+        ],
+      });
+      const result = await getMistakesForTopic(supabase, "u1", "t1", "lastSession");
+      expect(result).toHaveLength(2);
+    });
+
+    it("excludes legacy null-session rows when the newest response has a session_id", async () => {
+      const supabase = makeMistakesClient({
+        questionIds: ["q1", "q2"],
+        responses: [
+          { question_id: "q1", selected_option: "b", is_correct: false, answered_at: "2024-01-02", session_id: "s1" },
+          { question_id: "q2", selected_option: "c", is_correct: false, answered_at: "2024-01-01", session_id: null },
+        ],
+        questionDetails: [{ id: "q1", question_he: "What?", correct_option: "a" }],
+      });
+      const result = await getMistakesForTopic(supabase, "u1", "t1", "lastSession");
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe("q1");
+    });
+
+    it('explicit "all" scope ignores session boundaries', async () => {
+      const supabase = makeMistakesClient({
+        questionIds: ["q1", "q2"],
+        responses: [
+          { question_id: "q1", selected_option: "b", is_correct: false, answered_at: "2024-01-02", session_id: "s2" },
+          { question_id: "q2", selected_option: "c", is_correct: false, answered_at: "2024-01-01", session_id: "s1" },
+        ],
+        questionDetails: [
+          { id: "q1", question_he: "What?", correct_option: "a" },
+          { id: "q2", question_he: "Which?", correct_option: "a" },
+        ],
+      });
+      const result = await getMistakesForTopic(supabase, "u1", "t1", "all");
+      expect(result).toHaveLength(2);
+    });
+
+    it("returns [] when there are no responses", async () => {
+      const supabase = makeMistakesClient({ questionIds: ["q1"], responses: [] });
+      expect(await getMistakesForTopic(supabase, "u1", "t1", "lastSession")).toEqual([]);
+    });
   });
 });
 
