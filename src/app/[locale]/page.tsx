@@ -14,7 +14,7 @@ import { computeReadiness, findWeakestTopics, READINESS_MAX_ATTEMPTS } from "@/l
 import { TabBar } from "@/components/TabBar";
 import { Icon } from "@/components/Icon";
 import { getTranslations, getLocale } from "next-intl/server";
-import styles from "@/app/page.module.css";
+import styles from "./page.module.css";
 
 function PathProgress({ total = 5, current = 1 }: { total?: number; current?: number }) {
   const items = [];

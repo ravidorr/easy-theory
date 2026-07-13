@@ -3,7 +3,7 @@ import { readFileSync } from "fs";
 import { resolve } from "path";
 
 const authScript = readFileSync(
-  resolve(__dirname, "../../../../../public/js/auth.js"),
+  resolve(__dirname, "../../../../../../public/js/auth.js"),
   "utf-8"
 );
 

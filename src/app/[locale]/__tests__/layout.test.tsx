@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import React from "react";
-import LocaleLayout from "../layout";
+import LocaleLayout, { generateViewport } from "../layout";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 
@@ -158,5 +158,18 @@ describe("LocaleLayout", () => {
     const html = renderToStaticMarkup(jsx);
     expect(html).toContain('id="test-child"');
     expect(html).toContain("hello");
+  });
+
+  describe("generateViewport", () => {
+    it("returns the dark theme color when no theme cookie", async () => {
+      expect(await generateViewport()).toEqual({ themeColor: "#131829" });
+    });
+
+    it("returns the light theme color when theme cookie is light", async () => {
+      mockCookies.mockResolvedValue({
+        get: vi.fn().mockReturnValue({ value: "light" }),
+      } as never);
+      expect(await generateViewport()).toEqual({ themeColor: "#f5f7fc" });
+    });
   });
 });

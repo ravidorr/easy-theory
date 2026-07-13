@@ -10,7 +10,7 @@ import { createClient } from "@/lib/supabase";
 import { getTopicBySlug, getQuestionsForTopic } from "@/lib/db";
 import type { Question } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
-import styles from "@/app/topics/[slug]/page.module.css";
+import styles from "./page.module.css";
 
 function resolveImageUrl(url: string | null | undefined): string | null {
   if (!url) return null;

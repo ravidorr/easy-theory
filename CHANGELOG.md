@@ -2,6 +2,15 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.100] — 2026-07-14
+
+### Fixed
+- Nested `<html>` hydration errors on every page (4 error-level console entries per navigation): the root layout is now a pass-through and `src/app/[locale]/layout.tsx` is the sole owner of `<html>`/`<head>`/`<body>` — Arabic pages no longer get the stale hardcoded `lang="he"` + Hebrew metadata, and the cookie-based `themeColor` viewport moved into the locale layout
+- Added a root `src/app/not-found.tsx` (renders its own `<html>`, `next/error` defaults) for non-localized requests and invalid locales; localizing it is tracked in TODO
+- Tidied the shadow non-locale route dirs under `src/app/`: all 13 load-bearing `page.module.css` files moved next to their `[locale]` pages (relative imports), the unused `topics/page.module.css` deleted, and `auth-script.test.ts` relocated with its path fixed
+
+---
+
 ## [0.3.99] — 2026-07-14
 
 ### Added

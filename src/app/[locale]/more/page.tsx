@@ -8,7 +8,7 @@ import { Icon } from "@/components/Icon";
 import { getUserMedals, getUserStats } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
 import { LanguageToggle } from "@/components/LanguageToggle";
-import styles from "@/app/more/page.module.css";
+import styles from "./page.module.css";
 
 export default async function MorePage() {
   const supabase = await createClient();

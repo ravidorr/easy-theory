@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase";
 import { getSigns } from "@/lib/db";
 import type { Sign } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
-import styles from "@/app/flashcards/page.module.css";
+import styles from "./page.module.css";
 
 function cleanName(name: string, signNumber: string): string {
   if (/^\d+$/.test(name.trim())) return `תמרור ${signNumber}`;

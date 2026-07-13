@@ -4,7 +4,7 @@ import Script from "next/script";
 import { createClient } from "@/lib/supabase";
 import { getUserSchedule } from "@/lib/db";
 import { getTranslations } from "next-intl/server";
-import styles from "@/app/schedule/page.module.css";
+import styles from "./page.module.css";
 
 const DURATIONS = [30, 45, 60];
 

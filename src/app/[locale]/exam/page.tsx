@@ -8,7 +8,7 @@ import {
   EXAM_PASS_MARK,
 } from "@/lib/exam";
 import { getTranslations, getLocale } from "next-intl/server";
-import styles from "@/app/exam/page.module.css";
+import styles from "./page.module.css";
 
 export default async function ExamPage() {
   const supabase = await createClient();
