@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.76] — 2026-07-13
+
+### Fixed
+- Fixed `audit_sign_images.py` regex to match sign numbers preceded by `_` (Wikimedia-style docnames like `Israel_road_sign_151.svg`); previously `\b` failed to match because `_` is a word character, silently skipping 50 additional mismatches
+
+---
+
 ## [0.3.75] — 2026-07-13
 
 ### Fixed
