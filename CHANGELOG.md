@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.86] — 2026-07-13
+
+### Changed
+- Repopulated `TODO.md` with the next 10 priority-ordered items from an in-depth codebase audit — cron endpoint fail-open security fix, mock exam mode, PWA manifest + offline support, exam-readiness analytics, API-route hardening, Arabic localization of API/notification strings, nested-`<html>` layout fix, quiz-flow accessibility, tests for `public/js/`, and flashcards/image performance — plus a "Later" backlog (spaced repetition, bookmarks, DB-backed videos/resources, scripts cleanup)
+
+---
+
 ## [0.3.85] — 2026-07-13
 
 ### Added
