@@ -149,6 +149,21 @@ describe("proxy middleware", () => {
       expect(res.status).toBe(200);
     });
 
+    it("allows /auth/callback through without invoking the intl middleware (skip guard)", async () => {
+      // Regression: next-intl used to redirect /auth/callback → /he/auth/callback,
+      // which has no route (404), breaking every magic-link login.
+      const res = await proxy(makeRequest("/auth/callback"));
+      expect(res.status).toBe(200);
+      expect(mockIntlMiddlewareFn).not.toHaveBeenCalled();
+    });
+
+    it("still routes locale-less /auth/login through the intl middleware", async () => {
+      // The callback's error redirect targets /auth/login and relies on
+      // next-intl to add the locale prefix — it must NOT be skipped.
+      await proxy(makeRequest("/auth/login"));
+      expect(mockIntlMiddlewareFn).toHaveBeenCalled();
+    });
+
     it("allows /signs/sign-301.png through (skip guard)", async () => {
       const res = await proxy(makeRequest("/signs/sign-301.png"));
       expect(res.status).toBe(200);
