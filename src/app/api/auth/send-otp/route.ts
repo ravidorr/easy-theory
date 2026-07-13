@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { parseJsonBody } from "@/lib/api";
 
 export async function POST(request: Request) {
-  const { email, next } = await request.json();
+  const body = await parseJsonBody(request);
+  if (!body) {
+    return NextResponse.json({ error: "כתובת מייל חסרה" }, { status: 400 });
+  }
+  const { email, next } = body;
   const requestUrl = new URL(request.url);
   const safeNext =
     typeof next === "string" && next.startsWith("/") && !next.startsWith("//")

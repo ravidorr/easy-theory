@@ -179,6 +179,18 @@ describe("POST /api/quiz", () => {
     expect(res.status).toBe(400);
   });
 
+  it("returns 400 for a malformed JSON body", async () => {
+    mockCreateClient.mockResolvedValue(buildDb() as never);
+    const res = await POST(
+      new Request("http://localhost:3000/api/quiz", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{not json",
+      })
+    );
+    expect(res.status).toBe(400);
+  });
+
   it("returns 404 when question does not exist", async () => {
     mockCreateClient.mockResolvedValue(buildDb({ noQuestion: true }) as never);
     const res = await POST(makeRequest(defaultBody));
@@ -282,13 +294,11 @@ describe("POST /api/quiz", () => {
     expect(body.topic_completed).toBe(true);
   });
 
-  it("logs and continues when the response upsert fails", async () => {
+  it("returns 500 when the response upsert fails", async () => {
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     mockCreateClient.mockResolvedValue(buildDb({ upsertError: true }) as never);
     const res = await POST(makeRequest(defaultBody));
-    const body = await res.json();
-    expect(res.status).toBe(200);
-    expect(body.is_correct).toBe(true);
+    expect(res.status).toBe(500);
     expect(errorSpy).toHaveBeenCalledWith(
       "[quiz] upsert failed:",
       expect.objectContaining({ message: "upsert failed" })

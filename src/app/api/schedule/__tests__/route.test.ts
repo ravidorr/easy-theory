@@ -1,15 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { GET, PUT } from "../route";
 import { createClient } from "@/lib/supabase";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
+vi.mock("@/lib/rate-limit", () => ({ checkRateLimit: vi.fn() }));
 
 const mockCreateClient = vi.mocked(createClient);
+const mockCheckRateLimit = vi.mocked(checkRateLimit);
 const USER_ID = "user-uuid";
-
-function makeGetRequest() {
-  return new Request("http://localhost/api/schedule");
-}
 
 function makePutRequest(body: object) {
   return new Request("http://localhost/api/schedule", {
@@ -19,13 +18,20 @@ function makePutRequest(body: object) {
   });
 }
 
+function makeRawPutRequest(body: string) {
+  return new Request("http://localhost/api/schedule", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body,
+  });
+}
+
 function chain(data: unknown = null, error: unknown = null) {
   const result = { data, error };
   const m = {} as Record<string, unknown>;
-  for (const k of ["select", "eq", "order", "delete", "limit"]) {
+  for (const k of ["select", "eq", "order", "limit"]) {
     m[k] = vi.fn().mockReturnValue(m);
   }
-  m.insert = vi.fn().mockResolvedValue({ data: null, error: null });
   m.then = (onFulfilled: (v: typeof result) => unknown) =>
     Promise.resolve(result).then(onFulfilled);
   return m;
@@ -34,29 +40,20 @@ function chain(data: unknown = null, error: unknown = null) {
 function makeClient({
   user = { id: USER_ID } as { id: string } | null,
   schedule = [] as unknown[],
-  deleteError = false,
-  insertError = false,
+  rpcError = false,
 } = {}) {
-  let scheduleCalled = 0;
   return {
     auth: { getUser: vi.fn().mockResolvedValue({ data: { user } }) },
-    from: vi.fn().mockImplementation((table: string) => {
-      if (table === "user_schedule") {
-        scheduleCalled++;
-        if (scheduleCalled === 1) {
-          // GET fetch OR PUT delete
-          return chain(schedule, deleteError ? { message: "delete err" } : null);
-        }
-        // PUT insert (second call)
-        return { insert: vi.fn().mockResolvedValue({ error: insertError ? { message: "insert err" } : null }) };
-      }
-      return chain(null);
-    }),
+    from: vi.fn().mockImplementation(() => chain(schedule)),
+    rpc: vi.fn().mockResolvedValue({ error: rpcError ? { message: "rpc err" } : null }),
   };
 }
 
 describe("GET /api/schedule", () => {
-  beforeEach(() => { vi.clearAllMocks(); });
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockCheckRateLimit.mockResolvedValue(true);
+  });
 
   it("returns 401 when not authenticated", async () => {
     mockCreateClient.mockResolvedValue(makeClient({ user: null }) as never);
@@ -83,12 +80,28 @@ describe("GET /api/schedule", () => {
 });
 
 describe("PUT /api/schedule", () => {
-  beforeEach(() => { vi.clearAllMocks(); });
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockCheckRateLimit.mockResolvedValue(true);
+  });
 
   it("returns 401 when not authenticated", async () => {
     mockCreateClient.mockResolvedValue(makeClient({ user: null }) as never);
     const res = await PUT(makePutRequest({ days: [0], start_time: "08:00" }));
     expect(res.status).toBe(401);
+  });
+
+  it("returns 429 when rate limited", async () => {
+    mockCreateClient.mockResolvedValue(makeClient() as never);
+    mockCheckRateLimit.mockResolvedValue(false);
+    const res = await PUT(makePutRequest({ days: [0], start_time: "08:00" }));
+    expect(res.status).toBe(429);
+  });
+
+  it("returns 400 for a malformed JSON body", async () => {
+    mockCreateClient.mockResolvedValue(makeClient() as never);
+    const res = await PUT(makeRawPutRequest("{not json"));
+    expect(res.status).toBe(400);
   });
 
   it("returns 400 when days is missing", async () => {
@@ -115,36 +128,49 @@ describe("PUT /api/schedule", () => {
     expect(res.status).toBe(400);
   });
 
-  it("returns 500 when delete fails", async () => {
-    mockCreateClient.mockResolvedValue(makeClient({ deleteError: true }) as never);
-    const res = await PUT(makePutRequest({ days: [0], start_time: "08:00" }));
-    expect(res.status).toBe(500);
-  });
-
-  it("returns 500 when insert fails", async () => {
-    mockCreateClient.mockResolvedValue(makeClient({ insertError: true }) as never);
+  it("returns 500 when the replace RPC fails", async () => {
+    mockCreateClient.mockResolvedValue(makeClient({ rpcError: true }) as never);
     const res = await PUT(makePutRequest({ days: [0], start_time: "08:00" }));
     expect(res.status).toBe(500);
   });
 
   it("succeeds when duration_minutes and notify are omitted, using defaults", async () => {
-    mockCreateClient.mockResolvedValue(makeClient() as never);
+    const client = makeClient();
+    mockCreateClient.mockResolvedValue(client as never);
     const res = await PUT(makePutRequest({ days: [1], start_time: "09:00" }));
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ ok: true });
+    expect(client.rpc).toHaveBeenCalledWith("replace_user_schedule", {
+      p_days: [1],
+      p_start_time: "09:00",
+      p_duration_minutes: 45,
+      p_notify: true,
+    });
   });
 
   it("succeeds with valid days and time, returns { ok: true }", async () => {
-    mockCreateClient.mockResolvedValue(makeClient() as never);
-    const res = await PUT(makePutRequest({ days: [0, 3, 5], start_time: "08:00", duration_minutes: 30, notify: true }));
+    const client = makeClient();
+    mockCreateClient.mockResolvedValue(client as never);
+    const res = await PUT(makePutRequest({ days: [0, 3, 5], start_time: "08:00", duration_minutes: 30, notify: false }));
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ ok: true });
+    expect(client.rpc).toHaveBeenCalledWith("replace_user_schedule", {
+      p_days: [0, 3, 5],
+      p_start_time: "08:00",
+      p_duration_minutes: 30,
+      p_notify: false,
+    });
   });
 
   it("succeeds with empty days array (clears schedule)", async () => {
-    mockCreateClient.mockResolvedValue(makeClient() as never);
+    const client = makeClient();
+    mockCreateClient.mockResolvedValue(client as never);
     const res = await PUT(makePutRequest({ days: [], start_time: "08:00" }));
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ ok: true });
+    expect(client.rpc).toHaveBeenCalledWith(
+      "replace_user_schedule",
+      expect.objectContaining({ p_days: [] })
+    );
   });
 });

@@ -2,6 +2,17 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.96] — 2026-07-14
+
+### Changed
+- Hardened API routes: malformed JSON bodies now return a clean 400 via a shared `parseJsonBody` helper (`src/lib/api.ts`) in the quiz/progress/schedule/push/send-otp routes instead of throwing an unhandled 500
+- Schedule PUT now replaces the weekly schedule atomically through a new `replace_user_schedule` Postgres function (migration `008_replace_user_schedule.sql`) — a failed insert can no longer wipe the user's existing schedule
+- Supabase write errors are no longer swallowed: progress update/insert, the quiz answer upsert, the topics questions query, and push subscribe/unsubscribe now return 500 on failure (quiz gamification side-writes log and continue); the push 500 no longer leaks the raw DB error message
+- Added rate limiting to the progress (20/min), schedule (10/min), and push subscribe/unsubscribe (10/min shared) mutations; push route error strings normalized to Hebrew
+- Removed the completed harden-API-routes item from `TODO.md` and renumbered the rest
+
+---
+
 ## [0.3.95] — 2026-07-14
 
 ### Fixed

@@ -40,6 +40,18 @@ describe("POST /api/auth/send-otp", () => {
     expect(res.status).toBe(400);
   });
 
+  it("returns 400 for a malformed JSON body", async () => {
+    mockCreateClient.mockResolvedValue(makeClient() as never);
+    const res = await POST(
+      new Request("http://localhost/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{not json",
+      })
+    );
+    expect(res.status).toBe(400);
+  });
+
   it("returns 400 when email format is invalid", async () => {
     mockCreateClient.mockResolvedValue(makeClient() as never);
     const res = await POST(makeRequest({ email: "not-an-email" }));

@@ -30,6 +30,7 @@ function chain(data: unknown, error: unknown = null) {
 function makeClient({
   topic = { id: "t1" } as Record<string, unknown> | null,
   questions = [] as unknown[],
+  questionsError = false,
 } = {}) {
   let questionsCalled = false;
   return {
@@ -38,7 +39,7 @@ function makeClient({
       if (table === "questions") {
         // Only return questions after topic is found
         questionsCalled = true;
-        return chain(questions);
+        return chain(questions, questionsError ? { message: "db error" } : null);
       }
       return chain(null);
     }),
@@ -75,5 +76,15 @@ describe("GET /api/topics/[slug]", () => {
     mockCreateClient.mockResolvedValue(makeClient({ questions: null as never }) as never);
     const res = await GET(makeRequest("signs"), makeParams("signs"));
     expect(await res.json()).toEqual([]);
+  });
+
+  it("returns 500 when the questions query fails", async () => {
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    mockCreateClient.mockResolvedValue(makeClient({ questionsError: true }) as never);
+    const res = await GET(makeRequest("signs"), makeParams("signs"));
+    expect(res.status).toBe(500);
+    const body = await res.json();
+    expect(body).toHaveProperty("error");
+    consoleSpy.mockRestore();
   });
 });

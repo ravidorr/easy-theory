@@ -1,10 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { POST } from "../route";
 import { createClient } from "@/lib/supabase";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
+vi.mock("@/lib/rate-limit", () => ({ checkRateLimit: vi.fn() }));
 
 const mockCreateClient = vi.mocked(createClient);
+const mockCheckRateLimit = vi.mocked(checkRateLimit);
 
 const USER_ID = "user-uuid";
 
@@ -13,6 +16,14 @@ function makeRequest(body: object) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
+  });
+}
+
+function makeRawRequest(body: string) {
+  return new Request("http://localhost/api/progress", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body,
   });
 }
 
@@ -67,12 +78,28 @@ function makeClient({
 }
 
 describe("POST /api/progress", () => {
-  beforeEach(() => { vi.clearAllMocks(); });
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockCheckRateLimit.mockResolvedValue(true);
+  });
 
   it("returns 401 when not authenticated", async () => {
     mockCreateClient.mockResolvedValue(makeClient({ user: null }) as never);
     const res = await POST(makeRequest({ topic_id: "t1" }));
     expect(res.status).toBe(401);
+  });
+
+  it("returns 429 when rate limited", async () => {
+    mockCreateClient.mockResolvedValue(makeClient() as never);
+    mockCheckRateLimit.mockResolvedValue(false);
+    const res = await POST(makeRequest({ topic_id: "t1" }));
+    expect(res.status).toBe(429);
+  });
+
+  it("returns 400 for a malformed JSON body", async () => {
+    mockCreateClient.mockResolvedValue(makeClient() as never);
+    const res = await POST(makeRawRequest("{not json"));
+    expect(res.status).toBe(400);
   });
 
   it("returns 400 when topic_id is missing", async () => {
@@ -89,6 +116,14 @@ describe("POST /api/progress", () => {
     expect(await res.json()).toEqual({ ok: true });
   });
 
+  it("returns 500 when the insert fails", async () => {
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    mockCreateClient.mockResolvedValue(makeClient({ existing: null, insertError: true }) as never);
+    const res = await POST(makeRequest({ topic_id: "t1" }));
+    expect(res.status).toBe(500);
+    consoleSpy.mockRestore();
+  });
+
   it("updates existing record and never downgrades from completed", async () => {
     const existing = { id: "p1", best_score: 80, status: "completed" };
     const client = makeClient({ existing });
@@ -97,6 +132,15 @@ describe("POST /api/progress", () => {
     expect(res.status).toBe(200);
     // The update mock is called — we trust the route doesn't downgrade (tested via status logic)
     expect(await res.json()).toEqual({ ok: true });
+  });
+
+  it("returns 500 when the update fails", async () => {
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const existing = { id: "p1", best_score: 80, status: "in_progress" };
+    mockCreateClient.mockResolvedValue(makeClient({ existing, updateError: true }) as never);
+    const res = await POST(makeRequest({ topic_id: "t1", score: 90 }));
+    expect(res.status).toBe(500);
+    consoleSpy.mockRestore();
   });
 
   it("defaults invalid status to in_progress", async () => {
