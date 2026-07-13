@@ -338,3 +338,73 @@
   font-size: var(--type-caption-size);
   color: var(--text-muted);
 }
+
+/* Readiness card */
+.readinessCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.readinessHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.readinessTitle {
+  font-size: var(--type-body-size);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.readinessChip {
+  font-size: var(--type-caption-size);
+  font-weight: 700;
+  border-radius: var(--radius-pill);
+  padding: 3px 10px;
+  flex-shrink: 0;
+}
+
+.readinessChipHigh {
+  background: var(--success-soft);
+  color: var(--success-text);
+}
+
+.readinessChipMedium {
+  background: var(--gold-soft);
+  color: var(--gold-text);
+}
+
+.readinessChipLow {
+  background: var(--danger-soft);
+  color: var(--danger-text);
+}
+
+.readinessValue {
+  font-size: var(--type-h2-size);
+  font-weight: 800;
+  color: var(--text);
+}
+
+.readinessCaption {
+  font-size: var(--type-caption-size);
+  color: var(--text-muted);
+}
+
+.weakTopicPct {
+  font-size: var(--type-caption-size);
+  font-weight: 600;
+  color: var(--danger-text);
+  flex-shrink: 0;
+}
+
+.progressFillWeak {
+  background: var(--gold);
+}

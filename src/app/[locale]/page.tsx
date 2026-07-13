@@ -1,8 +1,15 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
-import { getTopics, getUserStats, getTopicProgress } from "@/lib/db";
+import {
+  getTopics,
+  getUserStats,
+  getTopicProgress,
+  getExamAttempts,
+  getTopicAccuracy,
+} from "@/lib/db";
 import { nextMedalTarget } from "@/lib/quiz";
+import { computeReadiness, findWeakestTopics, READINESS_MAX_ATTEMPTS } from "@/lib/readiness";
 import { TabBar } from "@/components/TabBar";
 import { Icon } from "@/components/Icon";
 import { getTranslations, getLocale } from "next-intl/server";
@@ -44,13 +51,22 @@ export default async function HomePage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/auth/login?next=/");
 
-  const [stats, topics, progressRows] = await Promise.all([
+  const [stats, topics, progressRows, examAttempts, topicAccuracy] = await Promise.all([
     getUserStats(supabase, user.id),
     getTopics(supabase),
     getTopicProgress(supabase, user.id),
+    getExamAttempts(supabase, user.id, READINESS_MAX_ATTEMPTS),
+    getTopicAccuracy(supabase, user.id),
   ]);
 
   const progressMap = Object.fromEntries(progressRows.map((p) => [p.topic_id, p]));
+
+  const readiness = computeReadiness(examAttempts);
+  const topicsById = new Map(topics.map((topic) => [topic.id, topic]));
+  const weakTopics = findWeakestTopics(topicAccuracy).flatMap((weak) => {
+    const topic = topicsById.get(weak.topic_id);
+    return topic ? [{ ...weak, topic }] : [];
+  });
 
   const todayTopic =
     topics.find((t) => progressMap[t.id]?.status === "in_progress") ??
@@ -136,6 +152,47 @@ export default async function HomePage() {
           </div>
         )}
 
+        <div className={styles.readinessCard}>
+          <div className={styles.readinessHeader}>
+            <span className={styles.readinessTitle}>{t("readinessTitle")}</span>
+            {readiness.level === "high" ? (
+              <span className={`${styles.readinessChip} ${styles.readinessChipHigh}`}>
+                {t("readinessLevelHigh")}
+              </span>
+            ) : readiness.level === "medium" ? (
+              <span className={`${styles.readinessChip} ${styles.readinessChipMedium}`}>
+                {t("readinessLevelMedium")}
+              </span>
+            ) : readiness.level === "low" ? (
+              <span className={`${styles.readinessChip} ${styles.readinessChipLow}`}>
+                {t("readinessLevelLow")}
+              </span>
+            ) : null}
+          </div>
+          {readiness.probability !== null ? (
+            (() => {
+              const percent = Math.round(readiness.probability * 100);
+              return (
+                <>
+                  <span className={styles.readinessValue}>
+                    {t("readinessPercent", { percent })}
+                  </span>
+                  <div className={styles.progressTrack}>
+                    <div className={styles.progressFill} style={{ width: `${percent}%` }} />
+                  </div>
+                  <span className={styles.readinessCaption}>
+                    {readiness.attemptsUsed === 1
+                      ? t("readinessBasedOnOne")
+                      : t("readinessBasedOnMany", { count: readiness.attemptsUsed })}
+                  </span>
+                </>
+              );
+            })()
+          ) : (
+            <span className={styles.readinessCaption}>{t("readinessEmpty")}</span>
+          )}
+        </div>
+
         <Link href="/exam" className={styles.noUnderline}>
           <div className={styles.examCta}>
             <span className={styles.examCtaIcon}>
@@ -148,6 +205,50 @@ export default async function HomePage() {
             <Icon name="chevron-left" size={18} />
           </div>
         </Link>
+
+        {weakTopics.length > 0 && (
+          <div className={styles.topicsSection}>
+            <div className={styles.topicsHeader}>
+              <h2>{t("weakTopicsHeader")}</h2>
+            </div>
+            {weakTopics.map(({ topic, accuracy }) => {
+              const percent = Math.round(accuracy * 100);
+              const topicAny = topic as Record<string, unknown>;
+              const topicName = (topicAny[nameField] as string) ?? topic.name_he;
+              return (
+                <Link
+                  key={topic.id}
+                  href={`/topics/${topic.slug}`}
+                  className={styles.noUnderline}
+                >
+                  <div className={styles.topicLink}>
+                    {topic.icon && (
+                      <div className={styles.topicIconWrap}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={topic.icon} alt="" className={styles.topicIconImg} />
+                      </div>
+                    )}
+                    <div className={styles.topicBody}>
+                      <div className={styles.topicTitleRow}>
+                        <span className={styles.topicName}>{topicName}</span>
+                        <span className={styles.weakTopicPct}>
+                          {t("weakTopicAccuracy", { percent })}
+                        </span>
+                      </div>
+                      <div className={styles.progressTrack}>
+                        <div
+                          className={`${styles.progressFill} ${styles.progressFillWeak}`}
+                          style={{ width: `${percent}%` }}
+                        />
+                      </div>
+                    </div>
+                    <Icon name="chevron-left" size={18} />
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
 
         <div className={styles.topicsSection}>
           <div className={styles.topicsHeader}>

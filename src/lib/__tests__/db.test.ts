@@ -14,6 +14,7 @@ import {
   markTopicCompleted,
   getRandomExamQuestions,
   getExamAttempts,
+  getTopicAccuracy,
 } from "../db";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -448,6 +449,46 @@ describe("getExamAttempts", () => {
 
   it("returns [] on null", async () => {
     expect(await getExamAttempts(makeClient(null), "u1")).toEqual([]);
+  });
+});
+
+describe("getTopicAccuracy", () => {
+  it("aggregates correct/total per topic", async () => {
+    const rows = [
+      { is_correct: true, questions: { topic_id: "t1" } },
+      { is_correct: false, questions: { topic_id: "t1" } },
+      { is_correct: true, questions: { topic_id: "t1" } },
+      { is_correct: false, questions: { topic_id: "t2" } },
+    ];
+    expect(await getTopicAccuracy(makeClient(rows), "u1")).toEqual([
+      { topic_id: "t1", correct: 2, total: 3 },
+      { topic_id: "t2", correct: 0, total: 1 },
+    ]);
+  });
+
+  it("handles array-shaped nested relations", async () => {
+    const rows = [
+      { is_correct: true, questions: [{ topic_id: "t1" }] },
+      { is_correct: false, questions: [{ topic_id: "t1" }] },
+    ];
+    expect(await getTopicAccuracy(makeClient(rows), "u1")).toEqual([
+      { topic_id: "t1", correct: 1, total: 2 },
+    ]);
+  });
+
+  it("skips rows with no related question", async () => {
+    const rows = [
+      { is_correct: true, questions: null },
+      { is_correct: true, questions: [] },
+      { is_correct: false, questions: { topic_id: "t1" } },
+    ];
+    expect(await getTopicAccuracy(makeClient(rows), "u1")).toEqual([
+      { topic_id: "t1", correct: 0, total: 1 },
+    ]);
+  });
+
+  it("returns [] on null", async () => {
+    expect(await getTopicAccuracy(makeClient(null), "u1")).toEqual([]);
   });
 });
 
