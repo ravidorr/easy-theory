@@ -3,6 +3,7 @@ import Link from "next/link";
 import { existsSync } from "fs";
 import { join } from "path";
 import { SignImage } from "@/components/SignImage";
+import { InlineMarkdown } from "@/components/InlineMarkdown";
 import { createClient } from "@/lib/supabase";
 import { getTopicBySlug, getMistakesForTopic } from "@/lib/db";
 import type { QuizMistake } from "@/lib/db";
@@ -90,7 +91,9 @@ function QuestionReview({
                 <span className={styles.optionTextContent}>{text}</span>
               )}
               {state === "correct" && explanationText && (
-                <span className="quiz-option-explanation">{explanationText}</span>
+                <span className="quiz-option-explanation">
+                  <InlineMarkdown>{explanationText}</InlineMarkdown>
+                </span>
               )}
             </div>
           );

@@ -5,6 +5,7 @@ import { existsSync } from "fs";
 import { join } from "path";
 import { SignImage } from "@/components/SignImage";
 import { Icon } from "@/components/Icon";
+import { InlineMarkdown } from "@/components/InlineMarkdown";
 import { createClient } from "@/lib/supabase";
 import { getTopicBySlug, getQuestionsForTopic } from "@/lib/db";
 import type { Question } from "@/lib/db";
@@ -92,7 +93,9 @@ function QuestionSlide({
                 <span className={styles.optionTextContent}>{text}</span>
               )}
               {explanationText && (
-                <span className="quiz-option-explanation">{explanationText}</span>
+                <span className="quiz-option-explanation">
+                  <InlineMarkdown>{explanationText}</InlineMarkdown>
+                </span>
               )}
             </button>
           );

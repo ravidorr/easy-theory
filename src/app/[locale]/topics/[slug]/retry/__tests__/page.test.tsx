@@ -108,6 +108,17 @@ describe("RetryMistakesPage", () => {
     expect(screen.getByText("מה המשמעות של תמרור זה?")).toBeInTheDocument();
   });
 
+  it("renders markdown bold in explanation as <strong> without literal asterisks", async () => {
+    const m = { ...MISTAKE_A, explanation_he: "**חגורות הבטיחות** מחזיקות את הנוסע" };
+    mockGetMistakes.mockResolvedValue([m] as never);
+    const jsx = await RetryMistakesPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    const explanation = container.querySelector(".quiz-option-explanation");
+    expect(explanation?.querySelector("strong")?.textContent).toBe("חגורות הבטיחות");
+    expect(explanation?.textContent).toContain("מחזיקות את הנוסע");
+    expect(explanation?.textContent).not.toContain("**");
+  });
+
   it("renders all mistakes as slides", async () => {
     mockGetMistakes.mockResolvedValue([MISTAKE_A, MISTAKE_B] as never);
     const jsx = await RetryMistakesPage({ params: Promise.resolve({ slug: "signs" }) });
