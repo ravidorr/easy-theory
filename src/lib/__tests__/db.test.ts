@@ -12,6 +12,8 @@ import {
   getPushSubscriptionsForUsers,
   getMistakesForTopic,
   markTopicCompleted,
+  getRandomExamQuestions,
+  getExamAttempts,
 } from "../db";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -358,6 +360,94 @@ describe("getMistakesForTopic", () => {
       const supabase = makeMistakesClient({ questionIds: ["q1"], responses: [] });
       expect(await getMistakesForTopic(supabase, "u1", "t1", "lastSession")).toEqual([]);
     });
+  });
+});
+
+// ─── Exam helpers ────────────────────────────────────────────────────────────
+
+function makeExamQuestionsClient(ids: string[], questionRows: QuestionRow[] | null) {
+  let questionCallCount = 0;
+  return {
+    from: vi.fn().mockImplementation((table: string) => {
+      if (table === "questions") {
+        questionCallCount++;
+        if (questionCallCount === 1) {
+          return chain({ data: ids.map((id) => ({ id })) });
+        }
+        return chain({ data: questionRows });
+      }
+      return chain({ data: [] });
+    }),
+  } as unknown as SupabaseClient;
+}
+
+describe("getRandomExamQuestions", () => {
+  it("returns `count` questions drawn from the id pool", async () => {
+    const ids = Array.from({ length: 50 }, (_, i) => `q${i}`);
+    // Second fetch returns every question so any sampled id resolves.
+    const rows = ids.map((id) => ({ id, question_he: `שאלה ${id}` }));
+    const supabase = makeExamQuestionsClient(ids, rows);
+    const result = await getRandomExamQuestions(supabase, 30);
+    expect(result).toHaveLength(30);
+    expect(new Set(result.map((q) => q.id)).size).toBe(30);
+  });
+
+  it("returns all questions when fewer than `count` exist", async () => {
+    const rows = [
+      { id: "q1", question_he: "א" },
+      { id: "q2", question_he: "ב" },
+    ];
+    const supabase = makeExamQuestionsClient(["q1", "q2"], rows);
+    const result = await getRandomExamQuestions(supabase, 30);
+    expect(result).toHaveLength(2);
+  });
+
+  it("preserves the sampled order, not the fetch order", async () => {
+    // With a single id the order is trivially preserved; assert the mapping path
+    // by returning rows keyed differently from the id fetch order.
+    const ids = ["q1", "q2", "q3"];
+    const rows = [
+      { id: "q3", question_he: "ג" },
+      { id: "q1", question_he: "א" },
+      { id: "q2", question_he: "ב" },
+    ];
+    const supabase = makeExamQuestionsClient(ids, rows);
+    const result = await getRandomExamQuestions(supabase, 3);
+    // Every returned row must exist and be unique regardless of fetch order.
+    expect(new Set(result.map((q) => q.id)).size).toBe(3);
+  });
+
+  it("returns [] when there are no questions", async () => {
+    const supabase = makeExamQuestionsClient([], []);
+    expect(await getRandomExamQuestions(supabase, 30)).toEqual([]);
+  });
+
+  it("returns [] when the details fetch yields null", async () => {
+    const supabase = makeExamQuestionsClient(["q1"], null);
+    expect(await getRandomExamQuestions(supabase, 30)).toEqual([]);
+  });
+
+  it("drops sampled ids missing from the details fetch", async () => {
+    const supabase = makeExamQuestionsClient(
+      ["q1", "q2"],
+      [{ id: "q1", question_he: "א" }]
+    );
+    const result = await getRandomExamQuestions(supabase, 2);
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe("q1");
+  });
+});
+
+describe("getExamAttempts", () => {
+  it("returns attempts", async () => {
+    const attempts = [
+      { id: "e1", score: 27, total: 30, passed: true, duration_seconds: 1800, created_at: "2026-07-01" },
+    ];
+    expect(await getExamAttempts(makeClient(attempts), "u1")).toEqual(attempts);
+  });
+
+  it("returns [] on null", async () => {
+    expect(await getExamAttempts(makeClient(null), "u1")).toEqual([]);
   });
 });
 

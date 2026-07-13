@@ -136,6 +136,19 @@ export default async function HomePage() {
           </div>
         )}
 
+        <Link href="/exam" className={styles.noUnderline}>
+          <div className={styles.examCta}>
+            <span className={styles.examCtaIcon}>
+              <Icon name="timer" size={22} />
+            </span>
+            <div className={styles.examCtaBody}>
+              <span className={styles.examCtaTitle}>{t("examCtaTitle")}</span>
+              <span className={styles.examCtaDesc}>{t("examCtaDesc")}</span>
+            </div>
+            <Icon name="chevron-left" size={18} />
+          </div>
+        </Link>
+
         <div className={styles.topicsSection}>
           <div className={styles.topicsHeader}>
             <h2>{t("topicsHeader")}</h2>

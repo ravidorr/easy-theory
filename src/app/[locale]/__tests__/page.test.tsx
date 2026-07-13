@@ -64,6 +64,14 @@ describe("HomePage", () => {
     expect(screen.getByText("42")).toBeInTheDocument();
   });
 
+  it("renders a mock-exam CTA linking to /exam", async () => {
+    const jsx = await HomePage();
+    const { container } = render(jsx);
+    expect(container.querySelector('a[href="/exam"]')).toBeTruthy();
+    expect(screen.getByText("examCtaTitle")).toBeInTheDocument();
+    expect(screen.getByText("examCtaDesc")).toBeInTheDocument();
+  });
+
   it("shows today's task card when there is an in_progress topic", async () => {
     mockGetProgress.mockResolvedValue([
       { topic_id: "t2", status: "in_progress", best_score: 50 },

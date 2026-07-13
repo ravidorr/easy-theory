@@ -27,6 +27,8 @@
     "emptyStateTitle": "מתי נוח לך ללמוד?",
     "emptyStateDesc": "נבנה תוכנית שבועית ונתחיל.",
     "emptyStateBtn": "שמירת תוכנית",
+    "examCtaTitle": "סימולציית מבחן",
+    "examCtaDesc": "30 שאלות · 40 דק׳ · כמו במבחן האמיתי",
     "topicsHeader": "הנושאים שלך",
     "topicCompleted": "✓ הושלם",
     "topicNotStarted": "טרם התחלת"
@@ -69,6 +71,7 @@
     "pageTitle": "עוד",
     "statStreak": "יום רצף",
     "statPoints": "נקודות",
+    "navExam": "סימולציית מבחן",
     "navSchedule": "התוכנית שלך",
     "navCredits": "קרדיטים",
     "medalsTitle": "הישגים",
@@ -135,6 +138,32 @@
     "scopeAllTime": "כל הזמנים",
     "emptyHintLastSession": "אין טעויות בתרגול האחרון!",
     "viewAllMistakes": "לצפייה בכל הטעויות"
+  },
+  "Exam": {
+    "pageTitle": "סימולציית מבחן",
+    "subtitle": "בדיוק כמו המבחן האמיתי, בלי הלחץ.",
+    "rulesTitle": "איך זה עובד?",
+    "ruleQuestions": "{count} שאלות אקראיות מכל הנושאים",
+    "ruleTime": "{minutes} דקות לכל המבחן",
+    "rulePass": "עוברים עם {passMark} תשובות נכונות ומעלה",
+    "startBtn": "יאללה, מתחילות!",
+    "historyTitle": "הניסיונות שלך",
+    "historyEmpty": "עוד לא עשית סימולציה. זה הזמן לנסות!",
+    "bestScore": "השיא שלך: {score} מתוך {total}",
+    "attemptScore": "{score} מתוך {total}",
+    "passChip": "עברת",
+    "failChip": "לא עברת",
+    "closeLabel": "סגירה",
+    "count": "{current} מתוך {total}",
+    "answered": "נענו {answered} מתוך {total}",
+    "prevBtn": "הקודמת",
+    "nextBtn": "הבאה",
+    "submitBtn": "הגשת המבחן",
+    "reviewBtn": "סקירת התשובות",
+    "backToExam": "חזרה לסימולציה",
+    "emptyQuestions": "אין שאלות זמינות עדיין.",
+    "timerLabel": "זמן שנותר",
+    "letters": "א,ב,ג,ד"
   },
   "Schedule": {
     "pageTitle": "מתי נוח לך ללמוד?",
@@ -262,6 +291,20 @@
       "cardCount": "כרטיס {current} מתוך {total}",
       "done": "הושלם! {total} כרטיסים",
       "allDone": "כל הכרטיסים עברו!"
+    },
+    "Exam": {
+      "examCount": "{current} מתוך {total}",
+      "examAnswered": "נענו {answered} מתוך {total}",
+      "examPrev": "הקודמת",
+      "examNext": "הבאה",
+      "examSubmit": "הגשת המבחן",
+      "examSubmitting": "שולחת...",
+      "examConfirmUnanswered": "יש {count} שאלות שלא נענו. להגיש בכל זאת?",
+      "examPassTitle": "עברת! 🎉",
+      "examFailTitle": "לא נורא, כמעט שם.",
+      "examResultScore": "{score} מתוך {total} נכון (ציון עובר: {passMark})",
+      "examTimeUp": "הזמן נגמר, המבחן הוגש.",
+      "examSubmitError": "שגיאה בשליחה, שננסה שוב?"
     }
   }
 }

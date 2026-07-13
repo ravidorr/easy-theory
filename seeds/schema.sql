@@ -84,6 +84,18 @@ CREATE TABLE IF NOT EXISTS user_quiz_responses (
   UNIQUE(user_id, question_id)
 );
 
+CREATE TABLE IF NOT EXISTS user_exam_attempts (
+  id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id          UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  score            INT NOT NULL CHECK (score >= 0),
+  total            INT NOT NULL CHECK (total > 0),
+  passed           BOOLEAN NOT NULL,
+  answers          JSONB NOT NULL DEFAULT '[]'::jsonb,
+  duration_seconds INT,
+  created_at       TIMESTAMPTZ DEFAULT NOW(),
+  CHECK (score <= total)
+);
+
 CREATE TABLE IF NOT EXISTS user_push_subscriptions (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id    UUID REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -135,3 +147,7 @@ ALTER TABLE user_push_subscriptions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "own select" ON user_push_subscriptions FOR SELECT USING (user_id = auth.uid());
 CREATE POLICY "own insert" ON user_push_subscriptions FOR INSERT WITH CHECK (user_id = auth.uid());
 CREATE POLICY "own delete" ON user_push_subscriptions FOR DELETE USING (user_id = auth.uid());
+
+ALTER TABLE user_exam_attempts ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "own select" ON user_exam_attempts FOR SELECT USING (user_id = auth.uid());
+CREATE POLICY "own insert" ON user_exam_attempts FOR INSERT WITH CHECK (user_id = auth.uid());
