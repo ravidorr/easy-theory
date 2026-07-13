@@ -1,6 +1,6 @@
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Rubik } from "next/font/google";
 import { cookies } from "next/headers";
 import Script from "next/script";
@@ -17,6 +17,12 @@ export const metadata: Metadata = {
   title: "ClearRoad — דרך ברורה",
   description: "לימוד תיאוריה, בלי הצפה",
 };
+
+export async function generateViewport(): Promise<Viewport> {
+  const cookieStore = await cookies();
+  const theme = cookieStore.get("theme")?.value ?? "dark";
+  return { themeColor: theme === "light" ? "#f5f7fc" : "#131829" };
+}
 
 export default async function RootLayout({
   children,

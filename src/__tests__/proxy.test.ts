@@ -173,6 +173,17 @@ describe("proxy middleware", () => {
       const res = await proxy(makeRequest("/favicon.ico"));
       expect(res.status).toBe(200);
     });
+
+    it("allows /manifest.webmanifest through without touching Supabase (skip guard)", async () => {
+      const res = await proxy(makeRequest("/manifest.webmanifest"));
+      expect(res.status).toBe(200);
+      expect(vi.mocked(createServerClient)).not.toHaveBeenCalled();
+    });
+
+    it("allows /sw.js through (skip guard)", async () => {
+      const res = await proxy(makeRequest("/sw.js"));
+      expect(res.status).toBe(200);
+    });
   });
 
   describe("cookie callbacks passed to createServerClient", () => {
