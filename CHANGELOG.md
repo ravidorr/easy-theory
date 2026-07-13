@@ -2,9 +2,10 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
-## [Unreleased]
+## [0.3.74] — 2026-07-13
 
 ### Fixed
+- Fixed wrong sign images on flashcards: 21 SVG files contained the wrong sign's artwork (detectable via `sodipodi:docname`); switched those signs to use the authoritative PNG files extracted from the official Israeli traffic signs PDF
 - Restored test coverage above 90% by adding tests for all 10 locale pages and `lib/navigation`
 - Excluded `scripts/` from `tsconfig.json` to fix Vercel build (translation scripts use DB columns not yet in generated types)
 
