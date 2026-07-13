@@ -9,6 +9,7 @@ import {
 import { checkTopicCompletion } from "@/lib/topic-completion";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { markTopicCompleted } from "@/lib/db";
+import { parseJsonBody } from "@/lib/api";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -25,7 +26,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "יותר מדי בקשות, נסי שוב עוד רגע" }, { status: 429 });
   }
 
-  const { question_id, selected_option, topic_id, session_id } = await request.json();
+  const body = await parseJsonBody(request);
+  if (!body) {
+    return NextResponse.json({ error: "חסרים פרמטרים" }, { status: 400 });
+  }
+  const { question_id, selected_option, topic_id, session_id } = body;
 
   if (!question_id || !selected_option) {
     return NextResponse.json({ error: "חסרים פרמטרים" }, { status: 400 });
@@ -34,6 +39,7 @@ export async function POST(request: Request) {
   // The column is a Postgres UUID — coerce anything invalid to null so the upsert can't fail on it
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   const sessionId = typeof session_id === "string" && UUID_RE.test(session_id) ? session_id : null;
+  const topicId = typeof topic_id === "string" ? topic_id : null;
 
   // Fetch question to check correct answer
   const { data: question } = await supabase
@@ -69,7 +75,10 @@ export async function POST(request: Request) {
     answered_at: new Date().toISOString(),
     session_id: sessionId,
   }, { onConflict: "user_id,question_id" });
-  if (upsertError) console.error("[quiz] upsert failed:", upsertError);
+  if (upsertError) {
+    console.error("[quiz] upsert failed:", upsertError);
+    return NextResponse.json({ error: "שמירת התשובה נכשלה" }, { status: 500 });
+  }
 
   let stars_earned = 0;
   const medals_earned: string[] = [];
@@ -88,12 +97,13 @@ export async function POST(request: Request) {
       .single();
 
     if (!stats) {
-      await supabase.from("user_stats").insert({
+      const { error: statsError } = await supabase.from("user_stats").insert({
         user_id: user.id,
         star_points: POINTS_PER_CORRECT,
         streak_days: 1,
         last_active_date: today,
       });
+      if (statsError) console.error("[quiz] stats insert failed:", statsError);
     } else {
       const yesterdayStr = toIL(new Date(Date.now() - 86_400_000));
 
@@ -104,7 +114,7 @@ export async function POST(request: Request) {
         yesterdayStr
       );
 
-      await supabase
+      const { error: statsError } = await supabase
         .from("user_stats")
         .update({
           star_points: stats.star_points + POINTS_PER_CORRECT,
@@ -112,6 +122,7 @@ export async function POST(request: Request) {
           last_active_date: today,
         })
         .eq("user_id", user.id);
+      if (statsError) console.error("[quiz] stats update failed:", statsError);
 
       // Streak milestone medals
       if (isMilestoneReached(newStreak, stats.streak_days, STREAK_MILESTONES)) {
@@ -127,38 +138,40 @@ export async function POST(request: Request) {
   // Update topic progress if topic_id provided
   let topic_completed = false;
 
-  if (topic_id && is_correct) {
+  if (topicId && is_correct) {
     const { data: progress } = await supabase
       .from("user_topic_progress")
       .select("*")
       .eq("user_id", user.id)
-      .eq("topic_id", topic_id)
+      .eq("topic_id", topicId)
       .single();
 
     if (!progress) {
-      await supabase.from("user_topic_progress").insert({
+      const { error: progressError } = await supabase.from("user_topic_progress").insert({
         user_id: user.id,
-        topic_id,
+        topic_id: topicId,
         status: "in_progress",
         last_studied_at: new Date().toISOString(),
       });
+      if (progressError) console.error("[quiz] topic progress insert failed:", progressError);
     } else if (progress.status !== "completed") {
-      await supabase
+      const { error: progressError } = await supabase
         .from("user_topic_progress")
         .update({
           status: "in_progress",
           last_studied_at: new Date().toISOString(),
         })
         .eq("user_id", user.id)
-        .eq("topic_id", topic_id);
+        .eq("topic_id", topicId);
+      if (progressError) console.error("[quiz] topic progress update failed:", progressError);
     }
 
     if (!progress || progress.status !== "completed") {
-      const isComplete = await checkTopicCompletion(supabase, user.id, topic_id);
+      const isComplete = await checkTopicCompletion(supabase, user.id, topicId);
       if (isComplete) {
         topic_completed = true;
         try {
-          await markTopicCompleted(supabase, user.id, topic_id);
+          await markTopicCompleted(supabase, user.id, topicId);
         } catch (err) {
           console.error("[quiz] Failed to mark topic completed:", err);
         }

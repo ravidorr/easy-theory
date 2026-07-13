@@ -1,20 +1,30 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { parseJsonBody } from "@/lib/api";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!user) return NextResponse.json({ error: "לא מחוברת" }, { status: 401 });
 
-  const body = await request.json();
-  const endpoint: string = body?.endpoint;
-  const auth: string = body?.keys?.auth;
-  const p256dh: string = body?.keys?.p256dh;
+  const allowed = await checkRateLimit(supabase, `push:${user.id}`, 10, 60);
+  if (!allowed) {
+    return NextResponse.json({ error: "יותר מדי בקשות, נסי שוב עוד רגע" }, { status: 429 });
+  }
+
+  const body = (await parseJsonBody(request)) as {
+    endpoint?: string;
+    keys?: { auth?: string; p256dh?: string };
+  } | null;
+  const endpoint = body?.endpoint;
+  const auth = body?.keys?.auth;
+  const p256dh = body?.keys?.p256dh;
 
   if (!endpoint || !auth || !p256dh) {
-    return NextResponse.json({ error: "Invalid subscription" }, { status: 400 });
+    return NextResponse.json({ error: "פרמטרים שגויים" }, { status: 400 });
   }
 
   const { error } = await supabase.from("user_push_subscriptions").upsert(
@@ -22,7 +32,10 @@ export async function POST(request: Request) {
     { onConflict: "user_id,endpoint" }
   );
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    console.error("[push] subscription upsert failed:", error);
+    return NextResponse.json({ error: "שגיאה בשמירת ההרשמה" }, { status: 500 });
+  }
   return NextResponse.json({ ok: true });
 }
 
@@ -31,12 +44,21 @@ export async function DELETE() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!user) return NextResponse.json({ error: "לא מחוברת" }, { status: 401 });
 
-  await supabase
+  const allowed = await checkRateLimit(supabase, `push:${user.id}`, 10, 60);
+  if (!allowed) {
+    return NextResponse.json({ error: "יותר מדי בקשות, נסי שוב עוד רגע" }, { status: 429 });
+  }
+
+  const { error } = await supabase
     .from("user_push_subscriptions")
     .delete()
     .eq("user_id", user.id);
 
+  if (error) {
+    console.error("[push] subscription delete failed:", error);
+    return NextResponse.json({ error: "שגיאה בהסרת ההרשמה" }, { status: 500 });
+  }
   return NextResponse.json({ ok: true });
 }

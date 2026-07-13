@@ -18,11 +18,16 @@ export async function GET(
     return NextResponse.json({ error: "נושא לא נמצא" }, { status: 404 });
   }
 
-  const { data: questions } = await supabase
+  const { data: questions, error } = await supabase
     .from("questions")
     .select("id, question_number, question_he, option_a, option_b, option_c, option_d, image_url")
     .eq("topic_id", topic.id)
     .order("question_number");
+
+  if (error) {
+    console.error("[topics] questions query failed:", error);
+    return NextResponse.json({ error: "שגיאה בטעינת השאלות" }, { status: 500 });
+  }
 
   return NextResponse.json(questions ?? []);
 }

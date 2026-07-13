@@ -1,10 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { POST, DELETE } from "../route";
 import { createClient } from "@/lib/supabase";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
+vi.mock("@/lib/rate-limit", () => ({ checkRateLimit: vi.fn() }));
 
 const mockCreateClient = vi.mocked(createClient);
+const mockCheckRateLimit = vi.mocked(checkRateLimit);
 const USER_ID = "user-uuid";
 
 const validBody = {
@@ -20,8 +23,12 @@ function makePostRequest(body: object) {
   });
 }
 
-function makeDeleteRequest() {
-  return new Request("http://localhost/api/push/subscribe", { method: "DELETE" });
+function makeRawPostRequest(body: string) {
+  return new Request("http://localhost/api/push/subscribe", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body,
+  });
 }
 
 function chain(data: unknown = null, error: unknown = null) {
@@ -39,20 +46,41 @@ function chain(data: unknown = null, error: unknown = null) {
 function makeClient({
   user = { id: USER_ID } as { id: string } | null,
   upsertError = false,
+  deleteError = false,
 } = {}) {
   return {
     auth: { getUser: vi.fn().mockResolvedValue({ data: { user } }) },
-    from: vi.fn().mockReturnValue(chain(null, upsertError ? { message: "db error" } : null)),
+    from: vi
+      .fn()
+      .mockReturnValue(
+        chain(null, upsertError || deleteError ? { message: "db error" } : null)
+      ),
   };
 }
 
 describe("POST /api/push/subscribe", () => {
-  beforeEach(() => { vi.clearAllMocks(); });
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockCheckRateLimit.mockResolvedValue(true);
+  });
 
   it("returns 401 when not authenticated", async () => {
     mockCreateClient.mockResolvedValue(makeClient({ user: null }) as never);
     const res = await POST(makePostRequest(validBody));
     expect(res.status).toBe(401);
+  });
+
+  it("returns 429 when rate limited", async () => {
+    mockCreateClient.mockResolvedValue(makeClient() as never);
+    mockCheckRateLimit.mockResolvedValue(false);
+    const res = await POST(makePostRequest(validBody));
+    expect(res.status).toBe(429);
+  });
+
+  it("returns 400 for a malformed JSON body", async () => {
+    mockCreateClient.mockResolvedValue(makeClient() as never);
+    const res = await POST(makeRawPostRequest("{not json"));
+    expect(res.status).toBe(400);
   });
 
   it("returns 400 when endpoint is missing", async () => {
@@ -73,10 +101,14 @@ describe("POST /api/push/subscribe", () => {
     expect(res.status).toBe(400);
   });
 
-  it("returns 500 when upsert fails", async () => {
+  it("returns 500 with a generic message when upsert fails", async () => {
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     mockCreateClient.mockResolvedValue(makeClient({ upsertError: true }) as never);
     const res = await POST(makePostRequest(validBody));
     expect(res.status).toBe(500);
+    const body = await res.json();
+    expect(body.error).not.toContain("db error");
+    consoleSpy.mockRestore();
   });
 
   it("returns { ok: true } on successful upsert", async () => {
@@ -88,12 +120,30 @@ describe("POST /api/push/subscribe", () => {
 });
 
 describe("DELETE /api/push/subscribe", () => {
-  beforeEach(() => { vi.clearAllMocks(); });
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockCheckRateLimit.mockResolvedValue(true);
+  });
 
   it("returns 401 when not authenticated", async () => {
     mockCreateClient.mockResolvedValue(makeClient({ user: null }) as never);
     const res = await DELETE();
     expect(res.status).toBe(401);
+  });
+
+  it("returns 429 when rate limited", async () => {
+    mockCreateClient.mockResolvedValue(makeClient() as never);
+    mockCheckRateLimit.mockResolvedValue(false);
+    const res = await DELETE();
+    expect(res.status).toBe(429);
+  });
+
+  it("returns 500 when the delete fails", async () => {
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    mockCreateClient.mockResolvedValue(makeClient({ deleteError: true }) as never);
+    const res = await DELETE();
+    expect(res.status).toBe(500);
+    consoleSpy.mockRestore();
   });
 
   it("deletes all subscriptions and returns { ok: true }", async () => {
