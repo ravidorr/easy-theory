@@ -2,6 +2,18 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.101] — 2026-07-14
+
+### Fixed
+- Screen-reader accessibility across the quiz flows and home page:
+  - Question sign images (quiz, retry, review, exam) now announce "תמרור {number}" — the official sign number identifies the image without revealing its meaning and spoiling the answer; non-sign question photos announce a generic "attached image" label (previously all `alt=""`, leaving "התמרור שלפניך" questions unanswerable with a screen reader)
+  - Picture-based answer options announce their sign number the same way
+  - Home header streak/star counters gain visually-hidden labels (new `.sr-only` utility) instead of being bare numbers
+  - The quiz/retry/review close controls are now named "סגירה" via `aria-label` (previously announced as "✕"), matching the existing exam pattern
+  - CTAs that nested a `<button>` inside a `<Link>` (today card, empty state, quiz/retry/review/exam final screens) are now single links styled as buttons — one tab stop, valid interactive nesting, identical visuals
+
+---
+
 ## [0.3.100] — 2026-07-14
 
 ### Fixed

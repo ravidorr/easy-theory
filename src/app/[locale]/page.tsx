@@ -101,10 +101,12 @@ export default async function HomePage() {
           <div className={styles.pillsRow}>
             <span className={`${styles.pill} ${styles.pillStreak}`}>
               <Icon name="flame" size={15} />
+              <span className="sr-only">{t("streakLabel")}</span>
               {stats.streak_days}
             </span>
             <span className={`${styles.pill} ${styles.pillPoints}`}>
               <Icon name="star" size={15} />
+              <span className="sr-only">{t("pointsLabel")}</span>
               {stats.star_points}
             </span>
           </div>
@@ -151,16 +153,16 @@ export default async function HomePage() {
               const current = pct >= 100 ? 6 : pct >= 67 ? 4 : pct >= 34 ? 3 : pct >= 1 ? 2 : 1;
               return <PathProgress total={5} current={current} />;
             })()}
-            <Link href={`/topics/${todayTopic.slug}`} className={styles.noUnderline}>
-              <button className="btn-primary">{t("startBtn")}</button>
+            <Link href={`/topics/${todayTopic.slug}`} className="btn-primary">
+              {t("startBtn")}
             </Link>
           </div>
         ) : (
           <div className={styles.emptyStateCard}>
             <h2>{t("emptyStateTitle")}</h2>
             <span className={styles.emptyCardDesc}>{t("emptyStateDesc")}</span>
-            <Link href="/schedule" className={styles.noUnderline}>
-              <button className="btn-primary">{t("emptyStateBtn")}</button>
+            <Link href="/schedule" className="btn-primary">
+              {t("emptyStateBtn")}
             </Link>
           </div>
         )}

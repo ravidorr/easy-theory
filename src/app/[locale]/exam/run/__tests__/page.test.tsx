@@ -14,12 +14,12 @@ vi.mock("next/navigation", () => ({
 vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
 vi.mock("@/lib/db", () => ({ getRandomExamQuestions: vi.fn() }));
 vi.mock("@/components/SignImage", () => ({
-  SignImage: ({ src }: { src: string }) =>
-    React.createElement("img", { src, alt: "" }),
+  SignImage: ({ src, alt = "" }: { src: string; alt?: string }) =>
+    React.createElement("img", { src, alt }),
 }));
 vi.mock("next/link", () => ({
-  default: ({ href, children }: { href: string; children: unknown }) =>
-    React.createElement("a", { href }, children as React.ReactNode),
+  default: ({ href, children, ...rest }: { href: string; children: unknown }) =>
+    React.createElement("a", { href, ...rest }, children as React.ReactNode),
 }));
 vi.mock("next/script", () => ({
   default: () => React.createElement("div", null),
@@ -135,6 +135,29 @@ describe("ExamRunPage", () => {
     expect(container.querySelector('img[src="/placeholder.svg"]')).toBeTruthy();
     expect(container.querySelector('img[src="/questions/3012.jpg"]')).toBeTruthy();
     expect(container.querySelector('img[src="/signs/sign-101.png"]')).toBeTruthy();
+  });
+
+  it("gives question and option images alt text without revealing the answer", async () => {
+    mockGetQuestions.mockResolvedValue([
+      // Wide question photo → generic question-image alt.
+      { ...makeQuestion(1), image_url: "/questions/3012.jpg" },
+      // Sign question → option sign image labelled by sign number only.
+      { ...makeQuestion(2), image_url: "/signs/sign-101.png", option_a: "101" },
+      // Square sign as the question image (non-numeric options).
+      { ...makeQuestion(3), image_url: "/signs/sign-100.png" },
+    ] as never);
+    const jsx = await ExamRunPage();
+    const { container } = render(jsx);
+    expect(container.querySelector('img[src="/questions/3012.jpg"]')?.getAttribute("alt")).toBe("questionImageAlt");
+    expect(container.querySelector('img[src="/signs/sign-101.png"]')?.getAttribute("alt")).toBe("signAlt");
+    expect(container.querySelector('img[src="/signs/sign-100.png"]')?.getAttribute("alt")).toBe("signAlt");
+  });
+
+  it("renders the back-to-exam CTA as a link styled as a button, without a nested button", async () => {
+    const jsx = await ExamRunPage();
+    const { container } = render(jsx);
+    expect(container.querySelector('a[href="/exam"].btn-primary')).toBeTruthy();
+    expect(container.querySelector("a button")).toBeNull();
   });
 
   it("shows the empty state when no questions exist", async () => {

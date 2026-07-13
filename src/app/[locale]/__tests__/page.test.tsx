@@ -28,8 +28,8 @@ vi.mock("@/lib/db", () => ({
   getTopicQuestionCounts: vi.fn(),
 }));
 vi.mock("next/link", () => ({
-  default: ({ href, children, style }: { href: string; children: unknown; style?: unknown }) =>
-    React.createElement("a", { href, style }, children as React.ReactNode),
+  default: ({ href, children, ...rest }: { href: string; children: unknown }) =>
+    React.createElement("a", { href, ...rest }, children as React.ReactNode),
 }));
 vi.mock("@/components/TabBar", () => ({
   TabBar: () => React.createElement("div", { "data-testid": "tabbar" }),
@@ -78,6 +78,36 @@ describe("HomePage", () => {
     render(jsx);
     expect(screen.getByText("7")).toBeInTheDocument();
     expect(screen.getByText("42")).toBeInTheDocument();
+  });
+
+  it("labels the streak and points counters for screen readers", async () => {
+    const jsx = await HomePage();
+    render(jsx);
+    expect(screen.getByText("streakLabel")).toHaveClass("sr-only");
+    expect(screen.getByText("pointsLabel")).toHaveClass("sr-only");
+  });
+
+  it("renders the today-card CTA as a link styled as a button, without a nested button", async () => {
+    mockGetProgress.mockResolvedValue([
+      { topic_id: "t1", status: "in_progress", best_score: 50 },
+    ] as never);
+    const jsx = await HomePage();
+    const { container } = render(jsx);
+    const cta = container.querySelector('a[href="/topics/signs"].btn-primary');
+    expect(cta).toBeTruthy();
+    expect(cta?.textContent).toBe("startBtn");
+    expect(container.querySelector("a button")).toBeNull();
+  });
+
+  it("renders the schedule CTA as a link without a nested button when all topics are completed", async () => {
+    mockGetProgress.mockResolvedValue([
+      { topic_id: "t1", status: "completed", best_score: 100 },
+      { topic_id: "t2", status: "completed", best_score: 100 },
+    ] as never);
+    const jsx = await HomePage();
+    const { container } = render(jsx);
+    expect(container.querySelector('a[href="/schedule"].btn-primary')).toBeTruthy();
+    expect(container.querySelector("a button")).toBeNull();
   });
 
   it("renders a mock-exam CTA linking to /exam", async () => {

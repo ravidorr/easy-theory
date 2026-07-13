@@ -13,6 +13,8 @@
   },
   "Home": {
     "wordmark": "דרך ברורה",
+    "streakLabel": "רצף ימים:",
+    "pointsLabel": "ניקוד:",
     "greetingMorning": "בוקר טוב",
     "greetingNoon": "צהריים טובים",
     "greetingEvening": "ערב טוב",
@@ -110,6 +112,9 @@
     "answerBtn": "צדקתי?",
     "nextBtn": "לשאלה הבאה",
     "scoreLabel": "ניקוד",
+    "closeLabel": "סגירה",
+    "signAlt": "תמרור {number}",
+    "questionImageAlt": "תמונה המצורפת לשאלה",
     "rewardCorrect": "יפה מאוד!",
     "rewardTopicDone": "כל הכבוד! סיימת את כל הנושא!",
     "rewardWrongPrefix": "בחרת ב־",

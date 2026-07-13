@@ -13,6 +13,8 @@
   },
   "Home": {
     "wordmark": "طريق واضح",
+    "streakLabel": "أيام متتالية:",
+    "pointsLabel": "النقاط:",
     "greetingMorning": "صباح الخير",
     "greetingNoon": "مرحباً",
     "greetingEvening": "مساء الخير",
@@ -110,6 +112,9 @@
     "answerBtn": "هل أصبت؟",
     "nextBtn": "السؤال التالي",
     "scoreLabel": "النقاط",
+    "closeLabel": "إغلاق",
+    "signAlt": "إشارة {number}",
+    "questionImageAlt": "صورة مرفقة بالسؤال",
     "rewardCorrect": "أحسنت!",
     "rewardTopicDone": "أحسنت! أكملت الموضوع بأكمله!",
     "rewardWrongPrefix": "اخترت ",

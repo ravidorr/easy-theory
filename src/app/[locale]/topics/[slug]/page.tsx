@@ -26,16 +26,26 @@ function resolveOptionSignImage(text: string): string | null {
   return existsSync(path) ? `/signs/sign-${text.trim()}.png` : null;
 }
 
+function signNumberFromUrl(url: string): string | null {
+  return url.match(/sign-(\d{2,4})/)?.[1] ?? null;
+}
+
+// The sign number identifies the image for screen readers without revealing
+// its meaning — a full description would give away the answer.
+type TranslateFn = (key: string, values?: Record<string, string | number>) => string;
+
 function QuestionSlide({
   question,
   index,
   topicId,
   letters,
+  t,
 }: {
   question: Question;
   index: number;
   topicId: string;
   letters: string[];
+  t: TranslateFn;
 }) {
   const qAny = question as Record<string, unknown>;
   const options: [string, string][] = [
@@ -50,6 +60,8 @@ function QuestionSlide({
     [question.option_a, question.option_b, question.option_c, question.option_d].some((t) => /^\d{2,4}$/.test(t.trim()));
   const imageUrl = isSignQuestion ? null : resolveImageUrl(question.image_url);
   const isWide = imageUrl && !imageUrl.includes("sign-");
+  const signNumber = imageUrl ? signNumberFromUrl(imageUrl) : null;
+  const signAlt = signNumber ? t("signAlt", { number: signNumber }) : t("questionImageAlt");
 
   const questionText = (qAny.question_display as string) ?? question.question_he;
   const explanationText = (qAny.explanation_display as string) ?? question.explanation_he;
@@ -68,11 +80,11 @@ function QuestionSlide({
           isWide ? (
             <div className={styles.imgWide}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={imageUrl} alt="" className={styles.imgEl} />
+              <img src={imageUrl} alt={t("questionImageAlt")} className={styles.imgEl} />
             </div>
           ) : (
             <div className={styles.imgSquare}>
-              <SignImage src={imageUrl!} size="md" />
+              <SignImage src={imageUrl!} alt={signAlt} size="md" />
             </div>
           )
         )}
@@ -87,7 +99,7 @@ function QuestionSlide({
               <span className="quiz-option-badge">{letters[i]}</span>
               {optionSignImg ? (
                 <span className={styles.optionSignContent}>
-                  <SignImage src={optionSignImg} size="md" />
+                  <SignImage src={optionSignImg} alt={t("signAlt", { number: text.trim() })} size="md" />
                 </span>
               ) : (
                 <span className={styles.optionTextContent}>{text}</span>
@@ -155,7 +167,7 @@ export default async function TopicQuizPage({
         className={styles.page}
       >
         <div className={styles.topBar}>
-          <Link href="/" className={styles.closeBtn}>
+          <Link href="/" className={styles.closeBtn} aria-label={t("closeLabel")}>
             ✕
           </Link>
           <div className={styles.progressTrack}>
@@ -182,6 +194,7 @@ export default async function TopicQuizPage({
               index={i}
               topicId={topic.id}
               letters={letters}
+              t={t}
             />
           ))
         )}
@@ -211,11 +224,11 @@ export default async function TopicQuizPage({
           <span className={styles.finalScore}>
             <span id="final-score"></span>
           </span>
-          <Link href="/">
-            <button className={`btn-primary ${styles.btnWide}`}>{t("finalBackHome")}</button>
+          <Link href="/" className={`btn-primary ${styles.btnWide}`}>
+            {t("finalBackHome")}
           </Link>
-          <Link href={`/topics/${slug}/review`}>
-            <button className={`btn-secondary ${styles.btnWide}`}>{t("finalReview")}</button>
+          <Link href={`/topics/${slug}/review`} className={`btn-secondary ${styles.btnWide}`}>
+            {t("finalReview")}
           </Link>
         </div>
       </main>
