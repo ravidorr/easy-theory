@@ -2,6 +2,12 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [Unreleased]
+
+### Fixed
+- Restored test coverage above 90% by adding tests for all 10 locale pages and `lib/navigation`
+- Excluded `scripts/` from `tsconfig.json` to fix Vercel build (translation scripts use DB columns not yet in generated types)
+
 ## [0.3.71] — 2026-07-13
 
 ### Changed
