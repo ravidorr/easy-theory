@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.75] — 2026-07-13
+
+### Fixed
+- Corrected sign image fix: only signs 604 and 935 had genuinely wrong images; reverted the other 19 signs back to SVG (higher quality than PNG)
+
+---
+
 ## [0.3.74] — 2026-07-13
 
 ### Fixed
