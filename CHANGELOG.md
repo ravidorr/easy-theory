@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.78] — 2026-07-13
+
+### Fixed
+- Fixed `audit_sign_images.py` regex again: `(?:_|^)` missed numbers after `-` (e.g. `drawing-15.svg`); replaced with `(?<!\d)` which handles all separator characters uniformly
+
+---
+
 ## [0.3.77] — 2026-07-13
 
 ### Fixed

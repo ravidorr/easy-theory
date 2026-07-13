@@ -12,7 +12,7 @@ import sys
 SIGNS_DIR = os.path.join(os.path.dirname(__file__), "..", "public", "signs")
 
 docname_re = re.compile(r'sodipodi:docname="([^"]+)"')
-number_re = re.compile(r'(?:_|^)(\d+)\.svg')
+number_re = re.compile(r'(?<!\d)(\d+)\.svg')
 
 
 def get_docname_number(svg_path):
