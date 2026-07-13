@@ -104,7 +104,7 @@ describe("quiz.js – reward score and feedback", () => {
     clickOption(0, "b");
     clickAction();
     expect(scoreText()).toBe("0");
-    expect(messageText()).toContain("בחרת ב");
+    expect(messageText()).toContain("בחרת ב־");
     expect(floatEl().hasAttribute("data-animate")).toBe(false);
   });
 

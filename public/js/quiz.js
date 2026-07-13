@@ -178,7 +178,7 @@
         const badge = wrongBtn?.querySelector(".quiz-option-badge")?.textContent?.trim() || "";
         const signNum = wrongBtn?.querySelector("span:not(.quiz-option-badge):not(.quiz-option-explanation) span")?.textContent?.trim() || "";
         const suffix = signNum ? tf(t.rewardSignSuffix || ' (תמרור {number})', { number: signNum }) : "";
-        rewardMessage.textContent = (t.rewardWrongPrefix || "בחרת ב") + badge + suffix + (t.rewardWrongSuffix || " — לא נורא, תנסי שוב בפעם הבאה.");
+        rewardMessage.textContent = (t.rewardWrongPrefix || "בחרת ב־") + badge + suffix + (t.rewardWrongSuffix || " — לא נורא, תנסי שוב בפעם הבאה.");
       }
     }
 

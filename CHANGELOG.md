@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.98] — 2026-07-14
+
+### Fixed
+- Wrong-answer quiz message no longer fuses the prefix with the option letter into "בחרת בא" — added a maqaf to `rewardWrongPrefix` ("בחרת ב־") in both the `Quiz` and `JS.Quiz` namespaces of `he.json`, and to the hardcoded fallback in `public/js/quiz.js`; Arabic already separates with a space and needed no change
+
+---
+
 ## [0.3.97] — 2026-07-14
 
 ### Added
