@@ -4,6 +4,7 @@ import Script from "next/script";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase";
 import { TabBar } from "@/components/TabBar";
+import { Icon } from "@/components/Icon";
 import { getUserMedals, getUserStats } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
 import { LanguageToggle } from "@/components/LanguageToggle";
@@ -52,9 +53,7 @@ export default async function MorePage() {
         <div className={styles.statsCard}>
           <div className={styles.statCell}>
             <span className={`${styles.statIcon} ${styles.statIconStreak}`}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
-              </svg>
+              <Icon name="flame" size={18} />
             </span>
             <span className={styles.statValue}>{stats.streak_days}</span>
             <span className={styles.statLabel}>{t("statStreak")}</span>
@@ -62,9 +61,7 @@ export default async function MorePage() {
           <div className={styles.statDivider} />
           <div className={styles.statCell}>
             <span className={`${styles.statIcon} ${styles.statIconPoints}`}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14 2 9.27l6.91-1.01L12 2z" />
-              </svg>
+              <Icon name="star" size={18} />
             </span>
             <span className={styles.statValue}>{stats.star_points}</span>
             <span className={styles.statLabel}>{t("statPoints")}</span>
@@ -74,26 +71,18 @@ export default async function MorePage() {
         <div className={styles.navCard}>
           <Link href="/schedule" className={`${styles.navRow} ${styles.navRowBordered}`}>
             <span className={styles.navIcon}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="4" width="18" height="17" rx="3" /><path d="M8 2v4M16 2v4M3 9h18" />
-              </svg>
+              <Icon name="calendar" size={20} />
             </span>
             <span className={styles.navRowLabel}>{t("navSchedule")}</span>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={styles.navChevron}>
-              <path d="m15 18-6-6 6-6" />
-            </svg>
+            <Icon name="chevron-left" size={18} className={styles.navChevron} />
           </Link>
 
           <Link href="/credits" className={styles.navRow}>
             <span className={styles.navIcon}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-              </svg>
+              <Icon name="heart" size={20} />
             </span>
             <span className={styles.navRowLabel}>{t("navCredits")}</span>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={styles.navChevron}>
-              <path d="m15 18-6-6 6-6" />
-            </svg>
+            <Icon name="chevron-left" size={18} className={styles.navChevron} />
           </Link>
         </div>
 
@@ -123,9 +112,7 @@ export default async function MorePage() {
         <div className={styles.settingsCard}>
           <label className={styles.settingsRow}>
             <span className={styles.settingsIcon}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-              </svg>
+              <Icon name="moon" size={20} />
             </span>
             <span className={styles.settingsRowLabel}>{t("darkMode")}</span>
             <span
@@ -140,9 +127,7 @@ export default async function MorePage() {
 
           <div className={styles.settingsRow}>
             <span className={styles.settingsIcon}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" /><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-              </svg>
+              <Icon name="globe" size={20} />
             </span>
             <span className={styles.settingsRowLabel}>{t("language")}</span>
             <LanguageToggle />

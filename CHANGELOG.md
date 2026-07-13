@@ -2,6 +2,20 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.81] — 2026-07-13
+
+### Added
+- Shared `Icon` component (`src/components/Icon.tsx`) with a typed 14-icon map mirroring `design-system/icons.svg`; all 21 inline SVGs across `TabBar` and the home, more, login, credits, resources, videos, and topic quiz/retry pages now render through it
+- `icon-heart` and `icon-globe` symbols in `design-system/icons.svg` so the sprite stays the canonical superset of app icons
+
+### Changed
+- More-page stat cards now use the design-system flame/star icons (previously one-off Lucide shapes that differed from the same stats on the home page); decorative icons in `TabBar` and the more page now set `aria-hidden`
+
+### Removed
+- Stale "SVG sprite" entry in `TODO.md` — the mockup consolidation shipped in v0.3.63
+
+---
+
 ## [0.3.80] — 2026-07-13
 
 ### Added
