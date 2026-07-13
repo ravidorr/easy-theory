@@ -108,6 +108,11 @@ describe("RetryMistakesPage", () => {
     expect(screen.getByText("מה המשמעות של תמרור זה?")).toBeInTheDocument();
   });
 
+  it("fetches mistakes scoped to the last session", async () => {
+    await RetryMistakesPage({ params: Promise.resolve({ slug: "signs" }) });
+    expect(mockGetMistakes).toHaveBeenCalledWith(expect.anything(), "u1", "t1", "lastSession");
+  });
+
   it("renders markdown bold in explanation as <strong> without literal asterisks", async () => {
     const m = { ...MISTAKE_A, explanation_he: "**חגורות הבטיחות** מחזיקות את הנוסע" };
     mockGetMistakes.mockResolvedValue([m] as never);

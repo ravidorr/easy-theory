@@ -124,7 +124,7 @@ export default async function RetryMistakesPage({
   const topic = await getTopicBySlug(supabase, slug);
   if (!topic) notFound();
 
-  const mistakes = await getMistakesForTopic(supabase, user.id, topic.id);
+  const mistakes = await getMistakesForTopic(supabase, user.id, topic.id, "lastSession");
   if (mistakes.length === 0) redirect(`/topics/${slug}/review`);
 
   const total = mistakes.length;

@@ -6,7 +6,7 @@ import { SignImage } from "@/components/SignImage";
 import { InlineMarkdown } from "@/components/InlineMarkdown";
 import { createClient } from "@/lib/supabase";
 import { getTopicBySlug, getMistakesForTopic } from "@/lib/db";
-import type { QuizMistake } from "@/lib/db";
+import type { MistakeScope, QuizMistake } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
 import styles from "@/app/topics/[slug]/review/page.module.css";
 
@@ -105,10 +105,14 @@ function QuestionReview({
 
 export default async function ReviewPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ scope?: string }>;
 }) {
   const { slug } = await params;
+  const { scope: scopeParam } = await searchParams;
+  const scope: MistakeScope = scopeParam === "all" ? "all" : "lastSession";
   const supabase = await createClient();
   const {
     data: { user },
@@ -122,7 +126,23 @@ export default async function ReviewPage({
   const topic = await getTopicBySlug(supabase, slug);
   if (!topic) notFound();
 
-  const mistakes = await getMistakesForTopic(supabase, user.id, topic.id);
+  const mistakes = await getMistakesForTopic(supabase, user.id, topic.id, scope);
+
+  // Retry always practices the LAST session's mistakes — hide the button when that
+  // session is clean so it can't bounce straight back to an empty review.
+  let showRetry: boolean;
+  let hasOlderMistakes = false;
+  if (scope === "lastSession") {
+    showRetry = mistakes.length > 0;
+    if (!showRetry) {
+      hasOlderMistakes =
+        (await getMistakesForTopic(supabase, user.id, topic.id, "all")).length > 0;
+    }
+  } else {
+    showRetry =
+      mistakes.length > 0 &&
+      (await getMistakesForTopic(supabase, user.id, topic.id, "lastSession")).length > 0;
+  }
 
   const questionField = locale === "ar" ? "question_ar" : "question_he";
   const explanationField = locale === "ar" ? "explanation_ar" : "explanation_he";
@@ -150,10 +170,36 @@ export default async function ReviewPage({
         <h1>{t("topBarTitle")}</h1>
       </div>
 
+      <div className={styles.scopeToggle} role="group" aria-label={t("scopeLabel")}>
+        <Link
+          href={`/topics/${slug}/review`}
+          className={styles.scopeOption}
+          data-active={scope === "lastSession" || undefined}
+          aria-current={scope === "lastSession" ? "page" : undefined}
+        >
+          {t("scopeLastSession")}
+        </Link>
+        <Link
+          href={`/topics/${slug}/review?scope=all`}
+          className={styles.scopeOption}
+          data-active={scope === "all" || undefined}
+          aria-current={scope === "all" ? "page" : undefined}
+        >
+          {t("scopeAllTime")}
+        </Link>
+      </div>
+
       {localizedMistakes.length === 0 ? (
         <div className={styles.emptyState}>
           <span className={styles.emptyEmoji}>🎉</span>
-          <p className={styles.emptyHint}>{t("emptyHint")}</p>
+          <p className={styles.emptyHint}>
+            {hasOlderMistakes ? t("emptyHintLastSession") : t("emptyHint")}
+          </p>
+          {hasOlderMistakes && (
+            <Link href={`/topics/${slug}/review?scope=all`}>
+              <button className={`btn-secondary ${styles.btnWide}`}>{t("viewAllMistakes")}</button>
+            </Link>
+          )}
           <Link href="/">
             <button className={`btn-primary ${styles.btnWide}`}>{t("backHome")}</button>
           </Link>
@@ -165,9 +211,11 @@ export default async function ReviewPage({
               ? t("mistakeCountOne")
               : t("mistakeCountMany", { count: localizedMistakes.length })}
           </p>
-          <Link href={`/topics/${slug}/retry`}>
-            <button className={`btn-primary ${styles.btnFull}`}>{t("retryBtn")}</button>
-          </Link>
+          {showRetry && (
+            <Link href={`/topics/${slug}/retry`}>
+              <button className={`btn-primary ${styles.btnFull}`}>{t("retryBtn")}</button>
+            </Link>
+          )}
           {localizedMistakes.map((mistake) => (
             <QuestionReview key={mistake.id} question={mistake} letters={letters} />
           ))}

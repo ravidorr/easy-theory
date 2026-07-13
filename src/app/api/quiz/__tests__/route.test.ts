@@ -57,7 +57,12 @@ function buildDb({
     return calls[t];
   };
 
+  const upsertMock = vi.fn().mockResolvedValue({
+    error: upsertError ? { message: "upsert failed" } : null,
+  });
+
   return {
+    upsertMock,
     auth: {
       getUser: vi.fn().mockResolvedValue({
         data: { user: authenticated ? { id: USER_ID } : null },
@@ -90,11 +95,7 @@ function buildDb({
             }),
           };
         }
-        return {
-          upsert: vi.fn().mockResolvedValue({
-            error: upsertError ? { message: "upsert failed" } : null,
-          }),
-        };
+        return { upsert: upsertMock };
       }
 
       if (table === "user_stats") {
@@ -309,6 +310,37 @@ describe("POST /api/quiz", () => {
     const body = await res.json();
     expect(res.status).toBe(200);
     expect(body.medals_earned).toEqual([]);
+  });
+
+  it("passes a valid session_id through to the response upsert", async () => {
+    const db = buildDb();
+    mockCreateClient.mockResolvedValue(db as never);
+    const sessionId = "123e4567-e89b-42d3-a456-426614174000";
+    await POST(makeRequest({ ...defaultBody, session_id: sessionId }));
+    expect(db.upsertMock).toHaveBeenCalledWith(
+      expect.objectContaining({ session_id: sessionId }),
+      { onConflict: "user_id,question_id" }
+    );
+  });
+
+  it("stores session_id: null when the body omits it", async () => {
+    const db = buildDb();
+    mockCreateClient.mockResolvedValue(db as never);
+    await POST(makeRequest(defaultBody));
+    expect(db.upsertMock).toHaveBeenCalledWith(
+      expect.objectContaining({ session_id: null }),
+      { onConflict: "user_id,question_id" }
+    );
+  });
+
+  it("coerces a non-UUID session_id to null", async () => {
+    const db = buildDb();
+    mockCreateClient.mockResolvedValue(db as never);
+    await POST(makeRequest({ ...defaultBody, session_id: "'; DROP TABLE users;--" }));
+    expect(db.upsertMock).toHaveBeenCalledWith(
+      expect.objectContaining({ session_id: null }),
+      { onConflict: "user_id,question_id" }
+    );
   });
 
   it("returns zeroed totals when updated stats cannot be fetched", async () => {
