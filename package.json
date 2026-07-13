@@ -1,7 +1,6 @@
 {
   "name": "clear-road",
-
-  "version": "0.3.68",
+  "version": "0.3.73",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -16,7 +15,8 @@
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "prepare": "husky",
-    "generate-explanations": "tsx --env-file=.env.local scripts/generate_explanations.ts"
+    "generate-explanations": "tsx --env-file=.env.local scripts/generate_explanations.ts",
+    "translate-arabic": "tsx --env-file=.env.local scripts/translate_arabic.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
@@ -25,6 +25,7 @@
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
     "next": "16.2.10",
+    "next-intl": "^4.13.2",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "resend": "^6.17.1",

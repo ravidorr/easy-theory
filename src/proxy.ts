@@ -1,10 +1,29 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import createNextIntlMiddleware from "next-intl/middleware";
+import { routing } from "./i18n/routing";
+
+const intlMiddleware = createNextIntlMiddleware(routing);
 
 export async function proxy(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request });
+  const { pathname } = request.nextUrl;
 
-  // Refresh session if expired (IMPORTANT: keep this call)
+  // Skip Next.js internals, static files, and API routes
+  const skip = /^\/(_next|api|_vercel|signs|js|questions|favicon\.ico|apple-icon|icon\.svg|manifest\.json|sw\.js)/.test(pathname)
+    || pathname.includes(".");
+  if (skip) return NextResponse.next();
+
+  // 1. next-intl: detect locale and redirect/normalise URL if needed
+  const intlRes = intlMiddleware(request);
+  // If next-intl is redirecting (e.g. / → /he/), propagate that immediately
+  if (intlRes.status !== 200) {
+    return intlRes;
+  }
+
+  // 2. Supabase session refresh — use intlRes as the base response so that
+  //    next-intl's forwarded request headers (x-next-intl-locale, etc.) are
+  //    preserved for server components. Supabase cookies are added on top.
+  const supabaseResponse = intlRes;
   let user = null;
   try {
     const supabase = createServerClient(
@@ -19,7 +38,7 @@ export async function proxy(request: NextRequest) {
             cookiesToSet.forEach(({ name, value }) =>
               request.cookies.set(name, value)
             );
-            supabaseResponse = NextResponse.next({ request });
+            // Keep using intlRes as base — just set cookies on it
             cookiesToSet.forEach(({ name, value, options }) =>
               supabaseResponse.cookies.set(name, value, options)
             );
@@ -33,19 +52,17 @@ export async function proxy(request: NextRequest) {
     // Supabase unreachable (missing credentials in dev) — treat as unauthenticated
   }
 
-  const { pathname } = request.nextUrl;
+  // 3. Auth guard — derive locale from the (already-normalised) pathname
+  const localeMatch = pathname.match(/^\/(he|ar)(\/|$)/);
+  const locale = localeMatch ? localeMatch[1] : routing.defaultLocale;
+
   const isPublic =
-    pathname.startsWith("/auth") ||
-    pathname.startsWith("/api/auth") ||
-    pathname.startsWith("/_next") ||
-    pathname.startsWith("/signs") ||
-    pathname.startsWith("/questions") ||
-    pathname.startsWith("/js") ||
-    pathname === "/favicon.ico";
+    pathname.startsWith(`/${locale}/auth`) ||
+    pathname.startsWith("/auth");
 
   if (!user && !isPublic) {
     const url = request.nextUrl.clone();
-    url.pathname = "/auth/login";
+    url.pathname = `/${locale}/auth/login`;
     return NextResponse.redirect(url);
   }
 

@@ -1,5 +1,7 @@
 /** Login page: send magic-link OTP and show sent banner. */
 (function () {
+  const t = window.__t || {};
+
   const form = document.getElementById("login-form");
   const btn = document.getElementById("send-btn");
   const banner = document.getElementById("sent-banner");
@@ -8,6 +10,9 @@
   const resendMsg = document.getElementById("resend-msg");
 
   if (!form) return;
+
+  const originalBtnText = btn ? btn.textContent : "";
+  const originalResendText = resendBtn ? resendBtn.textContent : "";
 
   let lastEmail = "";
 
@@ -36,20 +41,25 @@
     resendMsg.textContent = "";
   }
 
+  function resolveError(data) {
+    if (data && data.code && t[data.code]) return t[data.code];
+    return (data && data.error) || t.linkError || "שגיאה בשליחת הקישור, נסי שוב.";
+  }
+
   form.addEventListener("submit", async function (e) {
     e.preventDefault();
     clearError();
 
     const email = document.getElementById("email-input").value.trim();
     if (!email) {
-      showError("יש להזין כתובת מייל.");
+      showError(t.emailRequired || "יש להזין כתובת מייל.");
       return;
     }
 
     const nextPath = document.getElementById("next-path")?.value || "/";
 
     btn.disabled = true;
-    btn.innerHTML = '<span class="btn-spinner"></span>שולח...';
+    btn.innerHTML = '<span class="btn-spinner"></span>' + (t.sending || "שולח...");
 
     try {
       const res = await fetch("/api/auth/send-otp", {
@@ -59,22 +69,20 @@
       });
 
       if (!res.ok) {
-        const { error } = await res.json();
-        showError(error || "שגיאה בשליחת הקישור, נסי שוב.");
+        const data = await res.json();
+        showError(resolveError(data));
         btn.disabled = false;
-        btn.textContent = "שלחי לי קישור";
+        btn.textContent = originalBtnText;
         return;
       }
 
       lastEmail = email;
-
-      // Show sent state
       form.style.display = "none";
       if (banner) banner.style.display = "flex";
     } catch {
-      showError("שגיאת רשת, נסי שוב.");
+      showError(t.networkError || "שגיאת רשת, נסי שוב.");
       btn.disabled = false;
-      btn.textContent = "שלחי לי קישור";
+      btn.textContent = originalBtnText;
     }
   });
 
@@ -83,7 +91,7 @@
       if (!lastEmail) return;
 
       resendBtn.disabled = true;
-      resendBtn.textContent = "שולח...";
+      resendBtn.textContent = t.sending || "שולח...";
       hideResendMsg();
 
       try {
@@ -95,30 +103,30 @@
         });
 
         if (res.status === 429) {
-          const { error } = await res.json();
-          showResendMsg(error || "יותר מדי ניסיונות, נסי שוב בעוד 15 דקות", true);
-          resendBtn.textContent = "נשלח שוב";
+          const data = await res.json();
+          showResendMsg(resolveError(data), true);
+          resendBtn.textContent = originalResendText;
           resendBtn.disabled = false;
           return;
         }
 
         if (!res.ok) {
-          const { error } = await res.json();
-          showResendMsg(error || "שגיאה בשליחת הקישור, נסי שוב.", true);
-          resendBtn.textContent = "נשלח שוב";
+          const data = await res.json();
+          showResendMsg(resolveError(data), true);
+          resendBtn.textContent = originalResendText;
           resendBtn.disabled = false;
           return;
         }
 
-        resendBtn.textContent = "נשלח שוב";
-        showResendMsg("✓ נשלח שוב!", false);
+        resendBtn.textContent = originalResendText;
+        showResendMsg(t.resendSuccess || "✓ נשלח שוב!", false);
         setTimeout(function () {
           hideResendMsg();
           resendBtn.disabled = false;
         }, 60000);
       } catch {
-        showResendMsg("שגיאת רשת, נסי שוב.", true);
-        resendBtn.textContent = "נשלח שוב";
+        showResendMsg(t.networkError || "שגיאת רשת, נסי שוב.", true);
+        resendBtn.textContent = originalResendText;
         resendBtn.disabled = false;
       }
     });

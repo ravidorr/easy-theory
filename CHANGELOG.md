@@ -2,6 +2,53 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [Unreleased]
+
+### Fixed
+- Restored test coverage above 90% by adding tests for all 10 locale pages and `lib/navigation`
+- Excluded `scripts/` from `tsconfig.json` to fix Vercel build (translation scripts use DB columns not yet in generated types)
+
+## [0.3.73] — 2026-07-13
+
+### Fixed
+- Quiz, retry, and review pages now correctly show Hebrew answer options for the `he` locale; previously `option_a_ar`–`option_d_ar` were preferred unconditionally, causing Arabic text to appear for Hebrew users when those columns were populated
+
+---
+
+## [0.3.71] — 2026-07-13
+
+### Changed
+- Updated `proxy.test.ts` to mock `next-intl/middleware` and test locale-prefixed paths and the intl early-return path
+- Rewrote `TabBar.test.tsx` to handle the async server component and mock `next-intl/server`
+- Updated `SignImage.test.tsx`: replaced style assertions with attribute checks, added `onError` fallback test, added `next/image` shim mock
+- Added `LanguageToggle.test.tsx` covering locale label rendering, aria-labels, and router navigation
+- Added `src/app/[locale]/__tests__/layout.test.tsx` covering `notFound` on invalid locale, `lang` attribute per locale, `window.__t` injection, and theme cookie
+- Added `src/i18n/__tests__/request.test.ts` covering locale selection and unknown-locale fallback
+- Annotated root `layout.test.tsx` to clarify it tests the root layout, not the locale layout
+
+---
+
+## [0.3.70] — 2026-07-13
+
+### Changed
+- `SignImage`: replaced `<img>` with Next.js `<Image>` for lazy-loading and LCP improvement
+- Translation scripts: removed `as any` casts on Supabase `.update()` calls; replaced explicit `SupabaseClient<any, any, any>` type alias with `ReturnType<typeof createClient>`
+
+---
+
+## [0.3.69] — 2026-07-13
+
+### Added
+- Full Arabic (MSA) language support — all UI strings, quiz questions, answer options, topic names, sign names, and explanations now render in Arabic when the user navigates to `/ar`
+- `next-intl` i18n infrastructure: `[locale]` URL-prefix routing, `messages/he.json` + `messages/ar.json`, locale cookie persistence, browser `Accept-Language` auto-detection
+- Language toggle component (`LanguageToggle.tsx`) for switching between Hebrew and Arabic
+- DB migration adding `_ar` columns to `topics`, `questions`, and `signs` tables
+- One-time translation script (`scripts/translate_arabic.ts`) using Gemini 2.5 Flash to populate all 1273 questions, 277 signs, and 4 topics
+- Arabic fallback for quiz answer options — falls back to Hebrew when Arabic translation is absent
+- `proxy.ts` now correctly forwards `x-next-intl-locale` request headers so server components resolve the right locale
+
+---
+
 ## [0.3.68] — 2026-07-13
 
 ### Fixed

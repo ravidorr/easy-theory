@@ -1,5 +1,8 @@
 /** Flashcard: flip animation, know/don't-know navigation. */
 (function () {
+  const t = window.__t || {};
+  const tf = window.__tf || function(s, v) { return s.replace(/\{(\w+)\}/g, function(_, k) { return v[k] ?? _; }); };
+
   const container = document.getElementById("flashcards-container");
   if (!container) return;
 
@@ -14,12 +17,12 @@
 
   let current = 0;
   let flipped = false;
-  const dontKnow = []; // indices to repeat
+  const dontKnow = [];
   let replayMode = false;
 
   function updateUI(index) {
     const display = index + 1;
-    if (countEl) countEl.textContent = "כרטיס " + display + " מתוך " + total;
+    if (countEl) countEl.textContent = tf(t.cardCount || 'כרטיס {current} מתוך {total}', { current: display, total: total });
     if (progressFill) progressFill.style.width = (display / total * 100) + "%";
   }
 
@@ -32,7 +35,6 @@
     updateUI(index);
   }
 
-  // Flip on card click
   cards.forEach(function (card) {
     card.addEventListener("click", function () {
       flipped = !flipped;
@@ -41,14 +43,14 @@
   });
 
   function showDone() {
-    if (countEl) countEl.textContent = "הושלם! " + total + " כרטיסים";
+    if (countEl) countEl.textContent = tf(t.done || 'הושלם! {total} כרטיסים', { total: total });
     if (progressFill) progressFill.style.width = "100%";
     cards.forEach(function (c) { c.style.display = "none"; });
     if (yesBtn) yesBtn.disabled = true;
     if (noBtn) noBtn.disabled = true;
     const done = document.createElement("div");
     done.style.cssText = "flex:1;display:flex;align-items:center;justify-content:center;font-size:var(--type-h2-size);color:var(--text-muted);";
-    done.textContent = "כל הכרטיסים עברו!";
+    done.textContent = t.allDone || "כל הכרטיסים עברו!";
     container.appendChild(done);
   }
 
@@ -79,6 +81,5 @@
   if (yesBtn) yesBtn.addEventListener("click", function () { advance(true); });
   if (noBtn)  noBtn.addEventListener("click",  function () { advance(false); });
 
-  // Init
   showCard(0);
 })();

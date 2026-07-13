@@ -1,5 +1,8 @@
 /** Quiz interactivity: option selection, confirmation, instant feedback, progress, final screen. */
 (function () {
+  const t = window.__t || {};
+  const tf = window.__tf || function(s, v) { return s.replace(/\{(\w+)\}/g, function(_, k) { return v[k] ?? _; }); };
+
   const container = document.getElementById("quiz-container");
   if (!container) return;
 
@@ -24,10 +27,10 @@
 
   // ── Medal celebration ──────────────────────────────────────────
   const MEDAL_META = {
-    'streak-3':  { label: '3 ימים ברצף',   description: 'שלושה ימים של למידה ברצף, כל הכבוד!' },
-    'streak-7':  { label: 'שבוע ברצף',     description: 'שבוע שלם של למידה ברצף, מדהים!' },
-    'streak-14': { label: 'שבועיים ברצף',  description: 'ארבעה עשר ימים ברצף, ממש יפה!' },
-    'streak-30': { label: 'חודש ברצף',     description: 'חודש שלם ברצף, הישג מדהים!' },
+    'streak-3':  { label: t.medal3Label || '3 ימים ברצף',   description: t.medal3Desc || 'שלושה ימים של למידה ברצף, כל הכבוד!' },
+    'streak-7':  { label: t.medal7Label || 'שבוע ברצף',     description: t.medal7Desc || 'שבוע שלם של למידה ברצף, מדהים!' },
+    'streak-14': { label: t.medal14Label || 'שבועיים ברצף',  description: t.medal14Desc || 'ארבעה עשר ימים ברצף, ממש יפה!' },
+    'streak-30': { label: t.medal30Label || 'חודש ברצף',     description: t.medal30Desc || 'חודש שלם ברצף, הישג מדהים!' },
   };
 
   const medalQueue = [];
@@ -43,7 +46,7 @@
     const card = document.createElement('div');
     card.setAttribute('role', 'dialog');
     card.setAttribute('aria-modal', 'true');
-    card.setAttribute('aria-label', 'מדליה חדשה');
+    card.setAttribute('aria-label', t.medalModalLabel || 'מדליה חדשה');
     Object.assign(card.style, {
       background: 'var(--surface)', borderRadius: 'var(--radius-2xl)',
       boxShadow: 'var(--shadow-pop)', padding: '32px 28px 24px',
@@ -61,10 +64,10 @@
         '<span style="font-size:var(--type-caption-size);font-weight:600;color:var(--gold-text);">' + meta.label + '</span>' +
       '</div>' +
       '<div style="display:flex;flex-direction:column;gap:4px;">' +
-        '<h2 style="margin:0;font-size:var(--type-h2-size);font-weight:var(--type-h2-weight);color:var(--text);">מדליה חדשה! 🎉</h2>' +
+        '<h2 style="margin:0;font-size:var(--type-h2-size);font-weight:var(--type-h2-weight);color:var(--text);">' + (t.medalModalTitle || 'מדליה חדשה! 🎉') + '</h2>' +
         '<span style="font-size:var(--type-small-size);color:var(--text-muted);line-height:var(--line-body);">' + meta.description + '</span>' +
       '</div>' +
-      '<button style="font-family:var(--font-ui);font-weight:700;font-size:15.5px;min-height:var(--hit-min);padding:10px 22px;width:100%;border-radius:var(--radius-lg);border:1px solid transparent;cursor:pointer;background:var(--primary);color:var(--text-on-primary);box-shadow:var(--shadow-press);">מעולה, ממשיכות!</button>';
+      '<button style="font-family:var(--font-ui);font-weight:700;font-size:15.5px;min-height:var(--hit-min);padding:10px 22px;width:100%;border-radius:var(--radius-lg);border:1px solid transparent;cursor:pointer;background:var(--primary);color:var(--text-on-primary);box-shadow:var(--shadow-press);">' + (t.medalModalBtn || 'מעולה, ממשיכות!') + '</button>';
 
     function dismiss() {
       document.body.removeChild(scrim);
@@ -90,7 +93,7 @@
   function updateProgress(index) {
     const pct = ((index + 1) / total) * 100;
     if (progressFill) progressFill.style.width = pct + "%";
-    if (countEl) countEl.textContent = (index + 1) + " מתוך " + total;
+    if (countEl) countEl.textContent = tf(t.count || '{current} מתוך {total}', { current: index + 1, total: total });
   }
 
   function showSlide(index) {
@@ -102,7 +105,7 @@
     confirmed = false;
     if (actionBtn) {
       actionBtn.disabled = true;
-      actionBtn.textContent = "צדקתי?";
+      actionBtn.textContent = t.answerBtn || "צדקתי?";
     }
     if (rewardBanner) rewardBanner.hidden = true;
   }
@@ -119,12 +122,10 @@
     const slide = btn.closest(".quiz-slide");
     if (!slide) return;
 
-    // Clear previous selection
     slide.querySelectorAll(".quiz-option").forEach(function (o) {
       o.dataset.state = "";
     });
 
-    // Select this option
     btn.dataset.state = "selected";
     selectedOption = btn.dataset.option;
 
@@ -138,7 +139,6 @@
     const correctOption = slide.dataset.correct;
     const isCorrect = selectedOption === correctOption;
 
-    // Instant visual feedback — no API wait
     slide.querySelectorAll(".quiz-option").forEach(function (o) {
       if (o.dataset.option === correctOption) {
         o.dataset.state = "correct";
@@ -155,7 +155,7 @@
         rewardBanner.hidden = false;
         rewardBanner.style.display = "flex";
         rewardAmount.textContent = "+10";
-        if (rewardMessage) rewardMessage.textContent = "יפה מאוד!";
+        if (rewardMessage) rewardMessage.textContent = t.rewardCorrect || "יפה מאוד!";
       }
     } else {
       if (rewardBanner && rewardMessage) {
@@ -165,12 +165,12 @@
         const wrongBtn = slide.querySelector('[data-option="' + selectedOption + '"]');
         const badge = wrongBtn?.querySelector(".quiz-option-badge")?.textContent?.trim() || "";
         const signNum = wrongBtn?.querySelector("span:not(.quiz-option-badge):not(.quiz-option-explanation) span")?.textContent?.trim() || "";
-        const suffix = signNum ? " (תמרור " + signNum + ")" : "";
-        rewardMessage.textContent = "בחרת ב" + badge + suffix + " — לא נורא, תנסי שוב בפעם הבאה.";
+        const suffix = signNum ? tf(t.rewardSignSuffix || ' (תמרור {number})', { number: signNum }) : "";
+        rewardMessage.textContent = (t.rewardWrongPrefix || "בחרת ב") + badge + suffix + (t.rewardWrongSuffix || " — לא נורא, תנסי שוב בפעם הבאה.");
       }
     }
 
-    // Track answer server-side; update message if this answer completes the topic
+    // Track answer server-side
     const questionId = slide.dataset.questionId;
     const topicId = container.dataset.topicId || slide.dataset.topicId;
     fetch("/api/quiz", {
@@ -182,7 +182,7 @@
     }).then(function (data) {
       if (!data) return;
       if (data.topic_completed && rewardMessage) {
-        rewardMessage.textContent = "כל הכבוד! סיימת את כל הנושא!";
+        rewardMessage.textContent = t.rewardTopicDone || "כל הכבוד! סיימת את כל הנושא!";
       }
       if (data.medals_earned && data.medals_earned.length) {
         medalQueue.push.apply(medalQueue, data.medals_earned);
@@ -191,7 +191,7 @@
     }).catch(function () {});
 
     if (actionBtn) {
-      actionBtn.textContent = "לשאלה הבאה";
+      actionBtn.textContent = t.nextBtn || "לשאלה הבאה";
       actionBtn.disabled = false;
     }
   }
@@ -202,9 +202,9 @@
       slides.forEach(function (s) { s.style.display = "none"; });
       if (footer) footer.style.display = "none";
       if (finalScreen) finalScreen.style.display = "flex";
-      if (finalScore) finalScore.textContent = score + " מתוך " + total + " נכון";
+      if (finalScore) finalScore.textContent = tf(t.finalScore || '{score} מתוך {total} נכון', { score: score, total: total });
       if (progressFill) progressFill.style.width = "100%";
-      if (countEl) countEl.textContent = total + " מתוך " + total;
+      if (countEl) countEl.textContent = tf(t.count || '{current} מתוך {total}', { current: total, total: total });
 
       if (container.dataset.quizMode !== "retry") {
         const topicId = container.dataset.topicId;
@@ -223,14 +223,12 @@
     }
   }
 
-  // Attach option click handlers
   slides.forEach(function (slide) {
     slide.querySelectorAll(".quiz-option").forEach(function (btn) {
       btn.addEventListener("click", handleOptionClick);
     });
   });
 
-  // Action button: dispatches on confirmed state
   if (actionBtn) {
     actionBtn.addEventListener("click", function () {
       const slide = slides[currentIndex];
@@ -243,6 +241,5 @@
     });
   }
 
-  // Initialize
   showSlide(0);
 })();
