@@ -126,6 +126,41 @@ describe("GET /api/cron/notify", () => {
     expect(body).toEqual({ sent: 0 });
   });
 
+  it("defaults to Sunday when Intl returns no weekday part", async () => {
+    // Intl.DateTimeFormat is called with `new`, so the mock must be a class
+    const dtfSpy = vi.spyOn(Intl, "DateTimeFormat").mockImplementation(
+      class {
+        constructor() {
+          return { formatToParts: () => [] };
+        }
+      } as never
+    );
+    try {
+      const res = await GET(makeRequest());
+      expect(res.status).toBe(200);
+      expect(mockGetSchedules).toHaveBeenCalledWith(expect.anything(), 0);
+    } finally {
+      dtfSpy.mockRestore();
+    }
+  });
+
+  it("defaults to day 0 when Intl returns an unknown weekday", async () => {
+    const dtfSpy = vi.spyOn(Intl, "DateTimeFormat").mockImplementation(
+      class {
+        constructor() {
+          return { formatToParts: () => [{ type: "weekday", value: "Xxx" }] };
+        }
+      } as never
+    );
+    try {
+      const res = await GET(makeRequest());
+      expect(res.status).toBe(200);
+      expect(mockGetSchedules).toHaveBeenCalledWith(expect.anything(), 0);
+    } finally {
+      dtfSpy.mockRestore();
+    }
+  });
+
   it("skips email when user has no email address", async () => {
     mockGetSchedules.mockResolvedValue([SCHEDULE]);
     mockGetPushSubs.mockResolvedValue([]);

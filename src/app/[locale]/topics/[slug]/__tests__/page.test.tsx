@@ -254,4 +254,33 @@ describe("TopicQuizPage", () => {
     expect(optionA?.textContent).toContain("قف");
     expect(optionA?.textContent).not.toContain("עצור");
   });
+
+  it("falls back to option_a for ar locale when option_a_ar is missing", async () => {
+    vi.mocked(getLocale).mockResolvedValue("ar" as never);
+    const q = { ...QUESTION, option_b_ar: "انعطف يمينًا" };
+    mockGetQuestions.mockResolvedValue([q] as never);
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "ar" }) });
+    const { container } = render(jsx);
+    expect(container.querySelector('[data-option="a"]')?.textContent).toContain("עצור");
+    expect(container.querySelector('[data-option="b"]')?.textContent).toContain("انعطف يمينًا");
+  });
+
+  it("hides all slides after the first one", async () => {
+    const q2 = { ...QUESTION, id: "q2", question_he: "שאלה שנייה" };
+    mockGetQuestions.mockResolvedValue([QUESTION, q2] as never);
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "he" }) });
+    const { container } = render(jsx);
+    const slides = container.querySelectorAll<HTMLElement>(".quiz-slide");
+    expect(slides).toHaveLength(2);
+    expect(slides[0].style.display).toBe("flex");
+    expect(slides[1].style.display).toBe("none");
+  });
+
+  it("renders an empty question title when question_he is null", async () => {
+    const q = { ...QUESTION, question_he: null };
+    mockGetQuestions.mockResolvedValue([q] as never);
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "he" }) });
+    const { container } = render(jsx);
+    expect(container.querySelector(".quiz-slide h2")?.textContent).toBe("");
+  });
 });

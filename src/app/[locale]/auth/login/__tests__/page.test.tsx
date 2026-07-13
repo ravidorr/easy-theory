@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import LoginPage from "../page";
+import LoginPage, { generateMetadata } from "../page";
 
 vi.mock("next/script", () => ({
   default: () => React.createElement("div", null),
@@ -68,5 +68,30 @@ describe("LoginPage", () => {
     const { container } = await renderPage("https://evil.com");
     const input = container.querySelector<HTMLInputElement>("#next-path");
     expect(input?.value).toBe("/");
+  });
+
+  it("shows the link-expired alert when error=1", async () => {
+    const jsx = await LoginPage({ searchParams: Promise.resolve({ error: "1" }) });
+    render(jsx);
+    expect(screen.getByText("linkExpired")).toBeInTheDocument();
+  });
+
+  it("does not show the link-expired alert without the error param", async () => {
+    await renderPage();
+    expect(screen.queryByText("linkExpired")).not.toBeInTheDocument();
+  });
+});
+
+describe("generateMetadata", () => {
+  it("uses he_IL openGraph locale for he", async () => {
+    const meta = await generateMetadata({ params: Promise.resolve({ locale: "he" }) });
+    expect(meta.openGraph?.locale).toBe("he_IL");
+    expect(meta.title).toBe("metaTitle");
+    expect(meta.description).toBe("metaDescription");
+  });
+
+  it("uses ar_IL openGraph locale for ar", async () => {
+    const meta = await generateMetadata({ params: Promise.resolve({ locale: "ar" }) });
+    expect(meta.openGraph?.locale).toBe("ar_IL");
   });
 });

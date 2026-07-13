@@ -71,6 +71,15 @@ describe("GET /api/schedule", () => {
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual(schedule);
   });
+
+  it("returns an empty array when the query yields null data", async () => {
+    mockCreateClient.mockResolvedValue(
+      makeClient({ schedule: null as unknown as unknown[] }) as never
+    );
+    const res = await GET();
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual([]);
+  });
 });
 
 describe("PUT /api/schedule", () => {

@@ -121,6 +121,12 @@ describe("proxy middleware", () => {
       const res = await proxy(makeRequest("/he/flashcards"));
       expect(res.status).toBe(307);
     });
+
+    it("redirects a non-locale-prefixed path using the default locale", async () => {
+      const res = await proxy(makeRequest("/topics"));
+      expect(res.status).toBe(307);
+      expect(res.headers.get("location")).toContain("/he/auth/login");
+    });
   });
 
   describe("unauthenticated user — public paths", () => {

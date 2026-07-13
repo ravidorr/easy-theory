@@ -272,4 +272,22 @@ describe("ReviewPage", () => {
     expect(screen.getByText("قف")).toBeInTheDocument();
     expect(screen.queryByText("עצור")).not.toBeInTheDocument();
   });
+
+  it("falls back to option_a for ar locale when option_a_ar is missing", async () => {
+    vi.mocked(getLocale).mockResolvedValue("ar" as never);
+    const m = { ...MISTAKE_A, option_b_ar: "انعطف يمينًا" };
+    mockGetMistakes.mockResolvedValue([m] as never);
+    const jsx = await ReviewPage({ params: Promise.resolve({ slug: "signs" }) });
+    render(jsx);
+    expect(screen.getByText("עצור")).toBeInTheDocument();
+    expect(screen.getByText("انعطف يمينًا")).toBeInTheDocument();
+  });
+
+  it("renders an empty question title when question_he is null", async () => {
+    const m = { ...MISTAKE_A, question_he: null };
+    mockGetMistakes.mockResolvedValue([m] as never);
+    const jsx = await ReviewPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    expect(container.querySelector("h3")?.textContent).toBe("");
+  });
 });

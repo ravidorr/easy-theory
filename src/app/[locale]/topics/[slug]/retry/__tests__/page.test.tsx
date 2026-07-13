@@ -165,6 +165,56 @@ describe("RetryMistakesPage", () => {
     expect(optionA?.textContent).not.toContain("قف");
   });
 
+  it("hides the question image but shows sign options for sign questions", async () => {
+    // Sign question: /signs/ image + numeric options → question image suppressed,
+    // numeric options render as sign images (sign-100.png exists in public/signs)
+    const m = { ...MISTAKE_A, image_url: "/signs/sign-100.png", option_a: "100" };
+    mockGetMistakes.mockResolvedValue([m] as never);
+    const jsx = await RetryMistakesPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    const signImgs = container.querySelectorAll("img[src='/signs/sign-100.png']");
+    expect(signImgs).toHaveLength(1);
+    expect(signImgs[0].closest(".quiz-option")).toBeTruthy();
+  });
+
+  it("renders /signs/ image as square SignImage when options are not numeric", async () => {
+    const m = { ...MISTAKE_A, image_url: "/signs/sign-100.png" };
+    mockGetMistakes.mockResolvedValue([m] as never);
+    const jsx = await RetryMistakesPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    // Square branch uses the (mocked) SignImage component, not a raw wide <img>
+    const img = container.querySelector("img[src='/signs/sign-100.png']");
+    expect(img).toHaveAttribute("data-testid", "sign-img");
+  });
+
+  it("renders existing /questions/ image as a wide image", async () => {
+    const m = { ...MISTAKE_A, image_url: "/questions/3012.jpg" };
+    mockGetMistakes.mockResolvedValue([m] as never);
+    const jsx = await RetryMistakesPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    const img = container.querySelector("img[src='/questions/3012.jpg']");
+    expect(img).toBeTruthy();
+    expect(img).not.toHaveAttribute("data-testid");
+  });
+
+  it("renders an empty question title when question_he is null", async () => {
+    const m = { ...MISTAKE_A, question_he: null };
+    mockGetMistakes.mockResolvedValue([m] as never);
+    const jsx = await RetryMistakesPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    expect(container.querySelector(".quiz-slide h2")?.textContent).toBe("");
+  });
+
+  it("falls back to option_a for ar locale when option_a_ar is missing", async () => {
+    vi.mocked(getLocale).mockResolvedValue("ar" as never);
+    const m = { ...MISTAKE_A, option_b_ar: "انعطف يمينًا" };
+    mockGetMistakes.mockResolvedValue([m] as never);
+    const jsx = await RetryMistakesPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    expect(container.querySelector('[data-option="a"]')?.textContent).toContain("עצור");
+    expect(container.querySelector('[data-option="b"]')?.textContent).toContain("انعطف يمينًا");
+  });
+
   it("uses option_a_ar text for ar locale when option_a_ar is populated", async () => {
     vi.mocked(getLocale).mockResolvedValue("ar" as never);
     const m = { ...MISTAKE_A, option_a_ar: "قف", explanation_he: null };

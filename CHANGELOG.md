@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.80] — 2026-07-13
+
+### Added
+- Raised branch coverage from 91.59% to 97.85% (well above the 90% threshold) with 33 new unit tests: locale-fallback branches (`ar` → `he`) across the home, quiz, retry, review, flashcards, and more pages; time-of-day greeting branches on the home page; error paths in the quiz API (failed upsert, failed medal insert, missing stats); `Intl` weekday fallbacks in the cron notify route; and single-branch gaps in the proxy, locale layout, login metadata, schedule route, and `getMistakesForTopic`
+
+---
+
 ## [0.3.79] — 2026-07-13
 
 ### Fixed

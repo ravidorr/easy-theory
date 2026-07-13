@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import HomePage from "../page";
@@ -219,5 +219,71 @@ describe("HomePage", () => {
     const jsx = await HomePage();
     render(jsx);
     expect(screen.getByText("allMedals")).toBeInTheDocument();
+  });
+
+  it("shows one-day-to-medal nudge when the next milestone is tomorrow", async () => {
+    // streak=2 → next milestone is 3 → 1 day away → daysToMedalOne
+    mockGetStats.mockResolvedValue({ streak_days: 2, star_points: 20 } as never);
+    const jsx = await HomePage();
+    render(jsx);
+    expect(screen.getByText("daysToMedalOne")).toBeInTheDocument();
+  });
+
+  describe("time-based greeting", () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("shows morning greeting before noon", async () => {
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(new Date(2026, 6, 13, 8, 0, 0));
+      const jsx = await HomePage();
+      render(jsx);
+      expect(screen.getByText(/greetingMorning/)).toBeInTheDocument();
+    });
+
+    it("shows noon greeting between 12 and 17", async () => {
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(new Date(2026, 6, 13, 13, 0, 0));
+      const jsx = await HomePage();
+      render(jsx);
+      expect(screen.getByText(/greetingNoon/)).toBeInTheDocument();
+    });
+
+    it("shows evening greeting from 17 onwards", async () => {
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(new Date(2026, 6, 13, 19, 0, 0));
+      const jsx = await HomePage();
+      render(jsx);
+      expect(screen.getByText(/greetingEvening/)).toBeInTheDocument();
+    });
+  });
+
+  describe("ar locale", () => {
+    beforeEach(() => {
+      vi.mocked(getLocale).mockResolvedValue("ar" as never);
+    });
+
+    it("uses name_ar and description_ar when populated", async () => {
+      const topicAr = {
+        ...TOPIC_B,
+        name_ar: "أولوية المرور",
+        description_ar: "تعلم أولوية المرور",
+        description_he: "לימוד זכות קדימה",
+      };
+      mockGetTopics.mockResolvedValue([topicAr] as never);
+      const jsx = await HomePage();
+      render(jsx);
+      expect(screen.getAllByText("أولوية المرور").length).toBeGreaterThan(0);
+      expect(screen.getByText("تعلم أولوية المرور")).toBeInTheDocument();
+    });
+
+    it("falls back to name_he when name_ar is missing", async () => {
+      mockGetTopics.mockResolvedValue([TOPIC_A] as never);
+      const jsx = await HomePage();
+      render(jsx);
+      // Today card + topic list both fall back to the Hebrew name
+      expect(screen.getAllByText("תמרורים").length).toBeGreaterThan(0);
+    });
   });
 });

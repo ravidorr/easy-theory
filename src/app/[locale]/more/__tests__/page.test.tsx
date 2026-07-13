@@ -112,6 +112,16 @@ describe("MorePage", () => {
     expect(toggle).toHaveAttribute("aria-checked", "true");
   });
 
+  it("formats earned-medal dates with the ar-IL locale for ar", async () => {
+    vi.mocked(getLocale).mockResolvedValue("ar" as never);
+    mockGetMedals.mockResolvedValue([
+      { medal_slug: "streak-3", earned_at: "2026-01-15T10:00:00Z" },
+    ] as never);
+    const jsx = await MorePage();
+    render(jsx);
+    expect(screen.getAllByText("—")).toHaveLength(3);
+  });
+
   it("renders light mode toggle when theme is light", async () => {
     mockCookies.mockResolvedValue({
       get: vi.fn().mockReturnValue({ value: "light" }),

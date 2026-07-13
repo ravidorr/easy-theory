@@ -32,9 +32,11 @@ type DbConfig = {
   alreadyAnsweredCorrectly?: boolean;
   existingProgress?: { status: string } | null;
   stats?: { star_points: number; streak_days: number; last_active_date: string | null } | null;
-  updatedStats?: { star_points: number; streak_days: number };
+  updatedStats?: { star_points: number; streak_days: number } | null;
   noQuestion?: boolean;
   rateLimitPass?: boolean;
+  upsertError?: boolean;
+  medalInsertError?: boolean;
 };
 
 function buildDb({
@@ -46,6 +48,8 @@ function buildDb({
   updatedStats = { star_points: 10, streak_days: 1 },
   noQuestion = false,
   rateLimitPass = true,
+  upsertError = false,
+  medalInsertError = false,
 }: DbConfig = {}) {
   const calls: Record<string, number> = {};
   const nc = (t: string) => {
@@ -86,7 +90,11 @@ function buildDb({
             }),
           };
         }
-        return { upsert: vi.fn().mockResolvedValue({ error: null }) };
+        return {
+          upsert: vi.fn().mockResolvedValue({
+            error: upsertError ? { message: "upsert failed" } : null,
+          }),
+        };
       }
 
       if (table === "user_stats") {
@@ -116,7 +124,11 @@ function buildDb({
       }
 
       if (table === "user_medals") {
-        return { insert: vi.fn().mockResolvedValue({ error: null }) };
+        return {
+          insert: vi.fn().mockResolvedValue({
+            error: medalInsertError ? { message: "insert failed" } : null,
+          }),
+        };
       }
 
       if (table === "user_topic_progress") {
@@ -267,5 +279,43 @@ describe("POST /api/quiz", () => {
     const body = await res.json();
     expect(res.status).toBe(200);
     expect(body.topic_completed).toBe(true);
+  });
+
+  it("logs and continues when the response upsert fails", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    mockCreateClient.mockResolvedValue(buildDb({ upsertError: true }) as never);
+    const res = await POST(makeRequest(defaultBody));
+    const body = await res.json();
+    expect(res.status).toBe(200);
+    expect(body.is_correct).toBe(true);
+    expect(errorSpy).toHaveBeenCalledWith(
+      "[quiz] upsert failed:",
+      expect.objectContaining({ message: "upsert failed" })
+    );
+    errorSpy.mockRestore();
+  });
+
+  it("does not report a medal when the medal insert fails", async () => {
+    const yesterday = new Date(Date.now() - 86_400_000).toLocaleDateString("sv", {
+      timeZone: "Asia/Jerusalem",
+    });
+    mockCreateClient.mockResolvedValue(
+      buildDb({
+        stats: { star_points: 0, streak_days: 2, last_active_date: yesterday },
+        medalInsertError: true,
+      }) as never
+    );
+    const res = await POST(makeRequest(defaultBody));
+    const body = await res.json();
+    expect(res.status).toBe(200);
+    expect(body.medals_earned).toEqual([]);
+  });
+
+  it("returns zeroed totals when updated stats cannot be fetched", async () => {
+    mockCreateClient.mockResolvedValue(buildDb({ updatedStats: null }) as never);
+    const res = await POST(makeRequest(defaultBody));
+    const body = await res.json();
+    expect(body.new_total_stars).toBe(0);
+    expect(body.streak_days).toBe(0);
   });
 });
