@@ -2,6 +2,14 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.77] — 2026-07-13
+
+### Fixed
+- Fixed wrong sign images for signs 604 and 935: switched from incorrect SVG to authoritative PNG (extracted from the official Israeli Ministry of Transport PDF)
+- Added `scripts/audit_sign_images.py` to detect sign image mismatches via `sodipodi:docname` metadata, with correct handling of both simple (`125.svg`) and Wikimedia-style (`Israel_road_sign_151.svg`) docname formats
+
+---
+
 ## [0.3.76] — 2026-07-13
 
 ### Fixed
