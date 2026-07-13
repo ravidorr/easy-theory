@@ -20,12 +20,12 @@ vi.mock("@/lib/db", () => ({
   getQuestionsForTopic: vi.fn(),
 }));
 vi.mock("@/components/SignImage", () => ({
-  SignImage: ({ src }: { src: string }) =>
-    React.createElement("img", { src, alt: "" }),
+  SignImage: ({ src, alt = "" }: { src: string; alt?: string }) =>
+    React.createElement("img", { src, alt }),
 }));
 vi.mock("next/link", () => ({
-  default: ({ href, children }: { href: string; children: unknown }) =>
-    React.createElement("a", { href }, children as React.ReactNode),
+  default: ({ href, children, ...rest }: { href: string; children: unknown }) =>
+    React.createElement("a", { href, ...rest }, children as React.ReactNode),
 }));
 vi.mock("next/script", () => ({
   default: () => React.createElement("div", null),
@@ -319,5 +319,47 @@ describe("TopicQuizPage", () => {
     const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "he" }) });
     const { container } = render(jsx);
     expect(container.querySelector(".quiz-slide h2")?.textContent).toBe("");
+  });
+
+  it("labels the close link for screen readers", async () => {
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "he" }) });
+    const { container } = render(jsx);
+    expect(container.querySelector("a[aria-label='closeLabel']")).toBeTruthy();
+  });
+
+  it("gives the question sign image a sign-number alt", async () => {
+    const q = { ...QUESTION, image_url: "/signs/sign-100.png" };
+    mockGetQuestions.mockResolvedValue([q] as never);
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "he" }) });
+    const { container } = render(jsx);
+    const img = container.querySelector("img[src='/signs/sign-100.png']");
+    expect(img?.getAttribute("alt")).toBe("signAlt");
+  });
+
+  it("gives wide question images a descriptive alt", async () => {
+    const q = { ...QUESTION, image_url: "/images/wide.jpg" };
+    mockGetQuestions.mockResolvedValue([q] as never);
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "he" }) });
+    const { container } = render(jsx);
+    const img = container.querySelector("img[src='/images/wide.jpg']");
+    expect(img?.getAttribute("alt")).toBe("questionImageAlt");
+  });
+
+  it("gives option sign images a sign-number alt", async () => {
+    const q = { ...QUESTION, option_a: "100" };
+    mockGetQuestions.mockResolvedValue([q] as never);
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "he" }) });
+    const { container } = render(jsx);
+    const img = container.querySelector("img[src='/signs/sign-100.png']");
+    expect(img?.getAttribute("alt")).toBe("signAlt");
+  });
+
+  it("renders final navigation as links styled as buttons, without nested buttons", async () => {
+    mockGetQuestions.mockResolvedValue([QUESTION] as never);
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "he" }) });
+    const { container } = render(jsx);
+    const final = container.querySelector("#quiz-final");
+    expect(final?.querySelector("a.btn-primary")).toBeTruthy();
+    expect(final?.querySelector("a button")).toBeNull();
   });
 });

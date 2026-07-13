@@ -20,8 +20,8 @@ vi.mock("@/lib/db", () => ({
   getMistakesForTopic: vi.fn(),
 }));
 vi.mock("@/components/SignImage", () => ({
-  SignImage: ({ src }: { src: string }) =>
-    React.createElement("img", { src, alt: "", "data-testid": "sign-img" }),
+  SignImage: ({ src, alt = "" }: { src: string; alt?: string }) =>
+    React.createElement("img", { src, alt, "data-testid": "sign-img" }),
 }));
 vi.mock("next/link", () => ({
   default: ({ href, children, ...rest }: { href: string; children: unknown }) =>
@@ -306,6 +306,29 @@ describe("ReviewPage", () => {
     const jsx = await callPage();
     const { container } = render(jsx);
     expect(container.querySelector("h3")?.textContent).toBe("");
+  });
+
+  it("labels the close link for screen readers", async () => {
+    const jsx = await callPage();
+    const { container } = render(jsx);
+    expect(container.querySelector("a[aria-label='closeLabel']")).toBeTruthy();
+  });
+
+  it("gives the question sign image a sign-number alt", async () => {
+    const m = { ...MISTAKE_A, image_url: "/signs/sign-100.png" };
+    mockGetMistakes.mockResolvedValue([m] as never);
+    const jsx = await callPage();
+    const { container } = render(jsx);
+    const img = container.querySelector("img[src='/signs/sign-100.png']");
+    expect(img?.getAttribute("alt")).toBe("signAlt");
+  });
+
+  it("renders navigation CTAs as links styled as buttons, without nested buttons", async () => {
+    mockGetMistakes.mockResolvedValue([MISTAKE_A] as never);
+    const jsx = await callPage();
+    const { container } = render(jsx);
+    expect(container.querySelector("a.btn-primary")).toBeTruthy();
+    expect(container.querySelector("a button")).toBeNull();
   });
 
   describe("scope toggle", () => {

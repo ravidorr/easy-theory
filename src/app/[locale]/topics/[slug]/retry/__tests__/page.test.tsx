@@ -20,12 +20,12 @@ vi.mock("@/lib/db", () => ({
   getMistakesForTopic: vi.fn(),
 }));
 vi.mock("@/components/SignImage", () => ({
-  SignImage: ({ src }: { src: string }) =>
-    React.createElement("img", { src, alt: "", "data-testid": "sign-img" }),
+  SignImage: ({ src, alt = "" }: { src: string; alt?: string }) =>
+    React.createElement("img", { src, alt, "data-testid": "sign-img" }),
 }));
 vi.mock("next/link", () => ({
-  default: ({ href, children }: { href: string; children: unknown }) =>
-    React.createElement("a", { href }, children as React.ReactNode),
+  default: ({ href, children, ...rest }: { href: string; children: unknown }) =>
+    React.createElement("a", { href, ...rest }, children as React.ReactNode),
 }));
 vi.mock("next/script", () => ({
   default: () => React.createElement("div", null),
@@ -191,6 +191,21 @@ describe("RetryMistakesPage", () => {
     const signImgs = container.querySelectorAll("img[src='/signs/sign-100.png']");
     expect(signImgs).toHaveLength(1);
     expect(signImgs[0].closest(".quiz-option")).toBeTruthy();
+    expect(signImgs[0].getAttribute("alt")).toBe("signAlt");
+  });
+
+  it("labels the close link for screen readers", async () => {
+    const jsx = await RetryMistakesPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    expect(container.querySelector("a[aria-label='closeLabel']")).toBeTruthy();
+  });
+
+  it("renders final navigation as links styled as buttons, without nested buttons", async () => {
+    const jsx = await RetryMistakesPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    const final = container.querySelector("#quiz-final");
+    expect(final?.querySelector("a.btn-primary")).toBeTruthy();
+    expect(final?.querySelector("a button")).toBeNull();
   });
 
   it("renders /signs/ image as square SignImage when options are not numeric", async () => {

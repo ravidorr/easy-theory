@@ -29,16 +29,26 @@ function resolveOptionSignImage(text: string): string | null {
   return existsSync(path) ? `/signs/sign-${text.trim()}.png` : null;
 }
 
+function signNumberFromUrl(url: string): string | null {
+  return url.match(/sign-(\d{2,4})/)?.[1] ?? null;
+}
+
+// The sign number identifies the image for screen readers without revealing
+// its meaning — a full description would give away the answer.
+type TranslateFn = (key: string, values?: Record<string, string | number>) => string;
+
 // Exam slide — unlike the practice quiz, the correct option and explanation are
 // deliberately NOT rendered; scoring happens server-side at submit.
 function ExamSlide({
   question,
   index,
   letters,
+  t,
 }: {
   question: Question;
   index: number;
   letters: string[];
+  t: TranslateFn;
 }) {
   const qAny = question as Record<string, unknown>;
   const options: [string, string][] = [
@@ -53,6 +63,8 @@ function ExamSlide({
     [question.option_a, question.option_b, question.option_c, question.option_d].some((t) => /^\d{2,4}$/.test(t.trim()));
   const imageUrl = isSignQuestion ? null : resolveImageUrl(question.image_url);
   const isWide = imageUrl && !imageUrl.includes("sign-");
+  const signNumber = imageUrl ? signNumberFromUrl(imageUrl) : null;
+  const signAlt = signNumber ? t("signAlt", { number: signNumber }) : t("questionImageAlt");
 
   const questionText = (qAny.question_display as string) ?? question.question_he;
 
@@ -68,11 +80,11 @@ function ExamSlide({
           isWide ? (
             <div className={styles.imgWide}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={imageUrl} alt="" className={styles.imgEl} />
+              <img src={imageUrl} alt={t("questionImageAlt")} className={styles.imgEl} />
             </div>
           ) : (
             <div className={styles.imgSquare}>
-              <SignImage src={imageUrl!} size="md" />
+              <SignImage src={imageUrl!} alt={signAlt} size="md" />
             </div>
           )
         )}
@@ -87,7 +99,7 @@ function ExamSlide({
               <span className="quiz-option-badge">{letters[i]}</span>
               {optionSignImg ? (
                 <span className={styles.optionSignContent}>
-                  <SignImage src={optionSignImg} size="md" />
+                  <SignImage src={optionSignImg} alt={t("signAlt", { number: text.trim() })} size="md" />
                 </span>
               ) : (
                 <span className={styles.optionTextContent}>{text}</span>
@@ -115,6 +127,7 @@ export default async function ExamRunPage() {
 
   const locale = await getLocale();
   const t = await getTranslations("Exam");
+  const tQuiz = await getTranslations("Quiz");
 
   const questions = await getRandomExamQuestions(supabase, EXAM_QUESTION_COUNT);
   const total = questions.length;
@@ -172,7 +185,7 @@ export default async function ExamRunPage() {
           </div>
         ) : (
           localizedQuestions.map((q, i) => (
-            <ExamSlide key={q.id} question={q} index={i} letters={letters} />
+            <ExamSlide key={q.id} question={q} index={i} letters={letters} t={tQuiz} />
           ))
         )}
 
@@ -204,8 +217,8 @@ export default async function ExamRunPage() {
           <button id="exam-review-btn" className={`btn-secondary ${styles.btnWide}`}>
             {t("reviewBtn")}
           </button>
-          <Link href="/exam">
-            <button className={`btn-primary ${styles.btnWide}`}>{t("backToExam")}</button>
+          <Link href="/exam" className={`btn-primary ${styles.btnWide}`}>
+            {t("backToExam")}
           </Link>
         </div>
       </main>
