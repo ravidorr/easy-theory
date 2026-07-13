@@ -21,7 +21,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 // Builds a chainable Supabase query mock that resolves to `result`.
 function chain(result: { data: unknown }) {
   const mock: Record<string, unknown> = {};
-  for (const m of ["select", "eq", "order", "limit", "in"]) {
+  for (const m of ["select", "eq", "order", "limit", "in", "range"]) {
     mock[m] = vi.fn().mockReturnValue(mock);
   }
   mock.single = vi.fn().mockResolvedValue(result);
@@ -489,6 +489,48 @@ describe("getTopicAccuracy", () => {
 
   it("returns [] on null", async () => {
     expect(await getTopicAccuracy(makeClient(null), "u1")).toEqual([]);
+  });
+
+  it("pages through more than 1000 responses", async () => {
+    // Page 1: exactly 1000 rows (forces a second request); page 2: the rest.
+    const page1 = Array.from({ length: 1000 }, (_, i) => ({
+      is_correct: i % 2 === 0,
+      questions: { topic_id: "t1" },
+    }));
+    const page2 = Array.from({ length: 273 }, () => ({
+      is_correct: true,
+      questions: { topic_id: "t2" },
+    }));
+    const from = vi
+      .fn()
+      .mockReturnValueOnce(chain({ data: page1 }))
+      .mockReturnValueOnce(chain({ data: page2 }));
+    const client = { from } as unknown as SupabaseClient;
+
+    expect(await getTopicAccuracy(client, "u1")).toEqual([
+      { topic_id: "t1", correct: 500, total: 1000 },
+      { topic_id: "t2", correct: 273, total: 273 },
+    ]);
+    expect(from).toHaveBeenCalledTimes(2);
+  });
+
+  it("requests successive ranges when paginating", async () => {
+    const page1 = chain({
+      data: Array.from({ length: 1000 }, () => ({
+        is_correct: true,
+        questions: { topic_id: "t1" },
+      })),
+    });
+    const page2 = chain({ data: [] });
+    const from = vi
+      .fn()
+      .mockReturnValueOnce(page1)
+      .mockReturnValueOnce(page2);
+    const client = { from } as unknown as SupabaseClient;
+
+    await getTopicAccuracy(client, "u1");
+    expect(page1.range).toHaveBeenCalledWith(0, 999);
+    expect(page2.range).toHaveBeenCalledWith(1000, 1999);
   });
 });
 
