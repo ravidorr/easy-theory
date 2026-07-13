@@ -2,6 +2,16 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.87] — 2026-07-13
+
+### Fixed
+- Security: `/api/cron/notify` now fails closed — when `CRON_SECRET` is unset the endpoint returns 500 "Server misconfigured" instead of running unauthenticated; any request without the correct `Bearer` token gets 401 before any service-role work happens. Tests updated to authenticate by default, plus new cases for the missing-secret and missing-header paths
+
+### Changed
+- Removed the completed cron fail-closed item from `TODO.md` and renumbered the remaining items
+
+---
+
 ## [0.3.86] — 2026-07-13
 
 ### Changed
