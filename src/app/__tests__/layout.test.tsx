@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render } from "@testing-library/react";
 import { renderToStaticMarkup } from "react-dom/server";
 import React from "react";
-import RootLayout from "../layout";
+import RootLayout, { generateViewport } from "../layout";
 import { cookies } from "next/headers";
 
 vi.mock("next/font/google", () => ({
@@ -75,5 +75,18 @@ describe("RootLayout", () => {
     const html = renderToStaticMarkup(jsx);
     expect(html).toContain('lang="he"');
     expect(html).toContain('dir="rtl"');
+  });
+
+  describe("generateViewport", () => {
+    it("returns the dark theme color when no theme cookie", async () => {
+      expect(await generateViewport()).toEqual({ themeColor: "#131829" });
+    });
+
+    it("returns the light theme color when theme cookie is light", async () => {
+      mockCookies.mockResolvedValue({
+        get: vi.fn().mockReturnValue({ value: "light" }),
+      } as never);
+      expect(await generateViewport()).toEqual({ themeColor: "#f5f7fc" });
+    });
   });
 });

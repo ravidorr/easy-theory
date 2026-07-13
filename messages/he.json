@@ -1,7 +1,8 @@
 {
   "Metadata": {
     "rootTitle": "ClearRoad - דרך ברורה",
-    "rootDescription": "דרך ברורה - לומדים לתיאוריה בלי לחץ"
+    "rootDescription": "דרך ברורה - לומדים לתיאוריה בלי לחץ",
+    "shortName": "דרך ברורה"
   },
   "TabBar": {
     "home": "הבית",

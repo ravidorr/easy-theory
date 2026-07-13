@@ -9,7 +9,7 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Skip Next.js internals, static files, and API routes
-  const skip = /^\/(_next|api|_vercel|signs|js|questions|favicon\.ico|apple-icon|icon\.svg|manifest\.json|sw\.js)/.test(pathname)
+  const skip = /^\/(_next|api|_vercel|signs|js|questions|favicon\.ico|apple-icon|icon\.svg|manifest\.webmanifest|sw\.js)/.test(pathname)
     || pathname.includes(".");
   if (skip) return NextResponse.next();
 

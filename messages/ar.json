@@ -1,7 +1,8 @@
 {
   "Metadata": {
     "rootTitle": "ClearRoad - طريق واضح",
-    "rootDescription": "طريق واضح - نتعلم نظرية القيادة بدون ضغط"
+    "rootDescription": "طريق واضح - نتعلم نظرية القيادة بدون ضغط",
+    "shortName": "طريق واضح"
   },
   "TabBar": {
     "home": "الرئيسية",

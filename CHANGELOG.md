@@ -2,6 +2,20 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.89] — 2026-07-13
+
+### Added
+- Web app manifest (`src/app/manifest.ts`, served at `/manifest.webmanifest`) — the app is now installable as a PWA: standalone display, RTL, dark theme/splash colors, 192/512 icons; name/description sourced from `messages/he.json` with a new `Metadata.shortName` key in both `he.json` and `ar.json`
+- Offline support in `public/sw.js`: precaches the static shell (`/js/*.js`, icons, placeholder, manifest) on install; runtime caching with network-first for pages, cache-first for `/_next/static` and `/signs`+`/questions` images, stale-while-revalidate for `/js` and `/icons` — previously visited flashcards and practice pages now work offline. Redirected responses (auth guard) are never cached, and `/api`, RSC payloads, POSTs, and cross-origin requests are never intercepted; versioned caches are cleaned up on activate. Existing push/notification handlers unchanged
+- Cookie-driven `theme-color` meta via `generateViewport` in the root layout
+- Tests: manifest fields, `generateViewport`, proxy skip paths for `/manifest.webmanifest` + `/sw.js`, and a full `sw.js` suite (install/activate lifecycle, every caching strategy, non-interception guards, push regression)
+
+### Changed
+- `src/proxy.ts` skip-regex: stale `manifest.json` entry replaced with `manifest.webmanifest`
+- Removed the completed PWA item from `TODO.md` and renumbered the remaining items
+
+---
+
 ## [0.3.88] — 2026-07-13
 
 ### Added
