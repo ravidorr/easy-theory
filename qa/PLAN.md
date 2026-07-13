@@ -105,9 +105,10 @@ complete, `not_tested` is non-empty, coverage arithmetic is correct.
 
 - `qa-dev.sh` and `mint-session.ts` refuse to run if `.env.qa` is missing, `QA_ENV=1` is
   not set, or the Supabase URL matches the one in `.env.local` (production).
-- The skill never mutates GitHub/Slack/email. Findings land as local files; humans file
-  issues. Recommended deny rules for `.claude/settings.json`: `Bash(gh issue *)`,
-  `Bash(gh pr *)`, `Bash(git push*)`, `mcp__github__*`.
+- The skill never mutates GitHub/Slack/email. Findings land as local files; per-finding
+  issue DRAFTS go to `qa/runs/<id>/proposed-issues/` and humans file the approved ones
+  (`gh issue create --body-file …`). The committed `.claude/settings.json` denies
+  `gh issue` mutations and GitHub-MCP issue tools repo-wide as a mechanical backstop.
 - A check without observed evidence is `blocked` or `not-checked`, never `pass`.
 
 ## Validation of the pilot
@@ -129,4 +130,4 @@ complete, `not_tested` is non-empty, coverage arithmetic is correct.
 
 More charters (Arabic locale, flashcards, schedule, retry/review, dark mode,
 zero-progress persona), video/trace capture, scheduled post-deploy smoke loop, CI
-integration, cross-run findings dedupe/diff, committed permission deny rules.
+integration, cross-run findings dedupe/diff.

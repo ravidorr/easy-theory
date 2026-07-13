@@ -24,9 +24,10 @@ precise about what you did and did not verify.
 4. Do not edit product code, seeds, or the charter during a run. If the charter is
    wrong, report that and stop.
 
-Recommended (mention to the user if absent, do not auto-apply): deny rules in
-`.claude/settings.json` for `Bash(gh issue *)`, `Bash(gh pr *)`, `Bash(git push*)`, and
-`mcp__github__*` while QA sessions run.
+Rule 1 is enforced mechanically for issues: the committed `.claude/settings.json`
+denies `gh issue` mutations and the GitHub-MCP issue tools repo-wide. PR/push tooling
+stays allowed for normal development — the skill rule (not a permission) covers those
+during QA runs.
 
 ## Phase 1 — Preflight
 
@@ -88,10 +89,21 @@ Conventions:
    confidence, repro steps, expected/actual, evidence links) → **NOT tested**
    (mandatory, at minimum echoing the charter's out_of_scope) → known issues observed →
    limitations and next-charter suggestions.
-3. Run `pnpm qa:validate-report <run-dir> <charter-path>`. Fix the report until it
+3. For every finding, write a ready-to-file issue draft at
+   `proposed-issues/<finding-id>-<slug>.md` in the run dir:
+   - First line: `# <issue title>` (imperative, prefixed with the severity in brackets,
+     e.g. `# [major] Progress not saved when …`)
+   - Then a `Suggested labels:` line (`bug` / `a11y` / `copy` / `product-question` per
+     the finding category; `question`-severity findings get `product-question`, not `bug`)
+   - Then the body: repro steps, expected/actual, severity + confidence, environment
+     block, and evidence paths (note they live locally in the run dir — attach manually)
+   - These are DRAFTS. Never file them yourself. The human files approved ones with:
+     `gh issue create --title "…" --body-file qa/runs/<run>/proposed-issues/<file>.md`
+4. Run `pnpm qa:validate-report <run-dir> <charter-path>`. Fix the report until it
    passes — this gate is not optional.
-4. Final message to the user: one-paragraph outcome, the run-dir path, the checks
-   matrix, and the explicit NOT-tested list. Never a bare "all good".
+5. Final message to the user: one-paragraph outcome, the run-dir path, the checks
+   matrix, the explicit NOT-tested list, and the list of proposed-issue drafts awaiting
+   human review. Never a bare "all good".
 
 ## Phase 5 — Teardown
 
