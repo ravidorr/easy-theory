@@ -2,6 +2,19 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.69] — 2026-07-13
+
+### Added
+- Full Arabic (MSA) language support — all UI strings, quiz questions, answer options, topic names, sign names, and explanations now render in Arabic when the user navigates to `/ar`
+- `next-intl` i18n infrastructure: `[locale]` URL-prefix routing, `messages/he.json` + `messages/ar.json`, locale cookie persistence, browser `Accept-Language` auto-detection
+- Language toggle component (`LanguageToggle.tsx`) for switching between Hebrew and Arabic
+- DB migration adding `_ar` columns to `topics`, `questions`, and `signs` tables
+- One-time translation script (`scripts/translate_arabic.ts`) using Gemini 2.5 Flash to populate all 1273 questions, 277 signs, and 4 topics
+- Arabic fallback for quiz answer options — falls back to Hebrew when Arabic translation is absent
+- `proxy.ts` now correctly forwards `x-next-intl-locale` request headers so server components resolve the right locale
+
+---
+
 ## [0.3.68] — 2026-07-13
 
 ### Fixed

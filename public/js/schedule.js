@@ -1,7 +1,12 @@
 /** Schedule setup: day toggle, duration chip radio, notify toggle, save. */
 (function () {
+  const t = window.__t || {};
+  const tf = window.__tf || function(s, v) { return s.replace(/\{(\w+)\}/g, function(_, k) { return v[k] ?? _; }); };
+
   const saveBtn = document.getElementById("save-schedule-btn");
   if (!saveBtn) return;
+
+  const originalSaveBtnText = saveBtn.textContent;
 
   const dayPicker = document.getElementById("day-picker");
   const durationPicker = document.getElementById("duration-picker");
@@ -25,17 +30,16 @@
   function updateSummary() {
     if (daysLabel) {
       daysLabel.textContent = selectedDays.size > 0
-        ? "נבחרו " + selectedDays.size + " ימים"
-        : "טרם נבחרו ימים";
+        ? tf(t.daysSelected || 'נבחרו {count} ימים', { count: selectedDays.size })
+        : (t.daysNone || "טרם נבחרו ימים");
     }
     if (summaryText) {
       summaryText.textContent = selectedDays.size > 0
-        ? selectedDays.size + " מפגשים בשבוע, " + selectedDuration + " דק׳ כל אחד"
-        : "בחרי ימים כדי להתחיל";
+        ? tf(t.summarySessions || '{count} מפגשים בשבוע, {duration} דק׳ כל אחד', { count: selectedDays.size, duration: selectedDuration })
+        : (t.summaryChoose || "בחרי ימים כדי להתחיל");
     }
   }
 
-  // Day toggle
   if (dayPicker) {
     dayPicker.addEventListener("click", function (e) {
       const btn = e.target.closest(".day-btn");
@@ -62,7 +66,6 @@
     });
   }
 
-  // Duration radio
   if (durationPicker) {
     durationPicker.addEventListener("click", function (e) {
       const btn = e.target.closest(".duration-btn");
@@ -81,7 +84,6 @@
     });
   }
 
-  // Notify toggle
   if (notifyToggle) {
     notifyToggle.addEventListener("click", function () {
       notifyOn = !notifyOn;
@@ -97,15 +99,14 @@
     });
   }
 
-  // Save
   saveBtn.addEventListener("click", async function () {
     if (selectedDays.size === 0) {
-      alert("בחרי לפחות יום אחד ללמוד.");
+      alert(t.needDay || "בחרי לפחות יום אחד ללמוד.");
       return;
     }
 
     saveBtn.disabled = true;
-    saveBtn.textContent = "שומרת...";
+    saveBtn.textContent = t.saving || "שומרת...";
 
     try {
       if (notifyOn && window.pushHelpers) {
@@ -125,14 +126,14 @@
 
       if (!res.ok) throw new Error("save failed");
 
-      saveBtn.textContent = "נשמר!";
+      saveBtn.textContent = t.saved || "נשמר!";
       setTimeout(function () {
         window.location.href = "/";
       }, 800);
     } catch (_) {
-      alert("שגיאה בשמירה, נסי שוב.");
+      alert(t.saveError || "שגיאה בשמירה, נסי שוב.");
       saveBtn.disabled = false;
-      saveBtn.textContent = "שמרי את התוכנית";
+      saveBtn.textContent = originalSaveBtnText;
     }
   });
 })();
