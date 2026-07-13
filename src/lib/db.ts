@@ -309,27 +309,39 @@ export type TopicAccuracy = {
   total: number;
 };
 
+const TOPIC_ACCURACY_PAGE_SIZE = 1000;
+
 export async function getTopicAccuracy(
   supabase: SupabaseClient,
   userId: string
 ): Promise<TopicAccuracy[]> {
   // One row per (user, question) thanks to the upsert in the quiz route, so no
-  // dedup is needed. The question bank is well under Supabase's 1000-row cap.
-  const { data } = await supabase
-    .from("user_quiz_responses")
-    .select("is_correct, questions(topic_id)")
-    .eq("user_id", userId);
-
+  // dedup is needed. The question bank (1,273 questions) exceeds Supabase's
+  // 1000-row response cap, so page through all responses; question_id gives a
+  // stable order for range pagination.
   const byTopic = new Map<string, { correct: number; total: number }>();
-  for (const row of data ?? []) {
-    // supabase-js may type a to-one nested relation as object or array.
-    const related = Array.isArray(row.questions) ? row.questions[0] : row.questions;
-    const topicId = related?.topic_id;
-    if (!topicId) continue;
-    const acc = byTopic.get(topicId) ?? { correct: 0, total: 0 };
-    acc.total += 1;
-    if (row.is_correct) acc.correct += 1;
-    byTopic.set(topicId, acc);
+
+  for (let from = 0; ; from += TOPIC_ACCURACY_PAGE_SIZE) {
+    const { data } = await supabase
+      .from("user_quiz_responses")
+      .select("is_correct, questions(topic_id)")
+      .eq("user_id", userId)
+      .order("question_id")
+      .range(from, from + TOPIC_ACCURACY_PAGE_SIZE - 1);
+
+    const rows = data ?? [];
+    for (const row of rows) {
+      // supabase-js may type a to-one nested relation as object or array.
+      const related = Array.isArray(row.questions) ? row.questions[0] : row.questions;
+      const topicId = related?.topic_id;
+      if (!topicId) continue;
+      const acc = byTopic.get(topicId) ?? { correct: 0, total: 0 };
+      acc.total += 1;
+      if (row.is_correct) acc.correct += 1;
+      byTopic.set(topicId, acc);
+    }
+
+    if (rows.length < TOPIC_ACCURACY_PAGE_SIZE) break;
   }
 
   return [...byTopic.entries()].map(([topic_id, acc]) => ({ topic_id, ...acc }));

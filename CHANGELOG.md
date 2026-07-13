@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.94] — 2026-07-14
+
+### Fixed
+- `getTopicAccuracy` now pages through all of a user's quiz responses in 1000-row chunks (ordered by `question_id` for stable ranges) instead of relying on a single request — Supabase caps responses at 1000 rows and the question bank has 1,273 questions, so a learner who had answered more than 1000 unique questions would have had responses silently dropped from per-topic accuracy, skewing or hiding weakest topics (post-merge review catch on #88)
+
+---
+
 ## [0.3.93] — 2026-07-14
 
 ### Added
