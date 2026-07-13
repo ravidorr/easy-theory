@@ -2,6 +2,16 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.82] — 2026-07-13
+
+### Security
+- Upgraded `next` from 16.2.10 to 16.3.0-preview.5, which pins `postcss` 8.5.10 instead of the vulnerable 8.4.31, fixing CVE-2026-41305 (GHSA-qx2v-qp2m-jg93, moderate): XSS via unescaped `</style>` in PostCSS's stringified output. No stable Next.js release carries the patched postcss yet. Not exploitable in this app (no user-submitted CSS is ever processed), but this removes the vulnerable version from the dependency graph and clears the Dependabot alert.
+
+### Changed
+- Ignore `AGENTS.md`/`CLAUDE.md` in `.gitignore` and markdownlint — Next 16.3's postinstall auto-generates these agent-rules files in the repo root
+
+---
+
 ## [0.3.81] — 2026-07-13
 
 ### Added
@@ -12,7 +22,7 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 - More-page stat cards now use the design-system flame/star icons (previously one-off Lucide shapes that differed from the same stats on the home page); decorative icons in `TabBar` and the more page now set `aria-hidden`
 
 ### Removed
-- Stale "SVG sprite" entry in `TODO.md` — the mockup consolidation shipped in v0.3.63
+- Stale "SVG sprite" entry in `TODO.md` — the mockup consolidation shipped in v0.3.64
 
 ---
 
