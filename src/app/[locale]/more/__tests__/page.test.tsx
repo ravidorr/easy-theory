@@ -61,9 +61,10 @@ describe("MorePage", () => {
     await expect(MorePage()).rejects.toThrow("redirect");
   });
 
-  it("renders navigation links to schedule and credits", async () => {
+  it("renders navigation links to exam, schedule, and credits", async () => {
     const jsx = await MorePage();
     const { container } = render(jsx);
+    expect(container.querySelector('a[href="/exam"]')).toBeTruthy();
     expect(container.querySelector('a[href="/schedule"]')).toBeTruthy();
     expect(container.querySelector('a[href="/credits"]')).toBeTruthy();
     expect(container.querySelector('a[href="/videos"]')).toBeFalsy();

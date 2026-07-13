@@ -27,6 +27,8 @@
     "emptyStateTitle": "متى يناسبك التعلم؟",
     "emptyStateDesc": "نضع خطة أسبوعية ونبدأ.",
     "emptyStateBtn": "حفظ الخطة",
+    "examCtaTitle": "محاكاة الامتحان",
+    "examCtaDesc": "30 سؤالًا · 40 دقيقة · تمامًا مثل الامتحان الحقيقي",
     "topicsHeader": "موضوعاتك",
     "topicCompleted": "✓ مكتمل",
     "topicNotStarted": "لم تبدأ بعد"
@@ -69,6 +71,7 @@
     "pageTitle": "المزيد",
     "statStreak": "يوم متتالٍ",
     "statPoints": "نقاط",
+    "navExam": "محاكاة الامتحان",
     "navSchedule": "خطتك",
     "navCredits": "عن التطبيق",
     "medalsTitle": "الإنجازات",
@@ -135,6 +138,32 @@
     "scopeAllTime": "كل الأوقات",
     "emptyHintLastSession": "لا أخطاء في آخر تدريب!",
     "viewAllMistakes": "عرض كل الأخطاء"
+  },
+  "Exam": {
+    "pageTitle": "محاكاة الامتحان",
+    "subtitle": "تمامًا مثل الامتحان الحقيقي، بدون ضغط.",
+    "rulesTitle": "كيف يعمل؟",
+    "ruleQuestions": "{count} سؤالًا عشوائيًا من جميع المواضيع",
+    "ruleTime": "{minutes} دقيقة للامتحان كله",
+    "rulePass": "النجاح بـ {passMark} إجابة صحيحة أو أكثر",
+    "startBtn": "هيا نبدأ!",
+    "historyTitle": "محاولاتك",
+    "historyEmpty": "لم تجرّبي المحاكاة بعد. هذا هو الوقت المناسب!",
+    "bestScore": "أفضل نتيجة: {score} من {total}",
+    "attemptScore": "{score} من {total}",
+    "passChip": "نجاح",
+    "failChip": "لم تنجحي",
+    "closeLabel": "إغلاق",
+    "count": "{current} من {total}",
+    "answered": "تمت الإجابة على {answered} من {total}",
+    "prevBtn": "السابق",
+    "nextBtn": "التالي",
+    "submitBtn": "تسليم الامتحان",
+    "reviewBtn": "مراجعة الإجابات",
+    "backToExam": "العودة إلى المحاكاة",
+    "emptyQuestions": "لا توجد أسئلة متاحة بعد.",
+    "timerLabel": "الوقت المتبقي",
+    "letters": "أ,ب,ج,د"
   },
   "Schedule": {
     "pageTitle": "متى يناسبك التعلم؟",
@@ -262,6 +291,20 @@
       "cardCount": "بطاقة {current} من {total}",
       "done": "اكتمل! {total} بطاقات",
       "allDone": "مررت على جميع البطاقات!"
+    },
+    "Exam": {
+      "examCount": "{current} من {total}",
+      "examAnswered": "تمت الإجابة على {answered} من {total}",
+      "examPrev": "السابق",
+      "examNext": "التالي",
+      "examSubmit": "تسليم الامتحان",
+      "examSubmitting": "جارٍ الإرسال...",
+      "examConfirmUnanswered": "هناك {count} أسئلة بدون إجابة. هل تريدين التسليم رغم ذلك؟",
+      "examPassTitle": "نجحتِ! 🎉",
+      "examFailTitle": "لا بأس، اقتربتِ.",
+      "examResultScore": "{score} من {total} صحيح (علامة النجاح: {passMark})",
+      "examTimeUp": "انتهى الوقت، تم تسليم الامتحان.",
+      "examSubmitError": "خطأ في الإرسال، نحاول مرة أخرى؟"
     }
   }
 }

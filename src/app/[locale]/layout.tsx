@@ -62,6 +62,8 @@ export default async function LocaleLayout({
       .Schedule,
     ...((messages as Record<string, unknown>).JS as Record<string, Record<string, string>>)
       .Flashcard,
+    ...((messages as Record<string, unknown>).JS as Record<string, Record<string, string>>)
+      .Exam,
   };
 
   return (

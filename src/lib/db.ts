@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { sampleIds } from "./exam";
 
 export type Topic = {
   id: string;
@@ -254,6 +255,52 @@ export async function getMistakesForTopic(
     ...q,
     selected_option: latestByQuestion.get(q.id)!.selected_option as "a" | "b" | "c" | "d",
   }));
+}
+
+export type ExamAttempt = {
+  id: string;
+  score: number;
+  total: number;
+  passed: boolean;
+  duration_seconds: number | null;
+  created_at: string;
+};
+
+export async function getRandomExamQuestions(
+  supabase: SupabaseClient,
+  count: number
+): Promise<Question[]> {
+  const { data: idRows } = await supabase.from("questions").select("id");
+  if (!idRows?.length) return [];
+
+  const pickedIds = sampleIds(
+    idRows.map((row) => row.id),
+    count
+  );
+
+  const { data: questions } = await supabase
+    .from("questions")
+    .select("*")
+    .in("id", pickedIds);
+  if (!questions?.length) return [];
+
+  // .in() doesn't preserve order — restore the shuffled order.
+  const byId = new Map(questions.map((q) => [q.id, q]));
+  return pickedIds.map((id) => byId.get(id)).filter((q) => q != null);
+}
+
+export async function getExamAttempts(
+  supabase: SupabaseClient,
+  userId: string,
+  limit = 20
+): Promise<ExamAttempt[]> {
+  const { data } = await supabase
+    .from("user_exam_attempts")
+    .select("id, score, total, passed, duration_seconds, created_at")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  return data ?? [];
 }
 
 export async function markTopicCompleted(

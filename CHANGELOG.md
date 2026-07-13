@@ -2,6 +2,21 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.88] — 2026-07-13
+
+### Added
+- Mock exam mode (סימולציית מבחן תיאוריה) mirroring the real Israeli theory test: `/exam` landing page with rules and attempt history (date, score, pass/fail chip, best score), and `/exam/run` — 30 random questions drawn across all topics with a 40-minute countdown timer, prev/next navigation, changeable answers, and pass ≥ 26
+- `POST /api/exam` scores the whole exam server-side in one request (rate-limited 5/min) and records it in the new `user_exam_attempts` table (migration `007_exam_attempts.sql`, RLS-protected, per-question results stored as JSONB for future analytics)
+- Unlike practice quizzes, the exam page ships **no** `data-correct` attributes or explanations to the client — answers stay secret until submit; the results screen then decorates every question for review
+- `public/js/exam.js` drives the exam client-side (timer with under-5-minutes warning, auto-submit on timeout, unanswered-questions confirm, retryable submit errors) with full DOM-fixture test coverage
+- Entry points: mock-exam CTA card on the home page and a nav row in the More page (new `timer` icon in `Icon.tsx` + `design-system/icons.svg`); all strings added to both `messages/he.json` and `messages/ar.json`
+- Exam answers deliberately do not touch `user_quiz_responses`, stars, or streaks — practice history and mistake review stay clean (a pass bonus is a possible future add-on)
+
+### Changed
+- Removed the completed mock-exam item from `TODO.md` and renumbered the remaining items; the exam-readiness item now points at `user_exam_attempts`
+
+---
+
 ## [0.3.87] — 2026-07-13
 
 ### Fixed

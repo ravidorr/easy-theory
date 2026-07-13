@@ -295,3 +295,46 @@
 .connectorDone {
   background: var(--primary);
 }
+
+.examCta {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  min-height: var(--hit-min);
+  box-sizing: border-box;
+}
+
+.examCtaIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--primary-soft);
+  color: var(--primary-soft-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.examCtaBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.examCtaTitle {
+  font-size: var(--type-body-size);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.examCtaDesc {
+  font-size: var(--type-caption-size);
+  color: var(--text-muted);
+}
