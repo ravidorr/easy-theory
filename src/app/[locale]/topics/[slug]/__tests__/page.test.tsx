@@ -233,4 +233,25 @@ describe("TopicQuizPage", () => {
     const { container } = render(jsx);
     expect(container.querySelector("img[src='/signs/sign-100.png']")).toBeTruthy();
   });
+
+  it("uses Hebrew option text (not option_a_ar) for he locale when option_a_ar is populated", async () => {
+    const q = { ...QUESTION, option_a_ar: "قف" };
+    mockGetQuestions.mockResolvedValue([q] as never);
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "he" }) });
+    const { container } = render(jsx);
+    const optionA = container.querySelector('[data-option="a"]');
+    expect(optionA?.textContent).toContain("עצור");
+    expect(optionA?.textContent).not.toContain("قف");
+  });
+
+  it("uses option_a_ar text for ar locale when option_a_ar is populated", async () => {
+    vi.mocked(getLocale).mockResolvedValue("ar" as never);
+    const q = { ...QUESTION, option_a_ar: "قف" };
+    mockGetQuestions.mockResolvedValue([q] as never);
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "ar" }) });
+    const { container } = render(jsx);
+    const optionA = container.querySelector('[data-option="a"]');
+    expect(optionA?.textContent).toContain("قف");
+    expect(optionA?.textContent).not.toContain("עצור");
+  });
 });

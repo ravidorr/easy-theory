@@ -253,4 +253,23 @@ describe("ReviewPage", () => {
     const { container } = render(jsx);
     expect(container.querySelector("img[src='/signs/sign-100.png']")).toBeTruthy();
   });
+
+  it("uses Hebrew option text (not option_a_ar) for he locale when option_a_ar is populated", async () => {
+    const m = { ...MISTAKE_A, option_a_ar: "قف" };
+    mockGetMistakes.mockResolvedValue([m] as never);
+    const jsx = await ReviewPage({ params: Promise.resolve({ slug: "signs" }) });
+    render(jsx);
+    expect(screen.getByText("עצור")).toBeInTheDocument();
+    expect(screen.queryByText("قف")).not.toBeInTheDocument();
+  });
+
+  it("uses option_a_ar text for ar locale when option_a_ar is populated", async () => {
+    vi.mocked(getLocale).mockResolvedValue("ar" as never);
+    const m = { ...MISTAKE_A, option_a_ar: "قف" };
+    mockGetMistakes.mockResolvedValue([m] as never);
+    const jsx = await ReviewPage({ params: Promise.resolve({ slug: "signs" }) });
+    render(jsx);
+    expect(screen.getByText("قف")).toBeInTheDocument();
+    expect(screen.queryByText("עצור")).not.toBeInTheDocument();
+  });
 });

@@ -134,10 +134,10 @@ export default async function RetryMistakesPage({
       ...q,
       question_display: qAny[questionField] as string ?? q.question_he,
       explanation_display: qAny[explanationField] as string ?? q.explanation_he,
-      option_a_display: (qAny.option_a_ar as string) ?? q.option_a,
-      option_b_display: (qAny.option_b_ar as string) ?? q.option_b,
-      option_c_display: (qAny.option_c_ar as string) ?? q.option_c,
-      option_d_display: (qAny.option_d_ar as string) ?? q.option_d,
+      option_a_display: locale === "ar" ? ((qAny.option_a_ar as string) ?? q.option_a) : q.option_a,
+      option_b_display: locale === "ar" ? ((qAny.option_b_ar as string) ?? q.option_b) : q.option_b,
+      option_c_display: locale === "ar" ? ((qAny.option_c_ar as string) ?? q.option_c) : q.option_c,
+      option_d_display: locale === "ar" ? ((qAny.option_d_ar as string) ?? q.option_d) : q.option_d,
     };
   });
 

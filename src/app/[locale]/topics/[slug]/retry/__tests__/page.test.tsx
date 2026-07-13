@@ -154,4 +154,25 @@ describe("RetryMistakesPage", () => {
     const { container } = render(jsx);
     expect(container.querySelector("img[src='/placeholder.svg']")).toBeTruthy();
   });
+
+  it("uses Hebrew option text (not option_a_ar) for he locale when option_a_ar is populated", async () => {
+    const m = { ...MISTAKE_A, option_a_ar: "قف" };
+    mockGetMistakes.mockResolvedValue([m] as never);
+    const jsx = await RetryMistakesPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    const optionA = container.querySelector('[data-option="a"]');
+    expect(optionA?.textContent).toContain("עצור");
+    expect(optionA?.textContent).not.toContain("قف");
+  });
+
+  it("uses option_a_ar text for ar locale when option_a_ar is populated", async () => {
+    vi.mocked(getLocale).mockResolvedValue("ar" as never);
+    const m = { ...MISTAKE_A, option_a_ar: "قف", explanation_he: null };
+    mockGetMistakes.mockResolvedValue([m] as never);
+    const jsx = await RetryMistakesPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    const optionA = container.querySelector('[data-option="a"]');
+    expect(optionA?.textContent).toContain("قف");
+    expect(optionA?.textContent).not.toContain("עצור");
+  });
 });

@@ -8,6 +8,13 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 - Restored test coverage above 90% by adding tests for all 10 locale pages and `lib/navigation`
 - Excluded `scripts/` from `tsconfig.json` to fix Vercel build (translation scripts use DB columns not yet in generated types)
 
+## [0.3.73] — 2026-07-13
+
+### Fixed
+- Quiz, retry, and review pages now correctly show Hebrew answer options for the `he` locale; previously `option_a_ar`–`option_d_ar` were preferred unconditionally, causing Arabic text to appear for Hebrew users when those columns were populated
+
+---
+
 ## [0.3.71] — 2026-07-13
 
 ### Changed
