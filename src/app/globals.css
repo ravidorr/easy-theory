@@ -83,6 +83,7 @@ body {
   border: 1.5px solid var(--border-strong);
   background: var(--surface);
   min-height: var(--hit-min);
+  flex-wrap: wrap;
   box-sizing: border-box;
   cursor: pointer;
   width: 100%;
@@ -134,9 +135,11 @@ body {
 
 .quiz-option-explanation {
   font-size: var(--type-small-size);
-  color: var(--text-muted);
+  color: var(--text);
   line-height: var(--line-body);
   padding-inline-start: 40px;
+  flex-basis: 100%;
+  margin-top: 6px;
   display: none;
 }
 

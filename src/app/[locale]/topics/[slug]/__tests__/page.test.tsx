@@ -140,6 +140,17 @@ describe("TopicQuizPage", () => {
     expect(screen.getAllByText("תמרור זה משמעותו עצור").length).toBeGreaterThan(0);
   });
 
+  it("renders markdown bold in explanation as <strong> without literal asterisks", async () => {
+    const q = { ...QUESTION, explanation_he: "**חגורות הבטיחות** מחזיקות את הנוסע" };
+    mockGetQuestions.mockResolvedValue([q] as never);
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "he" }) });
+    const { container } = render(jsx);
+    const explanation = container.querySelector(".quiz-option-explanation");
+    expect(explanation?.querySelector("strong")?.textContent).toBe("חגורות הבטיחות");
+    expect(explanation?.textContent).toContain("מחזיקות את הנוסע");
+    expect(explanation?.textContent).not.toContain("**");
+  });
+
   it("renders image when /questions/ file exists on disk", async () => {
     const q = { ...QUESTION, image_url: "/questions/TEST_IMAGE_DO_NOT_DELETE.png" };
     mockGetQuestions.mockResolvedValue([q] as never);

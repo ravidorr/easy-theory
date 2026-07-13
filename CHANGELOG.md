@@ -2,6 +2,17 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.83] — 2026-07-13
+
+### Added
+- `InlineMarkdown` component (`src/components/InlineMarkdown.tsx`, via new `react-markdown` dependency): renders the AI-generated quiz explanations' markdown (`**bold**`, `*italic*`) as real formatting instead of literal asterisks. Inline-only — paragraphs are unwrapped and anything else (links, code, raw HTML) degrades to plain text, so the output stays valid and safe inside the answer button
+
+### Fixed
+- Quiz explanation no longer renders side-by-side with the answer (which squashed the answer to one word per line): the answer now spans the card on top with the explanation on its own full-width row below (`.quiz-option` wraps; explanation gets `flex-basis: 100%`)
+- Explanation text color changed from `--text-muted` to `--text` — the muted color on the green correct-answer background failed WCAG AA in light mode (3.76:1); it now measures 13.0:1 light / 10.4:1 dark
+
+---
+
 ## [0.3.82] — 2026-07-13
 
 ### Security
