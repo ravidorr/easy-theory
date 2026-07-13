@@ -8,6 +8,8 @@
     ".next/**",
     ".context/**",
     ".agents/**",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    "AGENTS.md",
+    "CLAUDE.md"
   ]
 }
