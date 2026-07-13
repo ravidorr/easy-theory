@@ -2,6 +2,14 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.93] — 2026-07-14
+
+### Added
+- QA runs now emit ready-to-file GitHub issue drafts per finding under `qa/runs/<run>/proposed-issues/` (title, suggested labels, repro/expected/actual/evidence body); the agent never files them — a human reviews and runs `gh issue create --body-file …` for the approved ones
+- Committed `.claude/settings.json` with permission deny rules blocking `gh issue` mutations and GitHub-MCP issue tools repo-wide — a mechanical backstop for the QA human-review gate (PR/push tooling stays allowed for normal development)
+
+---
+
 ## [0.3.92] — 2026-07-14
 
 ### Added
