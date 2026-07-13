@@ -2,6 +2,19 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.71] — 2026-07-13
+
+### Changed
+- Updated `proxy.test.ts` to mock `next-intl/middleware` and test locale-prefixed paths and the intl early-return path
+- Rewrote `TabBar.test.tsx` to handle the async server component and mock `next-intl/server`
+- Updated `SignImage.test.tsx`: replaced style assertions with attribute checks, added `onError` fallback test, added `next/image` shim mock
+- Added `LanguageToggle.test.tsx` covering locale label rendering, aria-labels, and router navigation
+- Added `src/app/[locale]/__tests__/layout.test.tsx` covering `notFound` on invalid locale, `lang` attribute per locale, `window.__t` injection, and theme cookie
+- Added `src/i18n/__tests__/request.test.ts` covering locale selection and unknown-locale fallback
+- Annotated root `layout.test.tsx` to clarify it tests the root layout, not the locale layout
+
+---
+
 ## [0.3.70] — 2026-07-13
 
 ### Changed

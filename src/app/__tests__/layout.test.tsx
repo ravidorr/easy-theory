@@ -20,6 +20,9 @@ vi.mock("next/script", () => ({
 
 const mockCookies = vi.mocked(cookies);
 
+// Tests the root src/app/layout.tsx — the thin wrapper that hosts the [locale] subtree.
+// Per-locale behaviour (lang="ar", notFound on bad locale, window.__t injection) is
+// tested in src/app/[locale]/__tests__/layout.test.tsx.
 describe("RootLayout", () => {
   beforeEach(() => {
     vi.clearAllMocks();
