@@ -1,6 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
+import Image from "next/image";
 import styles from "./SignImage.module.css";
 
 const SIZES = {
@@ -23,13 +24,15 @@ export function SignImage({ src, alt = "", size = "sm", className, style }: Sign
   const px = SIZES[size];
 
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
+    <Image
       src={src}
       alt={alt}
+      width={px}
+      height={px}
       className={["sign-image", styles.root, className].filter(Boolean).join(" ")}
-      style={{ width: px, height: px, ...style }}
-      onError={(e) => { e.currentTarget.src = "/placeholder.svg"; e.currentTarget.onerror = null; }}
+      style={style}
+      onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/placeholder.svg"; }}
+      unoptimized
     />
   );
 }

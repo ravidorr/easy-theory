@@ -46,7 +46,7 @@ explanation_he: ${data.explanation_he ?? ""}`;
           option_c_ar:    row.option_c_ar    || null,
           option_d_ar:    row.option_d_ar    || null,
           explanation_ar: row.explanation_ar || null,
-        } as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+        })
         .eq("id", data.id);
 
       if (upErr) console.error(`DB error: ${upErr.message}`);

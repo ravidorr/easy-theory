@@ -2,6 +2,14 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.70] — 2026-07-13
+
+### Changed
+- `SignImage`: replaced `<img>` with Next.js `<Image>` for lazy-loading and LCP improvement
+- Translation scripts: removed `as any` casts on Supabase `.update()` calls; replaced explicit `SupabaseClient<any, any, any>` type alias with `ReturnType<typeof createClient>`
+
+---
+
 ## [0.3.69] — 2026-07-13
 
 ### Added

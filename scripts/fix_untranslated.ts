@@ -52,7 +52,7 @@ ${JSON.stringify({
         option_c_ar:    row.option_c_ar    || null,
         option_d_ar:    row.option_d_ar    || null,
         explanation_ar: row.explanation_ar || null,
-      } as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+      })
       .eq("id", q.id);
 
     if (upErr) console.error(`  q#${q.question_number}: ${upErr.message}`);

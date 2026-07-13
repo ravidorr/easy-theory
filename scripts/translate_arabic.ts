@@ -10,10 +10,9 @@
  */
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { createClient } from "@supabase/supabase-js";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnySupabase = SupabaseClient<any, any, any>;
+type AnySupabase = ReturnType<typeof createClient>;
 type GeminiModel = ReturnType<InstanceType<typeof GoogleGenerativeAI>["getGenerativeModel"]>;
 
 // Row types — defined here because _ar columns don't exist in generated types yet
@@ -113,7 +112,7 @@ async function translateTopics(supabase: AnySupabase, model: GeminiModel) {
       }
       const { error: upErr } = await supabase
         .from("topics")
-                .update({ name_ar: row.name_ar || null, description_ar: row.description_ar || null } as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+                .update({ name_ar: row.name_ar || null, description_ar: row.description_ar || null })
         .eq("id", row.id);
       if (upErr) console.error(`  topic ${row.id}: ${upErr.message}`);
       else console.log(`  ✓ topic: ${original.name_he}`);
@@ -172,7 +171,7 @@ async function translateQuestions(supabase: AnySupabase, model: GeminiModel) {
           option_c_ar:    row.option_c_ar    || null,
           option_d_ar:    row.option_d_ar    || null,
           explanation_ar: row.explanation_ar || null,
-        } as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+        })
         .eq("id", row.id);
       if (upErr) console.error(`  question ${row.id}: ${upErr.message}`);
       else console.log(`  ✓ q#${original.question_number}`);
@@ -218,7 +217,7 @@ async function translateSigns(supabase: AnySupabase, model: GeminiModel) {
       }
       const { error: upErr } = await supabase
         .from("signs")
-                .update({ name_ar: row.name_ar || null, meaning_ar: row.meaning_ar || null } as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+                .update({ name_ar: row.name_ar || null, meaning_ar: row.meaning_ar || null })
         .eq("id", row.id);
       if (upErr) console.error(`  sign ${row.id}: ${upErr.message}`);
       else console.log(`  ✓ sign ${original.sign_number}: ${original.name_he}`);
