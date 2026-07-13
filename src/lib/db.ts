@@ -303,6 +303,38 @@ export async function getExamAttempts(
   return data ?? [];
 }
 
+export type TopicAccuracy = {
+  topic_id: string;
+  correct: number;
+  total: number;
+};
+
+export async function getTopicAccuracy(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<TopicAccuracy[]> {
+  // One row per (user, question) thanks to the upsert in the quiz route, so no
+  // dedup is needed. The question bank is well under Supabase's 1000-row cap.
+  const { data } = await supabase
+    .from("user_quiz_responses")
+    .select("is_correct, questions(topic_id)")
+    .eq("user_id", userId);
+
+  const byTopic = new Map<string, { correct: number; total: number }>();
+  for (const row of data ?? []) {
+    // supabase-js may type a to-one nested relation as object or array.
+    const related = Array.isArray(row.questions) ? row.questions[0] : row.questions;
+    const topicId = related?.topic_id;
+    if (!topicId) continue;
+    const acc = byTopic.get(topicId) ?? { correct: 0, total: 0 };
+    acc.total += 1;
+    if (row.is_correct) acc.correct += 1;
+    byTopic.set(topicId, acc);
+  }
+
+  return [...byTopic.entries()].map(([topic_id, acc]) => ({ topic_id, ...acc }));
+}
+
 export async function markTopicCompleted(
   supabase: SupabaseClient,
   userId: string,

@@ -2,11 +2,6 @@
 
 Ordered by priority.
 
-## 1. Exam-readiness score & weakest-areas analytics
-
-- Stats today are only `streak_days` + `star_points` (`src/lib/db.ts`). No aggregate accuracy, no "how ready am I?" signal.
-- Add per-topic accuracy, a readiness indicator on the home page (projected pass probability from `user_exam_attempts` mock-exam history), and a "weakest topics" surface linking straight to practice.
-
 ## 2. Harden API routes
 
 - `await request.json()` is unguarded in quiz/progress/schedule/push/send-otp routes — a malformed body throws an unhandled 500 instead of a clean 400.

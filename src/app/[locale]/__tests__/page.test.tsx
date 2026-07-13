@@ -3,7 +3,13 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import HomePage from "../page";
 import { createClient } from "@/lib/supabase";
-import { getTopics, getUserStats, getTopicProgress } from "@/lib/db";
+import {
+  getTopics,
+  getUserStats,
+  getTopicProgress,
+  getExamAttempts,
+  getTopicAccuracy,
+} from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
 
 vi.mock("next/navigation", () => ({
@@ -16,6 +22,8 @@ vi.mock("@/lib/db", () => ({
   getTopics: vi.fn(),
   getUserStats: vi.fn(),
   getTopicProgress: vi.fn(),
+  getExamAttempts: vi.fn(),
+  getTopicAccuracy: vi.fn(),
 }));
 vi.mock("next/link", () => ({
   default: ({ href, children, style }: { href: string; children: unknown; style?: unknown }) =>
@@ -33,6 +41,8 @@ const mockCreateClient = vi.mocked(createClient);
 const mockGetTopics = vi.mocked(getTopics);
 const mockGetStats = vi.mocked(getUserStats);
 const mockGetProgress = vi.mocked(getTopicProgress);
+const mockGetExamAttempts = vi.mocked(getExamAttempts);
+const mockGetTopicAccuracy = vi.mocked(getTopicAccuracy);
 
 const TOPIC_A = { id: "t1", slug: "signs", name_he: "תמרורים", icon: null };
 const TOPIC_B = { id: "t2", slug: "priority", name_he: "זכות קדימה", icon: null };
@@ -48,6 +58,8 @@ describe("HomePage", () => {
     mockGetStats.mockResolvedValue({ streak_days: 7, star_points: 42 } as never);
     mockGetTopics.mockResolvedValue([TOPIC_A, TOPIC_B] as never);
     mockGetProgress.mockResolvedValue([]);
+    mockGetExamAttempts.mockResolvedValue([]);
+    mockGetTopicAccuracy.mockResolvedValue([]);
     vi.mocked(getTranslations).mockResolvedValue((key: string) => key);
     vi.mocked(getLocale).mockResolvedValue("he");
   });
@@ -235,6 +247,108 @@ describe("HomePage", () => {
     const jsx = await HomePage();
     render(jsx);
     expect(screen.getByText("daysToMedalOne")).toBeInTheDocument();
+  });
+
+  describe("readiness card", () => {
+    function examAttempt(score: number, created_at: string) {
+      return {
+        id: `e-${created_at}`,
+        score,
+        total: 30,
+        passed: score >= 26,
+        duration_seconds: 1800,
+        created_at,
+      };
+    }
+
+    it("prompts to take a mock exam when there are no attempts", async () => {
+      const jsx = await HomePage();
+      render(jsx);
+      expect(screen.getByText("readinessTitle")).toBeInTheDocument();
+      expect(screen.getByText("readinessEmpty")).toBeInTheDocument();
+      expect(screen.queryByText("readinessLevelLow")).not.toBeInTheDocument();
+      expect(screen.queryByText("readinessLevelMedium")).not.toBeInTheDocument();
+      expect(screen.queryByText("readinessLevelHigh")).not.toBeInTheDocument();
+    });
+
+    it("shows a high-readiness chip and percent for strong recent scores", async () => {
+      mockGetExamAttempts.mockResolvedValue([
+        examAttempt(30, "2026-07-03"),
+        examAttempt(29, "2026-07-02"),
+      ] as never);
+      const jsx = await HomePage();
+      render(jsx);
+      expect(screen.getByText("readinessLevelHigh")).toBeInTheDocument();
+      expect(screen.getByText("readinessPercent")).toBeInTheDocument();
+      expect(screen.getByText("readinessBasedOnMany")).toBeInTheDocument();
+    });
+
+    it("shows a low-readiness chip for weak recent scores", async () => {
+      mockGetExamAttempts.mockResolvedValue([
+        examAttempt(10, "2026-07-03"),
+        examAttempt(12, "2026-07-02"),
+      ] as never);
+      const jsx = await HomePage();
+      render(jsx);
+      expect(screen.getByText("readinessLevelLow")).toBeInTheDocument();
+    });
+
+    it("uses the singular caption for a single attempt", async () => {
+      mockGetExamAttempts.mockResolvedValue([examAttempt(26, "2026-07-03")] as never);
+      const jsx = await HomePage();
+      render(jsx);
+      expect(screen.getByText("readinessLevelMedium")).toBeInTheDocument();
+      expect(screen.getByText("readinessBasedOnOne")).toBeInTheDocument();
+    });
+  });
+
+  describe("weakest topics", () => {
+    it("is hidden when no topic has enough answers", async () => {
+      mockGetTopicAccuracy.mockResolvedValue([
+        { topic_id: "t1", correct: 1, total: 3 },
+      ]);
+      const jsx = await HomePage();
+      render(jsx);
+      expect(screen.queryByText("weakTopicsHeader")).not.toBeInTheDocument();
+    });
+
+    it("renders weak topics linking to practice", async () => {
+      mockGetTopicAccuracy.mockResolvedValue([
+        { topic_id: "t1", correct: 2, total: 10 },
+        { topic_id: "t2", correct: 9, total: 10 },
+      ]);
+      const jsx = await HomePage();
+      const { container } = render(jsx);
+      expect(screen.getByText("weakTopicsHeader")).toBeInTheDocument();
+      expect(screen.getByText("weakTopicAccuracy")).toBeInTheDocument();
+      // Only t1 is weak (20%); t2 is mastered (90%). Weak section + topics list
+      // both link to /topics/signs.
+      expect(
+        container.querySelectorAll('a[href="/topics/signs"]').length
+      ).toBeGreaterThanOrEqual(2);
+    });
+
+    it("skips weak topics whose topic row is unknown", async () => {
+      mockGetTopicAccuracy.mockResolvedValue([
+        { topic_id: "missing", correct: 2, total: 10 },
+      ]);
+      const jsx = await HomePage();
+      render(jsx);
+      expect(screen.queryByText("weakTopicsHeader")).not.toBeInTheDocument();
+    });
+
+    it("uses name_ar for weak topics in the ar locale", async () => {
+      vi.mocked(getLocale).mockResolvedValue("ar" as never);
+      const topicAr = { ...TOPIC_A, name_ar: "إشارات المرور" };
+      mockGetTopics.mockResolvedValue([topicAr] as never);
+      mockGetTopicAccuracy.mockResolvedValue([
+        { topic_id: "t1", correct: 2, total: 10 },
+      ]);
+      const jsx = await HomePage();
+      render(jsx);
+      expect(screen.getByText("weakTopicsHeader")).toBeInTheDocument();
+      expect(screen.getAllByText("إشارات المرور").length).toBeGreaterThan(0);
+    });
   });
 
   describe("time-based greeting", () => {

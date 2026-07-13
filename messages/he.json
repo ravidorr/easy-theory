@@ -32,7 +32,17 @@
     "examCtaDesc": "30 שאלות · 40 דק׳ · כמו במבחן האמיתי",
     "topicsHeader": "הנושאים שלך",
     "topicCompleted": "✓ הושלם",
-    "topicNotStarted": "טרם התחלת"
+    "topicNotStarted": "טרם התחלת",
+    "readinessTitle": "מוכנות למבחן",
+    "readinessPercent": "{percent}%",
+    "readinessLevelLow": "מוכנות נמוכה",
+    "readinessLevelMedium": "בדרך הנכונה",
+    "readinessLevelHigh": "מוכנות גבוהה",
+    "readinessBasedOnOne": "לפי הסימולציה האחרונה שלך",
+    "readinessBasedOnMany": "לפי {count} הסימולציות האחרונות שלך",
+    "readinessEmpty": "סימולציה ראשונה תיתן לך הערכת מוכנות למבחן.",
+    "weakTopicsHeader": "כדאי לחזק",
+    "weakTopicAccuracy": "{percent}% הצלחה"
   },
   "Login": {
     "metaTitle": "דרך ברורה - לומדים לתיאוריה בלי לחץ",

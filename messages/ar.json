@@ -32,7 +32,17 @@
     "examCtaDesc": "30 سؤالًا · 40 دقيقة · تمامًا مثل الامتحان الحقيقي",
     "topicsHeader": "موضوعاتك",
     "topicCompleted": "✓ مكتمل",
-    "topicNotStarted": "لم تبدأ بعد"
+    "topicNotStarted": "لم تبدأ بعد",
+    "readinessTitle": "الجاهزية للامتحان",
+    "readinessPercent": "{percent}%",
+    "readinessLevelLow": "جاهزية منخفضة",
+    "readinessLevelMedium": "على الطريق الصحيح",
+    "readinessLevelHigh": "جاهزية عالية",
+    "readinessBasedOnOne": "بحسب آخر امتحان تجريبي لك",
+    "readinessBasedOnMany": "بحسب آخر {count} امتحانات تجريبية لك",
+    "readinessEmpty": "أول محاكاة امتحان ستمنحك تقدير الجاهزية.",
+    "weakTopicsHeader": "يستحسن تقويتها",
+    "weakTopicAccuracy": "{percent}% نجاح"
   },
   "Login": {
     "metaTitle": "طريق واضح - نتعلم نظرية القيادة بدون ضغط",

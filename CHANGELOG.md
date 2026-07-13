@@ -2,6 +2,18 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.92] — 2026-07-14
+
+### Added
+- Exam-readiness card on the home page: projected pass probability estimated from the user's last 5 mock-exam attempts (recency-weighted score mapped through a logistic curve centered on the 26/30 pass mark, clamped to 5–95%), with a low/medium/high chip and an empty-state prompt to take a first mock exam
+- "Weakest topics" section on the home page: per-topic accuracy computed from `user_quiz_responses` (new `getTopicAccuracy` in `src/lib/db.ts`), surfacing up to 3 topics below 85% accuracy with at least 5 answered questions, each linking straight to `/topics/{slug}` practice
+- New pure model module `src/lib/readiness.ts` (`computeReadiness`, `findWeakestTopics`) with full unit tests; new `Home` namespace strings in both `messages/he.json` and `messages/ar.json`
+
+### Changed
+- Removed the completed exam-readiness item from `TODO.md`
+
+---
+
 ## [0.3.91] — 2026-07-14
 
 ### Added
