@@ -30,7 +30,7 @@ const mockGetSchedules = vi.mocked(getUsersScheduledForDay);
 const mockGetPushSubs = vi.mocked(getPushSubscriptionsForUsers);
 
 
-function makeRequest(headers: Record<string, string> = {}) {
+function makeRequest(headers: Record<string, string> = { authorization: "Bearer secret123" }) {
   return new Request("http://localhost/api/cron/notify", { headers });
 }
 
@@ -60,20 +60,31 @@ const PUSH_SUB = { user_id: "u1", endpoint: "https://push.example.com", auth: "a
 describe("GET /api/cron/notify", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    delete process.env.CRON_SECRET;
+    process.env.CRON_SECRET = "secret123";
     mockCreateAdminClient.mockReturnValue(makeAdminClient() as never);
     mockGetSchedules.mockResolvedValue([]);
     mockGetPushSubs.mockResolvedValue([]);
   });
 
-  it("returns 401 when CRON_SECRET is set and auth header is wrong", async () => {
-    process.env.CRON_SECRET = "secret123";
+  it("returns 500 and does no work when CRON_SECRET is not set", async () => {
+    delete process.env.CRON_SECRET;
+    const res = await GET(makeRequest());
+    expect(res.status).toBe(500);
+    expect(mockGetSchedules).not.toHaveBeenCalled();
+  });
+
+  it("returns 401 when auth header is wrong", async () => {
     const res = await GET(makeRequest({ authorization: "Bearer wrong" }));
     expect(res.status).toBe(401);
   });
 
-  it("proceeds when CRON_SECRET is set and auth header is correct", async () => {
-    process.env.CRON_SECRET = "secret123";
+  it("returns 401 when auth header is missing", async () => {
+    const res = await GET(makeRequest({}));
+    expect(res.status).toBe(401);
+    expect(mockGetSchedules).not.toHaveBeenCalled();
+  });
+
+  it("proceeds when auth header is correct", async () => {
     mockGetSchedules.mockResolvedValue([]);
     const res = await GET(makeRequest({ authorization: "Bearer secret123" }));
     expect(res.status).toBe(200);
