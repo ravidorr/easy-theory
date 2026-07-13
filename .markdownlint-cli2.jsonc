@@ -8,6 +8,7 @@
     ".next/**",
     ".context/**",
     ".agents/**",
+    "qa/runs/**",
     "CHANGELOG.md",
     "AGENTS.md",
     "CLAUDE.md"
