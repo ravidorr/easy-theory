@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.102] - 2026-07-14
+
+### Changed
+- Added a reusable seed-project `.gitignore` covering dependencies, build output, environment files, QA artifacts, and local agent tooling
+
+---
+
 ## [0.3.101] — 2026-07-14
 
 ### Fixed
