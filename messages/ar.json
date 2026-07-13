@@ -94,6 +94,7 @@
     "emptyQuestions": "لا توجد أسئلة متاحة لهذا الموضوع بعد.",
     "answerBtn": "هل أصبت؟",
     "nextBtn": "السؤال التالي",
+    "scoreLabel": "النقاط",
     "rewardCorrect": "أحسنت!",
     "rewardTopicDone": "أحسنت! أكملت الموضوع بأكمله!",
     "rewardWrongPrefix": "اخترت ",

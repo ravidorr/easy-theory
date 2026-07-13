@@ -2,6 +2,17 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.84] — 2026-07-13
+
+### Changed
+- Quiz reward banner is now meaningful: the star pill is a persistent session score counter (starts at 0, +10 per correct answer) and a transient "+10" floats up out of the pill on each correct answer (respects `prefers-reduced-motion`). Previously a static "+10 יפה מאוד!" badge was always visible because the `.rewardBanner` CSS class overrode the `hidden` attribute
+- Feedback message next to the pill is empty until an answer is confirmed, announces via `aria-live`, and clears when advancing to the next question; the score pill carries a localized `aria-label` (new `Quiz.scoreLabel` string in `he`/`ar`)
+
+### Added
+- `quiz-script.test.ts` — 6 DOM-fixture tests exercising the real `public/js/quiz.js` scoring and feedback behavior, plus reward-banner render assertions in the quiz and retry page tests
+
+---
+
 ## [0.3.83] — 2026-07-13
 
 ### Added
