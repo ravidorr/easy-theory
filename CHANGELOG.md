@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.79] — 2026-07-13
+
+### Fixed
+- Fixed `audit_sign_images.py` docname number extraction to use `(?<!\d)` lookbehind, correctly handling all separator styles (`_`, `-`, start-of-string); previously `(?:_|^)` missed sign 604 whose docname is `drawing-15.svg`
+
+---
+
 ## [0.3.78] — 2026-07-13
 
 ### Fixed
