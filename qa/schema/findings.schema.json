@@ -1,0 +1,115 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ClearRoad QA run findings",
+  "description": "Structure of qa/runs/<run-id>/findings.json. Enforced mechanically by scripts/qa/validate-report.ts; this schema is the reference documentation.",
+  "type": "object",
+  "required": [
+    "run_id",
+    "charter_id",
+    "charter_path",
+    "started_at",
+    "finished_at",
+    "environment",
+    "checks",
+    "findings",
+    "known_issues_observed",
+    "not_tested",
+    "limitations",
+    "coverage_summary"
+  ],
+  "properties": {
+    "run_id": { "type": "string", "description": "<ISO-timestamp>_<charter-id>, matches the run directory name" },
+    "charter_id": { "type": "string" },
+    "charter_path": { "type": "string" },
+    "started_at": { "type": "string", "format": "date-time" },
+    "finished_at": { "type": "string", "format": "date-time" },
+    "environment": {
+      "type": "object",
+      "required": ["base_url", "git_sha", "app_version", "supabase_host", "viewport", "locale"],
+      "properties": {
+        "base_url": { "type": "string" },
+        "git_sha": { "type": "string" },
+        "app_version": { "type": "string" },
+        "supabase_host": { "type": "string", "description": "Host only — never include keys" },
+        "viewport": { "type": "string", "description": "e.g. 390x844" },
+        "locale": { "type": "string" }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "description": "MUST contain exactly one entry for every check id declared in the charter",
+      "items": {
+        "type": "object",
+        "required": ["id", "verdict", "observed"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^CHK-[A-Z0-9-]+$" },
+          "verdict": { "enum": ["pass", "fail", "blocked", "not-checked"] },
+          "observed": { "type": "string", "description": "One sentence stating what was actually seen. Required (non-empty) for pass/fail." },
+          "evidence": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Paths relative to the run dir (screenshots/…, console.log#L12). REQUIRED and non-empty for pass AND fail — a pass without evidence is invalid."
+          },
+          "reason": { "type": ["string", "null"], "description": "REQUIRED for blocked / not-checked (e.g. 'timebox', 'auth mint failed')" }
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "severity", "confidence", "category", "repro_steps", "expected", "actual", "evidence"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^F-[0-9]{3}$" },
+          "title": { "type": "string" },
+          "severity": {
+            "enum": ["blocker", "major", "minor", "cosmetic", "question"],
+            "description": "blocker: core flow impossible. major: wrong behavior/data loss, no workaround. minor: degraded but usable. cosmetic: polish. question: possibly intentional — needs a human decision (the anti-noise bucket)."
+          },
+          "confidence": {
+            "enum": ["high", "medium", "low"],
+            "description": "high: reproduced twice with evidence. medium: seen once with evidence. low: suspected, not reproduced."
+          },
+          "category": { "enum": ["functional", "data", "copy", "rtl", "a11y", "console", "network", "performance"] },
+          "related_checks": { "type": "array", "items": { "type": "string" } },
+          "repro_steps": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "expected": { "type": "string" },
+          "actual": { "type": "string" },
+          "evidence": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "known_issue_match": { "type": ["string", "null"] },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "known_issues_observed": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "status"],
+        "properties": {
+          "id": { "type": "string" },
+          "status": { "enum": ["unchanged", "worse", "not-observed"] }
+        }
+      }
+    },
+    "not_tested": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "description": "MANDATORY non-empty: flows/pages/states NOT covered, including echoes of the charter's out_of_scope"
+    },
+    "limitations": { "type": "array", "items": { "type": "string" } },
+    "coverage_summary": {
+      "type": "object",
+      "required": ["total", "pass", "fail", "blocked", "not_checked"],
+      "properties": {
+        "total": { "type": "integer" },
+        "pass": { "type": "integer" },
+        "fail": { "type": "integer" },
+        "blocked": { "type": "integer" },
+        "not_checked": { "type": "integer" }
+      },
+      "description": "Counts must equal the actual tallies in checks[] — validated mechanically"
+    }
+  }
+}

@@ -2,6 +2,19 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.91] — 2026-07-14
+
+### Added
+- Agentic exploratory QA framework (pilot): `/qa-explore` skill that runs charter-driven browser QA sessions against a dedicated test Supabase project and produces evidence-backed structured reports under `qa/runs/` (`qa/PLAN.md` documents the design)
+- QA charter format (`qa/charters/TEMPLATE.md`) with persona, environment, oracles, out-of-scope, known issues, and a per-check verdict contract; pilot charter `001-home-and-quiz` covering login redirect, dashboard, quiz loop, persistence, console, a11y, and Hebrew copy/RTL checks
+- QA tooling scripts: `qa:dev` (guarded dev server on port 3100 loading `.env.qa`), `qa:mint` (one-time login URL for the test user via Supabase admin `generateLink` + `--check` seed sanity), `qa:validate-report` (mechanical anti-false-confidence gate: every check needs a verdict, pass/fail need on-disk evidence, NOT-tested must be non-empty)
+- `qa/SETUP.md` one-time environment guide and committed `.env.qa.example`; all QA scripts refuse to run against the production Supabase project
+
+### Changed
+- `.gitignore` now tracks `.claude/skills/` (rest of `.claude/` stays ignored) and ignores `qa/runs/`; markdownlint ignores QA run artifacts
+
+---
+
 ## [0.3.90] — 2026-07-14
 
 ### Fixed

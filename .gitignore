@@ -35,12 +35,17 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.qa.example
 
 # vercel
 .vercel
 
-# claude code local workspace
-.claude/
+# claude code local workspace — commit only skills
+.claude/*
+!.claude/skills/
+
+# QA run artifacts (reports, screenshots, logs)
+qa/runs/*
 
 # conductor / mcp tooling
 .agents/
