@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase";
 import { getTopics, getUserStats, getTopicProgress } from "@/lib/db";
 import { nextMedalTarget } from "@/lib/quiz";
 import { TabBar } from "@/components/TabBar";
+import { Icon } from "@/components/Icon";
 import { getTranslations, getLocale } from "next-intl/server";
 import styles from "@/app/page.module.css";
 
@@ -32,19 +33,6 @@ function PathProgress({ total = 5, current = 1 }: { total?: number; current?: nu
   }
   return <div className={styles.pathProgress}>{items}</div>;
 }
-
-const FlameIcon = () => (
-  <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-    <path d="M8 1.5c.4 2.2 3.1 3.4 3.9 5.8.9 2.7-.8 6-3.9 6s-4.8-3.3-3.9-6c.4-1.3 1.4-2.2 2.2-3.2.8-1 1.5-1.7 1.7-2.6z" />
-    <circle cx="8" cy="10.6" r="2.1" fill="var(--surface)" opacity="0.85" />
-  </svg>
-);
-
-const StarIcon = () => (
-  <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-    <path d="M8 1.2l2 4.2 4.6.6-3.4 3.2.9 4.6L8 11.6l-4.1 2.2.9-4.6L1.4 6l4.6-.6z" />
-  </svg>
-);
 
 export default async function HomePage() {
   const locale = await getLocale();
@@ -92,11 +80,11 @@ export default async function HomePage() {
           <span className={styles.wordmark}>{t("wordmark")}</span>
           <div className={styles.pillsRow}>
             <span className={`${styles.pill} ${styles.pillStreak}`}>
-              <FlameIcon />
+              <Icon name="flame" size={15} />
               {stats.streak_days}
             </span>
             <span className={`${styles.pill} ${styles.pillPoints}`}>
-              <StarIcon />
+              <Icon name="star" size={15} />
               {stats.star_points}
             </span>
           </div>

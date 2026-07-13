@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import { getTranslations } from "next-intl/server";
+import { Icon } from "@/components/Icon";
 import styles from "@/app/auth/login/page.module.css";
 
 export async function generateMetadata({
@@ -139,20 +140,7 @@ export default async function LoginPage({
 
           <div className={styles.featureCard}>
             <div className={`${styles.iconWrap} ${styles.iconWrapPrimary}`}>
-              <svg
-                width="26"
-                height="26"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <rect x="3" y="4" width="18" height="17" rx="3" />
-                <path d="M8 2v4M16 2v4M3 9h18" />
-              </svg>
+              <Icon name="calendar" size={26} />
             </div>
             <div className={styles.featureBody}>
               <h3 className={styles.featureTitle}>{t("feature3Title")}</h3>

@@ -1,13 +1,12 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 import { TabBar } from "@/components/TabBar";
+import { Icon } from "@/components/Icon";
 import { getTranslations } from "next-intl/server";
 import styles from "@/app/videos/page.module.css";
 
 const PlayIcon = ({ size = 20 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="#fff" className={styles.playIcon}>
-    <path d="M8 5v14l11-7z" />
-  </svg>
+  <Icon name="play" size={size} className={styles.playIcon} />
 );
 
 export default async function VideosPage() {

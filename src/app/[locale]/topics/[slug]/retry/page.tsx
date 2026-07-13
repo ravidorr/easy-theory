@@ -4,6 +4,7 @@ import Script from "next/script";
 import { existsSync } from "fs";
 import { join } from "path";
 import { SignImage } from "@/components/SignImage";
+import { Icon } from "@/components/Icon";
 import { createClient } from "@/lib/supabase";
 import { getTopicBySlug, getMistakesForTopic } from "@/lib/db";
 import type { Question } from "@/lib/db";
@@ -179,9 +180,7 @@ export default async function RetryMistakesPage({
         <div id="quiz-footer" className={styles.quizFooter}>
           <div id="reward-banner" hidden className={styles.rewardBanner}>
             <span className={styles.rewardPill}>
-              <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                <path d="M8 1.2l2 4.2 4.6.6-3.4 3.2.9 4.6L8 11.6l-4.1 2.2.9-4.6L1.4 6l4.6-.6z" />
-              </svg>
+              <Icon name="star" size={12} />
               <span id="reward-amount">+10</span>
             </span>
             <span id="reward-message" className={styles.rewardMsg}>{tQuiz("rewardCorrect")}</span>

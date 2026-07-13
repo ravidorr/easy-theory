@@ -2,24 +2,11 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
 import { SignImage } from "@/components/SignImage";
+import { Icon } from "@/components/Icon";
 import { getTranslations } from "next-intl/server";
 import styles from "@/app/credits/page.module.css";
 
-const ExternalIcon = () => (
-  <svg
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="var(--text-faint)"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={styles.externalIcon}
-  >
-    <path d="M7 7h10v10" /><path d="M7 17 17 7" />
-  </svg>
-);
+const ExternalIcon = () => <Icon name="external" size={18} className={styles.externalIcon} />;
 
 export default async function CreditsPage() {
   const supabase = await createClient();
