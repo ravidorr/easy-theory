@@ -257,6 +257,17 @@ describe("getMistakesForTopic", () => {
     expect(result[0].selected_option).toBe("b");
   });
 
+  it("returns [] when the question details fetch yields null data", async () => {
+    const supabase = makeMistakesClient({
+      questionIds: ["q1"],
+      responses: [
+        { question_id: "q1", selected_option: "b", is_correct: false, answered_at: "2024-01-01" },
+      ],
+      questionDetails: null as unknown as QuestionRow[],
+    });
+    expect(await getMistakesForTopic(supabase, "u1", "t1")).toEqual([]);
+  });
+
   it("returns [] when mistakeIds is empty (all latest responses are correct)", async () => {
     const supabase = makeMistakesClient({
       questionIds: ["q1", "q2"],

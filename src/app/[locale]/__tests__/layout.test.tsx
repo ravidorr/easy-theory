@@ -131,6 +131,25 @@ describe("LocaleLayout", () => {
     expect(renderToStaticMarkup(jsx)).toContain('data-theme="light"');
   });
 
+  it("renders the vapid-public-key meta tag when the env var is set", async () => {
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY = "test-vapid-key";
+    const jsx = await LocaleLayout({
+      children: React.createElement("div"),
+      params: Promise.resolve({ locale: "he" }),
+    });
+    const html = renderToStaticMarkup(jsx);
+    expect(html).toContain('name="vapid-public-key"');
+    expect(html).toContain('content="test-vapid-key"');
+  });
+
+  it("omits the vapid-public-key meta tag when the env var is unset", async () => {
+    const jsx = await LocaleLayout({
+      children: React.createElement("div"),
+      params: Promise.resolve({ locale: "he" }),
+    });
+    expect(renderToStaticMarkup(jsx)).not.toContain('name="vapid-public-key"');
+  });
+
   it("renders children inside the layout", async () => {
     const jsx = await LocaleLayout({
       children: React.createElement("p", { id: "test-child" }, "hello"),

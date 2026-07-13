@@ -136,4 +136,23 @@ describe("FlashcardsPage", () => {
     expect(screen.getByText("btnYes")).toBeInTheDocument();
     expect(screen.getByText("btnNo")).toBeInTheDocument();
   });
+
+  it("renders 0% progress width when there are no signs", async () => {
+    mockGetSigns.mockResolvedValue([]);
+    const jsx = await FlashcardsPage();
+    const { container } = render(jsx);
+    const progress = container.querySelector<HTMLElement>("#fc-progress");
+    expect(progress?.style.width).toBe("0%");
+    expect(container.querySelectorAll(".flashcard-wrap")).toHaveLength(0);
+  });
+
+  it("uses name_ar for ar locale and falls back to name_he when missing", async () => {
+    vi.mocked(getLocale).mockResolvedValue("ar" as never);
+    const signAr = { ...SIGN_1, name_ar: "ممنوع الوقوف" };
+    mockGetSigns.mockResolvedValue([signAr, SIGN_2] as never);
+    const jsx = await FlashcardsPage();
+    render(jsx);
+    expect(screen.getByText("ممنوع الوقوف")).toBeInTheDocument();
+    expect(screen.getByText("עצור")).toBeInTheDocument();
+  });
 });
