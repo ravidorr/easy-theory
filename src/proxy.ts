@@ -8,8 +8,11 @@ const intlMiddleware = createNextIntlMiddleware(routing);
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Skip Next.js internals, static files, and API routes
-  const skip = /^\/(_next|api|_vercel|signs|js|questions|favicon\.ico|apple-icon|icon\.svg|manifest\.webmanifest|sw\.js)/.test(pathname)
+  // Skip Next.js internals, static files, API routes, and the locale-less auth
+  // callback (letting next-intl redirect it to /<locale>/auth/callback would 404 —
+  // the route only exists outside the [locale] segment). Its error redirect to
+  // /auth/login must still go through next-intl to gain a locale prefix.
+  const skip = /^\/(_next|api|_vercel|auth\/callback|signs|js|questions|favicon\.ico|apple-icon|icon\.svg|manifest\.webmanifest|sw\.js)/.test(pathname)
     || pathname.includes(".");
   if (skip) return NextResponse.next();
 

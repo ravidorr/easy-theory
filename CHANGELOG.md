@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.90] — 2026-07-14
+
+### Fixed
+- Magic-link login: `/auth/callback` (which lives outside the `[locale]` segment) was locale-redirected by next-intl to `/he/auth/callback` — a route that doesn't exist — so every emailed login link ended in a 404. The middleware now skips `/auth/callback` (and only it; the error redirect to `/auth/login` still gets its locale prefix). Found by the agentic QA pilot and confirmed against production with a dummy token
+
+---
+
 ## [0.3.89] — 2026-07-13
 
 ### Added
