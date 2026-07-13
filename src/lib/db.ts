@@ -347,6 +347,20 @@ export async function getTopicAccuracy(
   return [...byTopic.entries()].map(([topic_id, acc]) => ({ topic_id, ...acc }));
 }
 
+export async function getTopicQuestionCounts(
+  supabase: SupabaseClient
+): Promise<Record<string, number>> {
+  const { data } = await supabase.from("topics").select("id, questions(count)");
+
+  const counts: Record<string, number> = {};
+  for (const row of data ?? []) {
+    // supabase-js may type the aggregate relation as object or array.
+    const related = Array.isArray(row.questions) ? row.questions[0] : row.questions;
+    counts[row.id] = related?.count ?? 0;
+  }
+  return counts;
+}
+
 export async function markTopicCompleted(
   supabase: SupabaseClient,
   userId: string,

@@ -151,6 +151,7 @@ export default async function TopicQuizPage({
         id="quiz-container"
         data-topic-id={topic.id}
         data-total={total}
+        data-user-id={user.id}
         className={styles.page}
       >
         <div className={styles.topBar}>

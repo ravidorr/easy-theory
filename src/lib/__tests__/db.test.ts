@@ -15,6 +15,7 @@ import {
   getRandomExamQuestions,
   getExamAttempts,
   getTopicAccuracy,
+  getTopicQuestionCounts,
 } from "../db";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -531,6 +532,33 @@ describe("getTopicAccuracy", () => {
     await getTopicAccuracy(client, "u1");
     expect(page1.range).toHaveBeenCalledWith(0, 999);
     expect(page2.range).toHaveBeenCalledWith(1000, 1999);
+  });
+});
+
+describe("getTopicQuestionCounts", () => {
+  it("maps topic ids to question counts (array-shaped aggregate)", async () => {
+    const rows = [
+      { id: "t1", questions: [{ count: 361 }] },
+      { id: "t2", questions: [{ count: 42 }] },
+    ];
+    expect(await getTopicQuestionCounts(makeClient(rows))).toEqual({ t1: 361, t2: 42 });
+  });
+
+  it("handles object-shaped aggregate relations", async () => {
+    const rows = [{ id: "t1", questions: { count: 7 } }];
+    expect(await getTopicQuestionCounts(makeClient(rows))).toEqual({ t1: 7 });
+  });
+
+  it("defaults to 0 when the aggregate is missing", async () => {
+    const rows = [
+      { id: "t1", questions: null },
+      { id: "t2", questions: [] },
+    ];
+    expect(await getTopicQuestionCounts(makeClient(rows))).toEqual({ t1: 0, t2: 0 });
+  });
+
+  it("returns {} on null", async () => {
+    expect(await getTopicQuestionCounts(makeClient(null))).toEqual({});
   });
 });
 

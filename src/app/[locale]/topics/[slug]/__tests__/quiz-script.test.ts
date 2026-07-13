@@ -23,9 +23,11 @@ function slideHTML(index: number, correct: string) {
   `;
 }
 
-function setupDOM() {
+function setupDOM(opts: { userId?: string; quizMode?: string } = {}) {
+  const userAttr = opts.userId ? ` data-user-id="${opts.userId}"` : "";
+  const modeAttr = opts.quizMode ? ` data-quiz-mode="${opts.quizMode}"` : "";
   document.body.innerHTML = `
-    <main id="quiz-container" data-topic-id="t1" data-total="2">
+    <main id="quiz-container" data-topic-id="t1" data-total="2"${userAttr}${modeAttr}>
       <div id="quiz-progress-fill"></div>
       <span id="quiz-count"></span>
       ${slideHTML(0, "a")}
@@ -69,6 +71,7 @@ function clickAction() {
 
 describe("quiz.js – reward score and feedback", () => {
   beforeEach(() => {
+    localStorage.clear();
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) })
@@ -123,5 +126,113 @@ describe("quiz.js – reward score and feedback", () => {
     clickOption(1, "b");
     clickAction();
     expect(scoreText()).toBe("20");
+  });
+});
+
+describe("quiz.js – resume", () => {
+  const KEY = "quiz-resume:v1:u1:t1";
+
+  function slideDisplay(index: number) {
+    return (document.querySelectorAll(".quiz-slide")[index] as HTMLElement).style.display;
+  }
+
+  function fetchCalls(url: string) {
+    return (fetch as ReturnType<typeof vi.fn>).mock.calls.filter(
+      (call) => call[0] === url
+    );
+  }
+
+  beforeEach(() => {
+    localStorage.clear();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) })
+    );
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("saves position, score, and points on advance", () => {
+    setupDOM({ userId: "u1" });
+    clickOption(0, "a");
+    clickAction(); // confirm
+    clickAction(); // advance
+    const saved = JSON.parse(localStorage.getItem(KEY)!);
+    expect(saved).toMatchObject({ i: 1, score: 1, points: 10, total: 2 });
+  });
+
+  it("restores position, score, and points on re-init", () => {
+    localStorage.setItem(
+      KEY,
+      JSON.stringify({ i: 1, score: 1, points: 10, sessionId: "s-1", total: 2 })
+    );
+    setupDOM({ userId: "u1" });
+    expect(slideDisplay(0)).toBe("none");
+    expect(slideDisplay(1)).toBe("flex");
+    expect(scoreText()).toBe("10");
+  });
+
+  it("reuses the stored session id after a resume", () => {
+    localStorage.setItem(
+      KEY,
+      JSON.stringify({ i: 1, score: 1, points: 10, sessionId: "s-1", total: 2 })
+    );
+    setupDOM({ userId: "u1" });
+    clickOption(1, "b");
+    clickAction(); // confirm → POST /api/quiz
+    const body = JSON.parse(fetchCalls("/api/quiz")[0][1].body);
+    expect(body.session_id).toBe("s-1");
+  });
+
+  it("rejects an out-of-bounds saved index and clears the key", () => {
+    localStorage.setItem(
+      KEY,
+      JSON.stringify({ i: 5, score: 1, points: 10, sessionId: "s-1", total: 2 })
+    );
+    setupDOM({ userId: "u1" });
+    expect(slideDisplay(0)).toBe("flex");
+    expect(localStorage.getItem(KEY)).toBeNull();
+  });
+
+  it("rejects saved state when the question set size changed", () => {
+    localStorage.setItem(
+      KEY,
+      JSON.stringify({ i: 1, score: 1, points: 10, sessionId: "s-1", total: 99 })
+    );
+    setupDOM({ userId: "u1" });
+    expect(slideDisplay(0)).toBe("flex");
+    expect(localStorage.getItem(KEY)).toBeNull();
+  });
+
+  it("starts fresh without throwing on corrupt saved state", () => {
+    localStorage.setItem(KEY, "{not json");
+    expect(() => setupDOM({ userId: "u1" })).not.toThrow();
+    expect(slideDisplay(0)).toBe("flex");
+    expect(scoreText()).toBe("0");
+  });
+
+  it("clears the key on completion and still posts progress", () => {
+    setupDOM({ userId: "u1" });
+    clickOption(0, "a");
+    clickAction();
+    clickAction();
+    clickOption(1, "b");
+    clickAction();
+    clickAction(); // advance past the last slide → completion
+    expect(localStorage.getItem(KEY)).toBeNull();
+    expect(fetchCalls("/api/progress")).toHaveLength(1);
+  });
+
+  it("never reads or writes resume state in retry mode", () => {
+    const seeded = JSON.stringify({ i: 1, score: 1, points: 10, sessionId: "s-1", total: 2 });
+    localStorage.setItem(KEY, seeded);
+    setupDOM({ userId: "u1", quizMode: "retry" });
+    expect(slideDisplay(0)).toBe("flex");
+    clickOption(0, "a");
+    clickAction();
+    clickAction(); // advance — must not touch storage
+    expect(localStorage.getItem(KEY)).toBe(seeded);
   });
 });
