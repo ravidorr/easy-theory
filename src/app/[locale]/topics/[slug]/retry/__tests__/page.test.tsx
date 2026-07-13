@@ -208,6 +208,17 @@ describe("RetryMistakesPage", () => {
     expect(img).not.toHaveAttribute("data-testid");
   });
 
+  it("renders the reward banner visible with an initial score of 0 and empty message", async () => {
+    const jsx = await RetryMistakesPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    const banner = container.querySelector("#reward-banner");
+    expect(banner).toBeTruthy();
+    expect(banner).not.toHaveAttribute("hidden");
+    expect(container.querySelector("#reward-score")?.textContent).toBe("0");
+    expect(container.querySelector("#reward-message")?.textContent).toBe("");
+    expect(container.querySelector("#reward-float")?.textContent).toBe("+10");
+  });
+
   it("renders an empty question title when question_he is null", async () => {
     const m = { ...MISTAKE_A, question_he: null };
     mockGetMistakes.mockResolvedValue([m] as never);

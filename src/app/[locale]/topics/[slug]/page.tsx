@@ -186,12 +186,13 @@ export default async function TopicQuizPage({
         )}
 
         <div id="quiz-footer" className={styles.quizFooter}>
-          <div id="reward-banner" hidden className={styles.rewardBanner}>
-            <span className={styles.rewardPill}>
+          <div id="reward-banner" className={styles.rewardBanner}>
+            <span className={styles.rewardPill} aria-label={t("scoreLabel")}>
               <Icon name="star" size={12} />
-              <span id="reward-amount">+10</span>
+              <span id="reward-score">0</span>
+              <span id="reward-float" className={styles.rewardFloat} aria-hidden="true">+10</span>
             </span>
-            <span id="reward-message" className={styles.rewardMsg}>{t("rewardCorrect")}</span>
+            <span id="reward-message" className={styles.rewardMsg} aria-live="polite"></span>
           </div>
 
           <button

@@ -13,8 +13,8 @@
   const actionBtn = document.getElementById("quiz-next");
   const progressFill = document.getElementById("quiz-progress-fill");
   const countEl = document.getElementById("quiz-count");
-  const rewardBanner = document.getElementById("reward-banner");
-  const rewardAmount = document.getElementById("reward-amount");
+  const rewardScore = document.getElementById("reward-score");
+  const rewardFloat = document.getElementById("reward-float");
   const rewardMessage = document.getElementById("reward-message");
   const finalScreen = document.getElementById("quiz-final");
   const finalScore = document.getElementById("final-score");
@@ -24,6 +24,13 @@
   let selectedOption = null;
   let confirmed = false;
   let score = 0;
+  let points = 0;
+
+  if (rewardFloat) {
+    rewardFloat.addEventListener("animationend", function () {
+      rewardFloat.removeAttribute("data-animate");
+    });
+  }
 
   // ── Medal celebration ──────────────────────────────────────────
   const MEDAL_META = {
@@ -107,7 +114,7 @@
       actionBtn.disabled = true;
       actionBtn.textContent = t.answerBtn || "צדקתי?";
     }
-    if (rewardBanner) rewardBanner.hidden = true;
+    if (rewardMessage) rewardMessage.textContent = "";
   }
 
   function lockOptions(slide) {
@@ -151,17 +158,16 @@
 
     if (isCorrect) {
       score++;
-      if (rewardBanner && rewardAmount) {
-        rewardBanner.hidden = false;
-        rewardBanner.style.display = "flex";
-        rewardAmount.textContent = "+10";
-        if (rewardMessage) rewardMessage.textContent = t.rewardCorrect || "יפה מאוד!";
+      points += 10;
+      if (rewardScore) rewardScore.textContent = String(points);
+      if (rewardMessage) rewardMessage.textContent = t.rewardCorrect || "יפה מאוד!";
+      if (rewardFloat) {
+        rewardFloat.removeAttribute("data-animate");
+        void rewardFloat.offsetWidth;
+        rewardFloat.setAttribute("data-animate", "");
       }
     } else {
-      if (rewardBanner && rewardMessage) {
-        rewardBanner.hidden = false;
-        rewardBanner.style.display = "flex";
-        if (rewardAmount) rewardAmount.textContent = "";
+      if (rewardMessage) {
         const wrongBtn = slide.querySelector('[data-option="' + selectedOption + '"]');
         const badge = wrongBtn?.querySelector(".quiz-option-badge")?.textContent?.trim() || "";
         const signNum = wrongBtn?.querySelector("span:not(.quiz-option-badge):not(.quiz-option-explanation) span")?.textContent?.trim() || "";

@@ -287,6 +287,32 @@ describe("TopicQuizPage", () => {
     expect(slides[1].style.display).toBe("none");
   });
 
+  it("renders the reward banner visible with an initial score of 0", async () => {
+    mockGetQuestions.mockResolvedValue([QUESTION] as never);
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "he" }) });
+    const { container } = render(jsx);
+    const banner = container.querySelector("#reward-banner");
+    expect(banner).toBeTruthy();
+    expect(banner).not.toHaveAttribute("hidden");
+    expect(container.querySelector("#reward-score")?.textContent).toBe("0");
+  });
+
+  it("renders the reward message empty until an answer is confirmed", async () => {
+    mockGetQuestions.mockResolvedValue([QUESTION] as never);
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "he" }) });
+    const { container } = render(jsx);
+    expect(container.querySelector("#reward-message")?.textContent).toBe("");
+  });
+
+  it("renders the +10 float element inside the labelled score pill", async () => {
+    mockGetQuestions.mockResolvedValue([QUESTION] as never);
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "he" }) });
+    const { container } = render(jsx);
+    const float = container.querySelector("#reward-float");
+    expect(float?.textContent).toBe("+10");
+    expect(float?.closest("[aria-label='scoreLabel']")).toBeTruthy();
+  });
+
   it("renders an empty question title when question_he is null", async () => {
     const q = { ...QUESTION, question_he: null };
     mockGetQuestions.mockResolvedValue([q] as never);
