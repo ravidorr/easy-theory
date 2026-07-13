@@ -109,5 +109,8 @@ Conventions:
 
 - Close the browser (`browser_close`).
 - Kill the dev server only if this run started it.
+- **Back up the run dir**: `cp -R qa/runs/<run-id> ~/qa-runs-backup/`. Run artifacts are
+  gitignored and workspace tooling has deleted untracked files before — the backup
+  outside the repo is the durable copy.
 - Note in the report that the test user's data was mutated by the run (expected;
   `qa/SETUP.md` has a reset snippet).
