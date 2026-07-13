@@ -9,11 +9,54 @@
   const total = parseInt(container.dataset.total, 10) || 0;
   if (total === 0) return;
 
-  // One session id per quiz run — lets the review page scope mistakes to the latest run.
+  // Resume state is persisted per user + topic so a reload continues the same
+  // run. Retry sessions are throwaway and never persist.
+  const storageKey =
+    container.dataset.quizMode === "retry"
+      ? null
+      : "quiz-resume:v1:" + (container.dataset.userId || "anon") + ":" + (container.dataset.topicId || "topic");
+
+  function readResume() {
+    if (!storageKey) return null;
+    try {
+      return JSON.parse(window.localStorage.getItem(storageKey));
+    } catch {
+      return null;
+    }
+  }
+
+  function saveResume(state) {
+    if (!storageKey) return;
+    try {
+      window.localStorage.setItem(storageKey, JSON.stringify(state));
+    } catch {}
+  }
+
+  function clearResume() {
+    if (!storageKey) return;
+    try {
+      window.localStorage.removeItem(storageKey);
+    } catch {}
+  }
+
+  const resumed = (function () {
+    const s = readResume();
+    // A stored total that no longer matches means the question set changed —
+    // the saved index would point at a different question, so start over.
+    if (s && Number.isInteger(s.i) && s.i > 0 && s.i < total && s.total === total) {
+      return s;
+    }
+    if (s) clearResume();
+    return null;
+  })();
+
+  // One session id per quiz run — lets the review page scope mistakes to the
+  // latest run. A resumed run keeps its original id.
   const sessionId =
-    window.crypto && typeof window.crypto.randomUUID === "function"
+    (resumed && resumed.sessionId) ||
+    (window.crypto && typeof window.crypto.randomUUID === "function"
       ? window.crypto.randomUUID()
-      : null;
+      : null);
 
   const slides = Array.from(document.querySelectorAll(".quiz-slide"));
   const actionBtn = document.getElementById("quiz-next");
@@ -26,11 +69,11 @@
   const finalScore = document.getElementById("final-score");
   const footer = document.getElementById("quiz-footer");
 
-  let currentIndex = 0;
+  let currentIndex = resumed ? resumed.i : 0;
   let selectedOption = null;
   let confirmed = false;
-  let score = 0;
-  let points = 0;
+  let score = resumed ? resumed.score | 0 : 0;
+  let points = resumed ? resumed.points | 0 : 0;
 
   if (rewardFloat) {
     rewardFloat.addEventListener("animationend", function () {
@@ -211,6 +254,7 @@
   function handleAdvance() {
     currentIndex++;
     if (currentIndex >= total) {
+      clearResume();
       slides.forEach(function (s) { s.style.display = "none"; });
       if (footer) footer.style.display = "none";
       if (finalScreen) finalScreen.style.display = "flex";
@@ -231,6 +275,14 @@
         }
       }
     } else {
+      saveResume({
+        i: currentIndex,
+        score: score,
+        points: points,
+        sessionId: sessionId,
+        total: total,
+        savedAt: Date.now(),
+      });
       showSlide(currentIndex);
     }
   }
@@ -253,5 +305,6 @@
     });
   }
 
-  showSlide(0);
+  if (points > 0 && rewardScore) rewardScore.textContent = String(points);
+  showSlide(currentIndex);
 })();

@@ -7,6 +7,7 @@ import {
   getTopicProgress,
   getExamAttempts,
   getTopicAccuracy,
+  getTopicQuestionCounts,
 } from "@/lib/db";
 import { nextMedalTarget } from "@/lib/quiz";
 import { computeReadiness, findWeakestTopics, READINESS_MAX_ATTEMPTS } from "@/lib/readiness";
@@ -51,15 +52,18 @@ export default async function HomePage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/auth/login?next=/");
 
-  const [stats, topics, progressRows, examAttempts, topicAccuracy] = await Promise.all([
+  const [stats, topics, progressRows, examAttempts, topicAccuracy, questionCounts] = await Promise.all([
     getUserStats(supabase, user.id),
     getTopics(supabase),
     getTopicProgress(supabase, user.id),
     getExamAttempts(supabase, user.id, READINESS_MAX_ATTEMPTS),
     getTopicAccuracy(supabase, user.id),
+    getTopicQuestionCounts(supabase),
   ]);
 
   const progressMap = Object.fromEntries(progressRows.map((p) => [p.topic_id, p]));
+  // Distinct questions answered per topic (one response row per question).
+  const answeredMap = Object.fromEntries(topicAccuracy.map((a) => [a.topic_id, a.total]));
 
   const readiness = computeReadiness(examAttempts);
   const topicsById = new Map(topics.map((topic) => [topic.id, topic]));
@@ -131,10 +135,19 @@ export default async function HomePage() {
             <span className={styles.todayBadge}>{t("todayBadge")}</span>
             <div className={styles.todayTaskInfo}>
               <h2>{(todayTopic as Record<string, unknown>)[nameField] as string ?? todayTopic.name_he}</h2>
-              <span className={styles.todayTaskDesc}>{t("todayTaskDesc")}</span>
+              <span className={styles.todayTaskDesc}>
+                {t("todayTaskDesc", { count: questionCounts[todayTopic.id] ?? 0 })}
+              </span>
             </div>
             {(() => {
-              const pct = progressMap[todayTopic.id]?.best_score ?? 0;
+              const totalQ = questionCounts[todayTopic.id] ?? 0;
+              const answered = answeredMap[todayTopic.id] ?? 0;
+              const pct =
+                progressMap[todayTopic.id]?.status === "completed"
+                  ? 100
+                  : totalQ > 0
+                  ? Math.round((answered / totalQ) * 100)
+                  : 0;
               const current = pct >= 100 ? 6 : pct >= 67 ? 4 : pct >= 34 ? 3 : pct >= 1 ? 2 : 1;
               return <PathProgress total={5} current={current} />;
             })()}
@@ -260,8 +273,13 @@ export default async function HomePage() {
 
           {topics.map((topic) => {
             const prog = progressMap[topic.id];
-            const pct = prog?.best_score ?? 0;
             const done = prog?.status === "completed";
+            const answered = answeredMap[topic.id] ?? 0;
+            const totalQ = questionCounts[topic.id] ?? 0;
+            const coveragePct = totalQ > 0 ? Math.round((answered / totalQ) * 100) : 0;
+            // Completed topics keep showing the quiz score; in-progress ones
+            // show coverage so the card moves with every answered question.
+            const pct = done ? prog?.best_score ?? 0 : coveragePct;
             const topicAny = topic as Record<string, unknown>;
             const topicName = (topicAny[nameField] as string) ?? topic.name_he;
             const topicDesc = (topicAny[descField] as string) ?? topic.description_he;
@@ -282,7 +300,11 @@ export default async function HomePage() {
                     <div className={styles.topicTitleRow}>
                       <span className={styles.topicName}>{topicName}</span>
                       <span className={`${styles.topicStatus} ${done ? styles.topicStatusDone : ""}`}>
-                        {done ? t("topicCompleted") : pct > 0 ? `${pct}%` : t("topicNotStarted")}
+                        {done
+                          ? t("topicCompleted")
+                          : answered > 0
+                          ? t("topicAnsweredCount", { answered, total: totalQ })
+                          : t("topicNotStarted")}
                       </span>
                     </div>
                     {topicDesc && (

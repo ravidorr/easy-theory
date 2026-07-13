@@ -9,6 +9,7 @@ import {
   getTopicProgress,
   getExamAttempts,
   getTopicAccuracy,
+  getTopicQuestionCounts,
 } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
 
@@ -24,6 +25,7 @@ vi.mock("@/lib/db", () => ({
   getTopicProgress: vi.fn(),
   getExamAttempts: vi.fn(),
   getTopicAccuracy: vi.fn(),
+  getTopicQuestionCounts: vi.fn(),
 }));
 vi.mock("next/link", () => ({
   default: ({ href, children, style }: { href: string; children: unknown; style?: unknown }) =>
@@ -43,6 +45,7 @@ const mockGetStats = vi.mocked(getUserStats);
 const mockGetProgress = vi.mocked(getTopicProgress);
 const mockGetExamAttempts = vi.mocked(getExamAttempts);
 const mockGetTopicAccuracy = vi.mocked(getTopicAccuracy);
+const mockGetQuestionCounts = vi.mocked(getTopicQuestionCounts);
 
 const TOPIC_A = { id: "t1", slug: "signs", name_he: "תמרורים", icon: null };
 const TOPIC_B = { id: "t2", slug: "priority", name_he: "זכות קדימה", icon: null };
@@ -60,6 +63,7 @@ describe("HomePage", () => {
     mockGetProgress.mockResolvedValue([]);
     mockGetExamAttempts.mockResolvedValue([]);
     mockGetTopicAccuracy.mockResolvedValue([]);
+    mockGetQuestionCounts.mockResolvedValue({ t1: 20, t2: 10 });
     vi.mocked(getTranslations).mockResolvedValue((key: string) => key);
     vi.mocked(getLocale).mockResolvedValue("he");
   });
@@ -134,7 +138,7 @@ describe("HomePage", () => {
     expect(screen.getByText(/1 \/ 2/)).toBeInTheDocument();
   });
 
-  it("calculates step 1 when best_score is 0", async () => {
+  it("calculates step 1 when nothing was answered", async () => {
     mockGetProgress.mockResolvedValue([]);
     const jsx = await HomePage();
     const { container } = render(jsx);
@@ -155,40 +159,44 @@ describe("HomePage", () => {
     expect(screen.getByText("streakOne")).toBeInTheDocument();
   });
 
-  it("calculates step 6 when best_score is 100", async () => {
+  it("calculates step 6 when all questions were answered", async () => {
     mockGetProgress.mockResolvedValue([
       { topic_id: "t1", status: "in_progress", best_score: 100 },
     ] as never);
+    mockGetTopicAccuracy.mockResolvedValue([{ topic_id: "t1", correct: 20, total: 20 }]);
     const jsx = await HomePage();
     const { container } = render(jsx);
     expect(container.querySelector("[data-active]")).toBeNull();
     expect(screen.getAllByText("✓")).toHaveLength(5);
   });
 
-  it("calculates step 4 when best_score is 70", async () => {
+  it("calculates step 4 when 70% of questions were answered", async () => {
     mockGetProgress.mockResolvedValue([
-      { topic_id: "t1", status: "in_progress", best_score: 70 },
+      { topic_id: "t1", status: "in_progress", best_score: 0 },
     ] as never);
+    mockGetTopicAccuracy.mockResolvedValue([{ topic_id: "t1", correct: 14, total: 14 }]);
     const jsx = await HomePage();
     const { container } = render(jsx);
     expect(container.querySelector("[data-active]")).toBeTruthy();
     expect(screen.getAllByText("✓")).toHaveLength(3);
   });
 
-  it("calculates step 2 when best_score is 20", async () => {
+  it("calculates step 2 when 20% of questions were answered", async () => {
     mockGetProgress.mockResolvedValue([
-      { topic_id: "t1", status: "in_progress", best_score: 20 },
+      { topic_id: "t1", status: "in_progress", best_score: 0 },
     ] as never);
+    mockGetTopicAccuracy.mockResolvedValue([{ topic_id: "t1", correct: 4, total: 4 }]);
     const jsx = await HomePage();
     const { container } = render(jsx);
     expect(container.querySelector("[data-active]")).toBeTruthy();
     expect(screen.getAllByText("✓")).toHaveLength(1);
   });
 
-  it("calculates step 3 when best_score is 50", async () => {
+  it("calculates step 3 when 50% of questions were answered", async () => {
     mockGetProgress.mockResolvedValue([
-      { topic_id: "t1", status: "in_progress", best_score: 50 },
+      { topic_id: "t1", status: "in_progress", best_score: 0 },
     ] as never);
+    mockGetTopicAccuracy.mockResolvedValue([{ topic_id: "t1", correct: 10, total: 10 }]);
     const jsx = await HomePage();
     const { container } = render(jsx);
     expect(container.querySelector("[data-active]")).toBeTruthy();
@@ -217,13 +225,60 @@ describe("HomePage", () => {
     expect(screen.getByText("לימוד תמרורים")).toBeInTheDocument();
   });
 
-  it("shows percentage badge when topic is in_progress", async () => {
+  it("shows the answered-count badge once questions were answered", async () => {
     mockGetProgress.mockResolvedValue([
       { topic_id: "t1", status: "in_progress", best_score: 50 },
     ] as never);
+    mockGetTopicAccuracy.mockResolvedValue([{ topic_id: "t1", correct: 4, total: 5 }]);
     const jsx = await HomePage();
     render(jsx);
-    expect(screen.getByText("50%")).toBeInTheDocument();
+    expect(screen.getByText("topicAnsweredCount")).toBeInTheDocument();
+  });
+
+  it("keeps topicNotStarted when in_progress but nothing was answered yet", async () => {
+    mockGetProgress.mockResolvedValue([
+      { topic_id: "t1", status: "in_progress", best_score: 0 },
+    ] as never);
+    const jsx = await HomePage();
+    render(jsx);
+    expect(screen.getAllByText("topicNotStarted")).toHaveLength(2);
+    expect(screen.queryByText("topicAnsweredCount")).not.toBeInTheDocument();
+  });
+
+  it("uses the answered/total coverage for the in-progress bar width", async () => {
+    mockGetTopics.mockResolvedValue([TOPIC_A] as never);
+    mockGetProgress.mockResolvedValue([
+      { topic_id: "t1", status: "in_progress", best_score: 90 },
+    ] as never);
+    mockGetTopicAccuracy.mockResolvedValue([{ topic_id: "t1", correct: 5, total: 5 }]);
+    const jsx = await HomePage();
+    const { container } = render(jsx);
+    const widths = [...container.querySelectorAll("div")].map((d) => d.style.width);
+    expect(widths).toContain("25%"); // 5 answered of 20, not best_score 90
+    expect(widths).not.toContain("90%");
+  });
+
+  it("keeps best_score for the bar and label when completed", async () => {
+    mockGetTopics.mockResolvedValue([TOPIC_A] as never);
+    mockGetProgress.mockResolvedValue([
+      { topic_id: "t1", status: "completed", best_score: 85 },
+    ] as never);
+    mockGetTopicAccuracy.mockResolvedValue([{ topic_id: "t1", correct: 20, total: 20 }]);
+    const jsx = await HomePage();
+    const { container } = render(jsx);
+    expect(screen.getByText("topicCompleted")).toBeInTheDocument();
+    const widths = [...container.querySelectorAll("div")].map((d) => d.style.width);
+    expect(widths).toContain("85%");
+  });
+
+  it("passes the topic question count to the daily task description", async () => {
+    vi.mocked(getTranslations).mockResolvedValue(((
+      key: string,
+      values?: Record<string, unknown>
+    ) => (values ? `${key}|${JSON.stringify(values)}` : key)) as never);
+    const jsx = await HomePage();
+    render(jsx);
+    expect(screen.getByText('todayTaskDesc|{"count":20}')).toBeInTheDocument();
   });
 
   it("shows days-to-next-medal nudge based on streak_days", async () => {

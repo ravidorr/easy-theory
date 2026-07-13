@@ -2,6 +2,17 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.99] — 2026-07-14
+
+### Added
+- Topic quizzes now resume after a reload: position, score, points, and session id are saved per user + topic in `localStorage` on every advance, restored on load, and cleared on completion. Saved state is discarded if the topic's question set changed, and retry sessions never persist (QA finding: a reload restarted a 361-question session at question 1)
+
+### Fixed
+- The daily-task card no longer promises "8 שאלות תרגול · ~20 דק׳" — the linked topic quiz is a single full-topic session (361 questions for signs). The card now shows the topic's real question count and notes you can continue where you left off
+- Dashboard topic cards now show real mid-practice progress (answered/total questions, computed from quiz responses) instead of staying on "טרם התחלת" until the whole topic is finished; completed topics keep showing their best score. The daily card's path stepper follows the same coverage signal
+
+---
+
 ## [0.3.98] — 2026-07-14
 
 ### Fixed
