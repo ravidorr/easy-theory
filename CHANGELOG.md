@@ -2,6 +2,16 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.97] — 2026-07-14
+
+### Added
+- `qa/RUNNING.md` — how to run the agentic QA end-to-end (run a charter, read results, file approved issue drafts, write new charters)
+
+### Changed
+- `/qa-explore` teardown now backs up each run dir to `~/qa-runs-backup/` — `qa/runs/` is gitignored, so the copy outside the repo is the durable one
+
+---
+
 ## [0.3.96] — 2026-07-14
 
 ### Changed
