@@ -15,6 +15,13 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ---
 
+## [0.3.114] — 2026-07-14
+
+### Added
+- Tests for the previously untested `public/js/` scripts: `flashcard.js` (flip, know/don't-know navigation, replay queue, done state, translations), `push.js` (feature detection, VAPID key decoding, subscribe/unsubscribe API calls), and `more.js` (dark-mode switch sync, theme cookie, logout redirect); extended `schedule-script.test.ts` with day/duration pickers, notify toggle, zero-day guard, successful save + redirect, and `pushHelpers` integration.
+
+---
+
 ## [0.3.113] — 2026-07-14
 
 ### Fixed
