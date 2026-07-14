@@ -107,6 +107,12 @@ function QuestionReview({
                   <InlineMarkdown>{explanationText}</InlineMarkdown>
                 </span>
               )}
+              {state === "correct" && (
+                <span className="sr-only">{t("optionCorrectSr")}</span>
+              )}
+              {state === "wrong" && (
+                <span className="sr-only">{t("optionWrongSr")}</span>
+              )}
             </div>
           );
         })}

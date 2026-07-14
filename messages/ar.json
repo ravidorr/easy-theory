@@ -101,6 +101,7 @@
     "topBarTitle": "إشارات المرور: مراجعة",
     "cardCount": "بطاقة {current} من {total}",
     "flipHint": "انقر للقلب",
+    "backLabel": "رجوع",
     "signBadge": "إشارة {number}",
     "btnNo": "لم أعرف",
     "btnYes": "عرفت ✓",
@@ -115,6 +116,8 @@
     "closeLabel": "إغلاق",
     "signAlt": "إشارة {number}",
     "questionImageAlt": "صورة مرفقة بالسؤال",
+    "optionCorrectSr": "إجابة صحيحة",
+    "optionWrongSr": "إجابة خاطئة",
     "rewardCorrect": "أحسنت!",
     "rewardTopicDone": "أحسنت! أكملت الموضوع بأكمله!",
     "rewardWrongPrefix": "اخترت ",
@@ -196,7 +199,8 @@
     "summaryChoose": "اختر الأيام للبدء",
     "summaryHint": "إيقاع مريح يكفي تماماً للمادة.",
     "saveBtn": "احفظ الخطة",
-    "days": "ح,ا,ث,ر,خ,ج,س"
+    "days": "ح,ا,ث,ر,خ,ج,س",
+    "backLabel": "رجوع"
   },
   "Videos": {
     "pageTitle": "فيديوهات تعليمية",
@@ -247,7 +251,8 @@
     "supabaseDesc": "قاعدة البيانات والمصادقة",
     "geminiDesc": "شرح ذكي للأسئلة الخاطئة",
     "rubikDesc": "خط عربي ولاتيني — Google Fonts",
-    "footer": "© 2026 Raanan Avidor · مفتوح المصدر"
+    "footer": "© 2026 Raanan Avidor · مفتوح المصدر",
+    "backLabel": "رجوع"
   },
   "Api": {
     "notAuthenticated": "غير مسجّلة الدخول",
@@ -324,7 +329,9 @@
       "medal14Label": "أسبوعان متواصلان",
       "medal14Desc": "أربعة عشر يوماً متواصلاً، جميل!",
       "medal30Label": "شهر متواصل",
-      "medal30Desc": "شهر كامل متواصل، إنجاز رائع!"
+      "medal30Desc": "شهر كامل متواصل، إنجاز رائع!",
+      "optionCorrectSr": "إجابة صحيحة",
+      "optionWrongSr": "إجابة خاطئة"
     },
     "Schedule": {
       "daysSelected": "تم اختيار {count} أيام",

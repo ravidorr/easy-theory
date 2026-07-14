@@ -12,8 +12,8 @@ vi.mock("next/navigation", () => ({
 }));
 vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
 vi.mock("next/link", () => ({
-  default: ({ href, children }: { href: string; children: unknown }) =>
-    React.createElement("a", { href }, children as React.ReactNode),
+  default: ({ href, children, ...rest }: { href: string; children: unknown }) =>
+    React.createElement("a", { href, ...rest }, children as React.ReactNode),
 }));
 vi.mock("@/components/SignImage", () => ({
   SignImage: ({ src }: { src: string }) => React.createElement("img", { src }),
@@ -45,6 +45,12 @@ describe("CreditsPage", () => {
     const jsx = await CreditsPage();
     const { container } = render(jsx);
     expect(container.querySelector('a[href="/more"]')).toBeTruthy();
+  });
+
+  it("gives the icon-only back link an accessible name", async () => {
+    const jsx = await CreditsPage();
+    const { container } = render(jsx);
+    expect(container.querySelector("a[aria-label='backLabel']")).toBeTruthy();
   });
 
   it("renders the data sources section heading", async () => {

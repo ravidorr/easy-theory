@@ -13,7 +13,7 @@ function slideHTML(index: number) {
       ${["a", "b", "c", "d"]
         .map(
           (opt, i) => `
-        <button class="quiz-option" data-option="${opt}">
+        <button class="quiz-option" data-option="${opt}" aria-pressed="false">
           <span class="quiz-option-badge">${["א", "ב", "ג", "ד"][i]}</span>
           <span>אפשרות ${opt}</span>
         </button>`
@@ -124,6 +124,16 @@ describe("exam.js – answering and navigation", () => {
     expect(options[0].dataset.state).toBe("");
     expect(options[2].dataset.state).toBe("selected");
     expect(document.getElementById("exam-answered")!.textContent).toContain("1");
+  });
+
+  it("keeps aria-pressed in sync with the selected option", () => {
+    clickOption(0, "a");
+    clickOption(0, "c");
+    const options = slide(0).querySelectorAll<HTMLElement>(".quiz-option");
+    expect(options[2].getAttribute("aria-pressed")).toBe("true");
+    expect(options[0].getAttribute("aria-pressed")).toBe("false");
+    expect(options[1].getAttribute("aria-pressed")).toBe("false");
+    expect(options[3].getAttribute("aria-pressed")).toBe("false");
   });
 
   it("navigates forward and back between slides", () => {
@@ -238,6 +248,13 @@ describe("exam.js – submit", () => {
     expect(q2Options[1].dataset.state).toBe("wrong");
     expect(q2Options[3].dataset.state).toBe("correct");
     expect([...q2Options].every((o) => o.disabled)).toBe(true);
+
+    // Screen-reader result text mirrors the color-only data-state.
+    expect(q2Options[1].querySelector(".quiz-option-sr")!.textContent).toBe("תשובה שגויה");
+    expect(q2Options[3].querySelector(".quiz-option-sr")!.textContent).toBe("תשובה נכונה");
+    expect(q2Options[0].querySelector(".quiz-option-sr")).toBeNull();
+    // The chosen option stays aria-pressed after decoration.
+    expect(q2Options[1].getAttribute("aria-pressed")).toBe("true");
   });
 
   it("shows an error and allows retry when the POST fails", async () => {

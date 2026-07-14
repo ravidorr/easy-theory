@@ -111,12 +111,24 @@
 
     slide.querySelectorAll(".quiz-option").forEach(function (o) {
       o.dataset.state = "";
+      o.setAttribute("aria-pressed", "false");
     });
     btn.dataset.state = "selected";
+    btn.setAttribute("aria-pressed", "true");
     answers[slide.dataset.questionId] = btn.dataset.option;
 
     updateAnswered();
     updateNav();
+  }
+
+  // Exposes the correct/wrong result to screen readers; visually it is
+  // conveyed by color alone via [data-state].
+  function appendResultSr(option, text) {
+    if (option.querySelector(".quiz-option-sr")) return;
+    const sr = document.createElement("span");
+    sr.className = "sr-only quiz-option-sr";
+    sr.textContent = text;
+    option.appendChild(sr);
   }
 
   function decorateSlides(results) {
@@ -131,8 +143,10 @@
         if (!result) return;
         if (o.dataset.option === result.correct_option) {
           o.dataset.state = "correct";
+          appendResultSr(o, t.optionCorrectSr || "תשובה נכונה");
         } else if (o.dataset.option === result.selected_option && !result.is_correct) {
           o.dataset.state = "wrong";
+          appendResultSr(o, t.optionWrongSr || "תשובה שגויה");
         } else {
           o.dataset.state = "";
         }

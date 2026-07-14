@@ -2,6 +2,17 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [Unreleased]
+
+### Fixed
+- Quiz-flow accessibility gaps that were invisible to assistive tech:
+  - Icon-only `→` back links on schedule, flashcards, and credits now carry a localized `aria-label` (new `backLabel` key in `Schedule`/`Flashcards`/`Credits`, he + ar)
+  - Quiz/retry/exam option buttons expose selection via `aria-pressed` (server-rendered `false`, kept in sync by `quiz.js`/`exam.js`; the chosen option stays pressed after confirmation)
+  - Correct/wrong option results — previously color-only via `data-state` — get a visually-hidden "correct/wrong answer" span (`Quiz`/`JS.Quiz` `optionCorrectSr`/`optionWrongSr`, he + ar), appended by `quiz.js`/`exam.js` and server-rendered on the review page
+  - Schedule day/duration buttons mirror their `data-selected` state with `aria-pressed` (server render + `schedule.js` click handlers), matching the notify toggle's existing pattern
+
+---
+
 ## [0.3.108] - 2026-07-14
 
 ### Fixed

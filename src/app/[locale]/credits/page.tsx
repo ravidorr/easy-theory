@@ -20,7 +20,7 @@ export default async function CreditsPage() {
   return (
     <main className={styles.page}>
       <div className={styles.topBar}>
-        <Link href="/more" className={styles.backBtn}>→</Link>
+        <Link href="/more" className={styles.backBtn} aria-label={t("backLabel")}>→</Link>
         <div className={styles.titleCol}>
           <h1>{t("pageTitle")}</h1>
           <span className={styles.subtitle}>{t("subtitle")}</span>

@@ -200,6 +200,16 @@ describe("RetryMistakesPage", () => {
     expect(container.querySelector("a[aria-label='closeLabel']")).toBeTruthy();
   });
 
+  it("renders every option button with aria-pressed false", async () => {
+    const jsx = await RetryMistakesPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    const options = container.querySelectorAll(".quiz-option");
+    expect(options.length).toBeGreaterThan(0);
+    options.forEach((o) => {
+      expect(o.getAttribute("aria-pressed")).toBe("false");
+    });
+  });
+
   it("renders final navigation as links styled as buttons, without nested buttons", async () => {
     const jsx = await RetryMistakesPage({ params: Promise.resolve({ slug: "signs" }) });
     const { container } = render(jsx);

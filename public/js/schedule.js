@@ -48,6 +48,7 @@
       if (selectedDays.has(day)) {
         selectedDays.delete(day);
         btn.dataset.selected = "false";
+        btn.setAttribute("aria-pressed", "false");
         btn.style.background = "var(--surface)";
         btn.style.color = "var(--text-muted)";
         btn.style.border = "1px solid var(--border-strong)";
@@ -56,6 +57,7 @@
       } else {
         selectedDays.add(day);
         btn.dataset.selected = "true";
+        btn.setAttribute("aria-pressed", "true");
         btn.style.background = "var(--primary)";
         btn.style.color = "#fff";
         btn.style.border = "1px solid transparent";
@@ -74,6 +76,7 @@
       document.querySelectorAll(".duration-btn").forEach(function (b) {
         const active = b === btn;
         b.dataset.selected = active ? "true" : "false";
+        b.setAttribute("aria-pressed", active ? "true" : "false");
         b.style.background = active ? "var(--primary)" : "var(--surface)";
         b.style.color = active ? "#fff" : "var(--text-muted)";
         b.style.border = active ? "1px solid transparent" : "1px solid var(--border-strong)";

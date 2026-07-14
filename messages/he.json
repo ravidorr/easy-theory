@@ -101,6 +101,7 @@
     "topBarTitle": "תמרורים: חזרה",
     "cardCount": "כרטיס {current} מתוך {total}",
     "flipHint": "קליק להיפוך",
+    "backLabel": "חזרה",
     "signBadge": "תמרור {number}",
     "btnNo": "עוד לא",
     "btnYes": "ידעתי ✓",
@@ -115,6 +116,8 @@
     "closeLabel": "סגירה",
     "signAlt": "תמרור {number}",
     "questionImageAlt": "תמונה המצורפת לשאלה",
+    "optionCorrectSr": "תשובה נכונה",
+    "optionWrongSr": "תשובה שגויה",
     "rewardCorrect": "יפה מאוד!",
     "rewardTopicDone": "כל הכבוד! סיימת את כל הנושא!",
     "rewardWrongPrefix": "בחרת ב־",
@@ -196,7 +199,8 @@
     "summaryChoose": "בחרי ימים כדי להתחיל",
     "summaryHint": "קצב נעים שמספיק בדיוק לחומר.",
     "saveBtn": "נשמור את התוכנית?",
-    "days": "א,ב,ג,ד,ה,ו,ש"
+    "days": "א,ב,ג,ד,ה,ו,ש",
+    "backLabel": "חזרה"
   },
   "Videos": {
     "pageTitle": "סרטוני לימוד",
@@ -247,7 +251,8 @@
     "supabaseDesc": "בסיס נתונים ואימות משתמשים",
     "geminiDesc": "הסברים חכמים לשאלות שגויות",
     "rubikDesc": "גופן עברי ולטיני - Google Fonts",
-    "footer": "© 2026 Raanan Avidor · קוד פתוח"
+    "footer": "© 2026 Raanan Avidor · קוד פתוח",
+    "backLabel": "חזרה"
   },
   "Api": {
     "notAuthenticated": "לא מחוברת",
@@ -324,7 +329,9 @@
       "medal14Label": "שבועיים ברצף",
       "medal14Desc": "ארבעה עשר ימים ברצף, ממש יפה!",
       "medal30Label": "חודש ברצף",
-      "medal30Desc": "חודש שלם ברצף, הישג מדהים!"
+      "medal30Desc": "חודש שלם ברצף, הישג מדהים!",
+      "optionCorrectSr": "תשובה נכונה",
+      "optionWrongSr": "תשובה שגויה"
     },
     "Schedule": {
       "daysSelected": "נבחרו {count} ימים",
