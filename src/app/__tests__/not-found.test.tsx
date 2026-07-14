@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import React from "react";
-import GlobalNotFound from "../global-not-found";
+import RootNotFound from "../not-found";
 import { getTranslations } from "next-intl/server";
 
 vi.mock("next/font/google", () => ({
@@ -36,16 +36,16 @@ beforeEach(() => {
   }
 });
 
-describe("GlobalNotFound", () => {
+describe("RootNotFound", () => {
   it("renders its own html element since it mounts outside any layout", async () => {
-    const html = renderToStaticMarkup(await GlobalNotFound());
+    const html = renderToStaticMarkup(await RootNotFound());
     expect(html).toContain("<html");
     expect(html).toContain('lang="he"');
     expect(html).toContain('dir="rtl"');
   });
 
   it("resolves strings in the default locale when the request has no signal", async () => {
-    await GlobalNotFound();
+    await RootNotFound();
     expect(getTranslations).toHaveBeenCalledWith({
       locale: "he",
       namespace: "NotFound",
@@ -53,7 +53,7 @@ describe("GlobalNotFound", () => {
   });
 
   it("renders the branded content with a CTA to the default-locale home", async () => {
-    const html = renderToStaticMarkup(await GlobalNotFound());
+    const html = renderToStaticMarkup(await RootNotFound());
     expect(html).toContain("headline");
     expect(html).toContain("support");
     expect(html).toContain('href="/he"');
@@ -62,7 +62,7 @@ describe("GlobalNotFound", () => {
 
   it("follows the NEXT_LOCALE cookie", async () => {
     requestCookies.NEXT_LOCALE = "ar";
-    const html = renderToStaticMarkup(await GlobalNotFound());
+    const html = renderToStaticMarkup(await RootNotFound());
     expect(getTranslations).toHaveBeenCalledWith({
       locale: "ar",
       namespace: "NotFound",
@@ -74,7 +74,7 @@ describe("GlobalNotFound", () => {
 
   it("falls back to Accept-Language when there is no cookie", async () => {
     requestHeaders["accept-language"] = "ar-SA,ar;q=0.9,en;q=0.8";
-    const html = renderToStaticMarkup(await GlobalNotFound());
+    const html = renderToStaticMarkup(await RootNotFound());
     expect(getTranslations).toHaveBeenCalledWith({
       locale: "ar",
       namespace: "NotFound",
@@ -86,7 +86,7 @@ describe("GlobalNotFound", () => {
   it("ignores an unsupported cookie in favor of Accept-Language", async () => {
     requestCookies.NEXT_LOCALE = "fr";
     requestHeaders["accept-language"] = "ar";
-    const html = renderToStaticMarkup(await GlobalNotFound());
+    const html = renderToStaticMarkup(await RootNotFound());
     expect(html).toContain('lang="ar"');
   });
 });

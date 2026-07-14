@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Rubik } from "next/font/google";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-import { locale } from "next/root-params";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -29,11 +28,13 @@ export async function generateViewport(): Promise<Viewport> {
   return { themeColor: theme === "light" ? "#f5f7fc" : "#131829" };
 }
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations({
-    locale: await locale(),
-    namespace: "Metadata",
-  });
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "Metadata" });
   return {
     title: t("rootTitle"),
     description: t("rootDescription"),
@@ -42,10 +43,12 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function LocaleLayout({
   children,
+  params,
 }: {
   children: React.ReactNode;
+  params: Promise<{ locale: string }>;
 }) {
-  const currentLocale = await locale();
+  const { locale: currentLocale } = await params;
   if (!hasLocale(routing.locales, currentLocale)) {
     notFound();
   }

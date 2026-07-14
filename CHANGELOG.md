@@ -24,6 +24,13 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ---
 
+## [0.3.129] — 2026-07-14
+
+### Fixed
+- Locale-less 404s (e.g. `/signs/nope`, or any junk path with a dot — everything the proxy skips past next-intl's locale normalization) now render the branded, locale-detected 404 instead of Next's built-in "This page could not be found" shell. The 0.3.117 migration to `experimental.globalNotFound` assumed `global-not-found.tsx` also catches `notFound()` bubbling up from the `[locale]` layout's invalid-locale guard; it doesn't — per the Next docs it only covers URLs matching no route at all, and `[locale]/[...rest]` matches nearly everything. Restored the boundary pattern that migration removed, keeping the 0.3.121 localization: `src/app/global-not-found.tsx` is `src/app/not-found.tsx` again (cookie/`Accept-Language` locale detection intact), a pass-through root `layout.tsx` gives it a layout above it, the experimental flag is gone, and `src/app/[locale]/layout.tsx` reads the locale from the `params` prop again (with a root layout above it, `[locale]` is no longer a root param, so `next/root-params` stops compiling). Verified against a production build: `/signs/nope` and `/foo/bar.xyz` return 404 with the branded page in Hebrew or Arabic per the visitor's locale signals; completed TODO item removed.
+
+---
+
 ## [0.3.128] — 2026-07-14
 
 ### Changed
