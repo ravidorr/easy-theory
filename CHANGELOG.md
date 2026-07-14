@@ -15,6 +15,13 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ---
 
+## [0.3.112] — 2026-07-14
+
+### Changed
+- Expanded the seven one-line "Later" bullets in `TODO.md` into fully detailed items 4–10 (current state + suggested action, verified file paths), matching the format of items 1–3; corrected the stale note about the root 404 page, which is already localized but hardwired to the default locale.
+
+---
+
 ## [0.3.108] - 2026-07-14
 
 ### Fixed
