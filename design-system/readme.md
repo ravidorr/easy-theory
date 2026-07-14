@@ -5,7 +5,6 @@ Design system for **ClearRoad** (Hebrew: **דרך ברורה**), a Hebrew-first 
 **Chosen direction:** "לוחית נהג חדש" (new-driver plate) — strong plate blue on cool white, Rubik, high gamification (streaks, stars, progress paths) with a calm, quiet surface. Rebranded from the original lilac direction after user feedback that the pastels felt too blended and didn't convey the app's purpose; the primary blue now derives from the נהג חדש plate sign.
 
 ## Product principles (from PRD)
-
 1. שקט לפני הכל — clean, no visual noise
 2. מנה אחת בכל פעם — one small topic at a time
 3. קצב אישי — 30–60 min/day schedule
@@ -13,17 +12,15 @@ Design system for **ClearRoad** (Hebrew: **דרך ברורה**), a Hebrew-first 
 5. התקדמות נראית — every small step gets immediate positive reinforcement
 
 ## CONTENT FUNDAMENTALS
-
-- **Language:** Hebrew only, full RTL. English never appears in UI copy (brand name "ClearRoad" may appear in the logotype).
-- **Voice:** warm, encouraging, speaks directly to the learner in second person **feminine** (את): "ממשיכות", "יאללה, לעבודה!", "את באמצע". Short sentences. No jargon.
+- **Language:** Hebrew-first, full RTL, with Arabic as a second locale (also RTL; translations by a professional translator). English never appears in UI copy (brand name "ClearRoad" may appear in the logotype).
+- **Voice:** warm, encouraging, **gender-neutral Hebrew**: prefer infinitives and first-person plural ("להתחיל עכשיו", "יש ללחוץ", "נמשיך", "יאללה, מתחילים!"); avoid gendered second-person forms. Changed from the original feminine voice by product decision; older feminine strings need a copy pass. Short sentences. No jargon.
 - **Tone of reinforcement:** celebratory but gentle. "כל הכבוד, שלב 3 הושלם!" — never pressuring ("נשארו רק X ימים" is forbidden framing).
 - **Punctuation:** NO em-dashes (—) in copy. Use commas, periods, or restructure. Exclamation marks allowed sparingly for wins.
 - **Emoji:** used very sparingly, at most one per screen, only for celebration moments. Prefer the icon set (Lucide) and the star/flame glyph components over emoji.
 - **Numbers:** western digits. Times as "17:00". Durations as "20 דק׳".
-- **Example copy:** "המשימה להיום: זכות קדימה, חלק 2" · "8 שאלות תרגול · ~20 דק׳" · "3 מתוך 8, את באמצע!"
+- **Example copy:** "המשימה להיום: זכות קדימה, חלק 2" · "8 שאלות תרגול · ~20 דק׳" · "3 מתוך 8, בדיוק באמצע!"
 
 ## VISUAL FOUNDATIONS
-
 - **Backgrounds:** flat solid `--bg` (#f5f7fc light / #131829 dark). No gradients, no textures, no imagery backgrounds. Quiet above all.
 - **Cards:** white `--surface` on cool blue-tinted `--bg`, 1px `--border`, radius `--radius-xl` (20px) for primary cards, `--radius-lg` (16px) nested, shadow `--shadow-card` (soft, ink-tinted). Screens/modals use `--radius-2xl`.
 - **Color:** one primary (new-driver plate blue, oklch hue 264), one reward accent (gold, hue 85), semantic green/red (hues 155/25) at matched chroma. Soft variants (`*-soft`) for chips/badges. Traffic-sign colors (`--sign-*`) are fixed and never themed.
@@ -39,24 +36,22 @@ Design system for **ClearRoad** (Hebrew: **דרך ברורה**), a Hebrew-first 
 - **Layout:** mobile-first single column (max ~440px content), desktop centers content with generous whitespace; responsive both ways.
 
 ## ICONOGRAPHY
-
-- **Icon set:** [Lucide](https://lucide.dev) via CDN (`https://unpkg.com/lucide@latest`), rounded stroke style matching Rubik. Stroke width 2, size 18–24px, color `currentColor`. This is a substitution choice (no icon assets were provided); flag any replacement needs to the owner.
+- **Icon set:** [Lucide](https://lucide.dev)-style stroke icons, consolidated into an **`icons.svg` SVG sprite** in the app (`<use href="/icons.svg#icon-flame">`; stroke 2, 18–24px, `currentColor`). New icons are added as sprite `<symbol>`s, never one-off inline SVGs in app code. Kit specimens keep inline SVGs for copy-paste readability.
 - **Traffic signs:** REAL official artwork extracted from the uploaded לוח התמרורים (Sept 2022, ק"ת 10328) PDF — see `assets/signs/`. 21 common signs as PNGs named `sign-<number>-<meaning>.png` (number omitted where mapping was not 100% certain). Never redraw signs by hand; extract more from `uploads/signs-chart.pdf` (94 pages) as needed.
-- **Glyphs:** star (★) and flame are rendered by the `Star`/`Flame` glyph inside gamification components, gold/primary colored. No emoji in components.
+- **Glyphs:** star, flame, diamond, and trophy glyphs (gamification pills + medal milestones 3/7/14/30) are SVGs, gold/primary colored. No emoji in components; ticket open to replace the app's remaining medal emoji with glyphs.
+- **Favicon:** `assets/favicon/` — the ל learner-sign in brand blue (`favicon.svg` + PNG 16/32/180/512).
 - **Logo:** none provided. Render the wordmark in plain Rubik 800: "דרך ברורה" (or "ClearRoad"). Do not invent a logo mark.
 
 ## Index
-
 - `styles.css` — global entry (imports all tokens)
 - `tokens/` — colors (light+dark), typography, spacing/radius, effects
-- `assets/signs/` — 21 official traffic-sign PNGs; `uploads/signs-chart.pdf` — full source chart
+- `assets/signs/` — 21 official traffic-sign PNGs; `uploads/signs-chart.pdf` — full source chart; `assets/favicon/` — favicon set
 - `guidelines/` — foundation specimen cards (colors, type, spacing, radius, shadows, signs)
-- `components/core/` — Button, IconButton, Chip, Card, Input, Switch
+- `components/core/` — Button, IconButton, Chip, Card, Input, Switch, TabBar
 - `components/learning/` — QuizOption, Flashcard, ProgressBar, PathProgress, TopicCard
-- `components/gamification/` — StreakPill, StarsPill, Medal
-- `ui_kits/clearroad/` — app screens (home "המשימה להיום", quiz, flashcards, schedule)
-- `SKILL.md` — agent skill entry point
+- `components/gamification/` — StreakPill, StarsPill, Medal, MedalCelebration
+- `ui_kits/clearroad/` — app screens: landing+login, home (task, readiness, weak topics), quiz, exam intro/run, review, flashcards, schedule + setup, videos, resources, more (עוד + medals grid), credits, 404, medal-earned, branded email
+- `SKILL.md` — agent skill entry point (includes implementation notes aligned with the shipped app: class-based CSS + icons.svg sprite)
 
 ## Intentional additions
-
 Standard from-scratch component set (no source inventory existed). Learning + gamification families are derived directly from PRD P0 features.

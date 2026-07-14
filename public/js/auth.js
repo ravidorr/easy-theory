@@ -1,8 +1,9 @@
-/** Login page: send magic-link OTP and show sent banner. */
+/** Login page: send magic-link OTP and swap the form for the success card. */
 (function () {
   const t = window.__t || {};
 
   const form = document.getElementById("login-form");
+  const header = document.getElementById("login-header");
   const btn = document.getElementById("send-btn");
   const banner = document.getElementById("sent-banner");
   const errorEl = document.getElementById("login-error");
@@ -43,7 +44,7 @@
 
   function resolveError(data) {
     if (data && data.code && t[data.code]) return t[data.code];
-    return (data && data.error) || t.linkError || "שגיאה בשליחת הקישור, נסי שוב.";
+    return (data && data.error) || t.linkError || "שגיאה בשליחת הקישור, אפשר לנסות שוב.";
   }
 
   form.addEventListener("submit", async function (e) {
@@ -59,7 +60,7 @@
     const nextPath = document.getElementById("next-path")?.value || "/";
 
     btn.disabled = true;
-    btn.innerHTML = '<span class="btn-spinner"></span>' + (t.sending || "שולח...");
+    btn.innerHTML = '<span class="btn-spinner"></span>' + (t.sending || "שולחים...");
 
     try {
       const res = await fetch("/api/auth/send-otp", {
@@ -78,9 +79,10 @@
 
       lastEmail = email;
       form.style.display = "none";
+      if (header) header.style.display = "none";
       if (banner) banner.style.display = "flex";
     } catch {
-      showError(t.networkError || "שגיאת רשת, נסי שוב.");
+      showError(t.networkError || "שגיאת רשת, אפשר לנסות שוב.");
       btn.disabled = false;
       btn.textContent = originalBtnText;
     }
@@ -91,7 +93,7 @@
       if (!lastEmail) return;
 
       resendBtn.disabled = true;
-      resendBtn.textContent = t.sending || "שולח...";
+      resendBtn.textContent = t.sending || "שולחים...";
       hideResendMsg();
 
       try {
@@ -125,7 +127,7 @@
           resendBtn.disabled = false;
         }, 60000);
       } catch {
-        showResendMsg(t.networkError || "שגיאת רשת, נסי שוב.", true);
+        showResendMsg(t.networkError || "שגיאת רשת, אפשר לנסות שוב.", true);
         resendBtn.textContent = originalResendText;
         resendBtn.disabled = false;
       }

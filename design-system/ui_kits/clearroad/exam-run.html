@@ -1,0 +1,69 @@
+<!-- @dsCard group="Screens" viewport="420x1330" subtitle="שאלה עם טיימר וניווט + מסך תוצאה" name="Exam Run · מבחן פעיל" -->
+<!DOCTYPE html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><link rel="stylesheet" href="../../styles.css"></head>
+<body style="background:var(--bg); margin:0; padding:20px; display:flex; flex-direction:column; gap:20px; max-width:420px; box-sizing:border-box;">
+
+  <!-- Top bar: close + progress + timer + count -->
+  <div style="display:flex; align-items:center; gap:10px;">
+    <button aria-label="סגירה" style="width:44px; height:44px; border-radius:50%; border:1px solid var(--border-strong); background:var(--surface); color:var(--text-muted); font-size:18px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; font-family:var(--font-ui);">✕</button>
+    <div style="flex:1; height:8px; border-radius:var(--radius-pill); background:var(--surface-2); overflow:hidden;">
+      <div style="width:40%; height:100%; border-radius:var(--radius-pill); background:var(--primary);"></div>
+    </div>
+    <span aria-label="זמן שנותר" style="font-size:var(--type-small-size); font-weight:700; color:var(--text); font-variant-numeric:tabular-nums; flex-shrink:0;" dir="ltr">31:42</span>
+    <span style="font-size:var(--type-caption-size); font-weight:var(--type-caption-weight); color:var(--text-faint); flex-shrink:0;">12 מתוך 30</span>
+  </div>
+
+  <!-- Question (no correct/wrong feedback in exam mode) -->
+  <div style="display:flex; flex-direction:column; gap:16px; align-items:center;">
+    <div style="width:140px; height:140px; border-radius:var(--radius-xl); background:var(--surface); border:1px solid var(--border); box-shadow:var(--shadow-card); display:flex; align-items:center; justify-content:center;">
+      <img src="../../assets/signs/sign-301-yield.png" alt="תמרור 301" style="width:96px; height:96px; object-fit:contain;">
+    </div>
+    <h2 style="margin:0; font-size:var(--type-h2-size); font-weight:var(--type-h2-weight); line-height:var(--line-tight); color:var(--text); text-align:center;">מה משמעות התמרור?</h2>
+  </div>
+
+  <!-- Options: idle + selected only -->
+  <div style="display:flex; flex-direction:column; gap:10px;">
+    <button style="font-family:var(--font-ui); text-align:start; border-radius:var(--radius-lg); padding:12px 14px; display:flex; align-items:center; gap:12px; border:1.5px solid var(--border-strong); background:var(--surface); min-height:var(--hit-min); box-sizing:border-box; cursor:pointer;">
+      <span style="width:28px; height:28px; border-radius:50%; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; background:var(--surface-2); color:var(--text-muted);">א</span>
+      <span style="font-size:var(--type-body-size); line-height:var(--line-body); color:var(--text);">עצירה מוחלטת לפני הצומת</span>
+    </button>
+    <button aria-pressed="true" style="font-family:var(--font-ui); text-align:start; border-radius:var(--radius-lg); padding:12px 14px; display:flex; align-items:center; gap:12px; border:1.5px solid var(--primary); background:var(--primary-soft); min-height:var(--hit-min); box-sizing:border-box; cursor:pointer;">
+      <span style="width:28px; height:28px; border-radius:50%; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; background:var(--primary); color:#fff;">ב</span>
+      <span style="font-size:var(--type-body-size); line-height:var(--line-body); color:var(--text);">מתן זכות קדימה לתנועה בדרך החוצה</span>
+    </button>
+    <button style="font-family:var(--font-ui); text-align:start; border-radius:var(--radius-lg); padding:12px 14px; display:flex; align-items:center; gap:12px; border:1.5px solid var(--border-strong); background:var(--surface); min-height:var(--hit-min); box-sizing:border-box; cursor:pointer;">
+      <span style="width:28px; height:28px; border-radius:50%; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; background:var(--surface-2); color:var(--text-muted);">ג</span>
+      <span style="font-size:var(--type-body-size); line-height:var(--line-body); color:var(--text);">אזהרה מפני צומת מרומזר</span>
+    </button>
+    <button style="font-family:var(--font-ui); text-align:start; border-radius:var(--radius-lg); padding:12px 14px; display:flex; align-items:center; gap:12px; border:1.5px solid var(--border-strong); background:var(--surface); min-height:var(--hit-min); box-sizing:border-box; cursor:pointer;">
+      <span style="width:28px; height:28px; border-radius:50%; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; background:var(--surface-2); color:var(--text-muted);">ד</span>
+      <span style="font-size:var(--type-body-size); line-height:var(--line-body); color:var(--text);">כניסה לדרך חד-סטרית</span>
+    </button>
+  </div>
+
+  <!-- Footer: answered count + prev/next -->
+  <div style="display:flex; flex-direction:column; gap:12px;">
+    <span aria-live="polite" style="font-size:var(--type-caption-size); font-weight:var(--type-caption-weight); color:var(--text-faint); text-align:center;">נענו 11 מתוך 30</span>
+    <div style="display:flex; gap:12px;">
+      <button style="flex:1; font-family:var(--font-ui); font-weight:700; font-size:15.5px; min-height:52px; padding:10px 22px; border-radius:var(--radius-lg); border:1px solid var(--border-strong); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; background:var(--surface); color:var(--text);">הקודמת</button>
+      <button style="flex:1; font-family:var(--font-ui); font-weight:700; font-size:15.5px; min-height:52px; padding:10px 22px; border-radius:var(--radius-lg); border:1px solid transparent; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; background:var(--primary); color:var(--text-on-primary); box-shadow:var(--shadow-press);">הבאה</button>
+    </div>
+  </div>
+
+  <!-- Result state (replaces the slides after submit) -->
+  <div style="border-top:1px dashed var(--border-strong); padding-top:20px; display:flex; flex-direction:column; gap:10px;">
+    <span style="font-size:var(--type-caption-size); font-weight:var(--type-caption-weight); color:var(--text-faint);">מצב תוצאה · אחרי הגשה</span>
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-xl); box-shadow:var(--shadow-card); padding:28px 20px; display:flex; flex-direction:column; align-items:center; gap:14px; text-align:center;">
+      <span style="width:56px; height:56px; border-radius:50%; background:var(--gold-soft); color:var(--gold-text); border:3px solid var(--gold); display:inline-flex; align-items:center; justify-content:center; box-sizing:border-box;">
+        <svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1.2l2 4.2 4.6.6-3.4 3.2.9 4.6L8 11.6l-4.1 2.2.9-4.6L1.4 6l4.6-.6z"/></svg>
+      </span>
+      <h2 style="margin:0; font-size:var(--type-h1-size); font-weight:var(--type-h1-weight); color:var(--text);">עברת!</h2>
+      <span style="font-size:var(--type-body-size); color:var(--text-muted);">27 מתוך 30 נכון (ציון עובר: 26)</span>
+      <div style="display:flex; flex-direction:column; gap:10px; width:100%; max-width:280px;">
+        <button style="font-family:var(--font-ui); font-weight:700; font-size:15.5px; min-height:52px; border-radius:var(--radius-lg); border:1px solid var(--border-strong); cursor:pointer; background:var(--surface); color:var(--text);">סקירת התשובות</button>
+        <button style="font-family:var(--font-ui); font-weight:700; font-size:15.5px; min-height:52px; border-radius:var(--radius-lg); border:1px solid transparent; cursor:pointer; background:var(--primary); color:var(--text-on-primary); box-shadow:var(--shadow-press);">חזרה לסימולציה</button>
+      </div>
+    </div>
+  </div>
+
+</body></html>

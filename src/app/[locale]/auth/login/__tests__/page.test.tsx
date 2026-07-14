@@ -84,6 +84,56 @@ describe("LoginPage", () => {
     await renderPage();
     expect(screen.queryByText("linkExpired")).not.toBeInTheDocument();
   });
+
+  it("renders the trust badge and hero screenshot", async () => {
+    await renderPage();
+    expect(screen.getByText("trustBadge")).toBeInTheDocument();
+    expect(screen.getByAltText("screenshotHomeAlt")).toBeInTheDocument();
+  });
+
+  it("renders the three outcome-first feature cards, plan first", async () => {
+    await renderPage();
+    const titles = [
+      "featurePlanTitle",
+      "featureQuestionsTitle",
+      "featureCardsTitle",
+    ].map((key) => screen.getByText(key));
+    expect(titles[0].compareDocumentPosition(titles[1])).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+    expect(titles[1].compareDocumentPosition(titles[2])).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+  });
+
+  it("renders the peek-inside screenshots", async () => {
+    await renderPage();
+    expect(screen.getByAltText("screenshotQuizAlt")).toBeInTheDocument();
+    expect(screen.getByAltText("screenshotCardsAlt")).toBeInTheDocument();
+  });
+
+  it("renders all four FAQ items", async () => {
+    await renderPage();
+    for (const i of [1, 2, 3, 4]) {
+      expect(screen.getByText(`faq${i}Q`)).toBeInTheDocument();
+      expect(screen.getByText(`faq${i}A`)).toBeInTheDocument();
+    }
+  });
+
+  it("renders the emotional close with a CTA anchored to the login card", async () => {
+    const { container } = await renderPage();
+    const cta = screen.getByText("closeCta");
+    expect(cta).toHaveAttribute("href", "#login-card");
+    expect(container.querySelector("#login-card")).toBeTruthy();
+  });
+
+  it("renders the success card content hidden by default", async () => {
+    const { container } = await renderPage();
+    const banner = container.querySelector("#sent-banner");
+    expect(banner).toBeTruthy();
+    expect(screen.getByText("sentTitle")).toBeInTheDocument();
+    expect(screen.getByText("resendBtn")).toBeInTheDocument();
+  });
 });
 
 describe("generateMetadata", () => {

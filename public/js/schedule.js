@@ -36,7 +36,7 @@
     if (summaryText) {
       summaryText.textContent = selectedDays.size > 0
         ? tf(t.summarySessions || '{count} מפגשים בשבוע, {duration} דק׳ כל אחד', { count: selectedDays.size, duration: selectedDuration })
-        : (t.summaryChoose || "בחרי ימים כדי להתחיל");
+        : (t.summaryChoose || "יש לבחור ימים כדי להתחיל");
     }
   }
 
@@ -104,12 +104,12 @@
 
   saveBtn.addEventListener("click", async function () {
     if (selectedDays.size === 0) {
-      alert(t.needDay || "בחרי לפחות יום אחד ללמוד.");
+      alert(t.needDay || "יש לבחור לפחות יום אחד ללמוד.");
       return;
     }
 
     saveBtn.disabled = true;
-    saveBtn.textContent = t.saving || "שומרת...";
+    saveBtn.textContent = t.saving || "שומרים...";
 
     try {
       if (notifyOn && window.pushHelpers) {
@@ -134,7 +134,7 @@
         window.location.href = "/";
       }, 800);
     } catch {
-      alert(t.saveError || "שגיאה בשמירה, נסי שוב.");
+      alert(t.saveError || "שגיאה בשמירה, אפשר לנסות שוב.");
       saveBtn.disabled = false;
       saveBtn.textContent = originalSaveBtnText;
     }

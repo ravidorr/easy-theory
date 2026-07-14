@@ -160,6 +160,10 @@ const ICONS = {
       </g>
     ),
   },
+  check: {
+    viewBox: "0 0 24 24",
+    content: <path d="M20 6 9 17l-5-5" {...stroke} strokeWidth={2.5} />,
+  },
 } satisfies Record<string, { viewBox: string; content: ReactElement }>;
 
 export type IconName = keyof typeof ICONS;

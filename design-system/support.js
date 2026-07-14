@@ -191,7 +191,9 @@
       return h(Root, { ...defaults, ...entry.propOverrides || {} });
     }
     const ReactDOM = getReactDOM();
-    ReactDOM.createRoot(hostEl).render(h(StandaloneRoot));
+    if (ReactDOM.createRoot)
+      ReactDOM.createRoot(hostEl).render(h(StandaloneRoot));
+    else ReactDOM.render(h(StandaloneRoot), hostEl);
     return rootName;
   }
 
@@ -1084,13 +1086,13 @@
           filename: url,
           presets: ["react", "typescript"]
         }).code : src;
-        const mod = { exports: {} };
+        const module = { exports: {} };
         const before = new Set(Object.keys(window));
         //! nosemgrep: eval-and-function-constructor
         new Function("React", "module", "exports", "require", code)(
           getReact(),
-          mod,
-          mod.exports,
+          module,
+          module.exports,
           () => ({})
         );
         const globals = {};
@@ -1099,12 +1101,12 @@
             globals[k] = window[k];
           }
         }
-        cache.set(url, { mod: mod.exports, globals });
+        cache.set(url, { mod: module.exports, globals });
         console.info(
           "[dc-runtime] x-import: loaded",
           url,
           "\u2014 exports:",
-          Object.keys(mod.exports),
+          Object.keys(module.exports),
           "window globals:",
           Object.keys(globals)
         );

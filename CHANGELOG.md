@@ -4,6 +4,13 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ## [Unreleased]
 
+### Added
+- Landing page v2 per the updated design system: trust badge ("מבוסס על המאגר הרשמי"), phone-framed real app screenshots (hero + "הצצה פנימה" gallery, captured from the QA environment into `public/landing/`), a 4-item FAQ section, an emotional-close card whose CTA anchors back to the login card, and a redesigned magic-link success card (check circle, spam hint, "שליחה מחדש" pill) that replaces the form on success. New `check` icon in the Icon component. New/updated `Login` keys in he + ar; Arabic phrasing pending professional-translator review.
+
+### Changed
+- Imported the ClearRoad design-system full export (14.07.2026) verbatim into `design-system/`: gender-neutral voice docs, new kit screens (exam intro/run, review, credits, 404, landing v2), medals grid on more, readiness/weak-topics on home, favicon + official sign assets, and design-tool helpers (`image-slot.js`, `tweaks-panel.jsx`). The directory is now an exact mirror of the design tool's export (kit specimens are inline-styled by design) and is exempt from ESLint/stylelint/htmlhint-title/markdownlint; orphaned per-kit CSS files were removed. The export's `uploads/` source scans were not imported (the zip's signs-chart.pdf is truncated).
+- Gender-neutral Hebrew copy pass across the app per the design-system voice change: feminine imperatives/present-tense/plurals (שלחי, בחרי, נסי, שומרת, מתחילות, ממשיכות, אלייך...) replaced with infinitives and first-person plural in `messages/he.json`, `public/js` fallback strings, and the review retry button (now "חזרה על הטעויות"); Arabic counterparts updated to neutral masdar phrasing (pending professional-translator review).
+
 ### Fixed
 - ESLint warnings in maintained application code: exclude imported `design-system/` artifacts from linting, fix unused-variable warnings in `schedule.js` and the topics route test, and add schedule save-failure script tests.
 - Next.js workspace-root warning during dev and build by setting `turbopack.root` to the project directory and removing an empty home-level `package-lock.json` that caused incorrect root inference.
