@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.106] - 2026-07-14
+
+### Fixed
+- Quiz submission identifiers now use cryptographically secure browser randomness when `crypto.randomUUID` is unavailable.
+
+---
+
 ## [0.3.105] - 2026-07-14
 
 ### Fixed

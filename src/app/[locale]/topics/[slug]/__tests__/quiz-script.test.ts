@@ -110,7 +110,34 @@ describe("quiz.js – rejected answer persistence", () => {
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
     vi.unstubAllGlobals();
+  });
+
+  it("uses secure random bytes when randomUUID is unavailable", async () => {
+    const getRandomValues = vi.fn((bytes: Uint8Array) => {
+      bytes.set(Array.from({ length: bytes.length }, (_, index) => index));
+      return bytes;
+    });
+    vi.stubGlobal("crypto", { getRandomValues });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) })
+    );
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    setupDOM();
+
+    clickOption(0, "a");
+    clickAction();
+    await flushAsyncWork();
+
+    const requestBody = JSON.parse(fetchCalls("/api/quiz")[0][1].body);
+    expect(getRandomValues).toHaveBeenCalledOnce();
+    expect(requestBody.session_id).toBe("00010203-0405-4607-8809-0a0b0c0d0e0f");
+    expect(requestBody.idempotency_key).toBe(
+      "00010203-0405-4607-8809-0a0b0c0d0e0f:q1"
+    );
+    expect(Math.random).not.toHaveBeenCalled();
   });
 
   it("keeps the question open after a non-ok response and retries the same answer once", async () => {

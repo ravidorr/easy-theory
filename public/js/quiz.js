@@ -72,16 +72,37 @@
     return null;
   })();
 
+  function createSessionId() {
+    const cryptoApi = window.crypto;
+    if (!cryptoApi) return null;
+    if (typeof cryptoApi.randomUUID === "function") {
+      return cryptoApi.randomUUID();
+    }
+    if (typeof cryptoApi.getRandomValues !== "function") return null;
+
+    const bytes = cryptoApi.getRandomValues(new Uint8Array(16));
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    const hex = Array.from(bytes, function (byte) {
+      return byte.toString(16).padStart(2, "0");
+    }).join("");
+    return (
+      hex.slice(0, 8) +
+      "-" +
+      hex.slice(8, 12) +
+      "-" +
+      hex.slice(12, 16) +
+      "-" +
+      hex.slice(16, 20) +
+      "-" +
+      hex.slice(20)
+    );
+  }
+
   // One session id per quiz run — lets the review page scope mistakes to the
   // latest run. A resumed run keeps its original id.
-  const sessionId =
-    (resumed && resumed.sessionId) ||
-    (window.crypto && typeof window.crypto.randomUUID === "function"
-      ? window.crypto.randomUUID()
-      : null);
-  const submissionSessionKey =
-    sessionId ||
-    "fallback-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2);
+  const sessionId = (resumed && resumed.sessionId) || createSessionId();
+  const submissionSessionKey = sessionId;
 
   const slides = Array.from(document.querySelectorAll(".quiz-slide"));
   const actionBtn = document.getElementById("quiz-next");
@@ -313,6 +334,12 @@
       pendingSubmission.questionId !== questionId ||
       pendingSubmission.selectedOption !== selectedOption
     ) {
+      if (!submissionSessionKey) {
+        showPermanentSubmissionFailure(
+          t.saveAnswerError || "לא הצלחנו לשמור את התשובה. נסי שוב."
+        );
+        return;
+      }
       pendingSubmission = {
         questionId: questionId,
         selectedOption: selectedOption,
