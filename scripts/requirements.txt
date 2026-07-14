@@ -1,0 +1,10 @@
+# Third-party dependencies for the scripts/*.py one-time pipelines.
+# Only remove_sign_backgrounds.py needs these; the other Python scripts
+# (audit_sign_images.py, download_wikipedia_signs.py, extract_signs.py,
+# parse_questions.py) are stdlib-only.
+# extract_signs.py additionally requires the external `pdftohtml` binary
+# (poppler) on PATH.
+#
+# Install: python3 -m pip install -r scripts/requirements.txt
+Pillow
+numpy
