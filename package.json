@@ -1,6 +1,6 @@
 {
   "name": "clear-road",
-  "version": "0.3.122",
+  "version": "0.3.124",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -19,7 +19,8 @@
     "translate-arabic": "tsx --env-file=.env.local scripts/translate_arabic.ts",
     "qa:dev": "scripts/qa/qa-dev.sh",
     "qa:mint": "tsx --env-file=.env.qa scripts/qa/mint-session.ts",
-    "qa:validate-report": "tsx scripts/qa/validate-report.ts"
+    "qa:validate-report": "tsx scripts/qa/validate-report.ts",
+    "qa:publish-evidence": "scripts/qa/publish-evidence.sh"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

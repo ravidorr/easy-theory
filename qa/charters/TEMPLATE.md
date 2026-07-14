@@ -1,5 +1,6 @@
 ---
 # Unique charter id — also used in run-dir names: qa/runs/<timestamp>_<id>/
+# (the run dir is ephemeral staging — published to GitHub and deleted at teardown)
 id: "NNN-short-slug"
 title: "One-line human title"
 # One-line route through the app.
