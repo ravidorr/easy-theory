@@ -20,6 +20,8 @@ const eslintConfig = defineConfig([
     "coverage/**",
     // Imported Designer output (tokens consumed by app; not app source)
     "design-system/**",
+    // Conductor workspace scratch dir (attachments, agent collaboration files)
+    ".context/**",
   ]),
 ]);
 

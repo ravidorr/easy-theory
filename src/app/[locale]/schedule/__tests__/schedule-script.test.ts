@@ -74,7 +74,7 @@ describe("schedule.js – save failure handling", () => {
 
     const btn = document.getElementById("save-schedule-btn") as HTMLButtonElement;
     expect(btn.disabled).toBe(true);
-    expect(btn.textContent).toBe("שומרת...");
+    expect(btn.textContent).toBe("שומרים...");
   });
 
   it("restores button text and re-enables after a non-OK response", async () => {
@@ -90,7 +90,7 @@ describe("schedule.js – save failure handling", () => {
     const btn = document.getElementById("save-schedule-btn") as HTMLButtonElement;
     expect(btn.disabled).toBe(false);
     expect(btn.textContent).toBe("שמרי");
-    expect(alertSpy).toHaveBeenCalledWith("שגיאה בשמירה, נסי שוב.");
+    expect(alertSpy).toHaveBeenCalledWith("שגיאה בשמירה, אפשר לנסות שוב.");
     alertSpy.mockRestore();
   });
 
@@ -104,7 +104,7 @@ describe("schedule.js – save failure handling", () => {
     const btn = document.getElementById("save-schedule-btn") as HTMLButtonElement;
     expect(btn.disabled).toBe(false);
     expect(btn.textContent).toBe("שמרי");
-    expect(alertSpy).toHaveBeenCalledWith("שגיאה בשמירה, נסי שוב.");
+    expect(alertSpy).toHaveBeenCalledWith("שגיאה בשמירה, אפשר לנסות שוב.");
     alertSpy.mockRestore();
   });
 });
@@ -129,7 +129,7 @@ describe("schedule.js – pickers and notify toggle", () => {
       "טרם נבחרו ימים"
     );
     expect(document.getElementById("summary-text")!.textContent).toBe(
-      "בחרי ימים כדי להתחיל"
+      "יש לבחור ימים כדי להתחיל"
     );
   });
 
@@ -200,7 +200,7 @@ describe("schedule.js – successful save", () => {
     dayBtn(0).click();
     clickSave();
 
-    expect(alertSpy).toHaveBeenCalledWith("בחרי לפחות יום אחד ללמוד.");
+    expect(alertSpy).toHaveBeenCalledWith("יש לבחור לפחות יום אחד ללמוד.");
     expect(fetchMock).not.toHaveBeenCalled();
     alertSpy.mockRestore();
   });

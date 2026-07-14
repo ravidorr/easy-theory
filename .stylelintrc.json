@@ -1,6 +1,6 @@
 {
   "extends": ["stylelint-config-standard"],
-  "ignoreFiles": ["node_modules/**", ".next/**", "build/**"],
+  "ignoreFiles": ["node_modules/**", ".next/**", "build/**", "design-system/**"],
   "rules": {
     "selector-class-pattern": ["^[a-z][a-z0-9]*(-{1,2}[a-z0-9]+)*$", { "message": "Class names must be kebab-case (BEM -- modifier allowed)" }],
     "declaration-block-single-line-max-declarations": 1

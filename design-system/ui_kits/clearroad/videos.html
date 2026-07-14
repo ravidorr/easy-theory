@@ -1,93 +1,93 @@
 <!-- @dsCard group="Screens" viewport="420x1040" subtitle="שיעורים ומרתונים ביוטיוב" name="Videos · סרטוני לימוד" -->
 <!DOCTYPE html>
-<html lang="he" dir="rtl"><head><meta charset="utf-8"><title>ClearRoad – Videos</title><link rel="stylesheet" href="../../styles.css"><link rel="stylesheet" href="videos.css"></head>
-<body>
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><link rel="stylesheet" href="../../styles.css"></head>
+<body style="background:var(--bg); margin:0; padding:20px; display:flex; flex-direction:column; gap:20px; max-width:420px; box-sizing:border-box; min-height:100vh;">
 
   <!-- Top bar -->
-  <div class="top-bar">
-    <button>→</button>
-    <div class="top-bar-header">
-      <h1>סרטוני לימוד</h1>
-      <span class="page-subtitle">שיעורים קצרים ומרתונים, לפי נושא.</span>
+  <div style="display:flex; align-items:center; gap:14px;">
+    <button style="width:44px; height:44px; border-radius:50%; border:1px solid var(--border-strong); background:var(--surface); color:var(--text-muted); font-size:20px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; font-family:var(--font-ui);">→</button>
+    <div style="display:flex; flex-direction:column; gap:2px;">
+      <h1 style="margin:0; font-size:var(--type-h1-size); font-weight:var(--type-h1-weight); line-height:var(--line-tight); color:var(--text);">סרטוני לימוד</h1>
+      <span style="font-size:var(--type-small-size); color:var(--text-muted);">שיעורים קצרים ומרתונים, לפי נושא.</span>
     </div>
   </div>
 
   <!-- Marathons -->
-  <div class="section">
-    <h2>מרתונים</h2>
+  <div style="display:flex; flex-direction:column; gap:12px;">
+    <h2 style="margin:0; font-size:var(--type-h2-size); font-weight:var(--type-h2-weight); color:var(--text);">מרתונים</h2>
 
-    <a href="https://www.youtube.com/watch?v=gd6ES_aAdI0" target="_blank" rel="noopener" class="video-card-featured">
-      <div class="video-thumbnail">
-        <img class="thumbnail-img" src="https://i.ytimg.com/vi/gd6ES_aAdI0/hqdefault.jpg" alt="">
-        <span class="play-btn play-btn--lg">
-          <svg class="play-icon" width="20" height="20" aria-hidden="true"><use href="../../icons.svg#icon-play"/></svg>
+    <a href="https://www.youtube.com/watch?v=gd6ES_aAdI0" target="_blank" rel="noopener" style="text-decoration:none; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-xl); box-shadow:var(--shadow-card); overflow:hidden; display:flex; flex-direction:column;">
+      <div style="position:relative; aspect-ratio:16/9; background:var(--surface-2);">
+        <img src="https://i.ytimg.com/vi/gd6ES_aAdI0/hqdefault.jpg" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;">
+        <span style="position:absolute; inset-inline-start:50%; top:50%; transform:translate(50%,-50%); width:52px; height:52px; border-radius:50%; background:rgba(24,32,60,0.65); display:flex; align-items:center; justify-content:center;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" style="transform:scaleX(-1);"><path d="M8 5v14l11-7z"/></svg>
         </span>
-        <span class="duration-badge">40 דק׳</span>
+        <span style="position:absolute; bottom:10px; inset-inline-start:10px; background:rgba(24,32,60,0.75); color:#fff; border-radius:var(--radius-sm); padding:2px 8px; font-size:var(--type-caption-size); font-weight:var(--type-caption-weight);">40 דק׳</span>
       </div>
-      <div class="video-card-body">
-        <span class="video-title">מרתון הכנה למבחן התיאוריה</span>
-        <span class="video-desc">סיכום נושאי הליבה: זמני תגובה, הסחות דעת ועוד</span>
+      <div style="padding:14px 16px; display:flex; flex-direction:column; gap:2px;">
+        <span style="font-weight:600; font-size:var(--type-body-size); color:var(--text);">מרתון הכנה למבחן התיאוריה</span>
+        <span style="font-size:var(--type-small-size); color:var(--text-muted); line-height:var(--line-body);">סיכום נושאי הליבה: זמני תגובה, הסחות דעת ועוד</span>
       </div>
     </a>
 
-    <a href="https://www.youtube.com/watch?v=WsVi4kEiaPE" target="_blank" rel="noopener" class="video-card-row">
-      <div class="video-thumbnail-sm">
-        <img class="thumbnail-img" src="https://i.ytimg.com/vi/WsVi4kEiaPE/hqdefault.jpg" alt="">
-        <span class="play-btn play-btn--sm">
-          <svg class="play-icon" width="12" height="12" aria-hidden="true"><use href="../../icons.svg#icon-play"/></svg>
+    <a href="https://www.youtube.com/watch?v=WsVi4kEiaPE" target="_blank" rel="noopener" style="text-decoration:none; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow-card); padding:12px; display:flex; align-items:center; gap:12px;">
+      <div style="position:relative; width:120px; aspect-ratio:16/9; border-radius:var(--radius-sm); background:var(--surface-2); overflow:hidden; flex-shrink:0;">
+        <img src="https://i.ytimg.com/vi/WsVi4kEiaPE/hqdefault.jpg" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;">
+        <span style="position:absolute; inset-inline-start:50%; top:50%; transform:translate(50%,-50%); width:30px; height:30px; border-radius:50%; background:rgba(24,32,60,0.65); display:flex; align-items:center; justify-content:center;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff" style="transform:scaleX(-1);"><path d="M8 5v14l11-7z"/></svg>
         </span>
       </div>
-      <div class="video-body">
-        <span class="video-title">שיעור חזרה מרוכז</span>
-        <span class="video-desc">מעבר על חומר הליבה הנדרש למבחן</span>
+      <div style="flex:1; display:flex; flex-direction:column; gap:2px; min-width:0;">
+        <span style="font-weight:600; font-size:var(--type-body-size); color:var(--text); line-height:var(--line-tight);">שיעור חזרה מרוכז</span>
+        <span style="font-size:var(--type-small-size); color:var(--text-muted); line-height:var(--line-body);">מעבר על חומר הליבה הנדרש למבחן</span>
       </div>
     </a>
   </div>
 
   <!-- Lessons -->
-  <div class="section">
-    <h2>שיעורים לפי נושא</h2>
+  <div style="display:flex; flex-direction:column; gap:12px;">
+    <h2 style="margin:0; font-size:var(--type-h2-size); font-weight:var(--type-h2-weight); color:var(--text);">שיעורים לפי נושא</h2>
 
-    <a href="https://www.youtube.com/watch?v=vk37Vd80S2E" target="_blank" rel="noopener" class="video-card-row">
-      <div class="video-thumbnail-sm">
-        <img class="thumbnail-img" src="https://i.ytimg.com/vi/vk37Vd80S2E/hqdefault.jpg" alt="">
-        <span class="play-btn play-btn--sm">
-          <svg class="play-icon" width="12" height="12" aria-hidden="true"><use href="../../icons.svg#icon-play"/></svg>
+    <a href="https://www.youtube.com/watch?v=vk37Vd80S2E" target="_blank" rel="noopener" style="text-decoration:none; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow-card); padding:12px; display:flex; align-items:center; gap:12px;">
+      <div style="position:relative; width:120px; aspect-ratio:16/9; border-radius:var(--radius-sm); background:var(--surface-2); overflow:hidden; flex-shrink:0;">
+        <img src="https://i.ytimg.com/vi/vk37Vd80S2E/hqdefault.jpg" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;">
+        <span style="position:absolute; inset-inline-start:50%; top:50%; transform:translate(50%,-50%); width:30px; height:30px; border-radius:50%; background:rgba(24,32,60,0.65); display:flex; align-items:center; justify-content:center;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff" style="transform:scaleX(-1);"><path d="M8 5v14l11-7z"/></svg>
         </span>
       </div>
-      <div class="video-body video-body--lesson">
-        <span class="video-title">מבוא לתמרורים</span>
-        <span class="video-tag">תמרורים</span>
+      <div style="flex:1; display:flex; flex-direction:column; gap:4px; min-width:0;">
+        <span style="font-weight:600; font-size:var(--type-body-size); color:var(--text); line-height:var(--line-tight);">מבוא לתמרורים</span>
+        <span style="align-self:flex-start; background:var(--primary-soft); color:var(--primary-soft-text); border-radius:var(--radius-sm); padding:2px 8px; font-size:var(--type-caption-size); font-weight:var(--type-caption-weight);">תמרורים</span>
       </div>
     </a>
 
-    <a href="https://www.youtube.com/watch?v=Rp4wFyF-dok" target="_blank" rel="noopener" class="video-card-row">
-      <div class="video-thumbnail-sm">
-        <img class="thumbnail-img" src="https://i.ytimg.com/vi/Rp4wFyF-dok/hqdefault.jpg" alt="">
-        <span class="play-btn play-btn--sm">
-          <svg class="play-icon" width="12" height="12" aria-hidden="true"><use href="../../icons.svg#icon-play"/></svg>
+    <a href="https://www.youtube.com/watch?v=Rp4wFyF-dok" target="_blank" rel="noopener" style="text-decoration:none; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow-card); padding:12px; display:flex; align-items:center; gap:12px;">
+      <div style="position:relative; width:120px; aspect-ratio:16/9; border-radius:var(--radius-sm); background:var(--surface-2); overflow:hidden; flex-shrink:0;">
+        <img src="https://i.ytimg.com/vi/Rp4wFyF-dok/hqdefault.jpg" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;">
+        <span style="position:absolute; inset-inline-start:50%; top:50%; transform:translate(50%,-50%); width:30px; height:30px; border-radius:50%; background:rgba(24,32,60,0.65); display:flex; align-items:center; justify-content:center;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff" style="transform:scaleX(-1);"><path d="M8 5v14l11-7z"/></svg>
         </span>
       </div>
-      <div class="video-body video-body--lesson">
-        <span class="video-title">זכות קדימה בצמתים</span>
-        <span class="video-tag">זכות קדימה</span>
+      <div style="flex:1; display:flex; flex-direction:column; gap:4px; min-width:0;">
+        <span style="font-weight:600; font-size:var(--type-body-size); color:var(--text); line-height:var(--line-tight);">זכות קדימה בצמתים</span>
+        <span style="align-self:flex-start; background:var(--primary-soft); color:var(--primary-soft-text); border-radius:var(--radius-sm); padding:2px 8px; font-size:var(--type-caption-size); font-weight:var(--type-caption-weight);">זכות קדימה</span>
       </div>
     </a>
 
-    <a href="https://www.youtube.com/watch?v=nwbIrAdn8Qc" target="_blank" rel="noopener" class="video-card-row">
-      <div class="video-thumbnail-sm">
-        <img class="thumbnail-img" src="https://i.ytimg.com/vi/nwbIrAdn8Qc/hqdefault.jpg" alt="">
-        <span class="play-btn play-btn--sm">
-          <svg class="play-icon" width="12" height="12" aria-hidden="true"><use href="../../icons.svg#icon-play"/></svg>
+    <a href="https://www.youtube.com/watch?v=nwbIrAdn8Qc" target="_blank" rel="noopener" style="text-decoration:none; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow-card); padding:12px; display:flex; align-items:center; gap:12px;">
+      <div style="position:relative; width:120px; aspect-ratio:16/9; border-radius:var(--radius-sm); background:var(--surface-2); overflow:hidden; flex-shrink:0;">
+        <img src="https://i.ytimg.com/vi/nwbIrAdn8Qc/hqdefault.jpg" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;">
+        <span style="position:absolute; inset-inline-start:50%; top:50%; transform:translate(50%,-50%); width:30px; height:30px; border-radius:50%; background:rgba(24,32,60,0.65); display:flex; align-items:center; justify-content:center;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff" style="transform:scaleX(-1);"><path d="M8 5v14l11-7z"/></svg>
         </span>
       </div>
-      <div class="video-body video-body--lesson">
-        <span class="video-title">התנהגות בצמתים מורכבים</span>
-        <span class="video-tag">זכות קדימה</span>
+      <div style="flex:1; display:flex; flex-direction:column; gap:4px; min-width:0;">
+        <span style="font-weight:600; font-size:var(--type-body-size); color:var(--text); line-height:var(--line-tight);">התנהגות בצמתים מורכבים</span>
+        <span style="align-self:flex-start; background:var(--primary-soft); color:var(--primary-soft-text); border-radius:var(--radius-sm); padding:2px 8px; font-size:var(--type-caption-size); font-weight:var(--type-caption-weight);">זכות קדימה</span>
       </div>
     </a>
   </div>
 
-  <span class="page-footer">הסרטונים נפתחים ביוטיוב</span>
+  <span style="font-size:var(--type-caption-size); color:var(--text-faint); text-align:center; line-height:var(--line-body); margin-top:auto;">הסרטונים נפתחים ביוטיוב</span>
 
 </body></html>

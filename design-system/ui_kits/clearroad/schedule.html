@@ -1,107 +1,107 @@
 <!-- @dsCard group="Screens" viewport="420x900" subtitle="תוכנית שבועית, מדליות, תאריך מבחן" name="Schedule · התוכנית שלך" -->
 <!DOCTYPE html>
-<html lang="he" dir="rtl"><head><meta charset="utf-8"><title>ClearRoad – Schedule</title><link rel="stylesheet" href="../../styles.css"><link rel="stylesheet" href="schedule.css"></head>
-<body>
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><link rel="stylesheet" href="../../styles.css"></head>
+<body style="background:var(--bg); margin:0; padding:20px; display:flex; flex-direction:column; gap:20px; max-width:420px; box-sizing:border-box; min-height:100vh;">
 
   <!-- Header -->
-  <div class="page-header">
-    <h1>התוכנית שלך</h1>
-    <span class="page-subtitle">30 עד 60 דקות ביום, בקצב שלך.</span>
+  <div style="display:flex; flex-direction:column; gap:4px;">
+    <h1 style="margin:0; font-size:var(--type-h1-size); font-weight:var(--type-h1-weight); line-height:var(--line-tight); color:var(--text);">התוכנית שלך</h1>
+    <span style="font-size:var(--type-small-size); color:var(--text-muted);">30 עד 60 דקות ביום, בקצב שלך.</span>
   </div>
 
   <!-- Week strip -->
-  <div class="week-strip">
-    <div class="week-day">
-      <span class="week-day-label">א</span>
-      <span class="week-step week-step--done">✓</span>
+  <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-xl); box-shadow:var(--shadow-card); padding:16px; display:flex; justify-content:space-between; gap:4px;">
+    <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+      <span style="font-size:var(--type-caption-size); font-weight:var(--type-caption-weight); color:var(--text-faint);">א</span>
+      <span style="width:34px; height:34px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; background:var(--primary); color:#fff;">✓</span>
     </div>
-    <div class="week-day">
-      <span class="week-day-label">ב</span>
-      <span class="week-step week-step--done">✓</span>
+    <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+      <span style="font-size:var(--type-caption-size); font-weight:var(--type-caption-weight); color:var(--text-faint);">ב</span>
+      <span style="width:34px; height:34px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; background:var(--primary); color:#fff;">✓</span>
     </div>
-    <div class="week-day">
-      <span class="week-day-label week-day-label--current">ג</span>
-      <span class="week-step week-step--current">3</span>
+    <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+      <span style="font-size:var(--type-caption-size); font-weight:var(--type-caption-weight); color:var(--primary-soft-text);">ג</span>
+      <span style="width:34px; height:34px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; background:var(--surface); color:var(--primary-soft-text); border:3px solid var(--primary); box-sizing:border-box;">3</span>
     </div>
-    <div class="week-day">
-      <span class="week-day-label">ד</span>
-      <span class="week-step week-step--future">4</span>
+    <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+      <span style="font-size:var(--type-caption-size); font-weight:var(--type-caption-weight); color:var(--text-faint);">ד</span>
+      <span style="width:34px; height:34px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; background:var(--surface-2); color:var(--text-faint);">4</span>
     </div>
-    <div class="week-day">
-      <span class="week-day-label">ה</span>
-      <span class="week-step week-step--future">5</span>
+    <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+      <span style="font-size:var(--type-caption-size); font-weight:var(--type-caption-weight); color:var(--text-faint);">ה</span>
+      <span style="width:34px; height:34px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; background:var(--surface-2); color:var(--text-faint);">5</span>
     </div>
-    <div class="week-day">
-      <span class="week-day-label">ו</span>
-      <span class="week-step week-step--future">6</span>
+    <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+      <span style="font-size:var(--type-caption-size); font-weight:var(--type-caption-weight); color:var(--text-faint);">ו</span>
+      <span style="width:34px; height:34px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; background:var(--surface-2); color:var(--text-faint);">6</span>
     </div>
-    <div class="week-day">
-      <span class="week-day-label">ש</span>
-      <span class="week-step week-step--future">·</span>
+    <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+      <span style="font-size:var(--type-caption-size); font-weight:var(--type-caption-weight); color:var(--text-faint);">ש</span>
+      <span style="width:34px; height:34px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; background:var(--surface-2); color:var(--text-faint);">·</span>
     </div>
   </div>
 
   <!-- Upcoming tasks -->
-  <div class="section">
-    <h2>הקרובות בתור</h2>
+  <div style="display:flex; flex-direction:column; gap:12px;">
+    <h2 style="margin:0; font-size:var(--type-h2-size); font-weight:var(--type-h2-weight); color:var(--text);">הקרובות בתור</h2>
 
-    <div class="task-row">
-      <div class="task-info">
-        <span class="task-name">זכות קדימה, חלק 3</span>
-        <span class="task-sub">היום · 8 שאלות תרגול</span>
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow-card); padding:16px; display:flex; align-items:center; gap:14px;">
+      <div style="flex:1; display:flex; flex-direction:column; gap:2px;">
+        <span style="font-weight:600; font-size:var(--type-body-size); color:var(--text);">זכות קדימה, חלק 3</span>
+        <span style="font-size:var(--type-small-size); color:var(--text-muted);">היום · 8 שאלות תרגול</span>
       </div>
-      <span class="time-badge">20 דק׳</span>
+      <span style="background:var(--primary-soft); color:var(--primary-soft-text); border-radius:var(--radius-sm); padding:3px 10px; font-size:var(--type-caption-size); font-weight:var(--type-caption-weight); flex-shrink:0;">20 דק׳</span>
     </div>
 
-    <div class="task-row">
-      <div class="task-info">
-        <span class="task-name">תמרורים: חזרה בכרטיסיות</span>
-        <span class="task-sub">מחר · 12 כרטיסים</span>
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow-card); padding:16px; display:flex; align-items:center; gap:14px;">
+      <div style="flex:1; display:flex; flex-direction:column; gap:2px;">
+        <span style="font-weight:600; font-size:var(--type-body-size); color:var(--text);">תמרורים: חזרה בכרטיסיות</span>
+        <span style="font-size:var(--type-small-size); color:var(--text-muted);">מחר · 12 כרטיסים</span>
       </div>
-      <span class="time-badge">15 דק׳</span>
+      <span style="background:var(--primary-soft); color:var(--primary-soft-text); border-radius:var(--radius-sm); padding:3px 10px; font-size:var(--type-caption-size); font-weight:var(--type-caption-weight); flex-shrink:0;">15 דק׳</span>
     </div>
 
-    <div class="task-row">
-      <div class="task-info">
-        <span class="task-name">מבחן תרגול קצר</span>
-        <span class="task-sub">יום ה׳ · 15 שאלות מעורבות</span>
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow-card); padding:16px; display:flex; align-items:center; gap:14px;">
+      <div style="flex:1; display:flex; flex-direction:column; gap:2px;">
+        <span style="font-weight:600; font-size:var(--type-body-size); color:var(--text);">מבחן תרגול קצר</span>
+        <span style="font-size:var(--type-small-size); color:var(--text-muted);">יום ה׳ · 15 שאלות מעורבות</span>
       </div>
-      <span class="time-badge">30 דק׳</span>
+      <span style="background:var(--primary-soft); color:var(--primary-soft-text); border-radius:var(--radius-sm); padding:3px 10px; font-size:var(--type-caption-size); font-weight:var(--type-caption-weight); flex-shrink:0;">30 דק׳</span>
     </div>
   </div>
 
   <!-- Medals -->
-  <div class="section">
-    <h2>המדליות שלך</h2>
-    <div class="medals-row">
-      <div class="medal">
-        <div class="medal-icon">
-          <svg width="27" height="27" aria-hidden="true"><use href="../../icons.svg#icon-star"/></svg>
+  <div style="display:flex; flex-direction:column; gap:12px;">
+    <h2 style="margin:0; font-size:var(--type-h2-size); font-weight:var(--type-h2-weight); color:var(--text);">המדליות שלך</h2>
+    <div style="display:flex; justify-content:space-around; gap:8px;">
+      <div style="display:inline-flex; flex-direction:column; align-items:center; gap:8px; width:88px;">
+        <div style="width:64px; height:64px; border-radius:50%; background:var(--gold-soft); color:var(--gold-text); border:3px solid var(--gold); display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow-card);">
+          <svg width="27" height="27" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1.2l2 4.2 4.6.6-3.4 3.2.9 4.6L8 11.6l-4.1 2.2.9-4.6L1.4 6l4.6-.6z"/></svg>
         </div>
-        <span class="medal-label">שבוע ראשון</span>
+        <span style="font-size:var(--type-caption-size); font-weight:600; text-align:center; color:var(--text); line-height:1.35;">שבוע ראשון</span>
       </div>
-      <div class="medal">
-        <div class="medal-icon">
-          <svg width="27" height="27" aria-hidden="true"><use href="../../icons.svg#icon-flame-gold"/></svg>
+      <div style="display:inline-flex; flex-direction:column; align-items:center; gap:8px; width:88px;">
+        <div style="width:64px; height:64px; border-radius:50%; background:var(--gold-soft); color:var(--gold-text); border:3px solid var(--gold); display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow-card);">
+          <svg width="27" height="27" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1.5c.4 2.2 3.1 3.4 3.9 5.8.9 2.7-.8 6-3.9 6s-4.8-3.3-3.9-6c.4-1.3 1.4-2.2 2.2-3.2.8-1 1.5-1.7 1.7-2.6z"/><circle cx="8" cy="10.6" r="2.1" fill="var(--gold-soft)" opacity="0.85"/></svg>
         </div>
-        <span class="medal-label">5 ימים ברצף</span>
+        <span style="font-size:var(--type-caption-size); font-weight:600; text-align:center; color:var(--text); line-height:1.35;">5 ימים ברצף</span>
       </div>
-      <div class="medal">
-        <div class="medal-icon medal-icon--locked">
-          <span>✓</span>
+      <div style="display:inline-flex; flex-direction:column; align-items:center; gap:8px; width:88px;">
+        <div style="width:64px; height:64px; border-radius:50%; background:var(--surface-2); color:var(--text-faint); border:3px solid var(--surface-3); display:flex; align-items:center; justify-content:center;">
+          <span style="font-size:26px; font-weight:800; line-height:1;">✓</span>
         </div>
-        <span class="medal-label medal-label--locked">100 שאלות</span>
+        <span style="font-size:var(--type-caption-size); font-weight:600; text-align:center; color:var(--text-faint); line-height:1.35;">100 שאלות</span>
       </div>
     </div>
   </div>
 
   <!-- Exam date (calm framing) -->
-  <div class="exam-banner">
-    <div class="exam-info">
-      <span class="exam-label">מבחן התיאוריה שלך</span>
-      <span class="exam-sub">יש מספיק זמן, את בדרך טובה.</span>
+  <div style="background:var(--primary-soft); border-radius:var(--radius-xl); padding:18px 20px; display:flex; align-items:center; gap:14px;">
+    <div style="flex:1; display:flex; flex-direction:column; gap:2px;">
+      <span style="font-weight:600; font-size:var(--type-body-size); color:var(--primary-soft-text);">מבחן התיאוריה שלך</span>
+      <span style="font-size:var(--type-small-size); color:var(--text-muted);">יש מספיק זמן, את בדרך טובה.</span>
     </div>
-    <span class="exam-date">21.7</span>
+    <span style="font-weight:800; font-size:var(--type-h2-size); color:var(--primary-soft-text); flex-shrink:0;">21.7</span>
   </div>
 
 </body></html>

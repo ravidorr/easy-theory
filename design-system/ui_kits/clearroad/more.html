@@ -1,70 +1,102 @@
 <!-- @dsCard group="Screens" viewport="420x900" subtitle="תוכנית, סרטונים, חומרים, מצב כהה" name="More · עוד" -->
 <!DOCTYPE html>
-<html lang="he" dir="rtl"><head><meta charset="utf-8"><title>ClearRoad – More</title><link rel="stylesheet" href="../../styles.css"><link rel="stylesheet" href="more.css"></head>
-<body>
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><link rel="stylesheet" href="../../styles.css"></head>
+<body style="background:var(--bg); margin:0; padding:20px 20px 96px; display:flex; flex-direction:column; gap:20px; max-width:420px; box-sizing:border-box; min-height:100vh;">
 
   <!-- Header -->
-  <h1>עוד</h1>
+  <h1 style="margin:0; font-size:var(--type-h1-size); font-weight:var(--type-h1-weight); line-height:var(--line-tight); color:var(--text);">עוד</h1>
 
   <!-- Navigation rows -->
-  <div class="menu-card">
-    <a href="schedule.html" class="menu-item menu-item--bordered">
-      <span class="menu-icon">
-        <svg width="20" height="20" aria-hidden="true"><use href="../../icons.svg#icon-calendar"/></svg>
+  <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-xl); box-shadow:var(--shadow-card); display:flex; flex-direction:column; overflow:hidden;">
+
+    <a href="schedule.html" style="text-decoration:none; display:flex; align-items:center; gap:14px; padding:16px; min-height:var(--hit-min); box-sizing:border-box; border-bottom:1px solid var(--border);">
+      <span style="width:40px; height:40px; border-radius:var(--radius-md); background:var(--primary-soft); color:var(--primary-soft-text); display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 9h18"/></svg>
       </span>
-      <span class="menu-label">התוכנית שלך</span>
-      <svg class="menu-chevron" width="18" height="18" aria-hidden="true"><use href="../../icons.svg#icon-chevron-left"/></svg>
+      <span style="flex:1; font-size:var(--type-body-size); font-weight:600; color:var(--text);">התוכנית שלך</span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="m15 18-6-6 6-6"/></svg>
     </a>
 
-    <a href="videos.html" class="menu-item menu-item--bordered">
-      <span class="menu-icon">
-        <svg width="20" height="20" aria-hidden="true"><use href="../../icons.svg#icon-video"/></svg>
+    <a href="videos.html" style="text-decoration:none; display:flex; align-items:center; gap:14px; padding:16px; min-height:var(--hit-min); box-sizing:border-box; border-bottom:1px solid var(--border);">
+      <span style="width:40px; height:40px; border-radius:var(--radius-md); background:var(--primary-soft); color:var(--primary-soft-text); display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="m14 12-4-2.5v5z" fill="currentColor" stroke="none"/></svg>
       </span>
-      <span class="menu-label">סרטוני לימוד</span>
-      <svg class="menu-chevron" width="18" height="18" aria-hidden="true"><use href="../../icons.svg#icon-chevron-left"/></svg>
+      <span style="flex:1; font-size:var(--type-body-size); font-weight:600; color:var(--text);">סרטוני לימוד</span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="m15 18-6-6 6-6"/></svg>
     </a>
 
-    <a href="resources.html" class="menu-item">
-      <span class="menu-icon">
-        <svg width="20" height="20" aria-hidden="true"><use href="../../icons.svg#icon-link"/></svg>
+    <a href="resources.html" style="text-decoration:none; display:flex; align-items:center; gap:14px; padding:16px; min-height:var(--hit-min); box-sizing:border-box;">
+      <span style="width:40px; height:40px; border-radius:var(--radius-md); background:var(--primary-soft); color:var(--primary-soft-text); display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>
       </span>
-      <span class="menu-label">חומרים שימושיים</span>
-      <svg class="menu-chevron" width="18" height="18" aria-hidden="true"><use href="../../icons.svg#icon-chevron-left"/></svg>
+      <span style="flex:1; font-size:var(--type-body-size); font-weight:600; color:var(--text);">חומרים שימושיים</span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="m15 18-6-6 6-6"/></svg>
     </a>
   </div>
 
+  <!-- Achievements: medal milestones (glyph SVGs, never emoji) -->
+  <div style="display:flex; flex-direction:column; gap:12px;">
+    <h2 style="margin:0; font-size:var(--type-h2-size); font-weight:var(--type-h2-weight); color:var(--text);">הישגים</h2>
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-xl); box-shadow:var(--shadow-card); padding:20px 12px; display:grid; grid-template-columns:repeat(4, 1fr); gap:8px;">
+      <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+        <div style="width:56px; height:56px; border-radius:50%; background:var(--gold-soft); color:var(--gold-text); border:3px solid var(--gold); display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow-card); box-sizing:border-box;">
+          <svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1.5c.4 2.2 3.1 3.4 3.9 5.8.9 2.7-.8 6-3.9 6s-4.8-3.3-3.9-6c.4-1.3 1.4-2.2 2.2-3.2.8-1 1.5-1.7 1.7-2.6z"/><circle cx="8" cy="10.6" r="2.1" fill="var(--gold-soft)" opacity="0.85"/></svg>
+        </div>
+        <span style="font-size:var(--type-caption-size); font-weight:600; color:var(--text); text-align:center;">3 ימים</span>
+      </div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+        <div style="width:56px; height:56px; border-radius:50%; background:var(--gold-soft); color:var(--gold-text); border:3px solid var(--gold); display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow-card); box-sizing:border-box;">
+          <svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1.2l2 4.2 4.6.6-3.4 3.2.9 4.6L8 11.6l-4.1 2.2.9-4.6L1.4 6l4.6-.6z"/></svg>
+        </div>
+        <span style="font-size:var(--type-caption-size); font-weight:600; color:var(--text); text-align:center;">שבוע</span>
+      </div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+        <div style="width:56px; height:56px; border-radius:50%; background:var(--surface-2); color:var(--text-faint); border:3px solid var(--surface-3); display:flex; align-items:center; justify-content:center; box-sizing:border-box;">
+          <svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1.2 14.8 8 8 14.8 1.2 8z"/></svg>
+        </div>
+        <span style="font-size:var(--type-caption-size); font-weight:600; color:var(--text-faint); text-align:center;">שבועיים</span>
+      </div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+        <div style="width:56px; height:56px; border-radius:50%; background:var(--surface-2); color:var(--text-faint); border:3px solid var(--surface-3); display:flex; align-items:center; justify-content:center; box-sizing:border-box;">
+          <svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3 2h10v2h2v3c0 1.7-1.3 3-3 3h-.4A4 4 0 0 1 9 12v1h2.5v2h-7v-2H7v-1a4 4 0 0 1-2.6-2H4c-1.7 0-3-1.3-3-3V4h2zM3 5.5V7c0 .6.4 1 1 1h.1A7 7 0 0 1 4 6.5v-1zm10 0v1c0 .5 0 1-.1 1.5h.1c.6 0 1-.4 1-1V5.5z"/></svg>
+        </div>
+        <span style="font-size:var(--type-caption-size); font-weight:600; color:var(--text-faint); text-align:center;">חודש</span>
+      </div>
+    </div>
+  </div>
+
   <!-- Settings -->
-  <div class="menu-card">
-    <label>
-      <span class="menu-icon menu-icon--neutral">
-        <svg width="20" height="20" aria-hidden="true"><use href="../../icons.svg#icon-moon"/></svg>
+  <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-xl); box-shadow:var(--shadow-card); display:flex; flex-direction:column; overflow:hidden;">
+    <label style="display:flex; align-items:center; gap:14px; padding:16px; min-height:var(--hit-min); box-sizing:border-box; cursor:pointer;">
+      <span style="width:40px; height:40px; border-radius:var(--radius-md); background:var(--surface-2); color:var(--text-muted); display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
       </span>
-      <span class="menu-label">מצב כהה</span>
-      <span role="switch" aria-checked="false" class="toggle">
-        <span class="toggle-thumb"></span>
+      <span style="flex:1; font-size:var(--type-body-size); font-weight:600; color:var(--text);">מצב כהה</span>
+      <span role="switch" aria-checked="false" style="width:46px; height:28px; border-radius:var(--radius-pill); position:relative; background:var(--surface-3); flex-shrink:0; display:inline-block;">
+        <span style="position:absolute; top:3px; inset-inline-start:3px; width:22px; height:22px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(24,32,60,0.25);"></span>
       </span>
     </label>
   </div>
 
-  <button>יציאה מהחשבון</button>
+  <button style="font-family:var(--font-ui); font-weight:700; font-size:15.5px; min-height:var(--hit-min); padding:10px 22px; border-radius:var(--radius-lg); border:none; cursor:pointer; background:transparent; color:var(--danger-text); align-self:center;">יציאה מהחשבון</button>
 
   <!-- Tab bar: עוד active -->
-  <nav>
-    <a href="home.html">
-      <svg width="22" height="22" aria-hidden="true"><use href="../../icons.svg#icon-home"/></svg>
-      <span>הבית</span>
+  <nav style="position:fixed; bottom:0; inset-inline-start:0; width:100%; max-width:420px; box-sizing:border-box; background:var(--surface); border-top:1px solid var(--border); display:flex; padding:6px 8px calc(6px + env(safe-area-inset-bottom));">
+    <a href="home.html" style="flex:1; min-height:var(--hit-min); text-decoration:none; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; color:var(--text-faint);">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+      <span style="font-size:var(--type-caption-size); font-weight:600;">הבית</span>
     </a>
-    <a href="#">
-      <svg width="22" height="22" aria-hidden="true"><use href="../../icons.svg#icon-book"/></svg>
-      <span>נושאים</span>
+    <a href="#" style="flex:1; min-height:var(--hit-min); text-decoration:none; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; color:var(--text-faint);">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/></svg>
+      <span style="font-size:var(--type-caption-size); font-weight:600;">נושאים</span>
     </a>
-    <a href="flashcards.html">
-      <svg width="22" height="22" aria-hidden="true"><use href="../../icons.svg#icon-cards"/></svg>
-      <span>כרטיסיות</span>
+    <a href="flashcards.html" style="flex:1; min-height:var(--hit-min); text-decoration:none; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; color:var(--text-faint);">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
+      <span style="font-size:var(--type-caption-size); font-weight:600;">כרטיסיות</span>
     </a>
-    <a href="more.html" class="nav-active">
-      <svg width="22" height="22" aria-hidden="true"><use href="../../icons.svg#icon-more"/></svg>
-      <span>עוד</span>
+    <a href="more.html" style="flex:1; min-height:var(--hit-min); text-decoration:none; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; color:var(--primary-soft-text);">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
+      <span style="font-size:var(--type-caption-size); font-weight:700;">עוד</span>
     </a>
   </nav>
 

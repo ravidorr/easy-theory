@@ -190,7 +190,7 @@
     if (errorEl) errorEl.hidden = true;
     if (submitBtn) {
       submitBtn.disabled = true;
-      submitBtn.textContent = t.examSubmitting || "שולחת...";
+      submitBtn.textContent = t.examSubmitting || "שולחים...";
     }
 
     const payload = {

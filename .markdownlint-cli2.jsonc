@@ -5,6 +5,7 @@
   },
   "ignores": [
     "node_modules/**",
+    "design-system/**",
     ".next/**",
     ".context/**",
     ".agents/**",

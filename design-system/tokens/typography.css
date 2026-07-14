@@ -17,13 +17,13 @@
   --type-small-size: 13.5px;   /* תיאורי משנה */
   --type-caption-size: 12px;   /* תגיות, מונים */
   --type-caption-weight: 600;
+
   --line-tight: 1.25;
   --line-body: 1.55;
 }
 
 /* Base reset for consuming pages */
 html { direction: rtl; }
-
 body {
   margin: 0;
   font-family: var(--font-ui);

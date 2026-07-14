@@ -1,81 +1,218 @@
-<!-- @dsCard group="Screens" viewport="420x1100" subtitle="דף נחיתה ציבורי + כניסה, ידידותי ל-SEO" name="Landing + Login · דף הבית הציבורי" -->
+<!-- @dsCard group="Screens" viewport="420x1750" subtitle="גרסה 2 אחרי ביקורת UX: אמון, תצוגה מקדימה, FAQ" name="Landing + Login v2 · דף הבית הציבורי" -->
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- SEO reference: copy these patterns into the app's public page -->
-  <title>דרך ברורה · לומדים לתיאוריה בלי לחץ</title>
-  <meta name="description" content="אפליקציה חינמית ללימוד מבחן התיאוריה בישראל: שאלות אמיתיות מהמאגר הרשמי, כרטיסיות תמרורים ותוכנית אישית בקצב שלך.">
+  <title>דרך ברורה — לומדים לתיאוריה בלי לחץ</title>
+  <meta name="description" content="אפליקציה חינמית ללימוד מבחן התיאוריה בישראל: שאלות אמיתיות מהמאגר הרשמי של משרד התחבורה, כרטיסיות תמרורים ותוכנית אישית בקצב שלך.">
   <link rel="stylesheet" href="../../styles.css">
-  <link rel="stylesheet" href="landing.css">
+  <script src="image-slot.js"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
+  <script type="text/babel" src="tweaks-panel.jsx"></script>
 </head>
-<body>
+<body style="background:var(--bg); margin:0; padding:24px 20px; display:flex; flex-direction:column; gap:32px; max-width:420px; box-sizing:border-box; min-height:100vh;">
 
-  <!-- Hero -->
-  <header>
-    <span class="wordmark">דרך ברורה</span>
-    <h1>לומדים לתיאוריה,<br>בלי לחץ.</h1>
-    <p class="hero-desc">כל מה שצריך למבחן התיאוריה: שאלות אמיתיות מהמאגר הרשמי, כרטיסיות תמרורים ותוכנית שמתאימה את עצמה לקצב שלך.</p>
+  <!-- Hero: compact, login form above the fold -->
+  <header style="display:flex; flex-direction:column; align-items:center; gap:12px; text-align:center; padding-top:12px;">
+    <span style="font-weight:800; font-size:var(--type-h2-size); color:var(--primary-soft-text);">דרך ברורה</span>
+    <h1 data-tweak="h1" style="margin:0; font-size:var(--type-display-size); font-weight:var(--type-display-weight); line-height:var(--line-tight); color:var(--text);">לומדים לתיאוריה,<br>בלי לחץ.</h1>
+    <p style="margin:0; font-size:var(--type-body-size); color:var(--text-muted); line-height:var(--line-body); max-width:320px;">תוכנית אישית בקצב שלך, שאלות אמיתיות מהמבחן וכרטיסיות תמרורים חכמות.</p>
   </header>
 
-  <!-- Login card (the action, high on the page) -->
-  <section aria-label="כניסה" class="login-section">
-    <div class="login-section-header">
-      <h2>מתחילות עכשיו</h2>
-      <span class="login-subtitle">מתחברות עם קישור למייל, בלי סיסמה. חינם לגמרי.</span>
+  <!-- Login card: the hero action -->
+  <section id="login" aria-label="כניסה" style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-xl); box-shadow:var(--shadow-card); padding:24px 20px; display:flex; flex-direction:column; gap:16px;">
+    <div style="display:flex; flex-direction:column; gap:2px;">
+      <h2 data-tweak="login-title" style="margin:0; font-size:var(--type-h2-size); font-weight:var(--type-h2-weight); color:var(--text);">מתחילות תוך פחות מדקה</h2>
+      <span style="font-size:var(--type-small-size); color:var(--text-muted);">קישור כניסה למייל, בלי סיסמה. חינם לגמרי.</span>
     </div>
-    <label>
-      <span class="label-hint">כתובת המייל שלך</span>
-      <input type="email" placeholder="noa@example.com" dir="ltr">
+    <label style="display:flex; flex-direction:column; gap:6px;">
+      <span style="font-size:var(--type-small-size); font-weight:600; color:var(--text-muted);">כתובת המייל שלך</span>
+      <input type="email" placeholder="noa@example.com" dir="ltr" style="font-family:var(--font-ui); font-size:var(--type-body-size); color:var(--text); background:var(--surface); border:1.5px solid var(--border-strong); border-radius:var(--radius-md); padding:11px 14px; min-height:var(--hit-min); box-sizing:border-box; outline:none; text-align:left;">
     </label>
-    <button>שלחי לי קישור</button>
+    <button style="font-family:var(--font-ui); font-weight:700; font-size:17px; min-height:56px; padding:16px 28px; border-radius:var(--radius-lg); border:1px solid transparent; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; width:100%; background:var(--primary); color:var(--text-on-primary); box-shadow:var(--shadow-press);">שלחי לי קישור</button>
   </section>
 
-  <!-- What you get (crawlable feature content) -->
-  <section aria-label="מה מקבלים" class="features-section">
-    <h2>מה מחכה לך בפנים</h2>
-
-    <div class="feature-card">
-      <div class="feature-icon">
-        <img src="../../assets/signs/sign-302-stop.png" alt="תמרור עצור">
-      </div>
-      <div class="feature-body">
-        <h3>שאלות אמיתיות מהמבחן</h3>
-        <p>כל השאלות מהמאגר הרשמי של משרד התחבורה, עם הסבר לכל תשובה.</p>
-      </div>
+  <!-- Trust badge + product preview (directly under the form) -->
+  <section id="preview" aria-label="אמון ותצוגה מקדימה" style="display:flex; flex-direction:column; align-items:center; gap:16px;">
+    <div style="display:inline-flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-pill); padding:8px 16px; box-shadow:var(--shadow-card);">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--success-text)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+      <span style="font-size:var(--type-small-size); font-weight:600; color:var(--text);">מבוסס על המאגר הרשמי של משרד התחבורה</span>
     </div>
-
-    <div class="feature-card">
-      <div class="feature-icon">
-        <img src="../../assets/signs/sign-303-roundabout.png" alt="תמרור מעגל תנועה">
-      </div>
-      <div class="feature-body">
-        <h3>כרטיסיות תמרורים</h3>
-        <p>שינון תמרורים בשיטת חזרה מרווחת, מה שלא נזכר יחזור מחר.</p>
-      </div>
-    </div>
-
-    <div class="feature-card">
-      <div class="feature-icon feature-icon--primary">
-        <svg width="26" height="26" aria-hidden="true"><use href="../../icons.svg#icon-calendar"/></svg>
-      </div>
-      <div class="feature-body">
-        <h3>תוכנית אישית בקצב שלך</h3>
-        <p>בימים ושעות שנוח לך, והאפליקציה בונה תוכנית עד למבחן. בלי לחץ, ובלי ספירה לאחור.</p>
-      </div>
+    <!-- TODO trust: when real data exists, add here: student count / testimonial quote -->
+    <div style="width:230px; height:400px; border-radius:28px; border:6px solid var(--text); overflow:hidden; box-shadow:var(--shadow-pop); background:var(--surface);">
+      <image-slot id="landing-hero-screenshot" shape="rect" placeholder="צילום מסך של מסך הבית"></image-slot>
     </div>
   </section>
 
-  <!-- Reassurance strip -->
-  <section aria-label="בקצרה" class="reassurance">
-    <span class="reassurance-title">חינם, בעברית, בגובה העיניים.</span>
-    <span class="reassurance-sub">נבנה בשביל הנהגות והנהגים שבדרך.</span>
+  <!-- Success state (shown after submit, replaces the form; polished card) -->
+  <section aria-label="הקישור נשלח" style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-xl); box-shadow:var(--shadow-card); padding:28px 20px; display:flex; flex-direction:column; align-items:center; gap:12px; text-align:center;">
+    <span style="width:48px; height:48px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; background:var(--success-soft);">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--success-text)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+    </span>
+    <h2 style="margin:0; font-size:var(--type-h2-size); font-weight:var(--type-h2-weight); color:var(--text);">הקישור נשלח</h2>
+    <p style="margin:0; font-size:var(--type-small-size); color:var(--text-muted); line-height:var(--line-body);">בדקי את תיבת הדואר ולחצי על הקישור.<br>לא מופיע? שווה להציץ בספאם.</p>
+    <button style="font-family:var(--font-ui); font-weight:700; font-size:14px; min-height:var(--hit-min); padding:8px 18px; border-radius:var(--radius-pill); border:1px solid var(--border-strong); cursor:pointer; background:var(--surface); color:var(--text-muted);">שליחה מחדש</button>
   </section>
 
-  <footer>
-    <span>ClearRoad · דרך ברורה</span>
-    <span>לימוד לתיאוריה לרכב פרטי בישראל</span>
+  <!-- Features: outcome first (personal plan is the differentiator) -->
+  <section aria-label="מה מקבלים" style="display:flex; flex-direction:column; gap:14px;">
+    <h2 style="margin:0; font-size:var(--type-h2-size); font-weight:var(--type-h2-weight); color:var(--text);">מה מחכה לך בפנים</h2>
+
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow-card); padding:18px 16px; display:flex; align-items:center; gap:16px;">
+      <div style="width:64px; height:64px; border-radius:50%; background:var(--primary-soft); display:flex; align-items:center; justify-content:center; flex-shrink:0; color:var(--primary-soft-text);">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 9h18"/></svg>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:2px;">
+        <h3 style="margin:0; font-weight:600; font-size:var(--type-body-size); color:var(--text);">תוכנית אישית בקצב שלך</h3>
+        <p style="margin:0; font-size:var(--type-small-size); color:var(--text-muted); line-height:var(--line-body);">בוחרות ימים ושעות, והאפליקציה בונה תוכנית עד למבחן. בלי לחץ, בלי ספירה לאחור.</p>
+      </div>
+    </div>
+
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow-card); padding:18px 16px; display:flex; align-items:center; gap:16px;">
+      <div style="width:64px; height:64px; border-radius:50%; background:var(--surface-2); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+        <img src="../../assets/signs/sign-302-stop.png" alt="תמרור עצור" style="width:40px; height:40px; object-fit:contain;">
+      </div>
+      <div style="display:flex; flex-direction:column; gap:2px;">
+        <h3 style="margin:0; font-weight:600; font-size:var(--type-body-size); color:var(--text);">שאלות אמיתיות מהמבחן</h3>
+        <p style="margin:0; font-size:var(--type-small-size); color:var(--text-muted); line-height:var(--line-body);">כל השאלות מהמאגר הרשמי של משרד התחבורה, עם הסבר לכל תשובה.</p>
+      </div>
+    </div>
+
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow-card); padding:18px 16px; display:flex; align-items:center; gap:16px;">
+      <div style="width:64px; height:64px; border-radius:50%; background:var(--surface-2); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+        <img src="../../assets/signs/sign-303-roundabout.png" alt="תמרור מעגל תנועה" style="width:40px; height:40px; object-fit:contain;">
+      </div>
+      <div style="display:flex; flex-direction:column; gap:2px;">
+        <h3 style="margin:0; font-weight:600; font-size:var(--type-body-size); color:var(--text);">כרטיסיות תמרורים</h3>
+        <p style="margin:0; font-size:var(--type-small-size); color:var(--text-muted); line-height:var(--line-body);">משננות תמרורים בשיטת חזרה מרווחת, מה שלא זכרת יחזור מחר.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Peek inside: two more screenshots -->
+  <section aria-label="הצצה פנימה" style="display:flex; flex-direction:column; gap:14px;">
+    <h2 style="margin:0; font-size:var(--type-h2-size); font-weight:var(--type-h2-weight); color:var(--text);">הצצה פנימה</h2>
+    <div style="display:flex; gap:14px; justify-content:center;">
+      <div style="width:170px; height:300px; border-radius:20px; border:5px solid var(--text); overflow:hidden; box-shadow:var(--shadow-card); background:var(--surface);">
+        <image-slot id="landing-screenshot-quiz" shape="rect" placeholder="מסך תרגול"></image-slot>
+      </div>
+      <div style="width:170px; height:300px; border-radius:20px; border:5px solid var(--text); overflow:hidden; box-shadow:var(--shadow-card); background:var(--surface);">
+        <image-slot id="landing-screenshot-cards" shape="rect" placeholder="מסך כרטיסיות"></image-slot>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section aria-label="שאלות נפוצות" style="display:flex; flex-direction:column; gap:14px;">
+    <h2 style="margin:0; font-size:var(--type-h2-size); font-weight:var(--type-h2-weight); color:var(--text);">שאלות נפוצות</h2>
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-xl); box-shadow:var(--shadow-card); display:flex; flex-direction:column;">
+      <div style="padding:16px; display:flex; flex-direction:column; gap:4px; border-bottom:1px solid var(--border);">
+        <h3 style="margin:0; font-weight:600; font-size:var(--type-body-size); color:var(--text);">זה באמת חינם?</h3>
+        <p style="margin:0; font-size:var(--type-small-size); color:var(--text-muted); line-height:var(--line-body);">כן. כל התוכן פתוח, בלי תשלום ובלי כרטיס אשראי.</p>
+      </div>
+      <div style="padding:16px; display:flex; flex-direction:column; gap:4px; border-bottom:1px solid var(--border);">
+        <h3 style="margin:0; font-weight:600; font-size:var(--type-body-size); color:var(--text);">צריך להוריד אפליקציה?</h3>
+        <p style="margin:0; font-size:var(--type-small-size); color:var(--text-muted); line-height:var(--line-body);">לא, הכל עובד בדפדפן, גם בטלפון וגם במחשב.</p>
+      </div>
+      <div style="padding:16px; display:flex; flex-direction:column; gap:4px; border-bottom:1px solid var(--border);">
+        <h3 style="margin:0; font-weight:600; font-size:var(--type-body-size); color:var(--text);">השאלות זהות למבחן האמיתי?</h3>
+        <p style="margin:0; font-size:var(--type-small-size); color:var(--text-muted); line-height:var(--line-body);">כן, הן מגיעות מהמאגר הרשמי שממנו מורכב המבחן.</p>
+      </div>
+      <div style="padding:16px; display:flex; flex-direction:column; gap:4px;">
+        <h3 style="margin:0; font-weight:600; font-size:var(--type-body-size); color:var(--text);">כמה זמן לוקח להתכונן?</h3>
+        <p style="margin:0; font-size:var(--type-small-size); color:var(--text-muted); line-height:var(--line-body);">תלוי בקצב שלך. התוכנית מתאימה את עצמה לזמן שיש לך עד המבחן.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Emotional close -->
+  <section aria-label="סיכום" style="background:var(--primary-soft); border-radius:var(--radius-xl); padding:28px 24px; display:flex; flex-direction:column; gap:16px; text-align:center;">
+    <p data-tweak="close" style="margin:0; font-size:var(--type-h2-size); font-weight:var(--type-h2-weight); line-height:var(--line-tight); color:var(--primary-soft-text);">המטרה היא לא ללמוד יותר.<br>המטרה היא לעבור בפעם הראשונה.</p>
+    <button data-tweak="close-cta" style="font-family:var(--font-ui); font-weight:700; font-size:17px; min-height:56px; padding:16px 28px; border-radius:var(--radius-lg); border:1px solid transparent; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; width:100%; background:var(--primary); color:var(--text-on-primary); box-shadow:var(--shadow-press);">יאללה, מתחילות</button>
+  </section>
+
+  <footer style="padding-bottom:8px; display:flex; flex-direction:column; gap:2px; text-align:center;">
+    <span style="font-size:var(--type-caption-size); color:var(--text-faint);">ClearRoad · דרך ברורה</span>
+    <span style="font-size:var(--type-caption-size); color:var(--text-faint);">לימוד לתיאוריה לרכב פרטי בישראל</span>
   </footer>
+
+  <div id="tweaks-root"></div>
+  <script type="text/babel">
+    const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+      "voice": "רגוע",
+      "firstImpression": "טופס קודם",
+      "dark": false
+    }/*EDITMODE-END*/;
+
+    const COPY = {
+      "רגוע": {
+        h1: "לומדים לתיאוריה,<br>בלי לחץ.",
+        loginTitle: "מתחילות תוך פחות מדקה",
+        close: "המטרה היא לא ללמוד יותר.<br>המטרה היא לעבור בפעם הראשונה.",
+        closeCta: "יאללה, מתחילות"
+      },
+      "ישיר": {
+        h1: "עוברים תיאוריה.<br>פשוט ככה.",
+        loginTitle: "שתי דקות ואת בפנים",
+        close: "פחות שינון, יותר ביטחון.<br>עוברות בפעם הראשונה.",
+        closeCta: "מתחילות עכשיו"
+      },
+      "שובב": {
+        h1: "יאללה,<br>לומדות תיאוריה.",
+        loginTitle: "קופצות פנימה תוך דקה",
+        close: "עוד רגע את על הכביש.<br>קודם עוברות תיאוריה, בכיף.",
+        closeCta: "קדימה, מתחילות"
+      }
+    };
+
+    function App() {
+      const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+
+      React.useEffect(() => {
+        const copy = COPY[t.voice] || COPY["רגוע"];
+        document.querySelector('[data-tweak="h1"]').innerHTML = copy.h1;
+        document.querySelector('[data-tweak="login-title"]').textContent = copy.loginTitle;
+        document.querySelector('[data-tweak="close"]').innerHTML = copy.close;
+        document.querySelector('[data-tweak="close-cta"]').textContent = copy.closeCta;
+      }, [t.voice]);
+
+      React.useEffect(() => {
+        if (t.dark) document.documentElement.setAttribute('data-theme', 'dark');
+        else document.documentElement.removeAttribute('data-theme');
+      }, [t.dark]);
+
+      React.useEffect(() => {
+        // "טופס קודם" = login form above the fold (default).
+        // "הצצה קודם" = screenshot + trust badge lead, form after.
+        const kids = Array.from(document.body.children);
+        kids.forEach((el, i) => { el.style.order = i * 10; });
+        const login = document.getElementById('login');
+        const preview = document.getElementById('preview');
+        document.body.style.display = 'flex';
+        if (t.firstImpression === 'הצצה קודם') {
+          preview.style.order = String(Number(login.style.order) - 5);
+        }
+      }, [t.firstImpression]);
+
+      return (
+        <TweaksPanel>
+          <TweakSection label="אופי הדף" />
+          <TweakRadio label="קול המותג" value={t.voice}
+                      options={["רגוע", "ישיר", "שובב"]}
+                      onChange={(v) => setTweak('voice', v)} />
+          <TweakRadio label="רושם ראשון" value={t.firstImpression}
+                      options={["טופס קודם", "הצצה קודם"]}
+                      onChange={(v) => setTweak('firstImpression', v)} />
+          <TweakToggle label="מצב כהה" value={t.dark}
+                       onChange={(v) => setTweak('dark', v)} />
+        </TweaksPanel>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('tweaks-root')).render(<App />);
+  </script>
 
 </body></html>

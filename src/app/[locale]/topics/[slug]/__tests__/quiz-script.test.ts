@@ -137,9 +137,9 @@ describe("quiz.js – rejected answer persistence", () => {
         __t: Record<string, string>;
       }
     ).__t = {
-      savingAnswer: "שומרת...",
-      saveAnswerError: "לא הצלחנו לשמור את התשובה. נסי שוב.",
-      retryAnswerBtn: "נסי שוב",
+      savingAnswer: "שומרים...",
+      saveAnswerError: "לא הצלחנו לשמור את התשובה. אפשר לנסות שוב.",
+      retryAnswerBtn: "לנסות שוב",
       restartQuizBtn: "התחלה מחדש",
     };
   });
@@ -190,7 +190,7 @@ describe("quiz.js – rejected answer persistence", () => {
     await flushAsyncWork();
 
     expect(messageText()).toBe("שמירת התשובה נכשלה");
-    expect(actionButton().textContent).toBe("נסי שוב");
+    expect(actionButton().textContent).toBe("לנסות שוב");
     expect(actionButton().disabled).toBe(false);
 
     clickAction();
@@ -262,7 +262,7 @@ describe("quiz.js – rejected answer persistence", () => {
       await flushAsyncWork();
 
       expect(messageText()).toBe("שגיאה זמנית מקומית");
-      expect(actionButton().textContent).toBe("נסי שוב");
+      expect(actionButton().textContent).toBe("לנסות שוב");
 
       clickAction();
       await flushAsyncWork();
@@ -274,7 +274,7 @@ describe("quiz.js – rejected answer persistence", () => {
 
   it.each([
     [400, "התחלה מחדש"],
-    [500, "נסי שוב"],
+    [500, "לנסות שוב"],
   ])(
     "falls back safely when a %i error body is malformed",
     async (status, expectedAction) => {
@@ -294,7 +294,7 @@ describe("quiz.js – rejected answer persistence", () => {
       clickAction();
       await flushAsyncWork();
 
-      expect(messageText()).toBe("לא הצלחנו לשמור את התשובה. נסי שוב.");
+      expect(messageText()).toBe("לא הצלחנו לשמור את התשובה. אפשר לנסות שוב.");
       expect(actionButton().textContent).toBe(expectedAction);
       if (status === 400) {
         expect(localStorage.getItem("quiz-resume:v1:u1:t1")).toBeNull();
@@ -344,8 +344,8 @@ describe("quiz.js – rejected answer persistence", () => {
     clickAction();
     await flushAsyncWork();
 
-    expect(messageText()).toBe("לא הצלחנו לשמור את התשובה. נסי שוב.");
-    expect(actionButton().textContent).toBe("נסי שוב");
+    expect(messageText()).toBe("לא הצלחנו לשמור את התשובה. אפשר לנסות שוב.");
+    expect(actionButton().textContent).toBe("לנסות שוב");
     expect(actionButton().disabled).toBe(false);
     expect(
       (document.querySelectorAll(".quiz-slide")[0] as HTMLElement).style.display
@@ -584,7 +584,7 @@ describe("quiz.js – reward score and feedback", () => {
     vi.advanceTimersByTime(TOUCH_DOUBLE_TAP_SUPPRESSION_MS);
 
     expect(actionButton().disabled).toBe(false);
-    expect(actionButton().textContent).toBe("נסי שוב");
+    expect(actionButton().textContent).toBe("לנסות שוב");
   });
 
   it("does not let the touch timeout override pending persistence", async () => {
@@ -845,7 +845,7 @@ describe("quiz.js – resume", () => {
     setupDOM({ userId: "u1" });
 
     expect(scoreText()).toBe("10");
-    expect(actionButton().textContent).toBe("נסי שוב");
+    expect(actionButton().textContent).toBe("לנסות שוב");
     expect(actionButton().disabled).toBe(false);
     clickAction();
     await flushAsyncWork();

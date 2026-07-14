@@ -9,13 +9,14 @@ const authScript = readFileSync(
 
 function setupDOM() {
   document.body.innerHTML = `
+    <div id="login-header"></div>
     <form id="login-form">
       <input id="email-input" type="email" value="test@example.com" />
-      <button id="send-btn" type="submit">שלחי לי קישור</button>
+      <button id="send-btn" type="submit">לשלוח לי קישור</button>
       <div id="login-error" style="display:none"></div>
     </form>
     <div id="sent-banner" style="display:none">
-      <button id="resend-btn">נשלח שוב</button>
+      <button id="resend-btn">שליחה מחדש</button>
       <span id="resend-msg" style="display:none"></span>
     </div>
   `;
@@ -48,13 +49,13 @@ describe("auth.js – send button loading state", () => {
     expect(btn.querySelector(".btn-spinner")).not.toBeNull();
   });
 
-  it("shows שולח... (not נשלח...) while loading", () => {
+  it("shows שולחים... (not נשלח...) while loading", () => {
     vi.stubGlobal("fetch", vi.fn(() => new Promise(() => {})));
 
     submitForm();
 
     const btn = document.getElementById("send-btn") as HTMLButtonElement;
-    expect(btn.textContent).toContain("שולח...");
+    expect(btn.textContent).toContain("שולחים...");
     expect(btn.innerHTML).not.toContain("נשלח");
   });
 
@@ -69,7 +70,7 @@ describe("auth.js – send button loading state", () => {
 
     const btn = document.getElementById("send-btn") as HTMLButtonElement;
     expect(btn.disabled).toBe(false);
-    expect(btn.textContent).toBe("שלחי לי קישור");
+    expect(btn.textContent).toBe("לשלוח לי קישור");
     expect(btn.querySelector(".btn-spinner")).toBeNull();
   });
 
@@ -81,7 +82,18 @@ describe("auth.js – send button loading state", () => {
 
     const btn = document.getElementById("send-btn") as HTMLButtonElement;
     expect(btn.disabled).toBe(false);
-    expect(btn.textContent).toBe("שלחי לי קישור");
+    expect(btn.textContent).toBe("לשלוח לי קישור");
     expect(btn.querySelector(".btn-spinner")).toBeNull();
+  });
+
+  it("swaps the form and card header for the success card on success", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) }));
+
+    submitForm();
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect((document.getElementById("login-form") as HTMLElement).style.display).toBe("none");
+    expect((document.getElementById("login-header") as HTMLElement).style.display).toBe("none");
+    expect((document.getElementById("sent-banner") as HTMLElement).style.display).toBe("flex");
   });
 });
