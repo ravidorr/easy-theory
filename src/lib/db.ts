@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Locale } from "@/i18n/routing";
 import { sampleIds } from "./exam";
+import { isDue, type SrsReview } from "./srs";
 
 export type Topic = {
   id: string;
@@ -223,6 +224,8 @@ export async function getUserMedals(
 
 export type QuizMistake = Question & {
   selected_option: "a" | "b" | "c" | "d";
+  // Next SRS review; null = never scheduled, treated as due (see migration 014).
+  due_at: string | null;
 };
 
 export type PushSubscriptionRow = {
@@ -275,6 +278,81 @@ async function fetchQuestionsByIds(
   );
 
   return results.flat();
+}
+
+export type SrsCard = {
+  sign_id: string | null;
+  question_id: string | null;
+  ease: number;
+  interval_days: number;
+  repetitions: number;
+  due_at: string;
+  last_reviewed_at: string;
+};
+
+export type SrsItem = { sign_id: string } | { question_id: string };
+
+const SRS_COLUMNS =
+  "sign_id, question_id, ease, interval_days, repetitions, due_at, last_reviewed_at";
+
+export async function getSignSrsCards(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<SrsCard[]> {
+  // Bounded by the sign catalog (277 rows), no paging needed.
+  const { data, error } = await supabase
+    .from("user_srs_cards")
+    .select(SRS_COLUMNS)
+    .eq("user_id", userId)
+    .not("sign_id", "is", null);
+  if (error) {
+    throw new Error(`getSignSrsCards: query failed: ${error.message}`, { cause: error });
+  }
+  return data ?? [];
+}
+
+export async function getQuestionSrsCards(
+  supabase: SupabaseClient,
+  userId: string,
+  questionIds: string[]
+): Promise<SrsCard[]> {
+  const chunks: string[][] = [];
+  for (let i = 0; i < questionIds.length; i += IN_FILTER_CHUNK_SIZE) {
+    chunks.push(questionIds.slice(i, i + IN_FILTER_CHUNK_SIZE));
+  }
+
+  const results = await Promise.all(
+    chunks.map(async (chunk) => {
+      const { data, error } = await supabase
+        .from("user_srs_cards")
+        .select(SRS_COLUMNS)
+        .eq("user_id", userId)
+        .in("question_id", chunk);
+      if (error) {
+        throw new Error(`getQuestionSrsCards: query failed: ${error.message}`, {
+          cause: error,
+        });
+      }
+      return data ?? [];
+    })
+  );
+
+  return results.flat();
+}
+
+export async function upsertSrsCard(
+  supabase: SupabaseClient,
+  userId: string,
+  item: SrsItem,
+  review: SrsReview
+): Promise<void> {
+  const onConflict = "sign_id" in item ? "user_id,sign_id" : "user_id,question_id";
+  const { error } = await supabase
+    .from("user_srs_cards")
+    .upsert({ user_id: userId, ...item, ...review }, { onConflict });
+  if (error) {
+    throw new Error(`upsertSrsCard: upsert failed: ${error.message}`, { cause: error });
+  }
 }
 
 export async function getMistakesForTopic(
@@ -333,12 +411,27 @@ export async function getMistakesForTopic(
 
   if (!mistakeIds.length) return [];
 
-  const questions = await fetchQuestionsByIds(supabase, mistakeIds);
+  const [questions, srsCards] = await Promise.all([
+    fetchQuestionsByIds(supabase, mistakeIds),
+    getQuestionSrsCards(supabase, userId, mistakeIds),
+  ]);
+  const dueByQuestion = new Map(
+    srsCards.filter((c) => c.question_id != null).map((c) => [c.question_id!, c.due_at])
+  );
 
-  return questions.map((q) => ({
+  const mistakes: QuizMistake[] = questions.map((q) => ({
     ...q,
     selected_option: latestByQuestion.get(q.id)!.selected_option as "a" | "b" | "c" | "d",
+    due_at: dueByQuestion.get(q.id) ?? null,
   }));
+
+  // Due first (unscheduled counts as due), each group ordered by due_at
+  // ascending with unscheduled mistakes ahead of scheduled ones.
+  const dueTime = (m: QuizMistake) => (m.due_at == null ? -Infinity : Date.parse(m.due_at));
+  return mistakes.sort((a, b) => {
+    const dueRank = Number(!isDue(a.due_at)) - Number(!isDue(b.due_at));
+    return dueRank !== 0 ? dueRank : dueTime(a) - dueTime(b);
+  });
 }
 
 export type BookmarkedQuestion = Question & {

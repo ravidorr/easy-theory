@@ -15,6 +15,9 @@ import {
   getMistakesForTopic,
   getBookmarkedQuestionIds,
   getBookmarkedQuestions,
+  getSignSrsCards,
+  getQuestionSrsCards,
+  upsertSrsCard,
   markTopicCompleted,
   getRandomExamQuestions,
   getExamAttempts,
@@ -26,7 +29,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 // Builds a chainable Supabase query mock that resolves to `result`.
 function chain(result: { data: unknown; error?: unknown }) {
   const mock: Record<string, unknown> = {};
-  for (const m of ["select", "eq", "order", "limit", "in", "range"]) {
+  for (const m of ["select", "eq", "order", "limit", "in", "range", "not"]) {
     mock[m] = vi.fn().mockReturnValue(mock);
   }
   mock.single = vi.fn().mockResolvedValue(result);
@@ -197,9 +200,12 @@ type Response = {
 
 type QuestionRow = Record<string, unknown> & { id: string };
 
+type SrsRow = { question_id: string; due_at: string };
+
 function makeMistakesClient({
   responses = [] as Response[],
   questionDetails = [] as QuestionRow[] | null,
+  srsCards = [] as SrsRow[],
   responsesError = null as { message: string } | null,
   questionsError = null as { message: string } | null,
 } = {}) {
@@ -224,6 +230,15 @@ function makeMistakesClient({
             ),
           }),
         };
+      }
+      if (table === "user_srs_cards") {
+        const srsChain = {} as Record<string, unknown>;
+        srsChain.select = vi.fn().mockReturnValue(srsChain);
+        srsChain.eq = vi.fn().mockReturnValue(srsChain);
+        srsChain.in = vi.fn((_col: string, ids: string[]) =>
+          chain({ data: srsCards.filter((c) => ids.includes(c.question_id)) })
+        );
+        return srsChain;
       }
       return chain({ data: [] });
     }),
@@ -358,6 +373,55 @@ describe("getMistakesForTopic", () => {
     expect(questionCalls).toHaveLength(2);
   });
 
+  describe("SRS integration", () => {
+    const wrong = (id: string) => ({
+      question_id: id,
+      selected_option: "b",
+      is_correct: false,
+      answered_at: "2024-01-01",
+    });
+    const question = (id: string) => ({ id, question_he: "?", correct_option: "a" });
+
+    it("merges due_at from SRS cards and defaults to null for unscheduled mistakes", async () => {
+      const supabase = makeMistakesClient({
+        responses: [wrong("q1"), wrong("q2")],
+        questionDetails: [question("q1"), question("q2")],
+        srsCards: [{ question_id: "q1", due_at: "2020-01-01T00:00:00.000Z" }],
+      });
+      const result = await getMistakesForTopic(supabase, "u1", "t1");
+      const byId = new Map(result.map((m) => [m.id, m.due_at]));
+      expect(byId.get("q1")).toBe("2020-01-01T00:00:00.000Z");
+      expect(byId.get("q2")).toBeNull();
+    });
+
+    it("orders due mistakes first (unscheduled ahead of scheduled), not-yet-due last", async () => {
+      const future = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+      const supabase = makeMistakesClient({
+        responses: [wrong("q1"), wrong("q2"), wrong("q3")],
+        questionDetails: [question("q1"), question("q2"), question("q3")],
+        srsCards: [
+          { question_id: "q1", due_at: future },
+          { question_id: "q3", due_at: "2020-01-01T00:00:00.000Z" },
+        ],
+      });
+      const result = await getMistakesForTopic(supabase, "u1", "t1");
+      expect(result.map((m) => m.id)).toEqual(["q2", "q3", "q1"]);
+    });
+
+    it("orders due mistakes among themselves by due_at ascending", async () => {
+      const supabase = makeMistakesClient({
+        responses: [wrong("q1"), wrong("q2")],
+        questionDetails: [question("q1"), question("q2")],
+        srsCards: [
+          { question_id: "q1", due_at: "2021-01-01T00:00:00.000Z" },
+          { question_id: "q2", due_at: "2020-01-01T00:00:00.000Z" },
+        ],
+      });
+      const result = await getMistakesForTopic(supabase, "u1", "t1");
+      expect(result.map((m) => m.id)).toEqual(["q2", "q1"]);
+    });
+  });
+
   describe("lastSession scope", () => {
     it("includes latest-session mistakes and excludes older-session mistakes", async () => {
       const supabase = makeMistakesClient({
@@ -431,6 +495,114 @@ describe("getMistakesForTopic", () => {
       const supabase = makeMistakesClient({ responses: [] });
       expect(await getMistakesForTopic(supabase, "u1", "t1", "lastSession")).toEqual([]);
     });
+  });
+});
+
+// ─── SRS card helpers ────────────────────────────────────────────────────────
+
+const SRS_CARD = {
+  sign_id: "s1",
+  question_id: null,
+  ease: 2.5,
+  interval_days: 1,
+  repetitions: 1,
+  due_at: "2026-07-15T00:00:00.000Z",
+  last_reviewed_at: "2026-07-14T00:00:00.000Z",
+};
+
+function makeErrorClient(message: string) {
+  return {
+    from: vi.fn().mockReturnValue(chain({ data: null, error: { message } })),
+  } as unknown as SupabaseClient;
+}
+
+describe("getSignSrsCards", () => {
+  it("returns the user's sign cards", async () => {
+    expect(await getSignSrsCards(makeClient([SRS_CARD]), "u1")).toEqual([SRS_CARD]);
+  });
+
+  it("returns [] on null data", async () => {
+    expect(await getSignSrsCards(makeClient(null), "u1")).toEqual([]);
+  });
+
+  it("throws when the query fails", async () => {
+    await expect(getSignSrsCards(makeErrorClient("boom"), "u1")).rejects.toThrow(
+      /getSignSrsCards: query failed: boom/
+    );
+  });
+});
+
+describe("getQuestionSrsCards", () => {
+  function makeChunkedClient(cards: { question_id: string }[]) {
+    return {
+      from: vi.fn().mockImplementation(() => {
+        const srsChain = {} as Record<string, unknown>;
+        srsChain.select = vi.fn().mockReturnValue(srsChain);
+        srsChain.eq = vi.fn().mockReturnValue(srsChain);
+        srsChain.in = vi.fn((_col: string, ids: string[]) =>
+          chain({ data: cards.filter((c) => ids.includes(c.question_id)) })
+        );
+        return srsChain;
+      }),
+    } as unknown as SupabaseClient;
+  }
+
+  it("chunks the .in() filter and merges the results", async () => {
+    const ids = Array.from({ length: 150 }, (_, i) => `q${i}`);
+    const cards = ids.map((id) => ({ question_id: id }));
+    const supabase = makeChunkedClient(cards);
+    const result = await getQuestionSrsCards(supabase, "u1", ids);
+    expect(result).toHaveLength(150);
+    expect(vi.mocked(supabase.from).mock.calls).toHaveLength(2);
+  });
+
+  it("throws when a chunk fails", async () => {
+    await expect(getQuestionSrsCards(makeErrorClient("boom"), "u1", ["q1"])).rejects.toThrow(
+      /getQuestionSrsCards: query failed: boom/
+    );
+  });
+});
+
+describe("upsertSrsCard", () => {
+  const review = {
+    ease: 2.5,
+    interval_days: 1,
+    repetitions: 1,
+    due_at: "2026-07-15T00:00:00.000Z",
+    last_reviewed_at: "2026-07-14T00:00:00.000Z",
+  };
+
+  function makeUpsertClient(error: { message: string } | null = null) {
+    const upsert = vi.fn().mockResolvedValue({ error });
+    return {
+      client: { from: vi.fn().mockReturnValue({ upsert }) } as unknown as SupabaseClient,
+      upsert,
+    };
+  }
+
+  it("targets the (user_id, sign_id) constraint for sign cards", async () => {
+    const { client, upsert } = makeUpsertClient();
+    await upsertSrsCard(client, "u1", { sign_id: "s1" }, review);
+    expect(upsert).toHaveBeenCalledWith(
+      { user_id: "u1", sign_id: "s1", ...review },
+      { onConflict: "user_id,sign_id" }
+    );
+  });
+
+  it("targets the (user_id, question_id) constraint for question cards", async () => {
+    const { client, upsert } = makeUpsertClient();
+    await upsertSrsCard(client, "u1", { question_id: "q1" }, review);
+    expect(upsert).toHaveBeenCalledWith(
+      { user_id: "u1", question_id: "q1", ...review },
+      { onConflict: "user_id,question_id" }
+    );
+  });
+
+  it("throws when the upsert fails", async () => {
+    const { client } = makeUpsertClient({ message: "boom" });
+    await expect(upsertSrsCard(client, "u1", { sign_id: "s1" }, review)).rejects.toThrow(
+      /upsertSrsCard: upsert failed: boom/
+    );
   });
 });
 

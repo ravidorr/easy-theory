@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import FlashcardsPage from "../page";
 import { createClient } from "@/lib/supabase";
-import { getSigns } from "@/lib/db";
+import { getSigns, getSignSrsCards } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
 
 vi.mock("next/navigation", () => ({
@@ -12,7 +12,7 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
-vi.mock("@/lib/db", () => ({ getSigns: vi.fn() }));
+vi.mock("@/lib/db", () => ({ getSigns: vi.fn(), getSignSrsCards: vi.fn() }));
 vi.mock("@/components/SignImage", () => ({
   SignImage: ({ src, alt, className }: { src: string; alt: string; className?: string }) =>
     React.createElement("img", { src, alt, className }),
@@ -39,6 +39,22 @@ vi.mock("next-intl/server", () => ({
 
 const mockCreateClient = vi.mocked(createClient);
 const mockGetSigns = vi.mocked(getSigns);
+const mockGetSignSrsCards = vi.mocked(getSignSrsCards);
+
+function srsCard(signId: string, dueAt: string) {
+  return {
+    sign_id: signId,
+    question_id: null,
+    ease: 2.5,
+    interval_days: 1,
+    repetitions: 1,
+    due_at: dueAt,
+    last_reviewed_at: dueAt,
+  };
+}
+
+const PAST = "2020-01-01T00:00:00.000Z";
+const FUTURE = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
 const SIGN_1 = {
   id: "s1",
@@ -62,6 +78,7 @@ describe("FlashcardsPage", () => {
     vi.clearAllMocks();
     mockCreateClient.mockResolvedValue(makeClient() as never);
     mockGetSigns.mockResolvedValue([]);
+    mockGetSignSrsCards.mockResolvedValue([]);
     vi.mocked(getTranslations).mockResolvedValue(echoTranslator as never);
     vi.mocked(getLocale).mockResolvedValue("he");
   });
@@ -188,18 +205,63 @@ describe("FlashcardsPage", () => {
     const data = JSON.parse(container.querySelector("#fc-data")!.textContent!);
     expect(data).toEqual([
       {
+        id: "s1",
         img: "/signs/sign-301.png",
         alt: "חנייה אסורה",
         name: "חנייה אסורה",
         badge: "תמרור 301",
       },
       {
+        id: "s2",
         img: "/signs/sign-205.png",
         alt: "עצור",
         name: "עצור",
         badge: "תמרור 205",
       },
     ]);
+  });
+
+  it("orders the deck due-first, then never-seen, then not-yet-due", async () => {
+    const SIGN_3 = { ...SIGN_1, id: "s3", sign_number: "410", image_path: "/signs/sign-410.png" };
+    mockGetSigns.mockResolvedValue([SIGN_1, SIGN_2, SIGN_3] as never);
+    // s1 reviewed but not due yet; s3 due; s2 never seen.
+    mockGetSignSrsCards.mockResolvedValue([srsCard("s1", FUTURE), srsCard("s3", PAST)] as never);
+    const jsx = await FlashcardsPage();
+    const { container } = render(jsx);
+    const data = JSON.parse(container.querySelector("#fc-data")!.textContent!);
+    expect(data.map((c: { id: string }) => c.id)).toEqual(["s3", "s2", "s1"]);
+    // The server-rendered first card matches the reordered deck.
+    const firstCard = container.querySelector(".flashcard-wrap img");
+    expect(firstCard?.getAttribute("src")).toBe(SIGN_3.image_path);
+  });
+
+  it("orders due cards by oldest due date first", async () => {
+    mockGetSigns.mockResolvedValue([SIGN_1, SIGN_2] as never);
+    mockGetSignSrsCards.mockResolvedValue([
+      srsCard("s1", "2021-01-01T00:00:00.000Z"),
+      srsCard("s2", PAST),
+    ] as never);
+    const jsx = await FlashcardsPage();
+    const { container } = render(jsx);
+    const data = JSON.parse(container.querySelector("#fc-data")!.textContent!);
+    expect(data.map((c: { id: string }) => c.id)).toEqual(["s2", "s1"]);
+  });
+
+  it("shows the dueToday note only when cards are due", async () => {
+    mockGetSigns.mockResolvedValue([SIGN_1, SIGN_2] as never);
+    mockGetSignSrsCards.mockResolvedValue([srsCard("s1", PAST)] as never);
+    const jsx = await FlashcardsPage();
+    render(jsx);
+    // t("dueToday", { count }) echoes the key.
+    expect(screen.getByText("dueToday")).toBeInTheDocument();
+  });
+
+  it("hides the dueToday note when nothing is due", async () => {
+    mockGetSigns.mockResolvedValue([SIGN_1, SIGN_2] as never);
+    mockGetSignSrsCards.mockResolvedValue([srsCard("s1", FUTURE)] as never);
+    const jsx = await FlashcardsPage();
+    render(jsx);
+    expect(screen.queryByText("dueToday")).not.toBeInTheDocument();
   });
 
   it("applies cleanName to payload names and escapes < in the JSON", async () => {

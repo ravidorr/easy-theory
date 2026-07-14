@@ -10,6 +10,7 @@ import { InlineMarkdown } from "@/components/InlineMarkdown";
 import { createClient } from "@/lib/supabase";
 import { getTopicBySlug, getMistakesForTopic, getBookmarkedQuestionIds } from "@/lib/db";
 import type { MistakeScope, QuizMistake } from "@/lib/db";
+import { isDue } from "@/lib/srs";
 import { getTranslations, getLocale } from "next-intl/server";
 import styles from "./page.module.css";
 
@@ -40,11 +41,13 @@ function QuestionReview({
   letters,
   bookmarked,
   t,
+  dueBadge,
 }: {
   question: QuizMistake;
   letters: string[];
   bookmarked: boolean;
   t: TranslateFn;
+  dueBadge?: string;
 }) {
   const qAny = question as Record<string, unknown>;
   const options: [string, string][] = [
@@ -76,6 +79,7 @@ function QuestionReview({
       >
         <Icon name="bookmark" size={20} />
       </button>
+      {dueBadge && <span className={styles.dueBadge}>{dueBadge}</span>}
       {imageUrl && (
         isWide ? (
           <div className={styles.imgWide}>
@@ -185,6 +189,8 @@ export default async function ReviewPage({
       (await getMistakesForTopic(supabase, user.id, topic.id, "lastSession")).length > 0;
   }
 
+  const dueMistakeCount = mistakes.filter((m) => isDue(m.due_at)).length;
+
   const questionField = locale === "ar" ? "question_ar" : "question_he";
   const explanationField = locale === "ar" ? "explanation_ar" : "explanation_he";
   const letters = tQuiz("letters").split(",");
@@ -252,6 +258,9 @@ export default async function ReviewPage({
               ? t("mistakeCountOne")
               : t("mistakeCountMany", { count: localizedMistakes.length })}
           </p>
+          {dueMistakeCount > 0 && (
+            <p className={styles.dueCount}>{t("dueCount", { count: dueMistakeCount })}</p>
+          )}
           {showRetry && (
             <Link href={`/topics/${slug}/retry`} className={`btn-primary ${styles.btnFull}`}>
               {t("retryBtn")}
@@ -264,6 +273,7 @@ export default async function ReviewPage({
               letters={letters}
               bookmarked={bookmarkedIds.has(mistake.id)}
               t={tQuiz}
+              dueBadge={isDue(mistake.due_at) ? t("dueBadge") : undefined}
             />
           ))}
           <Link href="/" className={`btn-primary ${styles.btnFull} ${styles.returnLink}`}>

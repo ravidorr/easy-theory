@@ -24,6 +24,13 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ---
 
+## [0.3.127] — 2026-07-14
+
+### Added
+- Spaced repetition (binary SM-2) for flashcards and quiz mistakes: a new `user_srs_cards` table (migration `014_srs_cards.sql`, one row per (user, sign) or (user, question) with ease/interval/repetitions/due_at, own-rows RLS, hand-applied in prod + QA), a pure scheduler in `src/lib/srs.ts` (pass ladder 1d → 6d → round(interval × ease); fail resets and drops ease by 0.2 with a 1.3 floor, due immediately), and a signs-only `POST /api/srs` route (auth + 60/min rate limit + UUID validation). The flashcard deck is now ordered due-first → never-seen → not-yet-due with a "due today" count, and each Yes/No click persists a grade (fire-and-forget, first answer wins on in-session replays); question cards advance only through real quiz answers via a guarded post-RPC hook in `/api/quiz` that never fails the quiz response. `getMistakesForTopic` merges each mistake's `due_at` and sorts due-first, and the review page shows a due count plus a "לחזרה" badge on due mistakes. New `Flashcards.dueToday`, `Review.dueBadge`/`dueCount`, `Api.srsSaveFailed` keys and updated `Flashcards.footerNote` in he + ar; completed TODO item removed.
+
+---
+
 ## [0.3.126] — 2026-07-14
 
 ### Changed

@@ -3,8 +3,9 @@ import Link from "next/link";
 import Script from "next/script";
 import { SignImage } from "@/components/SignImage";
 import { createClient } from "@/lib/supabase";
-import { getSigns } from "@/lib/db";
-import type { Sign } from "@/lib/db";
+import { getSigns, getSignSrsCards } from "@/lib/db";
+import type { Sign, SrsCard } from "@/lib/db";
+import { isDue } from "@/lib/srs";
 import { getTranslations, getLocale } from "next-intl/server";
 import styles from "./page.module.css";
 
@@ -15,11 +16,31 @@ function cleanName(name: string, fallback: string): string {
 }
 
 type FlashcardData = {
+  id: string;
   img: string;
   alt: string;
   name: string;
   badge: string;
 };
+
+/** SRS deck order: due cards first (oldest due first), then never-seen
+ * signs in catalog order, then not-yet-due cards by upcoming due date. */
+function orderDeck(signs: Sign[], srsCards: SrsCard[]): { deck: Sign[]; dueCount: number } {
+  const cardBySign = new Map(
+    srsCards.filter((c) => c.sign_id != null).map((c) => [c.sign_id!, c])
+  );
+  const dueTime = (s: Sign) => Date.parse(cardBySign.get(s.id)!.due_at);
+
+  const due = signs
+    .filter((s) => cardBySign.has(s.id) && isDue(cardBySign.get(s.id)!.due_at))
+    .sort((a, b) => dueTime(a) - dueTime(b));
+  const fresh = signs.filter((s) => !cardBySign.has(s.id));
+  const later = signs
+    .filter((s) => cardBySign.has(s.id) && !isDue(cardBySign.get(s.id)!.due_at))
+    .sort((a, b) => dueTime(a) - dueTime(b));
+
+  return { deck: [...due, ...fresh, ...later], dueCount: due.length };
+}
 
 function SignCard({ card, flipHint }: { card: FlashcardData; flipHint: string }) {
   return (
@@ -69,8 +90,12 @@ export default async function FlashcardsPage() {
   const t = await getTranslations("Flashcards");
   const locale = await getLocale();
 
-  const signs = await getSigns(supabase, 277);
-  const total = signs.length;
+  const [signs, srsCards] = await Promise.all([
+    getSigns(supabase, 277),
+    getSignSrsCards(supabase, user.id),
+  ]);
+  const { deck, dueCount } = orderDeck(signs, srsCards);
+  const total = deck.length;
 
   // Use Arabic sign name if available
   const nameField = locale === "ar" ? "name_ar" : "name_he";
@@ -80,10 +105,11 @@ export default async function FlashcardsPage() {
     return (signAny[nameField] as string) ?? sign.name_he;
   }
 
-  const cards: FlashcardData[] = signs.map((sign) => {
+  const cards: FlashcardData[] = deck.map((sign) => {
     const localizedName = getSignName(sign);
     const badge = t("signBadge", { number: sign.sign_number });
     return {
+      id: sign.id,
       img: sign.image_path,
       alt: localizedName,
       name: cleanName(localizedName, badge),
@@ -107,6 +133,10 @@ export default async function FlashcardsPage() {
             </span>
           </div>
         </div>
+
+        {dueCount > 0 && (
+          <span className={styles.dueNote}>{t("dueToday", { count: dueCount })}</span>
+        )}
 
         <div className={styles.progressTrack}>
           <div

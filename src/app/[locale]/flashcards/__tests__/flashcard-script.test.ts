@@ -7,12 +7,16 @@ const flashcardScript = readFileSync(
   "utf-8"
 );
 
-type CardData = { img: string; alt: string; name: string; badge: string };
+type CardData = { id?: string; img: string; alt: string; name: string; badge: string };
+
+const ID_1 = "11111111-1111-4111-8111-111111111111";
+const ID_2 = "22222222-2222-4222-8222-222222222222";
+const ID_3 = "33333333-3333-4333-8333-333333333333";
 
 const SIGNS: CardData[] = [
-  { img: "/signs/sign-301.png", alt: "חנייה אסורה", name: "חנייה אסורה", badge: "תמרור 301" },
-  { img: "/signs/sign-205.png", alt: "עצור", name: "עצור", badge: "תמרור 205" },
-  { img: "/signs/sign-101.svg", alt: "כביש משובש", name: "כביש משובש", badge: "תמרור 101" },
+  { id: ID_1, img: "/signs/sign-301.png", alt: "חנייה אסורה", name: "חנייה אסורה", badge: "תמרור 301" },
+  { id: ID_2, img: "/signs/sign-205.png", alt: "עצור", name: "עצור", badge: "תמרור 205" },
+  { id: ID_3, img: "/signs/sign-101.svg", alt: "כביש משובש", name: "כביש משובש", badge: "תמרור 101" },
 ];
 
 const STALE_SRCSET = "/_next/image?url=%2Fsigns%2Fsign-301.png&w=96&q=75 1x";
@@ -76,6 +80,13 @@ function clickNo() {
 
 describe("flashcard.js", () => {
   let preloadedSrcs: string[];
+  let fetchMock: ReturnType<typeof vi.fn>;
+
+  function srsPosts() {
+    return fetchMock.mock.calls
+      .filter(([url]) => url === "/api/srs")
+      .map(([, init]) => JSON.parse((init as RequestInit).body as string));
+  }
 
   beforeEach(() => {
     preloadedSrcs = [];
@@ -87,6 +98,8 @@ describe("flashcard.js", () => {
         }
       }
     );
+    fetchMock = vi.fn().mockResolvedValue({ ok: true });
+    vi.stubGlobal("fetch", fetchMock);
   });
 
   afterEach(() => {
@@ -247,5 +260,53 @@ describe("flashcard.js", () => {
     document.body.innerHTML = `<span id="fc-count">untouched</span>`;
     expect(() => eval(flashcardScript)).not.toThrow();
     expect(countText()).toBe("untouched");
+  });
+
+  describe("SRS grading", () => {
+    it("posts the grade for each answered card", () => {
+      setupDOM();
+      clickYes();
+      clickNo();
+      expect(srsPosts()).toEqual([
+        { sign_id: ID_1, knew: true },
+        { sign_id: ID_2, knew: false },
+      ]);
+    });
+
+    it("does not re-post when a 'don't know' card is replayed", () => {
+      setupDOM();
+      clickNo(); // card 0 → don't know
+      clickYes(); // card 1
+      clickNo(); // card 2 → don't know, replay starts at card 0
+      clickYes(); // replayed card 0 — already graded
+      clickNo(); // replayed card 2 — already graded, re-queued
+      clickYes(); // replayed card 2 again
+      expect(srsPosts()).toEqual([
+        { sign_id: ID_1, knew: false },
+        { sign_id: ID_2, knew: true },
+        { sign_id: ID_3, knew: false },
+      ]);
+    });
+
+    it("skips cards without a valid UUID id", () => {
+      const tampered = [
+        { ...SIGNS[0], id: undefined },
+        { ...SIGNS[1], id: "not-a-uuid" },
+        SIGNS[2],
+      ];
+      setupDOM(tampered);
+      clickYes();
+      clickYes();
+      clickYes();
+      expect(srsPosts()).toEqual([{ sign_id: ID_3, knew: true }]);
+    });
+
+    it("keeps advancing when the POST rejects", async () => {
+      fetchMock.mockRejectedValue(new Error("offline"));
+      setupDOM([SIGNS[0]]);
+      clickYes();
+      await Promise.resolve();
+      expect(countText()).toBe("הושלם! 1 כרטיסים");
+    });
   });
 });

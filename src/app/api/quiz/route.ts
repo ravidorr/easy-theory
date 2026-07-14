@@ -1,6 +1,32 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase";
 import { getApiTranslator, parseJsonBody } from "@/lib/api";
+import { upsertSrsCard } from "@/lib/db";
+import { INITIAL_SRS_STATE, reviewCard } from "@/lib/srs";
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+// Advance the question's SM-2 card after a graded answer. Deliberately
+// non-atomic with submit_quiz_answer: a lost update self-heals on the next
+// answer, and scheduling must never fail the quiz response. An idempotent
+// replay of the same answer re-grades the card once — bounded and harmless.
+async function updateQuestionSrs(
+  supabase: SupabaseClient,
+  userId: string,
+  questionId: string,
+  isCorrect: boolean
+): Promise<void> {
+  const { data: existing, error } = await supabase
+    .from("user_srs_cards")
+    .select("ease, interval_days, repetitions")
+    .eq("user_id", userId)
+    .eq("question_id", questionId)
+    .maybeSingle();
+  if (error) {
+    throw new Error(`updateQuestionSrs: select failed: ${error.message}`, { cause: error });
+  }
+  const review = reviewCard(existing ?? INITIAL_SRS_STATE, isCorrect);
+  await upsertSrsCard(supabase, userId, { question_id: questionId }, review);
+}
 
 export async function POST(request: Request) {
   const t = getApiTranslator(request);
@@ -69,6 +95,14 @@ export async function POST(request: Request) {
     }
     console.error("[quiz] transactional submission failed:", error);
     return NextResponse.json({ error: t("answerSaveFailed") }, { status: 500 });
+  }
+
+  if (typeof data?.is_correct === "boolean") {
+    try {
+      await updateQuestionSrs(supabase, user.id, question_id, data.is_correct);
+    } catch (srsError) {
+      console.error("[quiz] SRS update failed:", srsError);
+    }
   }
 
   return NextResponse.json(data);

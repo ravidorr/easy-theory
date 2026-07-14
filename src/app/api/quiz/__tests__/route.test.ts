@@ -48,11 +48,21 @@ function buildClient({
   authenticated = true,
   result = storedResult,
   error = null,
+  srsExisting = null,
+  srsUpsertError = null,
 }: {
   authenticated?: boolean;
   result?: Record<string, unknown> | null;
   error?: { message: string } | null;
+  srsExisting?: { ease: number; interval_days: number; repetitions: number } | null;
+  srsUpsertError?: { message: string } | null;
 } = {}) {
+  const srsUpsert = vi.fn().mockResolvedValue({ error: srsUpsertError });
+  const srsChain = {} as Record<string, unknown>;
+  for (const k of ["select", "eq"]) {
+    srsChain[k] = vi.fn().mockReturnValue(srsChain);
+  }
+  srsChain.maybeSingle = vi.fn().mockResolvedValue({ data: srsExisting, error: null });
   return {
     auth: {
       getUser: vi.fn().mockResolvedValue({
@@ -60,6 +70,8 @@ function buildClient({
       }),
     },
     rpc: vi.fn().mockResolvedValue({ data: result, error }),
+    from: vi.fn().mockImplementation(() => ({ ...srsChain, upsert: srsUpsert })),
+    srsUpsert,
   };
 }
 
@@ -232,6 +244,66 @@ describe("POST /api/quiz", () => {
     expect(await response.json()).toEqual({
       error: arMessages.Api.tooManyRequests,
     });
+  });
+
+  it("advances the question's SRS card after a correct answer", async () => {
+    const client = buildClient({ result: { ...storedResult, is_correct: true } });
+    mockCreateClient.mockResolvedValue(client as never);
+
+    const response = await POST(makeRequest(defaultBody));
+
+    expect(response.status).toBe(200);
+    expect(client.from).toHaveBeenCalledWith("user_srs_cards");
+    expect(client.srsUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        user_id: USER_ID,
+        question_id: QUESTION_ID,
+        ease: 2.5,
+        interval_days: 1,
+        repetitions: 1,
+      }),
+      { onConflict: "user_id,question_id" }
+    );
+  });
+
+  it("resets the question's SRS card after a wrong answer", async () => {
+    const client = buildClient({
+      result: { ...storedResult, is_correct: false },
+      srsExisting: { ease: 2.5, interval_days: 6, repetitions: 2 },
+    });
+    mockCreateClient.mockResolvedValue(client as never);
+
+    const response = await POST(makeRequest(defaultBody));
+
+    expect(response.status).toBe(200);
+    expect(client.srsUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({ ease: 2.3, interval_days: 0, repetitions: 0 }),
+      { onConflict: "user_id,question_id" }
+    );
+  });
+
+  it("does not touch SRS state when the transactional RPC fails", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const client = buildClient({ result: null, error: { message: "rate_limited" } });
+    mockCreateClient.mockResolvedValue(client as never);
+
+    await POST(makeRequest(defaultBody));
+
+    expect(client.from).not.toHaveBeenCalled();
+    errorSpy.mockRestore();
+  });
+
+  it("still returns the quiz result when the SRS update fails", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const client = buildClient({ srsUpsertError: { message: "boom" } });
+    mockCreateClient.mockResolvedValue(client as never);
+
+    const response = await POST(makeRequest(defaultBody));
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(storedResult);
+    expect(errorSpy).toHaveBeenCalledWith("[quiz] SRS update failed:", expect.any(Error));
+    errorSpy.mockRestore();
   });
 
   it("returns 500 when the transactional submission fails", async () => {

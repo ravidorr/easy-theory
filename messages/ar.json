@@ -121,7 +121,8 @@
     "signBadge": "إشارة {number}",
     "btnNo": "لم أعرف",
     "btnYes": "عرفت ✓",
-    "footerNote": "البطاقات التي وضعت عليها \"لم أعرف\" ستعود غداً."
+    "footerNote": "البطاقات التي وضعت عليها \"لم أعرف\" ستظهر أولاً في المرة القادمة.",
+    "dueToday": "{count} بطاقات للمراجعة اليوم"
   },
   "Quiz": {
     "count": "{current} من {total}",
@@ -174,7 +175,9 @@
     "scopeLastSession": "آخر تدريب",
     "scopeAllTime": "كل الأوقات",
     "emptyHintLastSession": "لا أخطاء في آخر تدريب!",
-    "viewAllMistakes": "عرض كل الأخطاء"
+    "viewAllMistakes": "عرض كل الأخطاء",
+    "dueBadge": "للمراجعة",
+    "dueCount": "{count} أسئلة للمراجعة"
   },
   "Bookmarks": {
     "topBarTitle": "الأسئلة المحفوظة",
@@ -270,6 +273,7 @@
     "progressSaveFailed": "فشل حفظ التقدّم",
     "examSaveFailed": "فشل حفظ الامتحان",
     "answerSaveFailed": "فشل حفظ الإجابة",
+    "srsSaveFailed": "فشل حفظ المراجعة",
     "questionNotFound": "السؤال غير موجود",
     "topicNotFound": "الموضوع غير موجود",
     "questionsLoadFailed": "خطأ في تحميل الأسئلة",
