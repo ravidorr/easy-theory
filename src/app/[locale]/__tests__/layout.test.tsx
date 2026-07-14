@@ -4,7 +4,6 @@ import React from "react";
 import LocaleLayout, { generateViewport } from "../layout";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-import { locale } from "next/root-params";
 
 vi.mock("next/font/google", () => ({
   Rubik: vi.fn().mockReturnValue({ variable: "--font-rubik", className: "rubik" }),
@@ -20,11 +19,6 @@ vi.mock("next/navigation", () => ({
   notFound: vi.fn().mockImplementation(() => {
     throw new Error("NEXT_NOT_FOUND");
   }),
-}));
-
-// The real module is a compiler-replaced placeholder that throws outside next.
-vi.mock("next/root-params", () => ({
-  locale: vi.fn(),
 }));
 
 vi.mock("next/script", () => ({
@@ -60,7 +54,11 @@ vi.mock("@vercel/speed-insights/next", () => ({ SpeedInsights: () => null }));
 vi.mock("@/app/globals.css", () => ({}));
 
 const mockCookies = vi.mocked(cookies);
-const mockLocale = vi.mocked(locale);
+
+const layoutProps = (
+  locale: string,
+  children: React.ReactNode = React.createElement("div")
+) => ({ children, params: Promise.resolve({ locale }) });
 
 describe("LocaleLayout", () => {
   beforeEach(() => {
@@ -69,40 +67,36 @@ describe("LocaleLayout", () => {
     mockCookies.mockResolvedValue({
       get: vi.fn().mockReturnValue(undefined),
     } as never);
-    mockLocale.mockResolvedValue("he");
   });
 
   it("calls notFound for an unrecognised locale", async () => {
-    mockLocale.mockResolvedValue("fr");
-    await expect(
-      LocaleLayout({ children: React.createElement("div") })
-    ).rejects.toThrow("NEXT_NOT_FOUND");
+    await expect(LocaleLayout(layoutProps("fr"))).rejects.toThrow(
+      "NEXT_NOT_FOUND"
+    );
     expect(vi.mocked(notFound)).toHaveBeenCalled();
   });
 
   it("sets lang=he on the html element for he locale", async () => {
-    const jsx = await LocaleLayout({ children: React.createElement("div") });
+    const jsx = await LocaleLayout(layoutProps("he"));
     const html = renderToStaticMarkup(jsx);
     expect(html).toContain('lang="he"');
   });
 
   it("sets lang=ar on the html element for ar locale", async () => {
-    mockLocale.mockResolvedValue("ar");
-    const jsx = await LocaleLayout({ children: React.createElement("div") });
+    const jsx = await LocaleLayout(layoutProps("ar"));
     const html = renderToStaticMarkup(jsx);
     expect(html).toContain('lang="ar"');
   });
 
   it("always sets dir=rtl (both locales are RTL)", async () => {
     for (const currentLocale of ["he", "ar"]) {
-      mockLocale.mockResolvedValue(currentLocale);
-      const jsx = await LocaleLayout({ children: React.createElement("div") });
+      const jsx = await LocaleLayout(layoutProps(currentLocale));
       expect(renderToStaticMarkup(jsx)).toContain('dir="rtl"');
     }
   });
 
   it("injects window.__locale and window.__t into the inline script", async () => {
-    const jsx = await LocaleLayout({ children: React.createElement("div") });
+    const jsx = await LocaleLayout(layoutProps("he"));
     const html = renderToStaticMarkup(jsx);
     expect(html).toContain("window.__locale");
     expect(html).toContain("window.__t");
@@ -111,7 +105,7 @@ describe("LocaleLayout", () => {
   });
 
   it("defaults to dark theme when no theme cookie", async () => {
-    const jsx = await LocaleLayout({ children: React.createElement("div") });
+    const jsx = await LocaleLayout(layoutProps("he"));
     expect(renderToStaticMarkup(jsx)).toContain('data-theme="dark"');
   });
 
@@ -119,27 +113,27 @@ describe("LocaleLayout", () => {
     mockCookies.mockResolvedValue({
       get: vi.fn().mockReturnValue({ value: "light" }),
     } as never);
-    const jsx = await LocaleLayout({ children: React.createElement("div") });
+    const jsx = await LocaleLayout(layoutProps("he"));
     expect(renderToStaticMarkup(jsx)).toContain('data-theme="light"');
   });
 
   it("renders the vapid-public-key meta tag when the env var is set", async () => {
     process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY = "test-vapid-key";
-    const jsx = await LocaleLayout({ children: React.createElement("div") });
+    const jsx = await LocaleLayout(layoutProps("he"));
     const html = renderToStaticMarkup(jsx);
     expect(html).toContain('name="vapid-public-key"');
     expect(html).toContain('content="test-vapid-key"');
   });
 
   it("omits the vapid-public-key meta tag when the env var is unset", async () => {
-    const jsx = await LocaleLayout({ children: React.createElement("div") });
+    const jsx = await LocaleLayout(layoutProps("he"));
     expect(renderToStaticMarkup(jsx)).not.toContain('name="vapid-public-key"');
   });
 
   it("renders children inside the layout", async () => {
-    const jsx = await LocaleLayout({
-      children: React.createElement("p", { id: "test-child" }, "hello"),
-    });
+    const jsx = await LocaleLayout(
+      layoutProps("he", React.createElement("p", { id: "test-child" }, "hello"))
+    );
     const html = renderToStaticMarkup(jsx);
     expect(html).toContain('id="test-child"');
     expect(html).toContain("hello");

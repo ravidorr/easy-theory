@@ -12,13 +12,13 @@ const rubik = Rubik({
   display: "swap",
 });
 
-// Global 404, handled at the routing level: covers URLs that match no route
-// and notFound() bubbling to the root (e.g. the [locale] layout's invalid-
-// locale guard). Rendered outside any layout with no next-intl request
-// context, so it must supply its own <html> and resolve the locale itself
-// from the NEXT_LOCALE cookie / Accept-Language header. Both supported
-// locales are RTL, so dir stays fixed.
-export default async function GlobalNotFound() {
+// Root not-found boundary: catches notFound() bubbling above [locale] (e.g.
+// the layout's invalid-locale guard, hit via proxy-skipped paths like
+// /signs/nope) and covers URLs that match no route. Rendered outside the
+// locale layout with no next-intl request context, so it must supply its own
+// <html> and resolve the locale itself from the NEXT_LOCALE cookie /
+// Accept-Language header. Both supported locales are RTL, so dir stays fixed.
+export default async function RootNotFound() {
   const [cookieStore, headerStore] = await Promise.all([cookies(), headers()]);
   const locale = detectLocale(
     cookieStore.get("NEXT_LOCALE")?.value,
