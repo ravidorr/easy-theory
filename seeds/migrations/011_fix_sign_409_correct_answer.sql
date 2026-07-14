@@ -1,5 +1,7 @@
 -- Fix incorrect correct_option for signs question 409.
 -- The sign shows a sharp right curve; the correct answer is 'd', not 'a'.
+-- Historically numbered 002 (duplicate prefix with 002_fix_correct_options.sql);
+-- renumbered to 011. Already applied to prod and QA.
 UPDATE questions
 SET correct_option = 'd'
 WHERE question_number = 409

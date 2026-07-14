@@ -26,11 +26,11 @@ In the project's **SQL editor**, run these files in exactly this order:
 6. `seeds/rate_limits.sql`
 7. **every file in `seeds/migrations/` in filename order** (as of this writing:
    `001_quiz_responses_unique.sql`, `002_fix_correct_options.sql`,
-   `002_fix_sign_409_correct_answer.sql`, `003_fix_sign_102_name.sql`,
-   `004_quiz_responses_update_policy.sql`, `005_arabic_columns.sql`,
-   `006_quiz_responses_session_id.sql`, `007_exam_attempts.sql`,
-   `008_replace_user_schedule.sql`, `009_schedule_locale.sql`,
-   `010_quiz_submission_idempotency.sql`)
+   `003_fix_sign_102_name.sql`, `004_quiz_responses_update_policy.sql`,
+   `005_arabic_columns.sql`, `006_quiz_responses_session_id.sql`,
+   `007_exam_attempts.sql`, `008_replace_user_schedule.sql`,
+   `009_schedule_locale.sql`, `010_quiz_submission_idempotency.sql`,
+   `011_fix_sign_409_correct_answer.sql`)
 
 **Keep the QA project's schema in sync**: whenever a new file lands in
 `seeds/migrations/`, run it in the QA project's SQL editor too. The app's code assumes

@@ -22,6 +22,19 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ---
 
+## [0.3.120] — 2026-07-14
+
+### Removed
+- Spent one-off scripts `scripts/fix_q536.ts` and `scripts/fix_untranslated.ts` (hardcoded question IDs already fixed in the live DB; the reusable flow lives in `find_untranslated.ts`/`translate_arabic.ts`).
+
+### Added
+- `scripts/requirements.txt` manifest for the Python pipeline scripts (Pillow + numpy for `remove_sign_backgrounds.py`; the rest are stdlib-only, `extract_signs.py` also needs the external `pdftohtml` binary).
+
+### Changed
+- Renumbered `seeds/migrations/002_fix_sign_409_correct_answer.sql` to `011_...` to resolve the duplicate `002_` prefix (single-row data fix, order-independent, already applied to prod/QA); `qa/SETUP.md`'s migration list updated accordingly.
+
+---
+
 ## [0.3.119] — 2026-07-14
 
 ### Added
