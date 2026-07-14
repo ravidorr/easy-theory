@@ -6,6 +6,7 @@ const quizScript = readFileSync(
   resolve(__dirname, "../../../../../../public/js/quiz.js"),
   "utf-8"
 );
+const TOUCH_DOUBLE_TAP_SUPPRESSION_MS = 300;
 
 function slideHTML(index: number, correct: string) {
   return `
@@ -67,6 +68,40 @@ function clickOption(slideIndex: number, option: string) {
 
 function clickAction() {
   (document.getElementById("quiz-next") as HTMLButtonElement).click();
+}
+
+function dispatchActionClick(detail: number) {
+  document
+    .getElementById("quiz-next")!
+    .dispatchEvent(new MouseEvent("click", { bubbles: true, detail }));
+}
+
+function dispatchPointerAction(pointerType: string, detail: number) {
+  const pointerdown = new Event("pointerdown", { bubbles: true });
+  Object.defineProperty(pointerdown, "pointerType", { value: pointerType });
+  document.getElementById("quiz-next")!.dispatchEvent(pointerdown);
+  dispatchActionClick(detail);
+}
+
+function dispatchTouchFallbackAction(detail: number) {
+  document
+    .getElementById("quiz-next")!
+    .dispatchEvent(new Event("touchstart", { bubbles: true }));
+  dispatchActionClick(detail);
+}
+
+function pressActionKey(key: string, repeat: boolean) {
+  const action = document.getElementById("quiz-next")!;
+  const keydown = new KeyboardEvent("keydown", {
+    bubbles: true,
+    cancelable: true,
+    key,
+    repeat,
+  });
+
+  if (action.dispatchEvent(keydown)) {
+    dispatchActionClick(0);
+  }
 }
 
 function actionButton() {
@@ -392,6 +427,7 @@ describe("quiz.js – reward score and feedback", () => {
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     vi.unstubAllGlobals();
   });
 
@@ -430,6 +466,192 @@ describe("quiz.js – reward score and feedback", () => {
     clickAction(); // advance
     expect(messageText()).toBe("");
     expect(scoreText()).toBe("10");
+  });
+
+  it("keeps feedback visible for one mouse multi-click and advances on a later click", async () => {
+    clickOption(0, "a");
+
+    dispatchActionClick(1);
+    await flushAsyncWork();
+    dispatchActionClick(2);
+
+    expect(messageText()).toBe("יפה מאוד!");
+    expect(
+      (document.querySelectorAll(".quiz-slide")[0] as HTMLElement).style.display
+    ).toBe("flex");
+
+    dispatchActionClick(1);
+
+    expect(
+      (document.querySelectorAll(".quiz-slide")[1] as HTMLElement).style.display
+    ).toBe("flex");
+  });
+
+  it("keeps feedback visible through repeated Enter and advances on a later press", async () => {
+    clickOption(0, "a");
+
+    pressActionKey("Enter", false);
+    await flushAsyncWork();
+    pressActionKey("Enter", true);
+
+    expect(messageText()).toBe("יפה מאוד!");
+    expect(
+      (document.querySelectorAll(".quiz-slide")[0] as HTMLElement).style.display
+    ).toBe("flex");
+
+    pressActionKey("Enter", false);
+
+    expect(
+      (document.querySelectorAll(".quiz-slide")[1] as HTMLElement).style.display
+    ).toBe("flex");
+  });
+
+  it("keeps a successful touch confirmation disabled for the suppression window", async () => {
+    vi.useFakeTimers();
+    clickOption(0, "a");
+
+    dispatchPointerAction("touch", 1);
+    await flushAsyncWork();
+
+    expect(actionButton().disabled).toBe(true);
+    dispatchPointerAction("touch", 1);
+    expect(
+      (document.querySelectorAll(".quiz-slide")[0] as HTMLElement).style.display
+    ).toBe("flex");
+
+    vi.advanceTimersByTime(TOUCH_DOUBLE_TAP_SUPPRESSION_MS);
+    expect(actionButton().disabled).toBe(false);
+
+    dispatchPointerAction("touch", 1);
+    expect(
+      (document.querySelectorAll(".quiz-slide")[1] as HTMLElement).style.display
+    ).toBe("flex");
+  });
+
+  it("keeps recovered feedback visible after a touch retry double-tap", async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(errorResponse(500, "שמירת התשובה נכשלה"))
+        .mockResolvedValueOnce({ ok: true, json: async () => ({}) })
+    );
+    setupDOM();
+    clickOption(0, "a");
+    clickAction();
+    await flushAsyncWork();
+
+    dispatchPointerAction("touch", 1);
+    await flushAsyncWork();
+    dispatchPointerAction("touch", 1);
+
+    expect(messageText()).toBe("יפה מאוד!");
+    expect(actionButton().disabled).toBe(true);
+    expect(
+      (document.querySelectorAll(".quiz-slide")[0] as HTMLElement).style.display
+    ).toBe("flex");
+
+    vi.advanceTimersByTime(TOUCH_DOUBLE_TAP_SUPPRESSION_MS);
+    expect(actionButton().disabled).toBe(false);
+
+    dispatchPointerAction("touch", 1);
+    expect(
+      (document.querySelectorAll(".quiz-slide")[1] as HTMLElement).style.display
+    ).toBe("flex");
+  });
+
+  it("keeps a failed touch retry disabled until its suppression window expires", async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(errorResponse(500, "שמירת התשובה נכשלה"))
+        .mockResolvedValueOnce(errorResponse(500, "שמירת התשובה נכשלה שוב"))
+    );
+    setupDOM();
+    clickOption(0, "a");
+    clickAction();
+    await flushAsyncWork();
+
+    dispatchPointerAction("touch", 1);
+    await flushAsyncWork();
+
+    expect(messageText()).toBe("שמירת התשובה נכשלה שוב");
+    expect(actionButton().disabled).toBe(true);
+
+    vi.advanceTimersByTime(TOUCH_DOUBLE_TAP_SUPPRESSION_MS);
+
+    expect(actionButton().disabled).toBe(false);
+    expect(actionButton().textContent).toBe("נסי שוב");
+  });
+
+  it("does not let the touch timeout override pending persistence", async () => {
+    vi.useFakeTimers();
+    let resolveRequest!: (response: {
+      ok: boolean;
+      json: () => Promise<object>;
+    }) => void;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockReturnValue(
+        new Promise((resolve) => {
+          resolveRequest = resolve;
+        })
+      )
+    );
+    setupDOM();
+    clickOption(0, "a");
+
+    dispatchPointerAction("touch", 1);
+    vi.advanceTimersByTime(TOUCH_DOUBLE_TAP_SUPPRESSION_MS);
+
+    expect(actionButton().disabled).toBe(true);
+    expect(
+      (document.querySelectorAll(".quiz-slide")[0] as HTMLElement).style.display
+    ).toBe("flex");
+
+    resolveRequest({ ok: true, json: async () => ({}) });
+    await flushAsyncWork();
+
+    expect(actionButton().disabled).toBe(false);
+    expect(actionButton().textContent).toBe("לשאלה הבאה");
+  });
+
+  it("uses the touchstart fallback to suppress Safari-style double taps", async () => {
+    vi.useFakeTimers();
+    clickOption(0, "a");
+
+    dispatchTouchFallbackAction(1);
+    await flushAsyncWork();
+
+    expect(actionButton().disabled).toBe(true);
+    dispatchTouchFallbackAction(1);
+    expect(
+      (document.querySelectorAll(".quiz-slide")[0] as HTMLElement).style.display
+    ).toBe("flex");
+
+    vi.advanceTimersByTime(TOUCH_DOUBLE_TAP_SUPPRESSION_MS);
+    dispatchTouchFallbackAction(1);
+
+    expect(
+      (document.querySelectorAll(".quiz-slide")[1] as HTMLElement).style.display
+    ).toBe("flex");
+  });
+
+  it("keeps programmatic activations immediate", async () => {
+    clickOption(0, "a");
+
+    dispatchActionClick(0);
+    await flushAsyncWork();
+
+    expect(actionButton().disabled).toBe(false);
+    dispatchActionClick(0);
+
+    expect(
+      (document.querySelectorAll(".quiz-slide")[1] as HTMLElement).style.display
+    ).toBe("flex");
   });
 
   it("accumulates points across correct answers", async () => {

@@ -8,6 +8,8 @@
 
   const total = parseInt(container.dataset.total, 10) || 0;
   if (total === 0) return;
+  // Matches the common upper bound for mobile double-tap recognition.
+  const TOUCH_DOUBLE_TAP_SUPPRESSION_MS = 300;
 
   // Resume state is persisted per user + topic so a reload continues the same
   // run, including an unacknowledged submission. Retry sessions are throwaway
@@ -126,6 +128,31 @@
     : null;
   let score = resumed ? resumed.score | 0 : 0;
   let points = resumed ? resumed.points | 0 : 0;
+  let actionActivationIsTouch = false;
+  let touchAdvanceSuppressed = false;
+
+  function setActionAvailable(available) {
+    if (actionBtn) {
+      actionBtn.disabled = !available || touchAdvanceSuppressed;
+    }
+  }
+
+  function actionIsAvailableForPersistenceState() {
+    return (
+      answerPersistence === "failed" ||
+      answerPersistence === "succeeded" ||
+      answerPersistence === "blocked"
+    );
+  }
+
+  function suppressTouchActivation() {
+    touchAdvanceSuppressed = true;
+    setActionAvailable(false);
+    window.setTimeout(function () {
+      touchAdvanceSuppressed = false;
+      setActionAvailable(actionIsAvailableForPersistenceState());
+    }, TOUCH_DOUBLE_TAP_SUPPRESSION_MS);
+  }
 
   function persistResume() {
     saveResume({
@@ -252,7 +279,7 @@
     btn.dataset.state = "selected";
     selectedOption = btn.dataset.option;
 
-    if (actionBtn) actionBtn.disabled = false;
+    setActionAvailable(true);
   }
 
   function showAnswerFeedback(slide, awardReward) {
@@ -303,7 +330,7 @@
     if (rewardMessage) rewardMessage.textContent = message;
     if (actionBtn) {
       actionBtn.textContent = t.retryAnswerBtn || "נסי שוב";
-      actionBtn.disabled = false;
+      setActionAvailable(true);
     }
   }
 
@@ -315,7 +342,7 @@
     if (rewardMessage) rewardMessage.textContent = message;
     if (actionBtn) {
       actionBtn.textContent = t.restartQuizBtn || "התחלה מחדש";
-      actionBtn.disabled = false;
+      setActionAvailable(true);
     }
   }
 
@@ -402,7 +429,7 @@
       }
       if (actionBtn) {
         actionBtn.textContent = t.nextBtn || "לשאלה הבאה";
-        actionBtn.disabled = false;
+        setActionAvailable(true);
       }
     }).catch(function () {
       showRetryableSubmissionFailure(
@@ -443,7 +470,7 @@
       }
       if (actionBtn) {
         actionBtn.textContent = t.retryAnswerBtn || "נסי שוב";
-        actionBtn.disabled = false;
+        setActionAvailable(true);
       }
     } else {
       answerPersistence = "succeeded";
@@ -455,7 +482,7 @@
       }
       if (actionBtn) {
         actionBtn.textContent = t.nextBtn || "לשאלה הבאה";
-        actionBtn.disabled = false;
+        setActionAvailable(true);
       }
     }
   }
@@ -497,14 +524,38 @@
   });
 
   if (actionBtn) {
-    actionBtn.addEventListener("click", function () {
+    actionBtn.addEventListener("pointerdown", function (event) {
+      actionActivationIsTouch = event.pointerType === "touch";
+    });
+
+    actionBtn.addEventListener("touchstart", function () {
+      actionActivationIsTouch = true;
+    }, { passive: true });
+
+    actionBtn.addEventListener("keydown", function (event) {
+      if (event.key === "Enter" && event.repeat) {
+        event.preventDefault();
+      }
+    });
+
+    actionBtn.addEventListener("click", function (event) {
+      const isTouchActivation = actionActivationIsTouch;
+      actionActivationIsTouch = false;
+      if (isTouchActivation && touchAdvanceSuppressed) return;
+
       const slide = slides[currentIndex];
       if (!slide) return;
       if (!confirmed && selectedOption) {
+        if (isTouchActivation) {
+          suppressTouchActivation();
+        }
         handleConfirm(slide);
       } else if (answerPersistence === "failed") {
+        if (isTouchActivation) {
+          suppressTouchActivation();
+        }
         submitAnswer(slide);
-      } else if (answerPersistence === "succeeded") {
+      } else if (answerPersistence === "succeeded" && event.detail <= 1) {
         handleAdvance();
       } else if (answerPersistence === "blocked") {
         clearResume();
