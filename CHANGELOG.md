@@ -24,6 +24,13 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ---
 
+## [0.3.130] — 2026-07-14
+
+### Added
+- Branch coverage tests for the bookmarks page image-resolution logic, raising overall branch coverage from 94.68% to 96.45%: placeholder fallback for a missing `/questions/` image, wide rendering of an existing question image, sign questions hiding the question image and rendering the numeric option as a sign, square sign question images with the sign-number alt, and the ar-locale fallback to Hebrew when `question_ar` is absent.
+
+---
+
 ## [0.3.129] — 2026-07-14
 
 ### Fixed
