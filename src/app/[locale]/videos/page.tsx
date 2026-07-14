@@ -1,9 +1,10 @@
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase";
+import { getVideos } from "@/lib/db";
 import { TabBar } from "@/components/TabBar";
 import { Icon } from "@/components/Icon";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import styles from "./page.module.css";
 
 const PlayIcon = ({ size = 20 }: { size?: number }) => (
@@ -18,13 +19,14 @@ export default async function VideosPage() {
   if (!user) redirect("/auth/login?next=/videos");
 
   const t = await getTranslations("Videos");
+  const locale = await getLocale();
+  const loc = (he: string | null, ar: string | null) =>
+    locale === "ar" ? (ar ?? he) : he;
 
-  const lessons = [
-    { id: "vk37Vd80S2E", title: t("lesson1Title"), tag: t("lesson1Tag") },
-    { id: "Rp4wFyF-dok", title: t("lesson2Title"), tag: t("lesson2Tag") },
-    { id: "nwbIrAdn8Qc", title: t("lesson3Title"), tag: t("lesson3Tag") },
-    { id: "kJ5y5JlkMjc", title: t("lesson4Title"), tag: t("lesson4Tag") },
-  ];
+  const videos = await getVideos(supabase);
+  const featured = videos.find((v) => v.section === "marathon" && v.is_featured);
+  const marathons = videos.filter((v) => v.section === "marathon" && !v.is_featured);
+  const lessons = videos.filter((v) => v.section === "lesson");
 
   return (
     <>
@@ -37,70 +39,52 @@ export default async function VideosPage() {
         <div className={styles.section}>
           <h2>{t("marathonsTitle")}</h2>
 
-          <a
-            href="https://www.youtube.com/watch?v=gd6ES_aAdI0"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.featuredLink}
-          >
-            <div className={styles.thumbnailFeatured}>
-              <Image
-                src="https://i.ytimg.com/vi/gd6ES_aAdI0/hqdefault.jpg"
-                alt=""
-                fill
-                sizes="(max-width: 480px) 100vw, 440px"
-                className={styles.thumbnailImg}
-              />
-              <span className={styles.playBtnLg}>
-                <PlayIcon size={20} />
-              </span>
-              <span className={styles.durationBadge}>{t("featuredDuration")}</span>
-            </div>
-            <div className={styles.videoMeta}>
-              <span className={styles.videoTitle}>{t("featuredTitle")}</span>
-              <span className={styles.videoDesc}>{t("featuredDesc")}</span>
-            </div>
-          </a>
-
-          <a
-            href="https://www.youtube.com/watch?v=WsVi4kEiaPE"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.rowLink}
-          >
-            <div className={styles.thumbnailRow}>
-              <Image
-                src="https://i.ytimg.com/vi/WsVi4kEiaPE/hqdefault.jpg"
-                alt=""
-                fill
-                sizes="120px"
-                className={styles.thumbnailImg}
-              />
-              <span className={styles.playBtnSm}>
-                <PlayIcon size={12} />
-              </span>
-            </div>
-            <div className={styles.videoBody}>
-              <span className={styles.videoTitle}>{t("rowTitle1")}</span>
-              <span className={styles.videoDesc}>{t("rowDesc1")}</span>
-            </div>
-          </a>
-        </div>
-
-        <div className={styles.section}>
-          <h2>{t("lessonsTitle")}</h2>
-
-          {lessons.map((video) => (
+          {featured && (
             <a
-              key={video.id}
-              href={`https://www.youtube.com/watch?v=${video.id}`}
+              href={`https://www.youtube.com/watch?v=${featured.youtube_id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.featuredLink}
+            >
+              <div className={styles.thumbnailFeatured}>
+                <Image
+                  src={`https://i.ytimg.com/vi/${featured.youtube_id}/hqdefault.jpg`}
+                  alt=""
+                  fill
+                  sizes="(max-width: 480px) 100vw, 440px"
+                  className={styles.thumbnailImg}
+                />
+                <span className={styles.playBtnLg}>
+                  <PlayIcon size={20} />
+                </span>
+                {featured.duration_label_he && (
+                  <span className={styles.durationBadge}>
+                    {loc(featured.duration_label_he, featured.duration_label_ar)}
+                  </span>
+                )}
+              </div>
+              <div className={styles.videoMeta}>
+                <span className={styles.videoTitle}>
+                  {loc(featured.title_he, featured.title_ar)}
+                </span>
+                <span className={styles.videoDesc}>
+                  {loc(featured.description_he, featured.description_ar)}
+                </span>
+              </div>
+            </a>
+          )}
+
+          {marathons.map((video) => (
+            <a
+              key={video.youtube_id}
+              href={`https://www.youtube.com/watch?v=${video.youtube_id}`}
               target="_blank"
               rel="noopener noreferrer"
               className={styles.rowLink}
             >
               <div className={styles.thumbnailRow}>
                 <Image
-                  src={`https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`}
+                  src={`https://i.ytimg.com/vi/${video.youtube_id}/hqdefault.jpg`}
                   alt=""
                   fill
                   sizes="120px"
@@ -111,8 +95,47 @@ export default async function VideosPage() {
                 </span>
               </div>
               <div className={styles.videoBody}>
-                <span className={styles.videoTitle}>{video.title}</span>
-                <span className={styles.videoTag}>{video.tag}</span>
+                <span className={styles.videoTitle}>
+                  {loc(video.title_he, video.title_ar)}
+                </span>
+                <span className={styles.videoDesc}>
+                  {loc(video.description_he, video.description_ar)}
+                </span>
+              </div>
+            </a>
+          ))}
+        </div>
+
+        <div className={styles.section}>
+          <h2>{t("lessonsTitle")}</h2>
+
+          {lessons.map((video) => (
+            <a
+              key={video.youtube_id}
+              href={`https://www.youtube.com/watch?v=${video.youtube_id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.rowLink}
+            >
+              <div className={styles.thumbnailRow}>
+                <Image
+                  src={`https://i.ytimg.com/vi/${video.youtube_id}/hqdefault.jpg`}
+                  alt=""
+                  fill
+                  sizes="120px"
+                  className={styles.thumbnailImg}
+                />
+                <span className={styles.playBtnSm}>
+                  <PlayIcon size={12} />
+                </span>
+              </div>
+              <div className={styles.videoBody}>
+                <span className={styles.videoTitle}>
+                  {loc(video.title_he, video.title_ar)}
+                </span>
+                <span className={styles.videoTag}>
+                  {loc(video.tag_he, video.tag_ar)}
+                </span>
               </div>
             </a>
           ))}
