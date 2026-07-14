@@ -8,6 +8,8 @@
 
   const total = parseInt(container.dataset.total, 10) || 0;
   if (total === 0) return;
+  // Matches the common upper bound for mobile double-tap recognition.
+  const TOUCH_DOUBLE_TAP_SUPPRESSION_MS = 300;
 
   // Resume state is persisted per user + topic so a reload continues the same
   // run. Retry sessions are throwaway and never persist.
@@ -74,6 +76,8 @@
   let confirmed = false;
   let score = resumed ? resumed.score | 0 : 0;
   let points = resumed ? resumed.points | 0 : 0;
+  let actionActivationIsTouch = false;
+  let touchAdvanceSuppressed = false;
 
   if (rewardFloat) {
     rewardFloat.addEventListener("animationend", function () {
@@ -294,12 +298,38 @@
   });
 
   if (actionBtn) {
-    actionBtn.addEventListener("click", function () {
+    actionBtn.addEventListener("pointerdown", function (event) {
+      actionActivationIsTouch = event.pointerType === "touch";
+    });
+
+    actionBtn.addEventListener("touchstart", function () {
+      actionActivationIsTouch = true;
+    }, { passive: true });
+
+    actionBtn.addEventListener("keydown", function (event) {
+      if (event.key === "Enter" && event.repeat) {
+        event.preventDefault();
+      }
+    });
+
+    actionBtn.addEventListener("click", function (event) {
+      const isTouchActivation = actionActivationIsTouch;
+      actionActivationIsTouch = false;
+      if (isTouchActivation && touchAdvanceSuppressed) return;
+
       const slide = slides[currentIndex];
       if (!slide) return;
       if (!confirmed && selectedOption) {
         handleConfirm(slide);
-      } else if (confirmed) {
+        if (isTouchActivation) {
+          touchAdvanceSuppressed = true;
+          actionBtn.disabled = true;
+          window.setTimeout(function () {
+            touchAdvanceSuppressed = false;
+            actionBtn.disabled = false;
+          }, TOUCH_DOUBLE_TAP_SUPPRESSION_MS);
+        }
+      } else if (confirmed && event.detail <= 1) {
         handleAdvance();
       }
     });

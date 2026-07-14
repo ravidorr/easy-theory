@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.105] - 2026-07-14
+
+### Fixed
+- Quiz answer feedback remains visible after rapid mouse double-clicks, touch double-taps, and repeated Enter key events. A later distinct pointer or keyboard activation still advances normally.
+
+---
+
 ## [0.3.104] — 2026-07-14
 
 ### Added
