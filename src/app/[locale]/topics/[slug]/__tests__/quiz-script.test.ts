@@ -14,7 +14,7 @@ function slideHTML(index: number, correct: string) {
       ${["a", "b", "c", "d"]
         .map(
           (opt, i) => `
-        <button class="quiz-option" data-option="${opt}">
+        <button class="quiz-option" data-option="${opt}" aria-pressed="false">
           <span class="quiz-option-badge">${["א", "ב", "ג", "ד"][i]}</span>
           <span>אפשרות ${opt}</span>
         </button>`
@@ -662,6 +662,73 @@ describe("quiz.js – reward score and feedback", () => {
     clickOption(1, "b");
     clickAction();
     expect(scoreText()).toBe("20");
+  });
+});
+
+describe("quiz.js – assistive tech state", () => {
+  function option(slideIndex: number, opt: string) {
+    const slide = document.querySelectorAll(".quiz-slide")[slideIndex]!;
+    return slide.querySelector(`[data-option="${opt}"]`) as HTMLButtonElement;
+  }
+
+  beforeEach(() => {
+    localStorage.clear();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) })
+    );
+    setupDOM();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("sets aria-pressed on the clicked option and clears it on its siblings", () => {
+    clickOption(0, "b");
+    expect(option(0, "b").getAttribute("aria-pressed")).toBe("true");
+    ["a", "c", "d"].forEach((opt) => {
+      expect(option(0, opt).getAttribute("aria-pressed")).toBe("false");
+    });
+
+    clickOption(0, "c");
+    expect(option(0, "c").getAttribute("aria-pressed")).toBe("true");
+    expect(option(0, "b").getAttribute("aria-pressed")).toBe("false");
+  });
+
+  it("keeps the chosen option aria-pressed after confirmation", () => {
+    clickOption(0, "b");
+    clickAction();
+    expect(option(0, "b").getAttribute("aria-pressed")).toBe("true");
+    expect(option(0, "b").disabled).toBe(true);
+  });
+
+  it("adds screen-reader result text to the correct and wrong options on confirm", () => {
+    clickOption(0, "b"); // correct is "a"
+    clickAction();
+    expect(option(0, "a").querySelector(".quiz-option-sr")!.textContent).toBe("תשובה נכונה");
+    expect(option(0, "b").querySelector(".quiz-option-sr")!.textContent).toBe("תשובה שגויה");
+    expect(option(0, "c").querySelector(".quiz-option-sr")).toBeNull();
+  });
+
+  it("marks only the correct option when the answer is right", () => {
+    clickOption(0, "a");
+    clickAction();
+    expect(option(0, "a").querySelector(".quiz-option-sr")!.textContent).toBe("תשובה נכונה");
+    ["b", "c", "d"].forEach((opt) => {
+      expect(option(0, opt).querySelector(".quiz-option-sr")).toBeNull();
+    });
+  });
+
+  it("does not duplicate screen-reader result spans", () => {
+    clickOption(0, "a");
+    clickAction();
+    clickAction(); // advance
+    clickOption(1, "b");
+    clickAction();
+    document.querySelectorAll(".quiz-option").forEach((o) => {
+      expect(o.querySelectorAll(".quiz-option-sr").length).toBeLessThanOrEqual(1);
+    });
   });
 });
 

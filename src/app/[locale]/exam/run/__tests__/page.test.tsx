@@ -153,6 +153,16 @@ describe("ExamRunPage", () => {
     expect(container.querySelector('img[src="/signs/sign-100.png"]')?.getAttribute("alt")).toBe("signAlt");
   });
 
+  it("renders every option button with aria-pressed false", async () => {
+    const jsx = await ExamRunPage();
+    const { container } = render(jsx);
+    const options = container.querySelectorAll(".quiz-option");
+    expect(options.length).toBeGreaterThan(0);
+    options.forEach((o) => {
+      expect(o.getAttribute("aria-pressed")).toBe("false");
+    });
+  });
+
   it("renders the back-to-exam CTA as a link styled as a button, without a nested button", async () => {
     const jsx = await ExamRunPage();
     const { container } = render(jsx);

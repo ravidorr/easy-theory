@@ -14,8 +14,8 @@ vi.mock("next/navigation", () => ({
 vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
 vi.mock("@/lib/db", () => ({ getUserSchedule: vi.fn() }));
 vi.mock("next/link", () => ({
-  default: ({ href, children, style }: { href: string; children: unknown; style?: unknown }) =>
-    React.createElement("a", { href, style }, children as React.ReactNode),
+  default: ({ href, children, ...rest }: { href: string; children: unknown }) =>
+    React.createElement("a", { href, ...rest }, children as React.ReactNode),
 }));
 vi.mock("next/script", () => ({
   default: () => React.createElement("div", null),
@@ -88,6 +88,20 @@ describe("SchedulePage", () => {
     expect(selectedDays).toHaveLength(2);
   });
 
+  it("keeps aria-pressed in sync with data-selected on day and duration buttons", async () => {
+    mockGetUserSchedule.mockResolvedValue([
+      { day_of_week: 0, duration_minutes: 60, start_time: "08:00:00", notify: true },
+      { day_of_week: 3, duration_minutes: 60, start_time: "08:00:00", notify: true },
+    ] as never);
+    const jsx = await SchedulePage();
+    const { container } = render(jsx);
+    container.querySelectorAll(".day-btn, .duration-btn").forEach((btn) => {
+      expect(btn.getAttribute("aria-pressed")).toBe(btn.getAttribute("data-selected"));
+    });
+    expect(container.querySelectorAll('.day-btn[aria-pressed="true"]')).toHaveLength(2);
+    expect(container.querySelectorAll('.duration-btn[aria-pressed="true"]')).toHaveLength(1);
+  });
+
   it("shows daysSelected when days are scheduled", async () => {
     mockGetUserSchedule.mockResolvedValue([
       { day_of_week: 1, duration_minutes: 45, start_time: "09:00:00", notify: true },
@@ -119,5 +133,11 @@ describe("SchedulePage", () => {
     const jsx = await SchedulePage();
     const { container } = render(jsx);
     expect(container.querySelector('a[href="/more"]')).toBeTruthy();
+  });
+
+  it("gives the icon-only back link an accessible name", async () => {
+    const jsx = await SchedulePage();
+    const { container } = render(jsx);
+    expect(container.querySelector("a[aria-label='backLabel']")).toBeTruthy();
   });
 });

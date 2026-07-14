@@ -18,8 +18,8 @@ vi.mock("@/components/SignImage", () => ({
     React.createElement("img", { src, alt }),
 }));
 vi.mock("next/link", () => ({
-  default: ({ href, children }: { href: string; children: unknown }) =>
-    React.createElement("a", { href }, children as React.ReactNode),
+  default: ({ href, children, ...rest }: { href: string; children: unknown }) =>
+    React.createElement("a", { href, ...rest }, children as React.ReactNode),
 }));
 vi.mock("next/script", () => ({
   default: () => React.createElement("div", null),
@@ -135,6 +135,13 @@ describe("FlashcardsPage", () => {
     const jsx = await FlashcardsPage();
     const { container } = render(jsx);
     expect(container.querySelector('a[href="/"]')).toBeTruthy();
+  });
+
+  it("gives the icon-only back link an accessible name", async () => {
+    mockGetSigns.mockResolvedValue([SIGN_1] as never);
+    const jsx = await FlashcardsPage();
+    const { container } = render(jsx);
+    expect(container.querySelector("a[aria-label='backLabel']")).toBeTruthy();
   });
 
   it("renders btnYes and btnNo buttons", async () => {

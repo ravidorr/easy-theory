@@ -29,7 +29,7 @@ export default async function SchedulePage() {
     <>
       <main className={styles.page}>
         <div className={styles.topBar}>
-          <Link href="/more" className={styles.backBtn}>
+          <Link href="/more" className={styles.backBtn} aria-label={t("backLabel")}>
             →
           </Link>
           <div className={styles.titleCol}>
@@ -49,6 +49,7 @@ export default async function SchedulePage() {
                   className={`day-btn ${styles.btnDay} ${selected ? styles.btnDaySelected : ""}`}
                   data-day={i}
                   data-selected={selected ? "true" : "false"}
+                  aria-pressed={selected}
                 >
                   {label}
                 </button>
@@ -84,6 +85,7 @@ export default async function SchedulePage() {
                     className={`duration-btn ${styles.btnDuration} ${active ? styles.btnDurationActive : ""}`}
                     data-duration={d}
                     data-selected={active ? "true" : "false"}
+                    aria-pressed={active}
                   >
                     {d} {t("durationUnit")}
                   </button>

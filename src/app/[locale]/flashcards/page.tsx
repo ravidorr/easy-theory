@@ -83,7 +83,7 @@ export default async function FlashcardsPage() {
     <>
       <main className={styles.page}>
         <div className={styles.topBar}>
-          <Link href="/" className={styles.backBtn}>
+          <Link href="/" className={styles.backBtn} aria-label={t("backLabel")}>
             →
           </Link>
           <div className={styles.topBarBody}>

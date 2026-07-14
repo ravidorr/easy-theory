@@ -327,6 +327,17 @@ describe("TopicQuizPage", () => {
     expect(container.querySelector("a[aria-label='closeLabel']")).toBeTruthy();
   });
 
+  it("renders every option button with aria-pressed false", async () => {
+    mockGetQuestions.mockResolvedValue([QUESTION] as never);
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "he" }) });
+    const { container } = render(jsx);
+    const options = container.querySelectorAll(".quiz-option");
+    expect(options.length).toBeGreaterThan(0);
+    options.forEach((o) => {
+      expect(o.getAttribute("aria-pressed")).toBe("false");
+    });
+  });
+
   it("gives the question sign image a sign-number alt", async () => {
     const q = { ...QUESTION, image_url: "/signs/sign-100.png" };
     mockGetQuestions.mockResolvedValue([q] as never);

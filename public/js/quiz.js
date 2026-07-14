@@ -266,6 +266,16 @@
     });
   }
 
+  // Exposes the correct/wrong result to screen readers; visually it is
+  // conveyed by color alone via [data-state].
+  function appendResultSr(option, text) {
+    if (option.querySelector(".quiz-option-sr")) return;
+    const sr = document.createElement("span");
+    sr.className = "sr-only quiz-option-sr";
+    sr.textContent = text;
+    option.appendChild(sr);
+  }
+
   function handleOptionClick(e) {
     if (confirmed) return;
     const btn = e.currentTarget;
@@ -274,9 +284,11 @@
 
     slide.querySelectorAll(".quiz-option").forEach(function (o) {
       o.dataset.state = "";
+      o.setAttribute("aria-pressed", "false");
     });
 
     btn.dataset.state = "selected";
+    btn.setAttribute("aria-pressed", "true");
     selectedOption = btn.dataset.option;
 
     setActionAvailable(true);
@@ -289,8 +301,10 @@
     slide.querySelectorAll(".quiz-option").forEach(function (o) {
       if (o.dataset.option === correctOption) {
         o.dataset.state = "correct";
+        appendResultSr(o, t.optionCorrectSr || "תשובה נכונה");
       } else if (o.dataset.option === selectedOption && !isCorrect) {
         o.dataset.state = "wrong";
+        appendResultSr(o, t.optionWrongSr || "תשובה שגויה");
       } else {
         o.dataset.state = "";
       }

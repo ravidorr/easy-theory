@@ -2,12 +2,10 @@
 
 Ordered by priority.
 
-## 1. Accessibility fixes on the quiz flow
+## 1. Review page silently loses mistakes on large topics
 
-- Icon-only links use raw glyphs with no accessible name: `✕` in `topics/[slug]/page.tsx`, `→`/`←` in schedule/flashcards. Add `aria-label`.
-- Question images render `alt=""` even when the image *is* the question content (road scenes) — hidden from screen-reader users.
-- Quiz option correct/wrong state is class-only, invisible to assistive tech — add `aria-pressed`/live announcements.
-- `data-selected` day/duration buttons in `schedule/page.tsx` lack `aria-pressed`.
+- On the 501-question traffic-laws topic, `topics/[slug]/review` reports "no mistakes" (both scopes) even when wrong answers exist — reproduced during PR #103 verification against QA; works fine on the 106-question vehicle topic.
+- Root cause: `getMistakesForTopic` (`src/lib/db.ts`) fetches all topic question IDs and passes them to a single `.in("question_id", ids)` filter on `user_quiz_responses`; with ~501 UUIDs the query appears to fail and the error is swallowed (`data` null → `[]`). Chunk the `.in()` filter (or join/filter server-side) and surface query errors instead of returning an empty list.
 
 ## 2. Test the untested `public/js/` layer
 

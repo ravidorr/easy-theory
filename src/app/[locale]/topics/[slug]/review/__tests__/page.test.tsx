@@ -163,6 +163,22 @@ describe("ReviewPage", () => {
     expect(withoutState).toHaveLength(2);
   });
 
+  it("exposes correct/wrong state to screen readers, not only via data-state", async () => {
+    mockGetMistakes.mockResolvedValue([MISTAKE_A] as never);
+    const jsx = await callPage();
+    const { container } = render(jsx);
+    const correctSr = container.querySelector('[data-state="correct"] .sr-only');
+    const wrongSr = container.querySelector('[data-state="wrong"] .sr-only');
+    expect(correctSr?.textContent).toBe("optionCorrectSr");
+    expect(wrongSr?.textContent).toBe("optionWrongSr");
+    const unstated = Array.from(container.querySelectorAll(".quiz-option")).filter(
+      (el) => !el.getAttribute("data-state")
+    );
+    unstated.forEach((el) => {
+      expect(el.querySelector(".sr-only")).toBeNull();
+    });
+  });
+
   it("shows explanation text on the correct option", async () => {
     mockGetMistakes.mockResolvedValue([MISTAKE_A] as never);
     const jsx = await callPage();

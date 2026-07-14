@@ -95,7 +95,7 @@ function ExamSlide({
         {options.map(([key, text], i) => {
           const optionSignImg = resolveOptionSignImage(text);
           return (
-            <button key={key} className="quiz-option" data-option={key}>
+            <button key={key} className="quiz-option" data-option={key} aria-pressed="false">
               <span className="quiz-option-badge">{letters[i]}</span>
               {optionSignImg ? (
                 <span className={styles.optionSignContent}>
