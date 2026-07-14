@@ -2,6 +2,17 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.104] — 2026-07-14
+
+### Added
+- Branded, localized 404 page (from the designer's ClearRoad handoff), replacing the default Next.js English error screen:
+  - New `NotFound` namespace in `messages/he.json` + `messages/ar.json` (Arabic strings are machine-translated pending professional translator review)
+  - Shared `NotFoundContent` component: no-entry sign SVG (fixed `--sign-*` tokens), headline, support line, and a pressable `btn-primary` CTA back home; light/dark via tokens
+  - `src/app/[locale]/not-found.tsx` + `[...rest]` catch-all so unmatched URLs under a valid locale render the localized 404 inside the app layout
+  - Root `not-found.tsx` rebranded for locale-less/invalid-locale requests (default-locale strings, own `<html lang="he" dir="rtl">`)
+
+---
+
 ## [0.3.103] — 2026-07-14
 
 ### Fixed

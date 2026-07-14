@@ -1,0 +1,39 @@
+.wrap {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 32px;
+  text-align: center;
+  background: var(--bg);
+}
+
+.textBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.headline {
+  margin: 0;
+  font-size: var(--type-h1-size);
+  font-weight: var(--type-h1-weight);
+  line-height: var(--line-tight);
+  color: var(--text);
+}
+
+.support {
+  margin: 0;
+  font-size: var(--type-body-size);
+  color: var(--text-muted);
+  line-height: var(--line-body);
+  max-width: 280px;
+}
+
+.cta {
+  width: 100%;
+  max-width: 280px;
+}
