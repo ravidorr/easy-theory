@@ -5,6 +5,7 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 ## [Unreleased]
 
 ### Fixed
+- Next.js workspace-root warning during dev and build by setting `turbopack.root` to the project directory and removing an empty home-level `package-lock.json` that caused incorrect root inference.
 - Quiz-flow accessibility gaps that were invisible to assistive tech:
   - Icon-only `→` back links on schedule, flashcards, and credits now carry a localized `aria-label` (new `backLabel` key in `Schedule`/`Flashcards`/`Credits`, he + ar)
   - Quiz/retry/exam option buttons expose selection via `aria-pressed` (server-rendered `false`, kept in sync by `quiz.js`/`exam.js`; the chosen option stays pressed after confirmation)
