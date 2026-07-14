@@ -143,6 +143,57 @@ describe("BookmarksPage", () => {
     expect(screen.queryByText("מה המשמעות של תמרור זה?")).not.toBeInTheDocument();
   });
 
+  it("falls back to the placeholder when the question image is missing", async () => {
+    mockGetBookmarks.mockResolvedValue([
+      { ...BOOKMARK_A, image_url: "/questions/does-not-exist.jpg" },
+    ] as never);
+    const jsx = await BookmarksPage();
+    const { container } = render(jsx);
+    expect(container.querySelector('img[src="/placeholder.svg"]')).toBeTruthy();
+  });
+
+  it("renders an existing question image as a wide image", async () => {
+    mockGetBookmarks.mockResolvedValue([
+      { ...BOOKMARK_A, image_url: "/questions/3012.jpg" },
+    ] as never);
+    const jsx = await BookmarksPage();
+    const { container } = render(jsx);
+    const img = container.querySelector('img[src="/questions/3012.jpg"]');
+    expect(img?.getAttribute("alt")).toBe("questionImageAlt");
+    expect(container.querySelector('[data-testid="sign-img"]')).toBeNull();
+  });
+
+  it("hides the question image and renders the option as a sign for sign questions", async () => {
+    mockGetBookmarks.mockResolvedValue([
+      { ...BOOKMARK_A, image_url: "/signs/sign-101.png", option_a: "101" },
+    ] as never);
+    const jsx = await BookmarksPage();
+    const { container } = render(jsx);
+    const signImgs = container.querySelectorAll('[data-testid="sign-img"]');
+    expect(signImgs).toHaveLength(1);
+    expect(signImgs[0].getAttribute("src")).toBe("/signs/sign-101.png");
+    expect(screen.getByText("101")).toBeInTheDocument();
+  });
+
+  it("renders a square sign as the question image when options are not sign numbers", async () => {
+    mockGetBookmarks.mockResolvedValue([
+      { ...BOOKMARK_A, image_url: "/signs/sign-100.png" },
+    ] as never);
+    const jsx = await BookmarksPage();
+    const { container } = render(jsx);
+    const sign = container.querySelector('[data-testid="sign-img"]');
+    expect(sign?.getAttribute("src")).toBe("/signs/sign-100.png");
+    expect(sign?.getAttribute("alt")).toBe("signAlt");
+  });
+
+  it("falls back to Hebrew question text for ar locale when question_ar is absent", async () => {
+    vi.mocked(getLocale).mockResolvedValue("ar" as never);
+    mockGetBookmarks.mockResolvedValue([BOOKMARK_A] as never);
+    const jsx = await BookmarksPage();
+    render(jsx);
+    expect(screen.getByText("מה המשמעות של תמרור זה?")).toBeInTheDocument();
+  });
+
   it("links back to the more page from the top bar", async () => {
     const jsx = await BookmarksPage();
     const { container } = render(jsx);
