@@ -107,7 +107,8 @@ Conventions:
    and likewise `qa-run` (archived run reports), `a11y`, `copy`, `product-question`.
    The type labels `bug` and `enhancement` are GitHub defaults — assume they exist.
 6. Dedup before filing: fetch open QA issues once —
-   `gh issue list --state open --label qa --json number,title,body`. A finding matches
+   `gh issue list --state open --label qa --limit 200 --json number,title,body`
+   (the default limit is 30 and truncates silently). A finding matches
    an existing issue when it describes the same symptom in the same flow (judge by
    title + repro, not exact wording). For each match, do NOT file a new issue; instead
    `gh issue comment <number>` with "Still reproduces in run `<run-id>`", the severity +

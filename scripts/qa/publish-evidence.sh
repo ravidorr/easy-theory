@@ -37,6 +37,9 @@ if git rev-parse --verify --quiet "origin/$BRANCH" >/dev/null; then
   git worktree add -B "$BRANCH" "$WT" "origin/$BRANCH" --quiet
 else
   # First publish: create the orphan branch (no shared history with main).
+  # Drop any local leftover from a failed earlier attempt — worktree remove
+  # keeps the branch, and checkout --orphan dies on an existing one.
+  git branch -D "$BRANCH" 2>/dev/null || true
   git worktree add --detach "$WT" --quiet
   git -C "$WT" checkout --orphan "$BRANCH" --quiet
   git -C "$WT" rm -rf --quiet . 2>/dev/null || true
