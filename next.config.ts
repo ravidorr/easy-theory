@@ -14,6 +14,9 @@ const nextConfig: NextConfig = {
     // Sign/question images are immutable; a long TTL cuts Vercel transformations.
     minimumCacheTTL: 2678400,
   },
+  experimental: {
+    globalNotFound: true,
+  },
 };
 
 export default withNextIntl(nextConfig);
