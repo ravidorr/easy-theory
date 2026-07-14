@@ -15,6 +15,14 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ---
 
+## [0.3.113] — 2026-07-14
+
+### Fixed
+- Review page silently showing "no mistakes" on large topics: `getMistakesForTopic` passed all ~501 traffic-laws question IDs to a single `.in()` filter, producing an oversized request URL whose failure was swallowed into an empty result. The topic filter now runs server-side via a `questions!inner(topic_id)` join, the mistake-details fetch is chunked (100 IDs per request), and failed queries throw instead of masquerading as a clean slate.
+- Added a localized error boundary (`src/app/[locale]/error.tsx`, new `Error` strings in he + ar) so surfaced query failures render a translated "something went wrong" page with retry, instead of Next's default 500.
+
+---
+
 ## [0.3.112] — 2026-07-14
 
 ### Changed
