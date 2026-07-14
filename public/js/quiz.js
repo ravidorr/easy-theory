@@ -10,7 +10,8 @@
   if (total === 0) return;
 
   // Resume state is persisted per user + topic so a reload continues the same
-  // run. Retry sessions are throwaway and never persist.
+  // run, including an unacknowledged submission. Retry sessions are throwaway
+  // and intentionally never persist.
   const storageKey =
     container.dataset.quizMode === "retry"
       ? null
@@ -41,9 +42,30 @@
 
   const resumed = (function () {
     const s = readResume();
-    // A stored total that no longer matches means the question set changed —
-    // the saved index would point at a different question, so start over.
-    if (s && Number.isInteger(s.i) && s.i > 0 && s.i < total && s.total === total) {
+    const pending = s && s.pendingSubmission;
+    const acknowledged = s && s.acknowledgedSubmission;
+    const hasValidPending =
+      pending &&
+      typeof pending.questionId === "string" &&
+      ["a", "b", "c", "d"].includes(pending.selectedOption) &&
+      typeof pending.idempotencyKey === "string" &&
+      pending.idempotencyKey.length > 0;
+    const hasValidAcknowledged =
+      acknowledged &&
+      typeof acknowledged.questionId === "string" &&
+      ["a", "b", "c", "d"].includes(acknowledged.selectedOption) &&
+      typeof acknowledged.idempotencyKey === "string" &&
+      acknowledged.idempotencyKey.length > 0;
+    // A stored total that no longer matches means the question set changed.
+    // Index zero is resumable only while a submission state is recorded.
+    if (
+      s &&
+      Number.isInteger(s.i) &&
+      s.i >= 0 &&
+      s.i < total &&
+      s.total === total &&
+      (s.i > 0 || hasValidPending || hasValidAcknowledged)
+    ) {
       return s;
     }
     if (s) clearResume();
@@ -57,6 +79,9 @@
     (window.crypto && typeof window.crypto.randomUUID === "function"
       ? window.crypto.randomUUID()
       : null);
+  const submissionSessionKey =
+    sessionId ||
+    "fallback-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2);
 
   const slides = Array.from(document.querySelectorAll(".quiz-slide"));
   const actionBtn = document.getElementById("quiz-next");
@@ -72,8 +97,27 @@
   let currentIndex = resumed ? resumed.i : 0;
   let selectedOption = null;
   let confirmed = false;
+  let answerPersistence = "idle";
+  let answerFeedback = "";
+  let pendingSubmission = resumed ? resumed.pendingSubmission || null : null;
+  let acknowledgedSubmission = resumed
+    ? resumed.acknowledgedSubmission || null
+    : null;
   let score = resumed ? resumed.score | 0 : 0;
   let points = resumed ? resumed.points | 0 : 0;
+
+  function persistResume() {
+    saveResume({
+      i: currentIndex,
+      score: score,
+      points: points,
+      sessionId: sessionId,
+      total: total,
+      pendingSubmission: pendingSubmission,
+      acknowledgedSubmission: acknowledgedSubmission,
+      savedAt: Date.now(),
+    });
+  }
 
   if (rewardFloat) {
     rewardFloat.addEventListener("animationend", function () {
@@ -159,6 +203,8 @@
     updateProgress(index);
     selectedOption = null;
     confirmed = false;
+    answerPersistence = "idle";
+    answerFeedback = "";
     if (actionBtn) {
       actionBtn.disabled = true;
       actionBtn.textContent = t.answerBtn || "צדקתי?";
@@ -188,10 +234,7 @@
     if (actionBtn) actionBtn.disabled = false;
   }
 
-  function handleConfirm(slide) {
-    confirmed = true;
-    lockOptions(slide);
-
+  function showAnswerFeedback(slide, awardReward) {
     const correctOption = slide.dataset.correct;
     const isCorrect = selectedOption === correctOption;
 
@@ -206,52 +249,192 @@
     });
 
     if (isCorrect) {
-      score++;
-      points += 10;
+      if (awardReward) {
+        score++;
+        points += 10;
+      }
       if (rewardScore) rewardScore.textContent = String(points);
       if (rewardMessage) rewardMessage.textContent = t.rewardCorrect || "יפה מאוד!";
-      if (rewardFloat) {
+      if (awardReward && rewardFloat) {
         rewardFloat.removeAttribute("data-animate");
         void rewardFloat.offsetWidth;
         rewardFloat.setAttribute("data-animate", "");
       }
-    } else {
-      if (rewardMessage) {
-        const wrongBtn = slide.querySelector('[data-option="' + selectedOption + '"]');
-        const badge = wrongBtn?.querySelector(".quiz-option-badge")?.textContent?.trim() || "";
-        const signNum = wrongBtn?.querySelector("span:not(.quiz-option-badge):not(.quiz-option-explanation) span")?.textContent?.trim() || "";
-        const suffix = signNum ? tf(t.rewardSignSuffix || ' (תמרור {number})', { number: signNum }) : "";
-        rewardMessage.textContent = (t.rewardWrongPrefix || "בחרת ב־") + badge + suffix + (t.rewardWrongSuffix || " — לא נורא, תנסי שוב בפעם הבאה.");
-      }
+    } else if (rewardMessage) {
+      const wrongBtn = slide.querySelector('[data-option="' + selectedOption + '"]');
+      const badge = wrongBtn?.querySelector(".quiz-option-badge")?.textContent?.trim() || "";
+      const signNum = wrongBtn?.querySelector("span:not(.quiz-option-badge):not(.quiz-option-explanation) span")?.textContent?.trim() || "";
+      const suffix = signNum ? tf(t.rewardSignSuffix || ' (תמרור {number})', { number: signNum }) : "";
+      rewardMessage.textContent = (t.rewardWrongPrefix || "בחרת ב־") + badge + suffix + (t.rewardWrongSuffix || " — לא נורא, תנסי שוב בפעם הבאה.");
     }
+  }
 
-    // Track answer server-side
-    const questionId = slide.dataset.questionId;
-    const topicId = container.dataset.topicId || slide.dataset.topicId;
-    fetch("/api/quiz", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question_id: questionId, selected_option: selectedOption, topic_id: topicId, session_id: sessionId }),
-    }).then(function (res) {
-      return res.ok ? res.json() : null;
-    }).then(function (data) {
-      if (!data) return;
-      if (data.topic_completed && rewardMessage) {
-        rewardMessage.textContent = t.rewardTopicDone || "כל הכבוד! סיימת את כל הנושא!";
-      }
-      if (data.medals_earned && data.medals_earned.length) {
-        medalQueue.push.apply(medalQueue, data.medals_earned);
-        showNextMedal();
-      }
-    }).catch(function () {});
+  function submissionErrorMessage(data) {
+    return data &&
+      typeof data.error === "string" &&
+      data.error.trim().length > 0
+      ? data.error
+      : t.saveAnswerError || "לא הצלחנו לשמור את התשובה. נסי שוב.";
+  }
 
+  function showRetryableSubmissionFailure(message) {
+    answerPersistence = "failed";
+    if (rewardMessage) rewardMessage.textContent = message;
     if (actionBtn) {
-      actionBtn.textContent = t.nextBtn || "לשאלה הבאה";
+      actionBtn.textContent = t.retryAnswerBtn || "נסי שוב";
       actionBtn.disabled = false;
     }
   }
 
+  function showPermanentSubmissionFailure(message) {
+    answerPersistence = "blocked";
+    pendingSubmission = null;
+    acknowledgedSubmission = null;
+    clearResume();
+    if (rewardMessage) rewardMessage.textContent = message;
+    if (actionBtn) {
+      actionBtn.textContent = t.restartQuizBtn || "התחלה מחדש";
+      actionBtn.disabled = false;
+    }
+  }
+
+  function submitAnswer(slide) {
+    if (answerPersistence === "pending") return;
+    answerPersistence = "pending";
+    if (actionBtn) {
+      actionBtn.textContent = t.savingAnswer || "שומרת...";
+      actionBtn.disabled = true;
+    }
+
+    const questionId = slide.dataset.questionId;
+    const topicId = container.dataset.topicId || slide.dataset.topicId;
+    if (
+      !pendingSubmission ||
+      pendingSubmission.questionId !== questionId ||
+      pendingSubmission.selectedOption !== selectedOption
+    ) {
+      pendingSubmission = {
+        questionId: questionId,
+        selectedOption: selectedOption,
+        idempotencyKey: submissionSessionKey + ":" + questionId,
+      };
+    }
+    acknowledgedSubmission = null;
+    persistResume();
+    const idempotencyKey = pendingSubmission.idempotencyKey;
+    let request;
+    try {
+      request = fetch("/api/quiz", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question_id: questionId, selected_option: selectedOption, topic_id: topicId, session_id: sessionId, idempotency_key: idempotencyKey }),
+      });
+    } catch {
+      showRetryableSubmissionFailure(
+        t.saveAnswerError || "לא הצלחנו לשמור את התשובה. נסי שוב."
+      );
+      return;
+    }
+
+    request.then(function (res) {
+      if (res.ok) {
+        return res.json().catch(function () { return {}; });
+      }
+      const errorBody =
+        typeof res.json === "function"
+          ? res.json().catch(function () { return {}; })
+          : Promise.resolve({});
+      return errorBody.then(function (data) {
+        const message = submissionErrorMessage(data);
+        if (res.status === 429 || res.status >= 500) {
+          showRetryableSubmissionFailure(message);
+        } else {
+          showPermanentSubmissionFailure(message);
+        }
+        return null;
+      });
+    }).then(function (data) {
+      if (data === null) return;
+      answerPersistence = "succeeded";
+      const acknowledged = pendingSubmission;
+      if (rewardMessage) rewardMessage.textContent = answerFeedback;
+      if (data.topic_completed && rewardMessage) {
+        rewardMessage.textContent = t.rewardTopicDone || "כל הכבוד! סיימת את כל הנושא!";
+      }
+      pendingSubmission = null;
+      acknowledgedSubmission = {
+        questionId: acknowledged.questionId,
+        selectedOption: acknowledged.selectedOption,
+        idempotencyKey: acknowledged.idempotencyKey,
+        feedbackMessage: rewardMessage ? rewardMessage.textContent : answerFeedback,
+      };
+      persistResume();
+      if (data.medals_earned && data.medals_earned.length) {
+        medalQueue.push.apply(medalQueue, data.medals_earned);
+        showNextMedal();
+      }
+      if (actionBtn) {
+        actionBtn.textContent = t.nextBtn || "לשאלה הבאה";
+        actionBtn.disabled = false;
+      }
+    }).catch(function () {
+      showRetryableSubmissionFailure(
+        t.saveAnswerError || "לא הצלחנו לשמור את התשובה. נסי שוב."
+      );
+    });
+  }
+
+  function handleConfirm(slide) {
+    confirmed = true;
+    lockOptions(slide);
+    showAnswerFeedback(slide, true);
+    answerFeedback = rewardMessage ? rewardMessage.textContent : "";
+    submitAnswer(slide);
+  }
+
+  function restoreSubmissionState() {
+    const slide = slides[currentIndex];
+    const restoredSubmission = pendingSubmission || acknowledgedSubmission;
+    if (!restoredSubmission) return;
+    if (!slide || slide.dataset.questionId !== restoredSubmission.questionId) {
+      pendingSubmission = null;
+      acknowledgedSubmission = null;
+      persistResume();
+      return;
+    }
+
+    selectedOption = restoredSubmission.selectedOption;
+    confirmed = true;
+    lockOptions(slide);
+    showAnswerFeedback(slide, false);
+    answerFeedback = rewardMessage ? rewardMessage.textContent : "";
+
+    if (pendingSubmission) {
+      answerPersistence = "failed";
+      if (rewardMessage) {
+        rewardMessage.textContent = t.saveAnswerError || "לא הצלחנו לשמור את התשובה. נסי שוב.";
+      }
+      if (actionBtn) {
+        actionBtn.textContent = t.retryAnswerBtn || "נסי שוב";
+        actionBtn.disabled = false;
+      }
+    } else {
+      answerPersistence = "succeeded";
+      if (
+        rewardMessage &&
+        typeof acknowledgedSubmission.feedbackMessage === "string"
+      ) {
+        rewardMessage.textContent = acknowledgedSubmission.feedbackMessage;
+      }
+      if (actionBtn) {
+        actionBtn.textContent = t.nextBtn || "לשאלה הבאה";
+        actionBtn.disabled = false;
+      }
+    }
+  }
+
   function handleAdvance() {
+    acknowledgedSubmission = null;
     currentIndex++;
     if (currentIndex >= total) {
       clearResume();
@@ -275,14 +458,7 @@
         }
       }
     } else {
-      saveResume({
-        i: currentIndex,
-        score: score,
-        points: points,
-        sessionId: sessionId,
-        total: total,
-        savedAt: Date.now(),
-      });
+      persistResume();
       showSlide(currentIndex);
     }
   }
@@ -299,12 +475,18 @@
       if (!slide) return;
       if (!confirmed && selectedOption) {
         handleConfirm(slide);
-      } else if (confirmed) {
+      } else if (answerPersistence === "failed") {
+        submitAnswer(slide);
+      } else if (answerPersistence === "succeeded") {
         handleAdvance();
+      } else if (answerPersistence === "blocked") {
+        clearResume();
+        window.location.reload();
       }
     });
   }
 
   if (points > 0 && rewardScore) rewardScore.textContent = String(points);
   showSlide(currentIndex);
+  restoreSubmissionState();
 })();
