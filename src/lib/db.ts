@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Locale } from "@/i18n/routing";
 import { sampleIds } from "./exam";
 
 export type Topic = {
@@ -145,6 +146,7 @@ export type ScheduleWithUser = {
   user_id: string;
   start_time: string;
   duration_minutes: number;
+  locale: Locale;
 };
 
 export async function getUsersScheduledForDay(
@@ -153,7 +155,7 @@ export async function getUsersScheduledForDay(
 ): Promise<ScheduleWithUser[]> {
   const { data } = await supabase
     .from("user_schedule")
-    .select("user_id, start_time, duration_minutes")
+    .select("user_id, start_time, duration_minutes, locale")
     .eq("day_of_week", dayOfWeek)
     .eq("notify", true);
   return data ?? [];

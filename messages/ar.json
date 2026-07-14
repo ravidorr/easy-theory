@@ -249,6 +249,28 @@
     "rubikDesc": "خط عربي ولاتيني — Google Fonts",
     "footer": "© 2026 Raanan Avidor · مفتوح المصدر"
   },
+  "Api": {
+    "notAuthenticated": "غير مسجّلة الدخول",
+    "tooManyRequests": "طلبات كثيرة جداً، حاولي مجدداً بعد قليل",
+    "tooManyOtpAttempts": "محاولات كثيرة جداً، حاولي مجدداً بعد 15 دقيقة",
+    "missingParams": "معطيات ناقصة",
+    "invalidParams": "معطيات غير صالحة",
+    "emailMissing": "عنوان البريد الإلكتروني مفقود",
+    "emailInvalid": "عنوان البريد الإلكتروني غير صالح",
+    "otpSendFailed": "خطأ في إرسال الرابط، حاولي مجدداً",
+    "topicIdMissing": "topic_id مفقود",
+    "progressSaveFailed": "فشل حفظ التقدّم",
+    "examSaveFailed": "فشل حفظ الامتحان",
+    "answerSaveFailed": "فشل حفظ الإجابة",
+    "questionNotFound": "السؤال غير موجود",
+    "topicNotFound": "الموضوع غير موجود",
+    "questionsLoadFailed": "خطأ في تحميل الأسئلة",
+    "invalidDays": "أيام غير صالحة",
+    "invalidTime": "وقت غير صالح",
+    "scheduleUpdateFailed": "خطأ في تحديث الجدول",
+    "pushSubscribeFailed": "خطأ في حفظ الاشتراك",
+    "pushUnsubscribeFailed": "خطأ في إزالة الاشتراك"
+  },
   "Notify": {
     "pushTitle": "جدولك الدراسي لليوم",
     "pushBody": "📖 درس في الساعة {time} — {duration} دقيقة",

@@ -31,6 +31,10 @@ function makeRawPostRequest(body: string) {
   });
 }
 
+function makeDeleteRequest() {
+  return new Request("http://localhost/api/push/subscribe", { method: "DELETE" });
+}
+
 function chain(data: unknown = null, error: unknown = null) {
   const result = { data, error };
   const m = {} as Record<string, unknown>;
@@ -127,28 +131,28 @@ describe("DELETE /api/push/subscribe", () => {
 
   it("returns 401 when not authenticated", async () => {
     mockCreateClient.mockResolvedValue(makeClient({ user: null }) as never);
-    const res = await DELETE();
+    const res = await DELETE(makeDeleteRequest());
     expect(res.status).toBe(401);
   });
 
   it("returns 429 when rate limited", async () => {
     mockCreateClient.mockResolvedValue(makeClient() as never);
     mockCheckRateLimit.mockResolvedValue(false);
-    const res = await DELETE();
+    const res = await DELETE(makeDeleteRequest());
     expect(res.status).toBe(429);
   });
 
   it("returns 500 when the delete fails", async () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     mockCreateClient.mockResolvedValue(makeClient({ deleteError: true }) as never);
-    const res = await DELETE();
+    const res = await DELETE(makeDeleteRequest());
     expect(res.status).toBe(500);
     consoleSpy.mockRestore();
   });
 
   it("deletes all subscriptions and returns { ok: true }", async () => {
     mockCreateClient.mockResolvedValue(makeClient() as never);
-    const res = await DELETE();
+    const res = await DELETE(makeDeleteRequest());
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ ok: true });
   });

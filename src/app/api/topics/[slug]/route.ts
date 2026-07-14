@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase";
+import { getApiTranslator } from "@/lib/api";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ slug: string }> }
 ) {
+  const t = getApiTranslator(request);
   const { slug } = await params;
   const supabase = await createClient();
 
@@ -15,7 +17,7 @@ export async function GET(
     .single();
 
   if (!topic) {
-    return NextResponse.json({ error: "נושא לא נמצא" }, { status: 404 });
+    return NextResponse.json({ error: t("topicNotFound") }, { status: 404 });
   }
 
   const { data: questions, error } = await supabase
@@ -26,7 +28,7 @@ export async function GET(
 
   if (error) {
     console.error("[topics] questions query failed:", error);
-    return NextResponse.json({ error: "שגיאה בטעינת השאלות" }, { status: 500 });
+    return NextResponse.json({ error: t("questionsLoadFailed") }, { status: 500 });
   }
 
   return NextResponse.json(questions ?? []);

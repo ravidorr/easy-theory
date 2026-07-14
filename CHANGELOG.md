@@ -2,6 +2,17 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.103] — 2026-07-14
+
+### Fixed
+- API responses and cron notifications are now localized into Arabic (previously Hebrew-only):
+  - All user-visible API error strings moved to a new `Api` namespace in `messages/he.json` + `messages/ar.json`; routes resolve the caller's locale from the `NEXT_LOCALE` cookie via new `getRequestLocale`/`getApiTranslator` helpers in `src/lib/api.ts`
+  - The cron push/email digest uses the existing (previously unused) translated `Notify` namespace, per user: migration 009 adds a `locale` column to `user_schedule` (captured on schedule save through the updated `replace_user_schedule` RPC — run the migration in Supabase **before** deploying)
+  - The flashcards numeric-name fallback reuses the localized `Flashcards.signBadge` label instead of a hardcoded `תמרור {n}`
+  - Note: notification locale is captured when the schedule is saved; switching UI language updates it on the next schedule save
+
+---
+
 ## [0.3.102] - 2026-07-14
 
 ### Changed

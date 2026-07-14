@@ -24,8 +24,16 @@ vi.mock("next/link", () => ({
 vi.mock("next/script", () => ({
   default: () => React.createElement("div", null),
 }));
+// Echo keys, except signBadge which interpolates so the numeric-name
+// fallback test can verify the sign number is threaded through.
+// vi.hoisted so the vi.mock factory (hoisted to the top) can reference it.
+const echoTranslator = vi.hoisted(
+  () => (key: string, values?: Record<string, unknown>) =>
+    key === "signBadge" && values ? `תמרור ${values.number}` : key
+);
+
 vi.mock("next-intl/server", () => ({
-  getTranslations: vi.fn().mockResolvedValue((key: string) => key),
+  getTranslations: vi.fn().mockResolvedValue(echoTranslator),
   getLocale: vi.fn().mockResolvedValue("he"),
 }));
 
@@ -54,7 +62,7 @@ describe("FlashcardsPage", () => {
     vi.clearAllMocks();
     mockCreateClient.mockResolvedValue(makeClient() as never);
     mockGetSigns.mockResolvedValue([]);
-    vi.mocked(getTranslations).mockResolvedValue((key: string) => key);
+    vi.mocked(getTranslations).mockResolvedValue(echoTranslator as never);
     vi.mocked(getLocale).mockResolvedValue("he");
   });
 
@@ -82,8 +90,8 @@ describe("FlashcardsPage", () => {
     mockGetSigns.mockResolvedValue([SIGN_1] as never);
     const jsx = await FlashcardsPage();
     render(jsx);
-    // t("signBadge", { number: "301" }) returns "signBadge"
-    expect(screen.getByText("signBadge")).toBeInTheDocument();
+    // t("signBadge", { number: "301" }) returns "תמרור 301"
+    expect(screen.getByText("תמרור 301")).toBeInTheDocument();
   });
 
   it("renders flip hint on front face", async () => {
@@ -102,7 +110,7 @@ describe("FlashcardsPage", () => {
     expect(screen.getByRole("heading", { name: "חנייה אסורה" })).toBeInTheDocument();
   });
 
-  it("converts a purely-numeric name_he to 'תמרור <sign_number>'", async () => {
+  it("falls back to the localized signBadge label for a purely-numeric name_he", async () => {
     const numericSign = { ...SIGN_1, name_he: "9999" };
     mockGetSigns.mockResolvedValue([numericSign] as never);
     const jsx = await FlashcardsPage();

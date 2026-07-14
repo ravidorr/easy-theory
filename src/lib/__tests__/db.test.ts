@@ -128,7 +128,7 @@ describe("getUserSchedule", () => {
 
 describe("getUsersScheduledForDay", () => {
   it("returns users scheduled for the given day", async () => {
-    const users = [{ user_id: "u1", start_time: "08:00", duration_minutes: 45 }];
+    const users = [{ user_id: "u1", start_time: "08:00", duration_minutes: 45, locale: "he" }];
     expect(await getUsersScheduledForDay(makeClient(users), 0)).toEqual(users);
   });
 

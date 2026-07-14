@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { GET, PUT } from "../route";
 import { createClient } from "@/lib/supabase";
 import { checkRateLimit } from "@/lib/rate-limit";
+import arMessages from "../../../../../messages/ar.json";
 
 vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
 vi.mock("@/lib/rate-limit", () => ({ checkRateLimit: vi.fn() }));
@@ -10,10 +11,19 @@ const mockCreateClient = vi.mocked(createClient);
 const mockCheckRateLimit = vi.mocked(checkRateLimit);
 const USER_ID = "user-uuid";
 
-function makePutRequest(body: object) {
+function makeGetRequest(cookie?: string) {
+  return new Request("http://localhost/api/schedule", {
+    headers: cookie ? { cookie } : undefined,
+  });
+}
+
+function makePutRequest(body: object, cookie?: string) {
   return new Request("http://localhost/api/schedule", {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...(cookie ? { cookie } : {}),
+    },
     body: JSON.stringify(body),
   });
 }
@@ -57,14 +67,21 @@ describe("GET /api/schedule", () => {
 
   it("returns 401 when not authenticated", async () => {
     mockCreateClient.mockResolvedValue(makeClient({ user: null }) as never);
-    const res = await GET();
+    const res = await GET(makeGetRequest());
     expect(res.status).toBe(401);
+  });
+
+  it("returns the localized 401 error for an Arabic caller", async () => {
+    mockCreateClient.mockResolvedValue(makeClient({ user: null }) as never);
+    const res = await GET(makeGetRequest("NEXT_LOCALE=ar"));
+    expect(res.status).toBe(401);
+    expect(await res.json()).toEqual({ error: arMessages.Api.notAuthenticated });
   });
 
   it("returns the user schedule array", async () => {
     const schedule = [{ id: "s1", day_of_week: 0, start_time: "08:00" }];
     mockCreateClient.mockResolvedValue(makeClient({ schedule }) as never);
-    const res = await GET();
+    const res = await GET(makeGetRequest());
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual(schedule);
   });
@@ -73,7 +90,7 @@ describe("GET /api/schedule", () => {
     mockCreateClient.mockResolvedValue(
       makeClient({ schedule: null as unknown as unknown[] }) as never
     );
-    const res = await GET();
+    const res = await GET(makeGetRequest());
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual([]);
   });
@@ -145,6 +162,7 @@ describe("PUT /api/schedule", () => {
       p_start_time: "09:00",
       p_duration_minutes: 45,
       p_notify: true,
+      p_locale: "he",
     });
   });
 
@@ -159,7 +177,21 @@ describe("PUT /api/schedule", () => {
       p_start_time: "08:00",
       p_duration_minutes: 30,
       p_notify: false,
+      p_locale: "he",
     });
+  });
+
+  it("stores the caller's locale from the NEXT_LOCALE cookie", async () => {
+    const client = makeClient();
+    mockCreateClient.mockResolvedValue(client as never);
+    const res = await PUT(
+      makePutRequest({ days: [2], start_time: "10:00" }, "NEXT_LOCALE=ar")
+    );
+    expect(res.status).toBe(200);
+    expect(client.rpc).toHaveBeenCalledWith(
+      "replace_user_schedule",
+      expect.objectContaining({ p_locale: "ar" })
+    );
   });
 
   it("succeeds with empty days array (clears schedule)", async () => {

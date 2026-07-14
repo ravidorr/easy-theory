@@ -1,25 +1,26 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { parseJsonBody } from "@/lib/api";
+import { getApiTranslator, parseJsonBody } from "@/lib/api";
 
 export async function POST(request: Request) {
+  const t = getApiTranslator(request);
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "לא מחוברת" }, { status: 401 });
+  if (!user) return NextResponse.json({ error: t("notAuthenticated") }, { status: 401 });
 
   const allowed = await checkRateLimit(supabase, `progress:${user.id}`, 20, 60);
   if (!allowed) {
-    return NextResponse.json({ error: "יותר מדי בקשות, נסי שוב עוד רגע" }, { status: 429 });
+    return NextResponse.json({ error: t("tooManyRequests") }, { status: 429 });
   }
 
   const body = await parseJsonBody(request);
-  if (!body) return NextResponse.json({ error: "topic_id חסר" }, { status: 400 });
+  if (!body) return NextResponse.json({ error: t("topicIdMissing") }, { status: 400 });
 
   const { topic_id, score, status } = body;
-  if (!topic_id) return NextResponse.json({ error: "topic_id חסר" }, { status: 400 });
+  if (!topic_id) return NextResponse.json({ error: t("topicIdMissing") }, { status: 400 });
 
   const validStatus = ["not_started", "in_progress", "completed"];
   const safeStatus = typeof status === "string" && validStatus.includes(status) ? status : "in_progress";
@@ -48,7 +49,7 @@ export async function POST(request: Request) {
       .eq("id", existing.id);
     if (error) {
       console.error("[progress] update failed:", error);
-      return NextResponse.json({ error: "שמירת ההתקדמות נכשלה" }, { status: 500 });
+      return NextResponse.json({ error: t("progressSaveFailed") }, { status: 500 });
     }
   } else {
     const { error } = await supabase.from("user_topic_progress").insert({
@@ -60,7 +61,7 @@ export async function POST(request: Request) {
     });
     if (error) {
       console.error("[progress] insert failed:", error);
-      return NextResponse.json({ error: "שמירת ההתקדמות נכשלה" }, { status: 500 });
+      return NextResponse.json({ error: t("progressSaveFailed") }, { status: 500 });
     }
   }
 
