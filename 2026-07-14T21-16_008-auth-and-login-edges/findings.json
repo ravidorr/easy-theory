@@ -1,0 +1,29 @@
+{
+  "run_id": "2026-07-14T21-16_008-auth-and-login-edges",
+  "charter_id": "008-auth-and-login-edges",
+  "charter_path": "qa/charters/008-auth-and-login-edges.md",
+  "started_at": "2026-07-14T21:16:00Z",
+  "finished_at": "2026-07-14T21-24:00Z",
+  "environment": {"base_url": "http://localhost:3100", "git_sha": "cd095d1a60cee1421a6faac16f49b51a18218cff", "app_version": "0.3.130", "supabase_host": "nvgqczaesfeotijjcbed.supabase.co", "viewport": "390x844", "locale": "he"},
+  "checks": [
+    {"id": "CHK-LOGIN-01", "verdict": "fail", "observed": "Visit to /he/exam redirected to login but #next-path was / instead of /exam (proxy auth guard drops return path).", "evidence": ["screenshots/step-01-login-redirect.png"]},
+    {"id": "CHK-LOGIN-02", "verdict": "pass", "observed": "Login form, email input, send button, hero copy, h1, lang=he dir=rtl rendered.", "evidence": ["screenshots/step-01-login-redirect.png"]},
+    {"id": "CHK-LOGIN-03", "verdict": "pass", "observed": "Invalid email blocked by HTML5 validation; no POST /api/auth/send-otp observed.", "evidence": ["screenshots/step-01-login-redirect.png"]},
+    {"id": "CHK-LOGIN-04", "verdict": "fail", "observed": "Valid plus-tag email POST /api/auth/send-otp returned 500; sent banner did not appear.", "evidence": ["screenshots/step-02-sent-banner.png", "network.log"]},
+    {"id": "CHK-LOGIN-05", "verdict": "blocked", "reason": "send-otp returned 500; resend throttle not reachable", "evidence": ["network.log"]},
+    {"id": "CHK-LOGIN-06", "verdict": "pass", "observed": "/he/auth/login?error=1 rendered linkExpired alert with usable login form.", "evidence": ["screenshots/step-03-error-expired.png"]},
+    {"id": "CHK-LOGIN-07", "verdict": "pass", "observed": "Garbage /auth/callback redirected to /he/auth/login?error=1.", "evidence": ["screenshots/step-03-error-expired.png"]},
+    {"id": "CHK-LOGIN-08", "verdict": "blocked", "reason": "send-otp returns 500 for all attempts; cannot exhaust rate limit", "evidence": ["network.log"]},
+    {"id": "CHK-CONSOLE-01", "verdict": "pass", "observed": "No unhandled console errors during login flow.", "evidence": ["console.log"]},
+    {"id": "CHK-A11Y-01", "verdict": "pass", "observed": "Email input labeled, send button named, h1 present, error alert live region on failed send.", "evidence": ["screenshots/step-02-sent-banner.png"]},
+    {"id": "CHK-COPY-RTL-01", "verdict": "pass", "observed": "Hebrew Login copy RTL; plus-tag email rendered in LTR field without layout break.", "evidence": ["screenshots/step-01-login-redirect.png"]}
+  ],
+  "findings": [
+    {"id": "F-001", "title": "Auth proxy redirect drops post-login return path", "severity": "major", "confidence": "high", "category": "functional", "related_checks": ["CHK-LOGIN-01"], "repro_steps": ["Clear session cookies", "Visit /he/exam"], "expected": "#next-path carries /exam for post-login redirect.", "actual": "Middleware redirected to /he/auth/login with #next-path=/.", "evidence": ["screenshots/step-01-login-redirect.png"], "known_issue_match": null},
+    {"id": "F-002", "title": "send-otp API returns 500 in QA environment", "severity": "blocker", "confidence": "high", "category": "functional", "related_checks": ["CHK-LOGIN-04", "CHK-LOGIN-05", "CHK-LOGIN-08"], "repro_steps": ["POST /api/auth/send-otp with valid email"], "expected": "2xx and sent banner.", "actual": "HTTP 500 with generic Hebrew error JSON.", "evidence": ["network.log", "screenshots/step-02-sent-banner.png"], "known_issue_match": null}
+  ],
+  "known_issues_observed": [],
+  "not_tested": ["Real email delivery", "Resend 60s throttle", "4th-send 429 UI", "Desktop"],
+  "limitations": ["Cookies cleared via JS; not isolated browser profile", "send-otp failure blocked OTP-dependent checks"],
+  "coverage_summary": {"total": 11, "pass": 7, "fail": 2, "blocked": 2, "not_checked": 0}
+}
