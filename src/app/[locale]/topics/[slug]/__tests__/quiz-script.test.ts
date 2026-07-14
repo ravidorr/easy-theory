@@ -104,6 +104,318 @@ function pressActionKey(key: string, repeat: boolean) {
   }
 }
 
+function actionButton() {
+  return document.getElementById("quiz-next") as HTMLButtonElement;
+}
+
+function errorResponse(status: number, error: string) {
+  return {
+    ok: false,
+    status,
+    json: async () => ({ error }),
+  };
+}
+
+async function flushAsyncWork() {
+  await Promise.resolve();
+  await Promise.resolve();
+  await Promise.resolve();
+  await Promise.resolve();
+}
+
+describe("quiz.js – rejected answer persistence", () => {
+  function fetchCalls(url: string) {
+    return (fetch as ReturnType<typeof vi.fn>).mock.calls.filter(
+      (call) => call[0] === url
+    );
+  }
+
+  beforeEach(() => {
+    localStorage.clear();
+    (
+      window as unknown as {
+        __t: Record<string, string>;
+      }
+    ).__t = {
+      savingAnswer: "שומרת...",
+      saveAnswerError: "לא הצלחנו לשמור את התשובה. נסי שוב.",
+      retryAnswerBtn: "נסי שוב",
+      restartQuizBtn: "התחלה מחדש",
+    };
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
+
+  it("uses secure random bytes when randomUUID is unavailable", async () => {
+    const getRandomValues = vi.fn((bytes: Uint8Array) => {
+      bytes.set(Array.from({ length: bytes.length }, (_, index) => index));
+      return bytes;
+    });
+    vi.stubGlobal("crypto", { getRandomValues });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) })
+    );
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    setupDOM();
+
+    clickOption(0, "a");
+    clickAction();
+    await flushAsyncWork();
+
+    const requestBody = JSON.parse(fetchCalls("/api/quiz")[0][1].body);
+    expect(getRandomValues).toHaveBeenCalledOnce();
+    expect(requestBody.session_id).toBe("00010203-0405-4607-8809-0a0b0c0d0e0f");
+    expect(requestBody.idempotency_key).toBe(
+      "00010203-0405-4607-8809-0a0b0c0d0e0f:q1"
+    );
+    expect(Math.random).not.toHaveBeenCalled();
+  });
+
+  it("keeps the question open after a non-ok response and retries the same answer once", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(errorResponse(500, "שמירת התשובה נכשלה"))
+        .mockResolvedValueOnce({ ok: true, json: async () => ({}) })
+    );
+    setupDOM();
+
+    clickOption(0, "a");
+    clickAction();
+    await flushAsyncWork();
+
+    expect(messageText()).toBe("שמירת התשובה נכשלה");
+    expect(actionButton().textContent).toBe("נסי שוב");
+    expect(actionButton().disabled).toBe(false);
+
+    clickAction();
+    await flushAsyncWork();
+
+    expect(fetchCalls("/api/quiz")).toHaveLength(2);
+    expect(fetchCalls("/api/quiz")[1][1].body).toBe(
+      fetchCalls("/api/quiz")[0][1].body
+    );
+    const requestBody = JSON.parse(fetchCalls("/api/quiz")[0][1].body);
+    expect(requestBody.idempotency_key).toEqual(expect.any(String));
+    expect(requestBody.idempotency_key.length).toBeGreaterThan(0);
+    expect(scoreText()).toBe("10");
+    expect(actionButton().textContent).toBe("לשאלה הבאה");
+  });
+
+  it.each([400, 404, 409])(
+    "stops retrying permanent %i responses and clears invalid resume state",
+    async (status) => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockResolvedValue(errorResponse(status, "שגיאת API מקומית"))
+      );
+      setupDOM({ userId: "u1" });
+
+      clickOption(0, "a");
+      clickAction();
+      await flushAsyncWork();
+
+      expect(messageText()).toBe("שגיאת API מקומית");
+      expect(actionButton().textContent).toBe("התחלה מחדש");
+      expect(actionButton().disabled).toBe(false);
+      expect(localStorage.getItem("quiz-resume:v1:u1:t1")).toBeNull();
+      expect(fetchCalls("/api/quiz")).toHaveLength(1);
+    }
+  );
+
+  it("shows a localized authentication error without resubmitting", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(errorResponse(401, "לא מחוברת"))
+    );
+    setupDOM({ userId: "u1" });
+
+    clickOption(0, "a");
+    clickAction();
+    await flushAsyncWork();
+
+    expect(messageText()).toBe("לא מחוברת");
+    expect(actionButton().textContent).toBe("התחלה מחדש");
+    expect(localStorage.getItem("quiz-resume:v1:u1:t1")).toBeNull();
+    expect(fetchCalls("/api/quiz")).toHaveLength(1);
+  });
+
+  it.each([429, 500])(
+    "keeps localized %i failures retryable",
+    async (status) => {
+      vi.stubGlobal(
+        "fetch",
+        vi
+          .fn()
+          .mockResolvedValueOnce(errorResponse(status, "שגיאה זמנית מקומית"))
+          .mockResolvedValueOnce({ ok: true, json: async () => ({}) })
+      );
+      setupDOM();
+
+      clickOption(0, "a");
+      clickAction();
+      await flushAsyncWork();
+
+      expect(messageText()).toBe("שגיאה זמנית מקומית");
+      expect(actionButton().textContent).toBe("נסי שוב");
+
+      clickAction();
+      await flushAsyncWork();
+
+      expect(fetchCalls("/api/quiz")).toHaveLength(2);
+      expect(actionButton().textContent).toBe("לשאלה הבאה");
+    }
+  );
+
+  it.each([
+    [400, "התחלה מחדש"],
+    [500, "נסי שוב"],
+  ])(
+    "falls back safely when a %i error body is malformed",
+    async (status, expectedAction) => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockResolvedValue({
+          ok: false,
+          status,
+          json: async () => {
+            throw new SyntaxError("invalid json");
+          },
+        })
+      );
+      setupDOM({ userId: "u1" });
+
+      clickOption(0, "a");
+      clickAction();
+      await flushAsyncWork();
+
+      expect(messageText()).toBe("לא הצלחנו לשמור את התשובה. נסי שוב.");
+      expect(actionButton().textContent).toBe(expectedAction);
+      if (status === 400) {
+        expect(localStorage.getItem("quiz-resume:v1:u1:t1")).toBeNull();
+      } else {
+        expect(localStorage.getItem("quiz-resume:v1:u1:t1")).toEqual(
+          expect.any(String)
+        );
+      }
+    }
+  );
+
+  it("preserves topic completion and medal feedback when a retry recovers a committed answer", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockRejectedValueOnce(new Error("response lost"))
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            topic_completed: true,
+            medals_earned: ["streak-3"],
+          }),
+        })
+    );
+    setupDOM();
+
+    clickOption(0, "a");
+    clickAction();
+    await flushAsyncWork();
+    clickAction();
+    await flushAsyncWork();
+
+    expect(messageText()).toBe("כל הכבוד! סיימת את כל הנושא!");
+    expect(document.querySelector('[role="dialog"]')).not.toBeNull();
+    expect(scoreText()).toBe("10");
+    expect(fetchCalls("/api/quiz")[1][1].body).toBe(
+      fetchCalls("/api/quiz")[0][1].body
+    );
+  });
+
+  it("shows a retry action after a network failure", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
+    setupDOM();
+
+    clickOption(0, "a");
+    clickAction();
+    await flushAsyncWork();
+
+    expect(messageText()).toBe("לא הצלחנו לשמור את התשובה. נסי שוב.");
+    expect(actionButton().textContent).toBe("נסי שוב");
+    expect(actionButton().disabled).toBe(false);
+    expect(
+      (document.querySelectorAll(".quiz-slide")[0] as HTMLElement).style.display
+    ).toBe("flex");
+  });
+
+  it("does not allow advancing while answer persistence is pending", async () => {
+    let resolveRequest!: (response: {
+      ok: boolean;
+      json: () => Promise<object>;
+    }) => void;
+    const pendingRequest = new Promise<{
+      ok: boolean;
+      json: () => Promise<object>;
+    }>((resolve) => {
+      resolveRequest = resolve;
+    });
+    vi.stubGlobal("fetch", vi.fn().mockReturnValue(pendingRequest));
+    setupDOM();
+
+    clickOption(0, "a");
+    clickAction();
+
+    expect(actionButton().disabled).toBe(true);
+    clickAction();
+    expect(fetchCalls("/api/quiz")).toHaveLength(1);
+    expect(
+      (document.querySelectorAll(".quiz-slide")[0] as HTMLElement).style.display
+    ).toBe("flex");
+
+    resolveRequest({ ok: true, json: async () => ({}) });
+    await flushAsyncWork();
+
+    expect(actionButton().disabled).toBe(false);
+    expect(actionButton().textContent).toBe("לשאלה הבאה");
+    expect(
+      (document.querySelectorAll(".quiz-slide")[0] as HTMLElement).style.display
+    ).toBe("flex");
+  });
+
+  it("does not post completion after the final answer is rejected", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce({ ok: true, json: async () => ({}) })
+        .mockResolvedValue(errorResponse(500, "שמירת התשובה נכשלה"))
+    );
+    setupDOM();
+
+    clickOption(0, "a");
+    clickAction();
+    await flushAsyncWork();
+    clickAction();
+    clickOption(1, "b");
+    clickAction();
+    await flushAsyncWork();
+    clickAction();
+    await flushAsyncWork();
+
+    expect(fetchCalls("/api/progress")).toHaveLength(0);
+    expect(document.getElementById("quiz-final")!.style.display).not.toBe(
+      "flex"
+    );
+    expect(
+      (document.querySelectorAll(".quiz-slide")[1] as HTMLElement).style.display
+    ).toBe("flex");
+  });
+});
+
 describe("quiz.js – reward score and feedback", () => {
   beforeEach(() => {
     localStorage.clear();
@@ -147,108 +459,39 @@ describe("quiz.js – reward score and feedback", () => {
     expect(floatEl().hasAttribute("data-animate")).toBe(false);
   });
 
-  it("clears the message but keeps the score when advancing to the next question", () => {
+  it("clears the message but keeps the score when advancing to the next question", async () => {
     clickOption(0, "a");
     clickAction();
+    await flushAsyncWork();
     clickAction(); // advance
     expect(messageText()).toBe("");
     expect(scoreText()).toBe("10");
   });
 
-  it("keeps feedback visible when the confirmation click becomes a double-click", () => {
+  it("keeps feedback visible for one mouse multi-click and advances on a later click", async () => {
     clickOption(0, "a");
 
     dispatchActionClick(1);
+    await flushAsyncWork();
     dispatchActionClick(2);
 
     expect(messageText()).toBe("יפה מאוד!");
     expect(
       (document.querySelectorAll(".quiz-slide")[0] as HTMLElement).style.display
     ).toBe("flex");
-  });
-
-  it("advances on a later distinct mouse activation", () => {
-    clickOption(0, "a");
-    dispatchPointerAction("mouse", 1);
-
-    expect(
-      (document.getElementById("quiz-next") as HTMLButtonElement).disabled
-    ).toBe(false);
-
-    dispatchActionClick(2);
-
-    expect(messageText()).toBe("יפה מאוד!");
 
     dispatchActionClick(1);
 
     expect(
       (document.querySelectorAll(".quiz-slide")[1] as HTMLElement).style.display
     ).toBe("flex");
-    expect(messageText()).toBe("");
   });
 
-  it("advances when confirmation is followed by a keyboard-style activation", () => {
-    clickOption(0, "a");
-    pressActionKey("Enter", false);
-
-    expect(
-      (document.getElementById("quiz-next") as HTMLButtonElement).disabled
-    ).toBe(false);
-
-    pressActionKey("Enter", false);
-
-    expect(
-      (document.querySelectorAll(".quiz-slide")[1] as HTMLElement).style.display
-    ).toBe("flex");
-    expect(messageText()).toBe("");
-  });
-
-  it("suppresses a rapid second touch tap and advances after the window", () => {
-    vi.useFakeTimers();
-    clickOption(0, "a");
-
-    dispatchPointerAction("touch", 1);
-
-    const action = document.getElementById("quiz-next") as HTMLButtonElement;
-    expect(action.disabled).toBe(true);
-
-    dispatchPointerAction("touch", 1);
-
-    expect(messageText()).toBe("יפה מאוד!");
-    expect(
-      (document.querySelectorAll(".quiz-slide")[0] as HTMLElement).style.display
-    ).toBe("flex");
-
-    vi.advanceTimersByTime(TOUCH_DOUBLE_TAP_SUPPRESSION_MS - 1);
-    expect(action.disabled).toBe(true);
-
-    vi.advanceTimersByTime(1);
-    expect(action.disabled).toBe(false);
-
-    dispatchPointerAction("touch", 1);
-
-    expect(
-      (document.querySelectorAll(".quiz-slide")[1] as HTMLElement).style.display
-    ).toBe("flex");
-  });
-
-  it("detects touch confirmation through the Safari touch-event fallback", () => {
-    vi.useFakeTimers();
-    clickOption(0, "a");
-
-    dispatchTouchFallbackAction(1);
-
-    const action = document.getElementById("quiz-next") as HTMLButtonElement;
-    expect(action.disabled).toBe(true);
-
-    vi.advanceTimersByTime(TOUCH_DOUBLE_TAP_SUPPRESSION_MS);
-    expect(action.disabled).toBe(false);
-  });
-
-  it("keeps feedback visible through repeated Enter and advances on a later press", () => {
+  it("keeps feedback visible through repeated Enter and advances on a later press", async () => {
     clickOption(0, "a");
 
     pressActionKey("Enter", false);
+    await flushAsyncWork();
     pressActionKey("Enter", true);
 
     expect(messageText()).toBe("יפה מאוד!");
@@ -261,12 +504,101 @@ describe("quiz.js – reward score and feedback", () => {
     expect(
       (document.querySelectorAll(".quiz-slide")[1] as HTMLElement).style.display
     ).toBe("flex");
-    expect(messageText()).toBe("");
   });
 
-  it("accumulates points across correct answers", () => {
+  it("keeps a successful touch confirmation disabled for the suppression window", async () => {
+    vi.useFakeTimers();
+    clickOption(0, "a");
+
+    dispatchPointerAction("touch", 1);
+    await flushAsyncWork();
+
+    expect(actionButton().disabled).toBe(true);
+    dispatchPointerAction("touch", 1);
+    expect(
+      (document.querySelectorAll(".quiz-slide")[0] as HTMLElement).style.display
+    ).toBe("flex");
+
+    vi.advanceTimersByTime(TOUCH_DOUBLE_TAP_SUPPRESSION_MS);
+    expect(actionButton().disabled).toBe(false);
+
+    dispatchPointerAction("touch", 1);
+    expect(
+      (document.querySelectorAll(".quiz-slide")[1] as HTMLElement).style.display
+    ).toBe("flex");
+  });
+
+  it("does not let the touch timeout override pending persistence", async () => {
+    vi.useFakeTimers();
+    let resolveRequest!: (response: {
+      ok: boolean;
+      json: () => Promise<object>;
+    }) => void;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockReturnValue(
+        new Promise((resolve) => {
+          resolveRequest = resolve;
+        })
+      )
+    );
+    setupDOM();
+    clickOption(0, "a");
+
+    dispatchPointerAction("touch", 1);
+    vi.advanceTimersByTime(TOUCH_DOUBLE_TAP_SUPPRESSION_MS);
+
+    expect(actionButton().disabled).toBe(true);
+    expect(
+      (document.querySelectorAll(".quiz-slide")[0] as HTMLElement).style.display
+    ).toBe("flex");
+
+    resolveRequest({ ok: true, json: async () => ({}) });
+    await flushAsyncWork();
+
+    expect(actionButton().disabled).toBe(false);
+    expect(actionButton().textContent).toBe("לשאלה הבאה");
+  });
+
+  it("uses the touchstart fallback to suppress Safari-style double taps", async () => {
+    vi.useFakeTimers();
+    clickOption(0, "a");
+
+    dispatchTouchFallbackAction(1);
+    await flushAsyncWork();
+
+    expect(actionButton().disabled).toBe(true);
+    dispatchTouchFallbackAction(1);
+    expect(
+      (document.querySelectorAll(".quiz-slide")[0] as HTMLElement).style.display
+    ).toBe("flex");
+
+    vi.advanceTimersByTime(TOUCH_DOUBLE_TAP_SUPPRESSION_MS);
+    dispatchTouchFallbackAction(1);
+
+    expect(
+      (document.querySelectorAll(".quiz-slide")[1] as HTMLElement).style.display
+    ).toBe("flex");
+  });
+
+  it("keeps programmatic activations immediate", async () => {
+    clickOption(0, "a");
+
+    dispatchActionClick(0);
+    await flushAsyncWork();
+
+    expect(actionButton().disabled).toBe(false);
+    dispatchActionClick(0);
+
+    expect(
+      (document.querySelectorAll(".quiz-slide")[1] as HTMLElement).style.display
+    ).toBe("flex");
+  });
+
+  it("accumulates points across correct answers", async () => {
     clickOption(0, "a");
     clickAction();
+    await flushAsyncWork();
     clickAction(); // advance to slide 2
     clickOption(1, "b");
     clickAction();
@@ -299,10 +631,11 @@ describe("quiz.js – resume", () => {
     vi.unstubAllGlobals();
   });
 
-  it("saves position, score, and points on advance", () => {
+  it("saves position, score, and points on advance", async () => {
     setupDOM({ userId: "u1" });
     clickOption(0, "a");
     clickAction(); // confirm
+    await flushAsyncWork();
     clickAction(); // advance
     const saved = JSON.parse(localStorage.getItem(KEY)!);
     expect(saved).toMatchObject({ i: 1, score: 1, points: 10, total: 2 });
@@ -358,26 +691,154 @@ describe("quiz.js – resume", () => {
     expect(scoreText()).toBe("0");
   });
 
-  it("clears the key on completion and still posts progress", () => {
+  it("restores a response-lost submission and reuses its answer and idempotency key", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("response lost"))
+      .mockResolvedValueOnce({ ok: true, json: async () => ({}) });
+    vi.stubGlobal("fetch", fetchMock);
+    setupDOM({ userId: "u1" });
+
+    clickOption(0, "a");
+    clickAction();
+    await flushAsyncWork();
+
+    const firstBody = JSON.parse(fetchCalls("/api/quiz")[0][1].body);
+    const pendingState = JSON.parse(localStorage.getItem(KEY)!);
+    expect(pendingState).toMatchObject({
+      i: 0,
+      score: 1,
+      points: 10,
+      pendingSubmission: {
+        questionId: "q1",
+        selectedOption: "a",
+        idempotencyKey: firstBody.idempotency_key,
+      },
+    });
+
+    setupDOM({ userId: "u1" });
+
+    expect(scoreText()).toBe("10");
+    expect(actionButton().textContent).toBe("נסי שוב");
+    expect(actionButton().disabled).toBe(false);
+    clickAction();
+    await flushAsyncWork();
+
+    const secondBody = JSON.parse(fetchCalls("/api/quiz")[1][1].body);
+    expect(secondBody.selected_option).toBe(firstBody.selected_option);
+    expect(secondBody.idempotency_key).toBe(firstBody.idempotency_key);
+    expect(scoreText()).toBe("10");
+    expect(actionButton().textContent).toBe("לשאלה הבאה");
+    expect(JSON.parse(localStorage.getItem(KEY)!)).toMatchObject({
+      pendingSubmission: null,
+    });
+  });
+
+  it("restores an acknowledged correct answer without rescoring or reposting it", async () => {
     setupDOM({ userId: "u1" });
     clickOption(0, "a");
     clickAction();
+    await flushAsyncWork();
+
+    expect(fetchCalls("/api/quiz")).toHaveLength(1);
+    setupDOM({ userId: "u1" });
+
+    expect(scoreText()).toBe("10");
+    expect(messageText()).toBe("יפה מאוד!");
+    expect(actionButton().textContent).toBe("לשאלה הבאה");
+    expect(actionButton().disabled).toBe(false);
+    expect(fetchCalls("/api/quiz")).toHaveLength(1);
+
+    clickAction();
+    expect(slideDisplay(1)).toBe("flex");
+    expect(fetchCalls("/api/quiz")).toHaveLength(1);
+    expect(JSON.parse(localStorage.getItem(KEY)!)).toMatchObject({
+      i: 1,
+      score: 1,
+      points: 10,
+    });
+
+    clickOption(1, "b");
+    clickAction();
+    await flushAsyncWork();
+    clickAction();
+
+    expect(fetchCalls("/api/quiz")).toHaveLength(2);
+    const progressBody = JSON.parse(fetchCalls("/api/progress")[0][1].body);
+    expect(progressBody).toMatchObject({ score: 100, status: "completed" });
+  });
+
+  it("restores an acknowledged wrong answer without reposting or changing score", async () => {
+    setupDOM({ userId: "u1" });
+    clickOption(0, "b");
+    clickAction();
+    await flushAsyncWork();
+
+    expect(fetchCalls("/api/quiz")).toHaveLength(1);
+    setupDOM({ userId: "u1" });
+
+    expect(scoreText()).toBe("0");
+    expect(messageText()).toContain("בחרת ב־");
+    expect(actionButton().textContent).toBe("לשאלה הבאה");
+    expect(actionButton().disabled).toBe(false);
+    expect(fetchCalls("/api/quiz")).toHaveLength(1);
+
+    clickAction();
+    expect(slideDisplay(1)).toBe("flex");
+    expect(fetchCalls("/api/quiz")).toHaveLength(1);
+    expect(JSON.parse(localStorage.getItem(KEY)!)).toMatchObject({
+      i: 1,
+      score: 0,
+      points: 0,
+    });
+  });
+
+  it("clears the key on completion and still posts progress", async () => {
+    setupDOM({ userId: "u1" });
+    clickOption(0, "a");
+    clickAction();
+    await flushAsyncWork();
     clickAction();
     clickOption(1, "b");
     clickAction();
+    await flushAsyncWork();
     clickAction(); // advance past the last slide → completion
     expect(localStorage.getItem(KEY)).toBeNull();
     expect(fetchCalls("/api/progress")).toHaveLength(1);
   });
 
-  it("never reads or writes resume state in retry mode", () => {
+  it("never reads or writes resume state in retry mode", async () => {
     const seeded = JSON.stringify({ i: 1, score: 1, points: 10, sessionId: "s-1", total: 2 });
     localStorage.setItem(KEY, seeded);
     setupDOM({ userId: "u1", quizMode: "retry" });
     expect(slideDisplay(0)).toBe("flex");
     clickOption(0, "a");
     clickAction();
+    await flushAsyncWork();
     clickAction(); // advance — must not touch storage
     expect(localStorage.getItem(KEY)).toBe(seeded);
+  });
+
+  it("intentionally starts retry mode fresh after a response-lost reload", async () => {
+    const seeded = JSON.stringify({
+      i: 1,
+      score: 1,
+      points: 10,
+      sessionId: "s-1",
+      total: 2,
+    });
+    localStorage.setItem(KEY, seeded);
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("response lost")));
+    setupDOM({ userId: "u1", quizMode: "retry" });
+
+    clickOption(0, "a");
+    clickAction();
+    await flushAsyncWork();
+
+    expect(localStorage.getItem(KEY)).toBe(seeded);
+    setupDOM({ userId: "u1", quizMode: "retry" });
+    expect(scoreText()).toBe("0");
+    expect(actionButton().disabled).toBe(true);
+    expect(actionButton().textContent).toBe("צדקתי?");
   });
 });

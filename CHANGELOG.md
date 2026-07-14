@@ -2,10 +2,30 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
-## [0.3.105] - 2026-07-14
+## [0.3.107] - 2026-07-14
 
 ### Fixed
 - Quiz answer feedback remains visible after rapid mouse double-clicks, touch double-taps, and repeated Enter key events. A later distinct pointer or keyboard activation still advances normally.
+
+---
+
+## [0.3.106] - 2026-07-14
+
+### Fixed
+- Quiz submission identifiers now use cryptographically secure browser randomness when `crypto.randomUUID` is unavailable.
+
+---
+
+## [0.3.105] - 2026-07-14
+
+### Fixed
+- Rejected quiz submissions remain on the current question and can be retried without advancing or completing the topic. Pending and acknowledged submissions survive reloads, while permanent localized API failures stop blind retries and offer a clean restart.
+- Quiz answer persistence, idempotency, rewards, completion, and database-bound rate limiting now run transactionally so concurrent or repeated requests return the original result without duplicate progress or rewards.
+- Correct answers earn rewards only once per user and question through an immutable, access-restricted ledger, while later answers can still update review state.
+- Migration `010_quiz_submission_idempotency.sql` must be deployed before the application. It adds the transactional submission path and minute-by-minute, indexed cleanup with a shared 10,000-row ceiling.
+
+### Notes
+- The reward ledger best-effort backfills currently correct responses. Prior correct-then-wrong history is unavailable, so rare historical cases may receive one additional reward after deployment.
 
 ---
 
