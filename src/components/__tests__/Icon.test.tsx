@@ -35,6 +35,15 @@ describe("Icon", () => {
     expect(container.querySelector("svg")).toHaveClass("nav-chevron");
   });
 
+  it("renders the milestone medal icons gem and trophy as 16x16 fill icons", () => {
+    for (const name of ["gem", "trophy"] as const) {
+      const { container } = render(<Icon name={name} />);
+      const svg = container.querySelector("svg");
+      expect(svg).toHaveAttribute("viewBox", "0 0 16 16");
+      expect(svg!.querySelector("path")).toHaveAttribute("fill", "currentColor");
+    }
+  });
+
   it("renders nothing for an unknown name", () => {
     const { container } = render(<Icon name={"nope" as IconName} />);
     expect(container.firstChild).toBeNull();

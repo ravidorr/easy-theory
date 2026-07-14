@@ -185,7 +185,7 @@ describe("sw.js", () => {
     });
   });
 
-  describe("fetch — navigations (network-first)", () => {
+  describe("fetch - navigations (network-first)", () => {
     const navigate = (path: string) => makeRequest(path, { mode: "navigate" });
 
     it("serves and caches a successful navigation", async () => {
@@ -233,7 +233,7 @@ describe("sw.js", () => {
     });
   });
 
-  describe("fetch — images and static assets (cache-first)", () => {
+  describe("fetch - images and static assets (cache-first)", () => {
     it("caches sign images on first fetch and serves from cache after", async () => {
       const networkResponse = makeResponse();
       fetchMock.mockResolvedValue(networkResponse);
@@ -292,7 +292,7 @@ describe("sw.js", () => {
     });
   });
 
-  describe("fetch — requests that must never be intercepted", () => {
+  describe("fetch - requests that must never be intercepted", () => {
     it.each([
       ["POST request", makeRequest("/he/flashcards", { method: "POST" })],
       ["API route", makeRequest("/api/quiz")],

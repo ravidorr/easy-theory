@@ -243,7 +243,7 @@ describe("getMistakesForTopic", () => {
     expect(responsesChain.eq).toHaveBeenCalledWith("questions.topic_id", "t1");
   });
 
-  it("uses the latest response per question — answered wrong then right → not a mistake", async () => {
+  it("uses the latest response per question - answered wrong then right → not a mistake", async () => {
     // Responses ordered newest-first (as Supabase returns them with order ascending: false).
     const supabase = makeMistakesClient({
       responses: [
@@ -256,7 +256,7 @@ describe("getMistakesForTopic", () => {
     expect(await getMistakesForTopic(supabase, "u1", "t1")).toEqual([]);
   });
 
-  it("uses the latest response per question — answered right then wrong → is a mistake", async () => {
+  it("uses the latest response per question - answered right then wrong → is a mistake", async () => {
     const questionDetail = { id: "q1", question_he: "What?", correct_option: "a" };
     const supabase = makeMistakesClient({
       responses: [

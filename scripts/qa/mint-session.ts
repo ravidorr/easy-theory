@@ -29,7 +29,7 @@ const NEXT_PATH = arg("--next") ?? "/he";
 const BASE_URL = arg("--base") ?? "http://localhost:3100";
 
 function fail(message: string): never {
-  console.error(`qa:mint — ${message}`);
+  console.error(`qa:mint - ${message}`);
   process.exit(1);
 }
 
@@ -75,17 +75,17 @@ async function checkSeeds(): Promise<void> {
       .from(table)
       .select("*", { count: "exact", head: true });
     if (error) {
-      console.error(`qa:mint --check — ${table}: ${error.message}`);
+      console.error(`qa:mint --check - ${table}: ${error.message}`);
       failures += 1;
       continue;
     }
-    console.error(`qa:mint --check — ${table}: ${count ?? 0} rows`);
+    console.error(`qa:mint --check - ${table}: ${count ?? 0} rows`);
     if ((count ?? 0) < minRows) failures += 1;
   }
   if (failures > 0) {
     fail("QA database is unreachable or not fully seeded. See qa/SETUP.md.");
   }
-  console.error("qa:mint --check — OK");
+  console.error("qa:mint --check - OK");
 }
 
 // ── Mint ───────────────────────────────────────────────────────────────────
@@ -116,7 +116,7 @@ async function mint(): Promise<void> {
   }
 
   console.error(
-    `qa:mint — one-time session link for ${EMAIL} (expires on first use or OTP expiry):`
+    `qa:mint - one-time session link for ${EMAIL} (expires on first use or OTP expiry):`
   );
   console.log(
     `${BASE_URL}/auth/callback?token_hash=${tokenHash}&type=magiclink&next=${encodeURIComponent(NEXT_PATH)}`

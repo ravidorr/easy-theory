@@ -212,7 +212,7 @@
         '<span style="font-size:var(--type-caption-size);font-weight:600;color:var(--gold-text);">' + meta.label + '</span>' +
       '</div>' +
       '<div style="display:flex;flex-direction:column;gap:4px;">' +
-        '<h2 style="margin:0;font-size:var(--type-h2-size);font-weight:var(--type-h2-weight);color:var(--text);">' + (t.medalModalTitle || 'מדליה חדשה! 🎉') + '</h2>' +
+        '<h2 style="margin:0;font-size:var(--type-h2-size);font-weight:var(--type-h2-weight);color:var(--text);">' + (t.medalModalTitle || 'מדליה חדשה!') + '</h2>' +
         '<span style="font-size:var(--type-small-size);color:var(--text-muted);line-height:var(--line-body);">' + meta.description + '</span>' +
       '</div>' +
       '<button style="font-family:var(--font-ui);font-weight:700;font-size:15.5px;min-height:var(--hit-min);padding:10px 22px;width:100%;border-radius:var(--radius-lg);border:1px solid transparent;cursor:pointer;background:var(--primary);color:var(--text-on-primary);box-shadow:var(--shadow-press);">' + (t.medalModalBtn || 'מעולה, ממשיכות!') + '</button>';
@@ -327,7 +327,7 @@
       const badge = wrongBtn?.querySelector(".quiz-option-badge")?.textContent?.trim() || "";
       const signNum = wrongBtn?.querySelector("span:not(.quiz-option-badge):not(.quiz-option-explanation) span")?.textContent?.trim() || "";
       const suffix = signNum ? tf(t.rewardSignSuffix || ' (תמרור {number})', { number: signNum }) : "";
-      rewardMessage.textContent = (t.rewardWrongPrefix || "בחרת ב־") + badge + suffix + (t.rewardWrongSuffix || " — לא נורא, תנסי שוב בפעם הבאה.");
+      rewardMessage.textContent = (t.rewardWrongPrefix || "בחרת ב־") + badge + suffix + (t.rewardWrongSuffix || " - לא נורא, תנסי שוב בפעם הבאה.");
     }
   }
 

@@ -94,7 +94,7 @@ describe("proxy middleware", () => {
     });
   });
 
-  describe("unauthenticated user — private paths", () => {
+  describe("unauthenticated user - private paths", () => {
     beforeEach(() => {
       mockGetUser.mockResolvedValue({ data: { user: null } });
     });
@@ -129,7 +129,7 @@ describe("proxy middleware", () => {
     });
   });
 
-  describe("unauthenticated user — public paths", () => {
+  describe("unauthenticated user - public paths", () => {
     beforeEach(() => {
       mockGetUser.mockResolvedValue({ data: { user: null } });
     });

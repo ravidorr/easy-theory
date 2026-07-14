@@ -55,7 +55,7 @@ async function translateBatch(
   context: string,
   attempt = 1
 ): Promise<Record<string, string>[]> {
-  const prompt = `You are a professional translator specialising in Israeli road traffic law. Translate the Hebrew values in the following JSON into Modern Standard Arabic (MSA). Keep technical road-sign and traffic terminology accurate. Return ONLY a valid JSON array — preserve all keys exactly as-is, only replace the Hebrew string values with their Arabic translations. The "id" field must be copied unchanged. Do not add any explanation or markdown.
+  const prompt = `You are a professional translator specialising in Israeli road traffic law. Translate the Hebrew values in the following JSON into Modern Standard Arabic (MSA). Keep technical road-sign and traffic terminology accurate. Return ONLY a valid JSON array - preserve all keys exactly as-is, only replace the Hebrew string values with their Arabic translations. The "id" field must be copied unchanged. Do not add any explanation or markdown.
 
 Context: ${context}
 
@@ -105,7 +105,7 @@ async function translateTopics(supabase: AnySupabase, model: GeminiModel) {
 
     for (const row of translated) {
       const original = batch.find((r) => r.id === row.id);
-      if (!original) { console.warn(`  ⚠ topic: unknown id ${row.id} (Gemini mangled it, skipping)`); continue; }
+      if (!original) { console.warn(`  [warn] topic: unknown id ${row.id} (Gemini mangled it, skipping)`); continue; }
       if (DRY_RUN) {
         console.log(`  [topic] ${original.name_he} → ${row.name_ar}`);
         continue;
@@ -157,7 +157,7 @@ async function translateQuestions(supabase: AnySupabase, model: GeminiModel) {
 
     for (const row of translated) {
       const original = rows.find((r) => r.id === row.id);
-      if (!original) { console.warn(`  ⚠ question: unknown id ${row.id} (Gemini mangled it, skipping)`); continue; }
+      if (!original) { console.warn(`  [warn] question: unknown id ${row.id} (Gemini mangled it, skipping)`); continue; }
       if (DRY_RUN) {
         console.log(`  [q#${original.question_number}] ${original.question_he.slice(0, 40)}… → ${row.question_ar?.slice(0, 40)}…`);
         continue;
@@ -210,7 +210,7 @@ async function translateSigns(supabase: AnySupabase, model: GeminiModel) {
 
     for (const row of translated) {
       const original = batch.find((r) => r.id === row.id);
-      if (!original) { console.warn(`  ⚠ sign: unknown id ${row.id} (Gemini mangled it, skipping)`); continue; }
+      if (!original) { console.warn(`  [warn] sign: unknown id ${row.id} (Gemini mangled it, skipping)`); continue; }
       if (DRY_RUN) {
         console.log(`  [sign ${original.sign_number}] ${original.name_he} → ${row.name_ar}`);
         continue;

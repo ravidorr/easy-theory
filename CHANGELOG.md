@@ -15,6 +15,19 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ---
 
+## [0.3.116] — 2026-07-14
+
+### Added
+- ESLint rules banning emoji and em-dash characters in string literals (`eslint-plugin-no-emoji`, `eslint-plugin-no-em-dash`), added to the flat config as errors.
+- New `gem` and `trophy` icons in the Icon component, mirrored in `design-system/icons.svg`.
+
+### Changed
+- More-page milestone medals render SVG icons (flame, star, gem, trophy) instead of emoji, with explicit earned/unearned colors; the unearned-medal date placeholder is now a plain hyphen.
+- Home stepper's final step shows its number instead of a finish-flag emoji, and the streak medal nudge no longer embeds a medal emoji (`daysToMedalOne`/`daysToMedalMany` lost their `{medal}` parameter in he + ar).
+- Stripped remaining emoji and replaced em-dashes with hyphens in translation JSONs (he + ar), `public/js` fallback strings, script console output, and test names.
+
+---
+
 ## [0.3.115] — 2026-07-14
 
 ### Changed

@@ -28,7 +28,7 @@ function PathProgress({ total = 5, current = 1 }: { total?: number; current?: nu
         className={`${styles.stepNode} ${done ? styles.stepNodeDone : ""} ${active ? styles.stepNodeActive : ""}`}
         data-active={active || undefined}
       >
-        {done ? "✓" : i === total ? "🏁" : i}
+        {done ? "✓" : i}
       </span>
     );
     if (i < total) {
@@ -80,7 +80,6 @@ export default async function HomePage() {
 
   const completedCount = progressRows.filter((p) => p.status === "completed").length;
 
-  const MEDAL_EMOJI: Record<number, string> = { 3: "🔥", 7: "⭐", 14: "💎", 30: "🏆" };
   const nextMedal = nextMedalTarget(stats.streak_days);
   const daysToNextMedal = nextMedal !== null ? nextMedal - stats.streak_days : null;
 
@@ -125,8 +124,8 @@ export default async function HomePage() {
           {daysToNextMedal !== null ? (
             <span className={styles.medalNudge}>
               {daysToNextMedal === 1
-                ? t("daysToMedalOne", { medal: MEDAL_EMOJI[nextMedal!] })
-                : t("daysToMedalMany", { count: daysToNextMedal, medal: MEDAL_EMOJI[nextMedal!] })}
+                ? t("daysToMedalOne")
+                : t("daysToMedalMany", { count: daysToNextMedal })}
             </span>
           ) : stats.streak_days >= 30 ? (
             <span className={styles.medalNudge}>{t("allMedals")}</span>

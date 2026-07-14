@@ -59,11 +59,11 @@ if (!runDir || !charterPath) {
 }
 
 if (!existsSync(runDir)) {
-  console.error(`validate-report — run dir not found: ${runDir}`);
+  console.error(`validate-report - run dir not found: ${runDir}`);
   process.exit(1);
 }
 if (!existsSync(charterPath)) {
-  console.error(`validate-report — charter not found: ${charterPath}`);
+  console.error(`validate-report - charter not found: ${charterPath}`);
   process.exit(1);
 }
 
@@ -96,7 +96,7 @@ if (existsSync(findingsPath)) {
   try {
     report = JSON.parse(readFileSync(findingsPath, "utf8"));
   } catch (parseError) {
-    console.error(`validate-report — findings.json is not valid JSON: ${String(parseError)}`);
+    console.error(`validate-report - findings.json is not valid JSON: ${String(parseError)}`);
     process.exit(1);
   }
 
@@ -108,7 +108,7 @@ if (existsSync(findingsPath)) {
   for (const id of charterCheckIds) {
     const count = seen.get(id) ?? 0;
     if (count === 0) err(`check ${id} from the charter has no verdict in findings.json`);
-    if (count > 1) err(`check ${id} has ${count} entries — must be exactly one`);
+    if (count > 1) err(`check ${id} has ${count} entries - must be exactly one`);
   }
   for (const id of seen.keys()) {
     if (!charterCheckIds.includes(id)) {
@@ -127,7 +127,7 @@ if (existsSync(findingsPath)) {
         err(`check ${id}: ${check.verdict} requires a non-empty "observed" statement`);
       }
       if (!check.evidence?.length) {
-        err(`check ${id}: ${check.verdict} requires evidence — a ${check.verdict} without evidence is invalid`);
+        err(`check ${id}: ${check.verdict} requires evidence - a ${check.verdict} without evidence is invalid`);
       } else {
         for (const entry of check.evidence) {
           if (!evidenceExists(entry)) err(`check ${id}: evidence file not found in run dir: ${entry}`);
@@ -164,7 +164,7 @@ if (existsSync(findingsPath)) {
   }
 
   if (!report.not_tested?.length) {
-    err('not_tested must be non-empty — every run leaves something untested; say what');
+    err('not_tested must be non-empty - every run leaves something untested; say what');
   }
 
   const summary = report.coverage_summary;
@@ -187,8 +187,8 @@ if (existsSync(findingsPath)) {
 }
 
 if (errors.length > 0) {
-  console.error(`validate-report — ${errors.length} problem(s):`);
+  console.error(`validate-report - ${errors.length} problem(s):`);
   for (const message of errors) console.error(`  - ${message}`);
   process.exit(1);
 }
-console.error("validate-report — OK: report is complete and evidence-backed");
+console.error("validate-report - OK: report is complete and evidence-backed");
