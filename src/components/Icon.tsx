@@ -31,6 +31,31 @@ const ICONS = {
       />
     ),
   },
+  gem: {
+    viewBox: "0 0 16 16",
+    content: (
+      <>
+        <path d="M4.5 2.5h7L14 6 8 13.5 2 6z" fill="currentColor" />
+        <path d="M5.2 6.5h5.6L8 10.9z" fill="var(--surface)" opacity="0.85" />
+      </>
+    ),
+  },
+  trophy: {
+    viewBox: "0 0 16 16",
+    content: (
+      <>
+        <path d="M4.5 1.8h7v4a3.5 3.5 0 0 1-7 0z" fill="currentColor" />
+        <path
+          d="M4.5 3H2.5v1.5A2.5 2.5 0 0 0 5 7M11.5 3h2v1.5A2.5 2.5 0 0 1 11 7"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.3"
+        />
+        <path d="M7 9.3h2v2.2H7z" fill="currentColor" />
+        <path d="M4.8 11.5h6.4v1.7H4.8z" fill="currentColor" />
+      </>
+    ),
+  },
   home: {
     viewBox: "0 0 24 24",
     content: (

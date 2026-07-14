@@ -89,7 +89,7 @@ async function main() {
         try {
           const explanation = await generateExplanation(model, q);
           if (DRY_RUN) {
-            console.log(`[${idx}/${total}] Q#${q.question_number} — ${explanation} [DRY RUN]`);
+            console.log(`[${idx}/${total}] Q#${q.question_number} - ${explanation} [DRY RUN]`);
             return;
           }
           const { error } = await supabase
@@ -97,12 +97,12 @@ async function main() {
             .update({ explanation_he: explanation })
             .eq("id", q.id);
           if (error) {
-            console.error(`[${idx}/${total}] Q#${q.question_number} — update failed: ${error.message}`);
+            console.error(`[${idx}/${total}] Q#${q.question_number} - update failed: ${error.message}`);
           } else {
-            console.log(`[${idx}/${total}] Q#${q.question_number} — done`);
+            console.log(`[${idx}/${total}] Q#${q.question_number} - done`);
           }
         } catch (err) {
-          console.error(`[${idx}/${total}] Q#${q.question_number} — error: ${err}`);
+          console.error(`[${idx}/${total}] Q#${q.question_number} - error: ${err}`);
         }
       })
     );

@@ -75,6 +75,12 @@ importers:
       eslint-config-next:
         specifier: 16.2.10
         version: 16.2.10(@typescript-eslint/parser@8.62.1(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
+      eslint-plugin-no-em-dash:
+        specifier: ^1.0.0
+        version: 1.0.0(eslint@9.39.4(jiti@2.7.0))
+      eslint-plugin-no-emoji:
+        specifier: ^2.0.2
+        version: 2.0.2(eslint@9.39.4(jiti@2.7.0))
       htmlhint:
         specifier: ^1.9.2
         version: 1.9.2
@@ -1785,6 +1791,9 @@ packages:
   electron-to-chromium@1.5.384:
     resolution: {integrity: sha512-g6KAKY1vkYsADvSPWvdJsuYT0ixdcu6lUtD9P/wJKGBEDlZVXh2AX42j1mPqqaQPDluWjara9ziQ7xqAeXCt5A==}
 
+  emoji-regex@10.6.0:
+    resolution: {integrity: sha512-toUI84YS5YmxW219erniWD0CIVOo46xGKColeNQRgOzDorgBi1v4D71/OFzgD9GO2UGKIv1C3Sp8DAn0+j5w7A==}
+
   emoji-regex@8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}
 
@@ -1919,6 +1928,18 @@ packages:
     engines: {node: '>=4.0'}
     peerDependencies:
       eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8 || ^9
+
+  eslint-plugin-no-em-dash@1.0.0:
+    resolution: {integrity: sha512-HlqIvL/LlnX8OC66AIKwAxCr3NuQ8yoUysR7JtTcVffBsxQhRB3eYzjM2LY/kB8KAgJMEZ01SovSlASrvP4X2A==}
+    engines: {node: '>=18.18.0'}
+    peerDependencies:
+      eslint: '>=8.0.0'
+
+  eslint-plugin-no-emoji@2.0.2:
+    resolution: {integrity: sha512-EwnLPviXnXnP1fK5985o01tCfSp9aR/2b1Ix8ZcCZMsL6tBomNHkdUjX/muFfLy7+PErqj01cCQ+K1+tVqvKqw==}
+    engines: {node: '>=18.18.0'}
+    peerDependencies:
+      eslint: '>=8.0.0'
 
   eslint-plugin-react-hooks@7.1.1:
     resolution: {integrity: sha512-f2I7Gw6JbvCexzIInuSbZpfdQ44D7iqdWX01FKLvrPgqxoE7oMj8clOfto8U6vYiz4yd5oKu39rRSVOe1zRu0g==}
@@ -5143,6 +5164,8 @@ snapshots:
 
   electron-to-chromium@1.5.384: {}
 
+  emoji-regex@10.6.0: {}
+
   emoji-regex@8.0.0: {}
 
   emoji-regex@9.2.2: {}
@@ -5404,6 +5427,15 @@ snapshots:
       object.fromentries: 2.0.8
       safe-regex-test: 1.1.0
       string.prototype.includes: 2.0.1
+
+  eslint-plugin-no-em-dash@1.0.0(eslint@9.39.4(jiti@2.7.0)):
+    dependencies:
+      eslint: 9.39.4(jiti@2.7.0)
+
+  eslint-plugin-no-emoji@2.0.2(eslint@9.39.4(jiti@2.7.0)):
+    dependencies:
+      emoji-regex: 10.6.0
+      eslint: 9.39.4(jiti@2.7.0)
 
   eslint-plugin-react-hooks@7.1.1(eslint@9.39.4(jiti@2.7.0)):
     dependencies:

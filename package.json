@@ -1,6 +1,6 @@
 {
   "name": "clear-road",
-  "version": "0.3.115",
+  "version": "0.3.116",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -46,6 +46,8 @@
     "@vitest/coverage-v8": "^4.1.9",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
+    "eslint-plugin-no-em-dash": "^1.0.0",
+    "eslint-plugin-no-emoji": "^2.0.2",
     "htmlhint": "^1.9.2",
     "husky": "^9.1.7",
     "jsdom": "^29.1.1",

@@ -71,31 +71,29 @@ describe("MorePage", () => {
     expect(container.querySelector('a[href="/resources"]')).toBeFalsy();
   });
 
-  it("shows '—' for all medals when none are earned", async () => {
+  it("shows '-' for all medals when none are earned", async () => {
     mockGetMedals.mockResolvedValue([]);
     const jsx = await MorePage();
     render(jsx);
-    const dashes = screen.getAllByText("—");
+    const dashes = screen.getAllByText("-");
     expect(dashes).toHaveLength(4);
   });
 
-  it("shows a formatted date instead of '—' for earned medals", async () => {
+  it("shows a formatted date instead of '-' for earned medals", async () => {
     mockGetMedals.mockResolvedValue([
       { medal_slug: "streak-3", earned_at: "2026-01-15T10:00:00Z" },
     ] as never);
     const jsx = await MorePage();
     render(jsx);
-    const dashes = screen.getAllByText("—");
+    const dashes = screen.getAllByText("-");
     expect(dashes).toHaveLength(3);
   });
 
-  it("renders all four milestone emojis", async () => {
+  it("renders all four milestone medal icons", async () => {
     const jsx = await MorePage();
-    render(jsx);
-    expect(screen.getByText("🔥")).toBeInTheDocument();
-    expect(screen.getByText("⭐")).toBeInTheDocument();
-    expect(screen.getByText("💎")).toBeInTheDocument();
-    expect(screen.getByText("🏆")).toBeInTheDocument();
+    const { container } = render(jsx);
+    const medalIcons = container.querySelectorAll('[class*="medal"] svg');
+    expect(medalIcons).toHaveLength(4);
   });
 
   it("renders dark mode toggle switch set to true", async () => {
@@ -120,7 +118,7 @@ describe("MorePage", () => {
     ] as never);
     const jsx = await MorePage();
     render(jsx);
-    expect(screen.getAllByText("—")).toHaveLength(3);
+    expect(screen.getAllByText("-")).toHaveLength(3);
   });
 
   it("renders light mode toggle when theme is light", async () => {

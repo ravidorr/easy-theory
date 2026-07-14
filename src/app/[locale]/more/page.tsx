@@ -4,7 +4,7 @@ import Script from "next/script";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase";
 import { TabBar } from "@/components/TabBar";
-import { Icon } from "@/components/Icon";
+import { Icon, type IconName } from "@/components/Icon";
 import { getUserMedals, getUserStats } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
 import { LanguageToggle } from "@/components/LanguageToggle";
@@ -30,11 +30,11 @@ export default async function MorePage() {
   const cookieStore = await cookies();
   const isDark = (cookieStore.get("theme")?.value ?? "dark") === "dark";
 
-  const MILESTONES = [
-    { slug: "streak-3", label: t("milestone3"), emoji: "🔥" },
-    { slug: "streak-7", label: t("milestone7"), emoji: "⭐" },
-    { slug: "streak-14", label: t("milestone14"), emoji: "💎" },
-    { slug: "streak-30", label: t("milestone30"), emoji: "🏆" },
+  const MILESTONES: { slug: string; label: string; icon: IconName }[] = [
+    { slug: "streak-3", label: t("milestone3"), icon: "flame" },
+    { slug: "streak-7", label: t("milestone7"), icon: "star" },
+    { slug: "streak-14", label: t("milestone14"), icon: "gem" },
+    { slug: "streak-30", label: t("milestone30"), icon: "trophy" },
   ];
 
   const dateLocale = locale === "ar" ? "ar-IL" : "he-IL";
@@ -97,19 +97,19 @@ export default async function MorePage() {
         <div className={styles.medalsCard}>
           <h2>{t("medalsTitle")}</h2>
           <div className={styles.medalsGrid}>
-            {MILESTONES.map(({ slug, label, emoji }) => {
+            {MILESTONES.map(({ slug, label, icon }) => {
               const earned = earnedSet.has(slug);
               const date = earnedDateMap[slug];
               return (
                 <div key={slug} className={styles.medalItem}>
                   <div className={`${styles.medal} ${earned ? styles.medalEarned : ""}`}>
-                    {emoji}
+                    <Icon name={icon} size={24} />
                   </div>
                   <span className={`${styles.medalLabel} ${earned ? styles.medalLabelEarned : ""}`}>
                     {label}
                   </span>
                   <span className={`${styles.medalDate} ${earned ? styles.medalDateEarned : ""}`}>
-                    {earned ? fmtDate(date) : "—"}
+                    {earned ? fmtDate(date) : "-"}
                   </span>
                 </div>
               );
