@@ -5,6 +5,7 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 ## [Unreleased]
 
 ### Added
+- Question bookmarks: a new `user_question_bookmarks` table (migration `013_question_bookmarks.sql`, composite `(user_id, question_id)` PK with own-rows RLS), an idempotent `PUT /api/bookmarks` route (auth + rate limit + UUID validation), a bookmark toggle on every quiz/retry slide and review card (server-rendered `aria-pressed` state, driven by the shared `public/js/bookmark.js` with optimistic flip, busy guard, and a polite live-region error announcement), and a `/bookmarks` browse page (correct answer + explanation per card, un-bookmark in place) linked from a new row on the More page. New `bookmark` icon in the Icon component; new `Bookmarks`/`More.navBookmarks`/`Quiz.bookmarkLabel`/`Api.bookmarkUpdateFailed`/`JS.Bookmark` keys in he + ar.
 - Landing page v2 per the updated design system: trust badge ("מבוסס על המאגר הרשמי"), phone-framed real app screenshots (hero + "הצצה פנימה" gallery, captured from the QA environment into `public/landing/`), a 4-item FAQ section, an emotional-close card whose CTA anchors back to the login card, and a redesigned magic-link success card (check circle, spam hint, "שליחה מחדש" pill) that replaces the form on success. New `check` icon in the Icon component. New/updated `Login` keys in he + ar; Arabic phrasing pending professional-translator review.
 
 ### Changed

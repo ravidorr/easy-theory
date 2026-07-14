@@ -145,6 +145,31 @@ body {
 
 .quiz-option[data-state="correct"] .quiz-option-explanation { display: block; }
 
+/* ── Bookmark toggle ─────────────────────────────────────────── */
+.bookmark-toggle {
+  border: none;
+  background: none;
+  padding: 12px;
+  min-width: var(--hit-min);
+  min-height: var(--hit-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: color 120ms;
+}
+
+.bookmark-toggle:hover { color: var(--primary); }
+
+.bookmark-toggle[aria-pressed="true"] {
+  color: var(--primary);
+}
+
+.bookmark-toggle[aria-pressed="true"] svg path {
+  fill: currentcolor;
+}
+
 /* ── Sign images ─────────────────────────────────────────────── */
 .sign-image {
   object-fit: contain;

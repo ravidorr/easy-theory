@@ -8,7 +8,7 @@ import { SignImage } from "@/components/SignImage";
 import { Icon } from "@/components/Icon";
 import { InlineMarkdown } from "@/components/InlineMarkdown";
 import { createClient } from "@/lib/supabase";
-import { getTopicBySlug, getQuestionsForTopic } from "@/lib/db";
+import { getTopicBySlug, getQuestionsForTopic, getBookmarkedQuestionIds } from "@/lib/db";
 import type { Question } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
 import styles from "./page.module.css";
@@ -40,12 +40,14 @@ function QuestionSlide({
   index,
   topicId,
   letters,
+  bookmarked,
   t,
 }: {
   question: Question;
   index: number;
   topicId: string;
   letters: string[];
+  bookmarked: boolean;
   t: TranslateFn;
 }) {
   const qAny = question as Record<string, unknown>;
@@ -77,6 +79,15 @@ function QuestionSlide({
       style={{ display: index === 0 ? "flex" : "none" }}
     >
       <div className={styles.questionContainer}>
+        <button
+          type="button"
+          className={`bookmark-toggle ${styles.bookmarkCorner}`}
+          data-question-id={question.id}
+          aria-pressed={bookmarked ? "true" : "false"}
+          aria-label={t("bookmarkLabel")}
+        >
+          <Icon name="bookmark" size={20} />
+        </button>
         {imageUrl && (
           isWide ? (
             <div className={styles.imgWide}>
@@ -142,7 +153,10 @@ export default async function TopicQuizPage({
   const topic = await getTopicBySlug(supabase, slug);
   if (!topic) notFound();
 
-  const questions = await getQuestionsForTopic(supabase, topic.id);
+  const [questions, bookmarkedIds] = await Promise.all([
+    getQuestionsForTopic(supabase, topic.id),
+    getBookmarkedQuestionIds(supabase, user.id),
+  ]);
   const total = questions.length;
 
   // Pick locale-specific field names
@@ -201,6 +215,7 @@ export default async function TopicQuizPage({
               index={i}
               topicId={topic.id}
               letters={letters}
+              bookmarked={bookmarkedIds.has(q.id)}
               t={t}
             />
           ))
@@ -241,6 +256,7 @@ export default async function TopicQuizPage({
       </main>
 
       <Script src="/js/quiz.js" strategy="afterInteractive" />
+      <Script src="/js/bookmark.js" strategy="afterInteractive" />
     </>
   );
 }

@@ -61,14 +61,22 @@ describe("MorePage", () => {
     await expect(MorePage()).rejects.toThrow("redirect");
   });
 
-  it("renders navigation links to exam, schedule, and credits", async () => {
+  it("renders navigation links to exam, schedule, bookmarks, and credits", async () => {
     const jsx = await MorePage();
     const { container } = render(jsx);
     expect(container.querySelector('a[href="/exam"]')).toBeTruthy();
     expect(container.querySelector('a[href="/schedule"]')).toBeTruthy();
+    expect(container.querySelector('a[href="/bookmarks"]')).toBeTruthy();
     expect(container.querySelector('a[href="/credits"]')).toBeTruthy();
     expect(container.querySelector('a[href="/videos"]')).toBeFalsy();
     expect(container.querySelector('a[href="/resources"]')).toBeFalsy();
+  });
+
+  it("labels the bookmarks navigation row", async () => {
+    const jsx = await MorePage();
+    const { container } = render(jsx);
+    const row = container.querySelector('a[href="/bookmarks"]');
+    expect(row?.textContent).toContain("navBookmarks");
   });
 
   it("shows '-' for all medals when none are earned", async () => {

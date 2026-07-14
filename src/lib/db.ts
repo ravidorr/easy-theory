@@ -341,6 +341,59 @@ export async function getMistakesForTopic(
   }));
 }
 
+export type BookmarkedQuestion = Question & {
+  bookmarked_at: string;
+};
+
+export async function getBookmarkedQuestionIds(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<Set<string>> {
+  // Soft fallback: a failure renders toggles as "not bookmarked" instead of
+  // breaking the quiz — the bookmark PUT is idempotent, so state self-heals.
+  const { data } = await supabase
+    .from("user_question_bookmarks")
+    .select("question_id")
+    .eq("user_id", userId);
+  return new Set((data ?? []).map((row) => row.question_id));
+}
+
+export async function getBookmarkedQuestions(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<BookmarkedQuestion[]> {
+  // One row per (user, question) via the table's primary key. Supabase caps a
+  // single response at 1000 rows, so a user who bookmarks 1000+ of the 1,273
+  // questions gets a truncated list — accepted deliberately; page through like
+  // getTopicAccuracy if that ever becomes a real usage pattern.
+  const { data: bookmarks, error } = await supabase
+    .from("user_question_bookmarks")
+    .select("question_id, created_at")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw new Error(`getBookmarkedQuestions: bookmarks query failed: ${error.message}`, {
+      cause: error,
+    });
+  }
+  if (!bookmarks?.length) return [];
+
+  const questions = await fetchQuestionsByIds(
+    supabase,
+    bookmarks.map((b) => b.question_id)
+  );
+
+  // fetchQuestionsByIds doesn't preserve order — restore newest-first.
+  const byId = new Map(questions.map((q) => [q.id, q]));
+  return bookmarks
+    .map((b) => {
+      const question = byId.get(b.question_id);
+      return question ? { ...question, bookmarked_at: b.created_at } : null;
+    })
+    .filter((q) => q != null);
+}
+
 export type ExamAttempt = {
   id: string;
   score: number;

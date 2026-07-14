@@ -102,6 +102,7 @@
     "statPoints": "נקודות",
     "navExam": "סימולציית מבחן",
     "navSchedule": "התוכנית שלך",
+    "navBookmarks": "שאלות שמורות",
     "navCredits": "קרדיטים",
     "medalsTitle": "הישגים",
     "milestone3": "3 ימים",
@@ -133,6 +134,7 @@
     "questionImageAlt": "תמונה המצורפת לשאלה",
     "optionCorrectSr": "תשובה נכונה",
     "optionWrongSr": "תשובה שגויה",
+    "bookmarkLabel": "שמירת השאלה לחזרה",
     "rewardCorrect": "יפה מאוד!",
     "rewardTopicDone": "כל הכבוד! סיימת את כל הנושא!",
     "rewardWrongPrefix": "בחרת ב־",
@@ -173,6 +175,13 @@
     "scopeAllTime": "כל הזמנים",
     "emptyHintLastSession": "אין טעויות בתרגול האחרון!",
     "viewAllMistakes": "לצפייה בכל הטעויות"
+  },
+  "Bookmarks": {
+    "topBarTitle": "שאלות שמורות",
+    "countOne": "שאלה שמורה אחת",
+    "countMany": "{count} שאלות שמורות",
+    "emptyHint": "עוד אין שאלות שמורות. אפשר לשמור שאלות בזמן התרגול.",
+    "backHome": "חזרה לבית"
   },
   "Exam": {
     "pageTitle": "סימולציית מבחן",
@@ -268,7 +277,8 @@
     "invalidTime": "שעה לא תקינה",
     "scheduleUpdateFailed": "שגיאה בעדכון לוח הזמנים",
     "pushSubscribeFailed": "שגיאה בשמירת ההרשמה",
-    "pushUnsubscribeFailed": "שגיאה בהסרת ההרשמה"
+    "pushUnsubscribeFailed": "שגיאה בהסרת ההרשמה",
+    "bookmarkUpdateFailed": "שגיאה בעדכון השאלות השמורות"
   },
   "Notify": {
     "pushTitle": "לוח הלימודים שלך להיום",
@@ -361,6 +371,9 @@
       "examResultScore": "{score} מתוך {total} נכון (ציון עובר: {passMark})",
       "examTimeUp": "הזמן נגמר, המבחן הוגש.",
       "examSubmitError": "שגיאה בשליחה, שננסה שוב?"
+    },
+    "Bookmark": {
+      "bookmarkSaveError": "שגיאה בשמירה, שננסה שוב?"
     }
   }
 }

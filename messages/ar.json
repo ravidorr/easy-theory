@@ -102,6 +102,7 @@
     "statPoints": "نقاط",
     "navExam": "محاكاة الامتحان",
     "navSchedule": "خطتك",
+    "navBookmarks": "الأسئلة المحفوظة",
     "navCredits": "عن التطبيق",
     "medalsTitle": "الإنجازات",
     "milestone3": "3 أيام",
@@ -133,6 +134,7 @@
     "questionImageAlt": "صورة مرفقة بالسؤال",
     "optionCorrectSr": "إجابة صحيحة",
     "optionWrongSr": "إجابة خاطئة",
+    "bookmarkLabel": "حفظ السؤال للمراجعة لاحقاً",
     "rewardCorrect": "أحسنت!",
     "rewardTopicDone": "أحسنت! أكملت الموضوع بأكمله!",
     "rewardWrongPrefix": "اخترت ",
@@ -173,6 +175,13 @@
     "scopeAllTime": "كل الأوقات",
     "emptyHintLastSession": "لا أخطاء في آخر تدريب!",
     "viewAllMistakes": "عرض كل الأخطاء"
+  },
+  "Bookmarks": {
+    "topBarTitle": "الأسئلة المحفوظة",
+    "countOne": "سؤال محفوظ واحد",
+    "countMany": "{count} أسئلة محفوظة",
+    "emptyHint": "لا توجد أسئلة محفوظة بعد. يمكن حفظ الأسئلة أثناء التدريب.",
+    "backHome": "العودة للرئيسية"
   },
   "Exam": {
     "pageTitle": "محاكاة الامتحان",
@@ -268,7 +277,8 @@
     "invalidTime": "وقت غير صالح",
     "scheduleUpdateFailed": "خطأ في تحديث الجدول",
     "pushSubscribeFailed": "خطأ في حفظ الاشتراك",
-    "pushUnsubscribeFailed": "خطأ في إزالة الاشتراك"
+    "pushUnsubscribeFailed": "خطأ في إزالة الاشتراك",
+    "bookmarkUpdateFailed": "خطأ في تحديث الأسئلة المحفوظة"
   },
   "Notify": {
     "pushTitle": "جدولك الدراسي لليوم",
@@ -361,6 +371,9 @@
       "examResultScore": "{score} من {total} صحيح (علامة النجاح: {passMark})",
       "examTimeUp": "انتهى الوقت، تم تسليم الامتحان.",
       "examSubmitError": "خطأ في الإرسال، نحاول مرة أخرى؟"
+    },
+    "Bookmark": {
+      "bookmarkSaveError": "خطأ في الحفظ، نحاول مجدداً؟"
     }
   }
 }
