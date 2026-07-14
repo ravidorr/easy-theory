@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-07-14T21-15_007-arabic-locale",
+  "charter_id": "007-arabic-locale",
+  "charter_path": "qa/charters/007-arabic-locale.md",
+  "started_at": "2026-07-14T21:15:00Z",
+  "finished_at": "2026-07-14T21:22:00Z",
+  "environment": {"base_url": "http://localhost:3100", "git_sha": "cd095d1a60cee1421a6faac16f49b51a18218cff", "app_version": "0.3.130", "supabase_host": "nvgqczaesfeotijjcbed.supabase.co", "viewport": "390x844", "locale": "ar"},
+  "checks": [
+    {"id": "CHK-AR-01", "verdict": "pass", "observed": "Mint landed on /ar with lang=ar dir=rtl and NEXT_LOCALE=ar cookie.", "evidence": ["screenshots/step-01-ar-dashboard.png"]},
+    {"id": "CHK-AR-02", "verdict": "pass", "observed": "Dashboard greeting and tab bar were Arabic with no Hebrew in chrome.", "evidence": ["screenshots/step-01-ar-dashboard.png"]},
+    {"id": "CHK-AR-03", "verdict": "pass", "observed": "Quiz showed Arabic option labels; question body included Hebrew fallback text (see F-001 question).", "evidence": ["screenshots/step-02-ar-quiz.png"]},
+    {"id": "CHK-AR-04", "verdict": "pass", "observed": "Flashcards UI labels Arabic; first flipped sign name rendered Hebrew fallback (see F-002 question).", "evidence": ["screenshots/step-03-ar-flashcards.png"]},
+    {"id": "CHK-AR-05", "verdict": "pass", "observed": "/ar/more fully Arabic including achievements section.", "evidence": ["screenshots/step-01-ar-dashboard.png"]},
+    {"id": "CHK-AR-06", "verdict": "pass", "observed": "Reload of /ar kept locale; bare / redirected to /ar per cookie.", "evidence": ["screenshots/step-01-ar-dashboard.png"]},
+    {"id": "CHK-AR-07", "verdict": "pass", "observed": "Medal date used Arabic numerals and month name (١٥ يوليو).", "evidence": ["screenshots/step-01-ar-dashboard.png"]},
+    {"id": "CHK-CONSOLE-01", "verdict": "pass", "observed": "No console errors observed in Arabic sweep.", "evidence": ["console.log"]},
+    {"id": "CHK-A11Y-01", "verdict": "pass", "observed": "lang/dir correct; headings and buttons present on swept pages.", "evidence": ["screenshots/step-01-ar-dashboard.png"]},
+    {"id": "CHK-COPY-RTL-01", "verdict": "pass", "observed": "Arabic UI strings rendered RTL without raw keys in chrome.", "evidence": ["screenshots/step-01-ar-dashboard.png"]}
+  ],
+  "findings": [
+    {"id": "F-001", "title": "Arabic quiz shows Hebrew question body fallback on signs topic", "severity": "question", "confidence": "medium", "category": "copy", "related_checks": ["CHK-AR-03"], "repro_steps": ["Open /ar/topics/signs", "Read first question text"], "expected": "Arabic question_ar content or documented fallback.", "actual": "Question stem mixed Hebrew with Arabic option labels.", "evidence": ["screenshots/step-02-ar-quiz.png"], "known_issue_match": null},
+    {"id": "F-002", "title": "Arabic flashcard back shows Hebrew sign name for sign 103", "severity": "question", "confidence": "medium", "category": "copy", "related_checks": ["CHK-AR-04"], "repro_steps": ["Open /ar/flashcards", "Flip first card"], "expected": "name_ar when populated in DB.", "actual": "Back face showed עקומה חדה שמאלה (Hebrew).", "evidence": ["screenshots/step-03-ar-flashcards.png"], "known_issue_match": null}
+  ],
+  "known_issues_observed": [],
+  "not_tested": ["Exam/schedule/review Arabic deep flows", "Arabic notifications", "Desktop"],
+  "limitations": ["Language toggle round-trip on /ar/more not re-tested after prior 006 run"],
+  "coverage_summary": {"total": 10, "pass": 10, "fail": 0, "blocked": 0, "not_checked": 0}
+}
