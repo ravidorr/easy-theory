@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import Script from "next/script";
 import { existsSync } from "fs";
 import { join } from "path";
@@ -79,8 +80,14 @@ function QuestionSlide({
         {imageUrl && (
           isWide ? (
             <div className={styles.imgWide}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={imageUrl} alt={t("questionImageAlt")} className={styles.imgEl} />
+              <Image
+                src={imageUrl}
+                alt={t("questionImageAlt")}
+                width={480}
+                height={270}
+                sizes="(max-width: 480px) 100vw, 440px"
+                className={styles.imgEl}
+              />
             </div>
           ) : (
             <div className={styles.imgSquare}>

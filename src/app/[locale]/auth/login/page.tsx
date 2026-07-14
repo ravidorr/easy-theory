@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { Icon } from "@/components/Icon";
 import styles from "./page.module.css";
@@ -118,8 +119,7 @@ export default async function LoginPage({
 
           <div className={styles.featureCard}>
             <div className={`${styles.iconWrap} ${styles.iconWrapNeutral}`}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/signs/sign-302.png" alt={t("feature1ImgAlt")} className={styles.iconImg} />
+              <Image src="/signs/sign-302.png" alt={t("feature1ImgAlt")} width={34} height={34} className={styles.iconImg} />
             </div>
             <div className={styles.featureBody}>
               <h3 className={styles.featureTitle}>{t("feature1Title")}</h3>
@@ -129,8 +129,7 @@ export default async function LoginPage({
 
           <div className={styles.featureCard}>
             <div className={`${styles.iconWrap} ${styles.iconWrapNeutral}`}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/signs/sign-303.png" alt={t("feature2ImgAlt")} className={styles.iconImg} />
+              <Image src="/signs/sign-303.png" alt={t("feature2ImgAlt")} width={34} height={34} className={styles.iconImg} />
             </div>
             <div className={styles.featureBody}>
               <h3 className={styles.featureTitle}>{t("feature2Title")}</h3>

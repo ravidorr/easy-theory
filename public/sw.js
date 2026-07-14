@@ -105,7 +105,14 @@ self.addEventListener("fetch", function (event) {
     event.respondWith(cacheFirst(request, STATIC_CACHE));
     return;
   }
-  if (url.pathname.startsWith("/signs/") || url.pathname.startsWith("/questions/")) {
+  // /_next/image is the optimizer endpoint the sign/question images (and
+  // proxied video thumbnails) are served through; the direct /signs/ and
+  // /questions/ paths still cover SVGs and JS-swapped flashcard images.
+  if (
+    url.pathname.startsWith("/signs/") ||
+    url.pathname.startsWith("/questions/") ||
+    url.pathname.startsWith("/_next/image")
+  ) {
     event.respondWith(cacheFirst(request, IMAGES_CACHE));
     return;
   }

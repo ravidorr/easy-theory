@@ -15,6 +15,14 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ---
 
+## [0.3.115] — 2026-07-14
+
+### Changed
+- Flashcards page performance: the server now renders only the first card plus a JSON payload of all signs (`#fc-data`), and `flashcard.js` swaps the single card's content on advance (with image preloading and a placeholder fallback) — previously all 277 cards (~554 images) were mounted up front with `display:none`.
+- Real image optimization: removed `unoptimized` from `SignImage` (SVG sources still bypass the optimizer automatically), converted all raw `<img>` tags to `next/image` (home topic icons, login feature icons, YouTube video thumbnails, wide question photos in quiz/retry/review/exam), and added an `images` config to `next.config.ts` (`i.ytimg.com` remote pattern, long `minimumCacheTTL`).
+
+---
+
 ## [0.3.114] — 2026-07-14
 
 ### Added
