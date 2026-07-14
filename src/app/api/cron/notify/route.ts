@@ -3,6 +3,7 @@ import { Resend } from "resend";
 import webpush from "web-push";
 import { createAdminClient } from "@/lib/supabase";
 import { getUsersScheduledForDay, getPushSubscriptionsForUsers } from "@/lib/db";
+import { getNotifyTranslator } from "@/lib/api";
 
 const APP_URL = "https://easy-theory-omega.vercel.app";
 
@@ -60,14 +61,15 @@ export async function GET(request: Request) {
       const time = formatTime(s.start_time);
       const duration = s.duration_minutes;
       const pushSub = pushSubsByUser.get(s.user_id);
+      const t = getNotifyTranslator(s.locale === "ar" ? "ar" : "he");
 
       if (pushSub) {
         try {
           await webpush.sendNotification(
             { endpoint: pushSub.endpoint, keys: { auth: pushSub.auth, p256dh: pushSub.p256dh } },
             JSON.stringify({
-              title: "לוח הלימודים שלך להיום",
-              body: `📖 שיעור בשעה ${time} — ${duration} דקות`,
+              title: t("pushTitle"),
+              body: t("pushBody", { time, duration }),
               url: APP_URL,
             })
           );
@@ -91,17 +93,17 @@ export async function GET(request: Request) {
       await resend.emails.send({
         from: "Easy Theory <noreply@easy-theory-omega.vercel.app>",
         to: email,
-        subject: "📅 לוח הלימודים שלך להיום",
+        subject: t("emailSubject"),
         text: [
-          "שלום!",
+          t("emailGreeting"),
           "",
-          "הנה לוח הלימודים שלך להיום:",
+          t("emailScheduleHeader"),
           "",
-          `📖 שיעור בשעה ${time} — ${duration} דקות`,
+          t("emailLesson", { time, duration }),
           "",
-          `לחץ כאן להתחיל: ${APP_URL}`,
+          t("emailCta", { url: APP_URL }),
           "",
-          "בהצלחה!",
+          t("emailGoodLuck"),
         ].join("\n"),
       });
       sent++;

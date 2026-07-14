@@ -9,31 +9,32 @@ import {
 import { checkTopicCompletion } from "@/lib/topic-completion";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { markTopicCompleted } from "@/lib/db";
-import { parseJsonBody } from "@/lib/api";
+import { getApiTranslator, parseJsonBody } from "@/lib/api";
 
 export async function POST(request: Request) {
+  const t = getApiTranslator(request);
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json({ error: "לא מחוברת" }, { status: 401 });
+    return NextResponse.json({ error: t("notAuthenticated") }, { status: 401 });
   }
 
   const allowed = await checkRateLimit(supabase, `quiz:${user.id}`, 20, 60);
   if (!allowed) {
-    return NextResponse.json({ error: "יותר מדי בקשות, נסי שוב עוד רגע" }, { status: 429 });
+    return NextResponse.json({ error: t("tooManyRequests") }, { status: 429 });
   }
 
   const body = await parseJsonBody(request);
   if (!body) {
-    return NextResponse.json({ error: "חסרים פרמטרים" }, { status: 400 });
+    return NextResponse.json({ error: t("missingParams") }, { status: 400 });
   }
   const { question_id, selected_option, topic_id, session_id } = body;
 
   if (!question_id || !selected_option) {
-    return NextResponse.json({ error: "חסרים פרמטרים" }, { status: 400 });
+    return NextResponse.json({ error: t("missingParams") }, { status: 400 });
   }
 
   // The column is a Postgres UUID — coerce anything invalid to null so the upsert can't fail on it
@@ -49,7 +50,7 @@ export async function POST(request: Request) {
     .single();
 
   if (!question) {
-    return NextResponse.json({ error: "שאלה לא נמצאה" }, { status: 404 });
+    return NextResponse.json({ error: t("questionNotFound") }, { status: 404 });
   }
 
   const is_correct = question.correct_option === selected_option;
@@ -77,7 +78,7 @@ export async function POST(request: Request) {
   }, { onConflict: "user_id,question_id" });
   if (upsertError) {
     console.error("[quiz] upsert failed:", upsertError);
-    return NextResponse.json({ error: "שמירת התשובה נכשלה" }, { status: 500 });
+    return NextResponse.json({ error: t("answerSaveFailed") }, { status: 500 });
   }
 
   let stars_earned = 0;

@@ -249,6 +249,28 @@
     "rubikDesc": "גופן עברי ולטיני - Google Fonts",
     "footer": "© 2026 Raanan Avidor · קוד פתוח"
   },
+  "Api": {
+    "notAuthenticated": "לא מחוברת",
+    "tooManyRequests": "יותר מדי בקשות, נסי שוב עוד רגע",
+    "tooManyOtpAttempts": "יותר מדי ניסיונות, נסי שוב בעוד 15 דקות",
+    "missingParams": "חסרים פרמטרים",
+    "invalidParams": "פרמטרים שגויים",
+    "emailMissing": "כתובת מייל חסרה",
+    "emailInvalid": "כתובת המייל אינה תקינה",
+    "otpSendFailed": "שגיאה בשליחת הקישור, נסי שוב",
+    "topicIdMissing": "topic_id חסר",
+    "progressSaveFailed": "שמירת ההתקדמות נכשלה",
+    "examSaveFailed": "שמירת המבחן נכשלה",
+    "answerSaveFailed": "שמירת התשובה נכשלה",
+    "questionNotFound": "שאלה לא נמצאה",
+    "topicNotFound": "נושא לא נמצא",
+    "questionsLoadFailed": "שגיאה בטעינת השאלות",
+    "invalidDays": "ימים לא תקינים",
+    "invalidTime": "שעה לא תקינה",
+    "scheduleUpdateFailed": "שגיאה בעדכון לוח הזמנים",
+    "pushSubscribeFailed": "שגיאה בשמירת ההרשמה",
+    "pushUnsubscribeFailed": "שגיאה בהסרת ההרשמה"
+  },
   "Notify": {
     "pushTitle": "לוח הלימודים שלך להיום",
     "pushBody": "📖 שיעור בשעה {time} - {duration} דקות",

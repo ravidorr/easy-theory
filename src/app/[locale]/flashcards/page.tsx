@@ -8,8 +8,8 @@ import type { Sign } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
 import styles from "./page.module.css";
 
-function cleanName(name: string, signNumber: string): string {
-  if (/^\d+$/.test(name.trim())) return `תמרור ${signNumber}`;
+function cleanName(name: string, fallback: string): string {
+  if (/^\d+$/.test(name.trim())) return fallback;
   const firstClause = name.split(/[,.(]/)[0].trim().replace(/\s+/g, " ");
   return firstClause.length > 55 ? firstClause.slice(0, 52) + "…" : firstClause;
 }
@@ -49,7 +49,7 @@ function SignCard({
             style={{ width: "45%", maxHeight: "40%", opacity: 0.35 }}
           />
           <h2 className={styles.flashcardBackH2}>
-            {cleanName(sign.name_he, sign.sign_number)}
+            {cleanName(sign.name_he, signBadgeLabel)}
           </h2>
           <span className={styles.signNumberBadge}>{signBadgeLabel}</span>
         </div>

@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { GET } from "../route";
 import { createAdminClient } from "@/lib/supabase";
 import { getUsersScheduledForDay, getPushSubscriptionsForUsers } from "@/lib/db";
+import heMessages from "../../../../../../messages/he.json";
+import arMessages from "../../../../../../messages/ar.json";
 
 // vi.hoisted ensures these are initialised before the vi.mock factories run.
 const mockSendNotification = vi.hoisted(() => vi.fn().mockResolvedValue({}));
@@ -54,7 +56,13 @@ function makeAdminClient() {
   };
 }
 
-const SCHEDULE = { user_id: "u1", start_time: "08:00:00", duration_minutes: 45 };
+const SCHEDULE = {
+  user_id: "u1",
+  start_time: "08:00:00",
+  duration_minutes: 45,
+  locale: "he" as const,
+};
+const SCHEDULE_AR = { ...SCHEDULE, locale: "ar" as const };
 const PUSH_SUB = { user_id: "u1", endpoint: "https://push.example.com", auth: "auth", p256dh: "p256" };
 
 describe("GET /api/cron/notify", () => {
@@ -111,6 +119,29 @@ describe("GET /api/cron/notify", () => {
     expect(body).toEqual({ sent: 1 });
   });
 
+  it("sends the push notification in Hebrew for a he schedule", async () => {
+    mockGetSchedules.mockResolvedValue([SCHEDULE]);
+    mockGetPushSubs.mockResolvedValue([PUSH_SUB]);
+
+    await GET(makeRequest());
+
+    const payload = JSON.parse(mockSendNotification.mock.calls[0][1]);
+    expect(payload.title).toBe(heMessages.Notify.pushTitle);
+    expect(payload.body).toContain("08:00");
+    expect(payload.body).toContain("45");
+  });
+
+  it("sends the push notification in Arabic for an ar schedule", async () => {
+    mockGetSchedules.mockResolvedValue([SCHEDULE_AR]);
+    mockGetPushSubs.mockResolvedValue([PUSH_SUB]);
+
+    await GET(makeRequest());
+
+    const payload = JSON.parse(mockSendNotification.mock.calls[0][1]);
+    expect(payload.title).toBe(arMessages.Notify.pushTitle);
+    expect(payload.body).toContain("08:00");
+  });
+
   it("falls back to email when user has no push subscription", async () => {
     mockGetSchedules.mockResolvedValue([SCHEDULE]);
     mockGetPushSubs.mockResolvedValue([]); // no push sub
@@ -119,6 +150,25 @@ describe("GET /api/cron/notify", () => {
     const body = await res.json();
 
     expect(mockEmailSend).toHaveBeenCalled();
+    expect(mockEmailSend).toHaveBeenCalledWith(
+      expect.objectContaining({ subject: heMessages.Notify.emailSubject })
+    );
+    expect(body).toEqual({ sent: 1 });
+  });
+
+  it("sends the fallback email in Arabic for an ar schedule", async () => {
+    mockGetSchedules.mockResolvedValue([SCHEDULE_AR]);
+    mockGetPushSubs.mockResolvedValue([]);
+
+    const res = await GET(makeRequest());
+    const body = await res.json();
+
+    expect(mockEmailSend).toHaveBeenCalledWith(
+      expect.objectContaining({ subject: arMessages.Notify.emailSubject })
+    );
+    const text = mockEmailSend.mock.calls[0][0].text;
+    expect(text).toContain(arMessages.Notify.emailGreeting);
+    expect(text).toContain(arMessages.Notify.emailGoodLuck);
     expect(body).toEqual({ sent: 1 });
   });
 

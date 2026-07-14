@@ -3,35 +3,37 @@ import { createClient } from "@/lib/supabase";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { EXAM_QUESTION_COUNT, EXAM_PASS_MARK, scoreExam } from "@/lib/exam";
 import type { ExamAnswer } from "@/lib/exam";
+import { getApiTranslator } from "@/lib/api";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const OPTION_RE = /^[a-d]$/;
 
 export async function POST(request: Request) {
+  const t = getApiTranslator(request);
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json({ error: "לא מחוברת" }, { status: 401 });
+    return NextResponse.json({ error: t("notAuthenticated") }, { status: 401 });
   }
 
   const allowed = await checkRateLimit(supabase, `exam:${user.id}`, 5, 60);
   if (!allowed) {
-    return NextResponse.json({ error: "יותר מדי בקשות, נסי שוב עוד רגע" }, { status: 429 });
+    return NextResponse.json({ error: t("tooManyRequests") }, { status: 429 });
   }
 
   let body: Record<string, unknown>;
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "חסרים פרמטרים" }, { status: 400 });
+    return NextResponse.json({ error: t("missingParams") }, { status: 400 });
   }
 
   const { answers, duration_seconds } = body ?? {};
   if (!Array.isArray(answers)) {
-    return NextResponse.json({ error: "חסרים פרמטרים" }, { status: 400 });
+    return NextResponse.json({ error: t("missingParams") }, { status: 400 });
   }
 
   const validAnswers: ExamAnswer[] = answers.filter(
@@ -44,7 +46,7 @@ export async function POST(request: Request) {
   );
 
   if (validAnswers.length > EXAM_QUESTION_COUNT) {
-    return NextResponse.json({ error: "חסרים פרמטרים" }, { status: 400 });
+    return NextResponse.json({ error: t("missingParams") }, { status: 400 });
   }
 
   let correctById = new Map<string, string>();
@@ -76,7 +78,7 @@ export async function POST(request: Request) {
 
   if (insertError) {
     console.error("[exam] attempt insert failed:", insertError);
-    return NextResponse.json({ error: "שמירת המבחן נכשלה" }, { status: 500 });
+    return NextResponse.json({ error: t("examSaveFailed") }, { status: 500 });
   }
 
   return NextResponse.json({
