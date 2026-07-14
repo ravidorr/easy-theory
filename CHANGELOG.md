@@ -5,6 +5,7 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 ## [Unreleased]
 
 ### Fixed
+- ESLint warnings in maintained application code: exclude imported `design-system/` artifacts from linting, fix unused-variable warnings in `schedule.js` and the topics route test, and add schedule save-failure script tests.
 - Next.js workspace-root warning during dev and build by setting `turbopack.root` to the project directory and removing an empty home-level `package-lock.json` that caused incorrect root inference.
 - Quiz-flow accessibility gaps that were invisible to assistive tech:
   - Icon-only `→` back links on schedule, flashcards, and credits now carry a localized `aria-label` (new `backLabel` key in `Schedule`/`Flashcards`/`Credits`, he + ar)

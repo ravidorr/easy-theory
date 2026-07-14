@@ -133,7 +133,7 @@
       setTimeout(function () {
         window.location.href = "/";
       }, 800);
-    } catch (_) {
+    } catch {
       alert(t.saveError || "שגיאה בשמירה, נסי שוב.");
       saveBtn.disabled = false;
       saveBtn.textContent = originalSaveBtnText;
