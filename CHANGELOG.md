@@ -22,6 +22,13 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ---
 
+## [0.3.121] — 2026-07-14
+
+### Fixed
+- The root 404 (`global-not-found.tsx`) is no longer hardwired to Hebrew: it now resolves the visitor's locale from the `NEXT_LOCALE` cookie, then `Accept-Language` (new `detectLocale` helper in `src/i18n/detect-locale.ts`, q-value aware and tolerant of RFC 9110 whitespace/case variants), then the default — so Arabic visitors on locale-less URLs get the Arabic 404. Verifying this surfaced a pre-existing gap, recorded as TODO item 6: on Next 16.3.0-preview.5, `notFound()` bubbled from the `[locale]` layout renders Next's built-in shell instead of `global-not-found`.
+
+---
+
 ## [0.3.120] — 2026-07-14
 
 ### Removed
