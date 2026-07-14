@@ -16,11 +16,14 @@
     parsed = [];
   }
   if (!Array.isArray(parsed)) parsed = [];
-  // Validate the payload: only same-origin image paths may reach img.src;
-  // anything else falls back to the placeholder.
+  // Validate the payload: only same-origin image paths may reach img.src
+  // (anything else falls back to the placeholder), and only a well-formed
+  // UUID id may be posted back to /api/srs.
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   const signs = parsed.map(function (entry) {
     const s = entry || {};
     return {
+      id: typeof s.id === "string" && UUID_RE.test(s.id) ? s.id : "",
       img: typeof s.img === "string" && /^\/[\w\-./]+$/.test(s.img) ? s.img : "/placeholder.svg",
       alt: typeof s.alt === "string" ? s.alt : "",
       name: typeof s.name === "string" ? s.name : "",
@@ -45,6 +48,21 @@
   let flipped = false;
   const dontKnow = [];
   let replayMode = false;
+  const graded = new Set();
+
+  // Persist the SM-2 grade; fire-and-forget so a failed save never blocks
+  // the deck. First answer wins: in-session replays of "don't know" cards
+  // are not re-graded.
+  function gradeCard(index, knew) {
+    const id = signs[index].id;
+    if (!id || graded.has(id)) return;
+    graded.add(id);
+    fetch("/api/srs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sign_id: id, knew: knew }),
+    }).catch(function () {});
+  }
 
   function setImg(img, src, alt) {
     if (!img) return;
@@ -108,6 +126,7 @@
   }
 
   function advance(knew) {
+    gradeCard(current, knew);
     if (!knew) dontKnow.push(current);
 
     if (!replayMode) {

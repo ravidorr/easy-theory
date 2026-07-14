@@ -462,4 +462,38 @@ describe("ReviewPage", () => {
       expect(container.querySelector('a[href="/topics/signs/retry"]')).toBeTruthy();
     });
   });
+
+  describe("SRS due indicators", () => {
+    const PAST = "2020-01-01T00:00:00.000Z";
+    const FUTURE = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+
+    it("badges only due mistakes and shows the due count", async () => {
+      mockGetMistakes.mockResolvedValue([
+        { ...MISTAKE_A, due_at: PAST },
+        { ...MISTAKE_B, due_at: FUTURE },
+      ] as never);
+      const jsx = await callPage();
+      render(jsx);
+      expect(screen.getAllByText("dueBadge")).toHaveLength(1);
+      expect(screen.getByText("dueCount")).toBeInTheDocument();
+    });
+
+    it("treats an unscheduled mistake (null due_at) as due", async () => {
+      mockGetMistakes.mockResolvedValue([{ ...MISTAKE_A, due_at: null }] as never);
+      const jsx = await callPage();
+      render(jsx);
+      expect(screen.getByText("dueBadge")).toBeInTheDocument();
+    });
+
+    it("hides the badge and due count when nothing is due", async () => {
+      mockGetMistakes.mockResolvedValue([
+        { ...MISTAKE_A, due_at: FUTURE },
+        { ...MISTAKE_B, due_at: FUTURE },
+      ] as never);
+      const jsx = await callPage();
+      render(jsx);
+      expect(screen.queryByText("dueBadge")).not.toBeInTheDocument();
+      expect(screen.queryByText("dueCount")).not.toBeInTheDocument();
+    });
+  });
 });

@@ -121,7 +121,8 @@
     "signBadge": "תמרור {number}",
     "btnNo": "עוד לא",
     "btnYes": "ידעתי ✓",
-    "footerNote": "כרטיסים שסימנת \"עוד לא\" יחזרו מחר."
+    "footerNote": "כרטיסים שסימנת \"עוד לא\" יופיעו ראשונים בפעם הבאה.",
+    "dueToday": "{count} כרטיסים לחזרה היום"
   },
   "Quiz": {
     "count": "{current} מתוך {total}",
@@ -174,7 +175,9 @@
     "scopeLastSession": "התרגול האחרון",
     "scopeAllTime": "כל הזמנים",
     "emptyHintLastSession": "אין טעויות בתרגול האחרון!",
-    "viewAllMistakes": "לצפייה בכל הטעויות"
+    "viewAllMistakes": "לצפייה בכל הטעויות",
+    "dueBadge": "לחזרה",
+    "dueCount": "{count} שאלות לחזרה"
   },
   "Bookmarks": {
     "topBarTitle": "שאלות שמורות",
@@ -270,6 +273,7 @@
     "progressSaveFailed": "שמירת ההתקדמות נכשלה",
     "examSaveFailed": "שמירת המבחן נכשלה",
     "answerSaveFailed": "שמירת התשובה נכשלה",
+    "srsSaveFailed": "שמירת החזרה נכשלה",
     "questionNotFound": "שאלה לא נמצאה",
     "topicNotFound": "נושא לא נמצא",
     "questionsLoadFailed": "שגיאה בטעינת השאלות",

@@ -152,6 +152,23 @@
   color: var(--text-muted);
 }
 
+.dueCount {
+  margin: 0;
+  font-size: var(--type-small-size);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.dueBadge {
+  align-self: center;
+  padding: 2px 10px;
+  font-size: var(--type-caption-size);
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border-radius: var(--radius-pill);
+}
+
 .btnFull {
   width: 100%;
 }
