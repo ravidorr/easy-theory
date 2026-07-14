@@ -1,0 +1,4 @@
+[CHK-EXAM-04] Timer observed 40:00 -> 39:53 -> 39:50 (monotonic decrease)
+[CHK-EXAM-05] Confirm dialog: "יש 25 שאלות שלא נענו. להגיש בכל זאת?" — dismissed, run continued
+[CHK-EXAM-06] POST /api/exam returned score 1/30, passed=false; result screen matched
+[CHK-CONSOLE-01] Zero error-level console entries

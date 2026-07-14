@@ -1,0 +1,26 @@
+{
+  "run_id": "2026-07-14T21-16_003-exam-simulation",
+  "charter_id": "003-exam-simulation",
+  "charter_path": "qa/charters/003-exam-simulation.md",
+  "started_at": "2026-07-14T21:16:00Z",
+  "finished_at": "2026-07-14T21:25:00Z",
+  "environment": {"base_url": "http://localhost:3100", "git_sha": "cd095d1a60cee1421a6faac16f49b51a18218cff", "app_version": "0.3.130", "supabase_host": "nvgqczaesfeotijjcbed.supabase.co", "viewport": "390x844", "locale": "he"},
+  "checks": [
+    {"id": "CHK-EXAM-01", "verdict": "pass", "observed": "Landing showed 30 questions, 40 minutes, pass mark 26, start button, and empty-then-populated history.", "evidence": ["screenshots/step-01-exam-landing.png", "screenshots/step-05-exam-history.png"]},
+    {"id": "CHK-EXAM-02", "verdict": "pass", "observed": "Exam run had data-total=30 and zero data-correct attributes before submission.", "evidence": ["screenshots/step-02-exam-first-question.png"]},
+    {"id": "CHK-EXAM-03", "verdict": "pass", "observed": "Answered counter incremented to 5; prev/next navigation preserved selections across slides.", "evidence": ["screenshots/step-03-mid-run-answered.png"]},
+    {"id": "CHK-EXAM-04", "verdict": "pass", "observed": "Timer started near 40:00 and decreased monotonically (40:00 -> 39:53 -> 39:50).", "evidence": ["console.log", "screenshots/step-02-exam-first-question.png"]},
+    {"id": "CHK-EXAM-05", "verdict": "pass", "observed": "Submit with 25 unanswered raised localized confirm; dismiss returned to run without submitting.", "evidence": ["console.log", "screenshots/step-03-mid-run-answered.png"]},
+    {"id": "CHK-EXAM-06", "verdict": "pass", "observed": "POST /api/exam returned 1/30 with fail verdict matching score < 26.", "evidence": ["screenshots/step-04-exam-result.png", "network.log"]},
+    {"id": "CHK-EXAM-07", "verdict": "pass", "observed": "History listed new attempt 1/30 with date; best score 1/30.", "evidence": ["screenshots/step-05-exam-history.png"]},
+    {"id": "CHK-EXAM-08", "verdict": "pass", "observed": "Home readiness card showed מוכנות נמוכה 5% based on latest simulation.", "evidence": ["screenshots/step-06-home-readiness.png"]},
+    {"id": "CHK-CONSOLE-01", "verdict": "pass", "observed": "Zero error-level console entries.", "evidence": ["console.log"]},
+    {"id": "CHK-A11Y-01", "verdict": "pass", "observed": "Timer and answered counter are readable text; options have accessible names; headings on each page.", "evidence": ["screenshots/step-02-exam-first-question.png", "screenshots/step-04-exam-result.png"]},
+    {"id": "CHK-COPY-RTL-01", "verdict": "pass", "observed": "Exam Hebrew copy and timer digits rendered without raw keys or direction breakage.", "evidence": ["screenshots/step-01-exam-landing.png", "screenshots/step-04-exam-result.png"]}
+  ],
+  "findings": [],
+  "known_issues_observed": [],
+  "not_tested": ["40-minute timer expiry", "Timer warning at <=5:00", "Arabic locale", "Desktop viewport", "Exploration budget"],
+  "limitations": ["Final submission carried 5 answered questions after confirm-dialog test; score 1/30 reflects partial answers."],
+  "coverage_summary": {"total": 11, "pass": 11, "fail": 0, "blocked": 0, "not_checked": 0}
+}
