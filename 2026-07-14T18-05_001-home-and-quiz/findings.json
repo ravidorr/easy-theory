@@ -1,0 +1,149 @@
+{
+  "run_id": "2026-07-14T18-05_001-home-and-quiz",
+  "charter_id": "001-home-and-quiz",
+  "charter_path": "qa/charters/001-home-and-quiz.md",
+  "started_at": "2026-07-14T18:05:00+03:00",
+  "finished_at": "2026-07-14T18:16:00+03:00",
+  "environment": {
+    "base_url": "http://localhost:3100",
+    "git_sha": "d058ff774639a64e7ecc323f8bcdae151b675da2",
+    "app_version": "0.3.119",
+    "supabase_host": "nvgqczaesfeotijjcbed.supabase.co",
+    "viewport": "390x844",
+    "locale": "he"
+  },
+  "checks": [
+    {
+      "id": "CHK-AUTH-01",
+      "verdict": "pass",
+      "observed": "Unauthed visit to / redirected to /he/auth/login with the email field and submit button visible.",
+      "evidence": ["screenshots/step-01-login-redirect.png"],
+      "reason": null
+    },
+    {
+      "id": "CHK-AUTH-02",
+      "verdict": "pass",
+      "observed": "Minted callback URL landed authenticated on /he; dashboard widgets (streak, points, daily task, topics) rendered with no redirect loop.",
+      "evidence": ["screenshots/step-02-dashboard.png"],
+      "reason": null
+    },
+    {
+      "id": "CHK-HOME-01",
+      "verdict": "pass",
+      "observed": "Streak=2, points=320, non-empty topic list with real counts (traffic-laws 2/501, vehicle 6/106, signs completed, safety not started) matching seeded topics; no NaN/undefined/empty values.",
+      "evidence": ["screenshots/step-02-dashboard.png"],
+      "reason": null
+    },
+    {
+      "id": "CHK-HOME-02",
+      "verdict": "pass",
+      "observed": "html has lang=he dir=rtl; visible labels match messages/he.json Home namespace (greetingEvening, streakLabel, pointsLabel); no raw keys or unexpected English on screen.",
+      "evidence": ["screenshots/step-02-dashboard.png"],
+      "reason": null
+    },
+    {
+      "id": "CHK-QUIZ-01",
+      "verdict": "pass",
+      "observed": "Suggested-topic CTA opened /he/topics/traffic-laws; #quiz-container rendered question 1/501 with 4 option buttons (question was text-only; no sign image applicable).",
+      "evidence": ["screenshots/step-03-quiz-first-question.png"],
+      "reason": null
+    },
+    {
+      "id": "CHK-QUIZ-02",
+      "verdict": "pass",
+      "observed": "Selected answer highlights with aria-pressed=true and enables confirm; correct feedback (score +10) and wrong feedback (correct option revealed) both shown; question counter/progress advanced 1→2→3.",
+      "evidence": ["screenshots/step-04-correct-feedback.png", "screenshots/step-05-wrong-feedback.png"],
+      "reason": null
+    },
+    {
+      "id": "CHK-QUIZ-03",
+      "verdict": "pass",
+      "observed": "Each of the 3 confirmed answers produced POST /api/quiz returning 200; no 4xx/5xx requests in the flow.",
+      "evidence": ["network.log"],
+      "reason": null
+    },
+    {
+      "id": "CHK-QUIZ-04",
+      "verdict": "blocked",
+      "observed": "Not observed: the topic quiz session spans all 501 topic questions, so #quiz-final and POST /api/progress were not reached.",
+      "evidence": [],
+      "reason": "Topic quiz has no batching (quiz-container data-total=501); completing 501 questions to reach #quiz-final is not feasible within the 25-minute timebox."
+    },
+    {
+      "id": "CHK-QUIZ-05",
+      "verdict": "pass",
+      "observed": "After 3 in-run answers the dashboard reflected them: points 320→340 (+10 per correct answer), traffic-laws count 2/501→3/501 (distinct questions), daily-task step 1 turned to a checkmark.",
+      "evidence": ["screenshots/step-02-dashboard.png", "screenshots/step-07-dashboard-after.png"],
+      "reason": null
+    },
+    {
+      "id": "CHK-CONSOLE-01",
+      "verdict": "pass",
+      "observed": "Zero error-level console entries across login redirect, dashboard, and the full quiz loop; only dev-mode warnings (Next.js LCP hint, unused CSS preloads) which do not occur in production builds.",
+      "evidence": ["console.log"],
+      "reason": null
+    },
+    {
+      "id": "CHK-A11Y-01",
+      "verdict": "pass",
+      "observed": "Buttons and links expose accessible names (Hebrew labels); headings exist on every page (h1 on dashboard, h2 question on quiz); html lang/dir correct; answer selection exposed via aria-pressed and correct/wrong results carry visually-hidden 'תשובה נכונה'/'תשובה שגויה' text, not color alone; landing images have alt text.",
+      "evidence": ["screenshots/step-04-correct-feedback.png", "screenshots/step-05-wrong-feedback.png"],
+      "reason": null
+    },
+    {
+      "id": "CHK-COPY-RTL-01",
+      "verdict": "pass",
+      "observed": "Visible strings across login, dashboard, and quiz match messages/he.json (Home/Quiz/TabBar); no raw keys, English leakage, or mixed-direction breakage observed.",
+      "evidence": ["screenshots/step-02-dashboard.png", "screenshots/step-03-quiz-first-question.png"],
+      "reason": null
+    }
+  ],
+  "findings": [
+    {
+      "id": "F-001",
+      "title": "Quiz restarts from question 1 in a new browser despite server-side progress and 'continue where you stopped' copy",
+      "severity": "question",
+      "confidence": "medium",
+      "category": "functional",
+      "related_checks": ["CHK-QUIZ-01", "CHK-QUIZ-05"],
+      "repro_steps": [
+        "Have a user with existing progress in a topic (dashboard shows 'חוקי התנועה 2/501 שאלות' and the daily-task card says 'אפשר להמשיך מאיפה שעצרת')",
+        "Open the app in a fresh browser/device (new session, empty localStorage) and log in",
+        "Tap the suggested-topic CTA to open /he/topics/traffic-laws"
+      ],
+      "expected": "The quiz resumes from where the user stopped (after the 2 already-answered questions), consistent with the server-side 2/501 count and the 'continue where you stopped' promise.",
+      "actual": "The quiz opened at question 1 מתוך 501 and re-served already-answered questions. Quiz position is stored only in browser localStorage (within-browser reload does resume correctly — verified), so progress position does not follow the account across browsers/devices, while the answered-count does.",
+      "evidence": [
+        "screenshots/step-02-dashboard.png",
+        "screenshots/step-03-quiz-first-question.png",
+        "screenshots/step-06-reload-restores-state.png"
+      ],
+      "known_issue_match": null,
+      "notes": "Filed as 'question' — client-local resume may be an intentional pilot simplification, but the dashboard copy promises cross-session continuation and the server already knows which questions were answered."
+    }
+  ],
+  "known_issues_observed": [],
+  "not_tested": [
+    "Push notifications / service worker (charter out_of_scope)",
+    "Arabic locale (charter out_of_scope)",
+    "Email sending / send-otp path — auth was minted (charter out_of_scope)",
+    "Flashcards / schedule / videos / resources / credits / more pages (charter out_of_scope)",
+    "Desktop viewport (charter out_of_scope)",
+    "Quiz completion: #quiz-final screen and POST /api/progress (CHK-QUIZ-04 blocked — 501-question session vs timebox)",
+    "Exploration probes not exercised: rapid double-click on confirm, browser back mid-quiz, empty-progress persona (test user has existing progress)",
+    "Sign-image questions in the quiz (the 3 questions served were text-only)"
+  ],
+  "limitations": [
+    "Only 3 of 501 traffic-laws questions were answered; the quiz loop was validated, not the full session.",
+    "F-001 cross-browser behavior was observed once (fresh Playwright profile vs seeded server progress); within-browser resume was verified working via reload.",
+    "The run mutated the QA test user's data (3 quiz responses, +20 points) — expected; qa/SETUP.md has a reset snippet.",
+    "Next charter suggestion: a short seeded topic or a batched quiz mode would make the completion path (CHK-QUIZ-04) testable."
+  ],
+  "coverage_summary": {
+    "total": 12,
+    "pass": 11,
+    "fail": 0,
+    "blocked": 1,
+    "not_checked": 0
+  }
+}
