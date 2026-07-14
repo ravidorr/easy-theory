@@ -15,6 +15,13 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ---
 
+## [0.3.117] — 2026-07-14
+
+### Changed
+- Migrated the layout setup to Next 16 conventions: the pass-through root `layout.tsx` (the next-intl workaround that gave the root 404 a layout above it) is gone. `src/app/not-found.tsx` is now `src/app/global-not-found.tsx` (`experimental.globalNotFound`), which handles unmatched URLs and `notFound()` bubbling to the root, and `src/app/[locale]/layout.tsx` reads the locale via `next/root-params` (`await locale()`) instead of the `params` prop. Layout/404 tests updated accordingly; completed TODO item removed.
+
+---
+
 ## [0.3.116] — 2026-07-14
 
 ### Added

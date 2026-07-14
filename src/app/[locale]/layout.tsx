@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Rubik } from "next/font/google";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
+import { locale } from "next/root-params";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -28,13 +29,11 @@ export async function generateViewport(): Promise<Viewport> {
   return { themeColor: theme === "light" ? "#f5f7fc" : "#131829" };
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}): Promise<Metadata> {
-  const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "Metadata" });
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations({
+    locale: await locale(),
+    namespace: "Metadata",
+  });
   return {
     title: t("rootTitle"),
     description: t("rootDescription"),
@@ -43,13 +42,11 @@ export async function generateMetadata({
 
 export default async function LocaleLayout({
   children,
-  params,
 }: {
   children: React.ReactNode;
-  params: Promise<{ locale: string }>;
 }) {
-  const { locale } = await params;
-  if (!hasLocale(routing.locales, locale)) {
+  const currentLocale = await locale();
+  if (!hasLocale(routing.locales, currentLocale)) {
     notFound();
   }
 
@@ -73,14 +70,19 @@ export default async function LocaleLayout({
   };
 
   return (
-    <html lang={locale} dir="rtl" data-theme={theme} className={rubik.variable}>
+    <html
+      lang={currentLocale}
+      dir="rtl"
+      data-theme={theme}
+      className={rubik.variable}
+    >
       <head>
         {vapidPublicKey && (
           <meta name="vapid-public-key" content={vapidPublicKey} />
         )}
         <script
           dangerouslySetInnerHTML={{
-            __html: `window.__locale=${JSON.stringify(locale)};window.__t=${JSON.stringify(jsT)};window.__tf=function(s,v){return s.replace(/\\{(\\w+)\\}/g,function(_,k){return v[k]??_;});};`,
+            __html: `window.__locale=${JSON.stringify(currentLocale)};window.__t=${JSON.stringify(jsT)};window.__tf=function(s,v){return s.replace(/\\{(\\w+)\\}/g,function(_,k){return v[k]??_;});};`,
           }}
         />
       </head>

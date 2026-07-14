@@ -11,11 +11,11 @@ const rubik = Rubik({
   display: "swap",
 });
 
-// Root 404 boundary for requests with no locale context (unmatched by the
-// proxy) and for notFound() thrown by the [locale] layout on invalid locales.
-// Rendered outside the [locale] layout, so it must supply its own <html> and
-// resolve strings explicitly in the default locale.
-export default async function NotFound() {
+// Global 404, handled at the routing level: covers URLs that match no route
+// and notFound() bubbling to the root (e.g. the [locale] layout's invalid-
+// locale guard). Rendered outside any layout, so it must supply its own
+// <html> and resolve strings explicitly in the default locale.
+export default async function GlobalNotFound() {
   const t = await getTranslations({
     locale: routing.defaultLocale,
     namespace: "NotFound",
