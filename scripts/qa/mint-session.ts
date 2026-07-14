@@ -81,6 +81,8 @@ async function checkSchema(): Promise<number> {
     { table: "user_quiz_responses", column: "session_id", migration: "006" },
     { table: "user_exam_attempts", column: "id", migration: "007" },
     { table: "user_schedule", column: "locale", migration: "009" },
+    { table: "videos", column: "youtube_id", migration: "012" },
+    { table: "resources", column: "href", migration: "012" },
   ];
   for (const { table, column, migration } of columnProbes) {
     const { error } = await admin.from(table).select(column, { count: "exact", head: true });
@@ -131,7 +133,13 @@ async function checkSchema(): Promise<number> {
 }
 
 async function checkSeeds(): Promise<void> {
-  const expected: Record<string, number> = { topics: 1, questions: 1273, signs: 277 };
+  const expected: Record<string, number> = {
+    topics: 1,
+    questions: 1273,
+    signs: 277,
+    videos: 6,
+    resources: 4,
+  };
   let failures = 0;
   for (const [table, minRows] of Object.entries(expected)) {
     const { count, error } = await admin

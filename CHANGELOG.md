@@ -22,10 +22,17 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ---
 
+## [0.3.122] — 2026-07-14
+
+### Changed
+- Moved the videos and resources page content out of hardcoded JSX and translation keys into new Supabase `videos` and `resources` tables (migration `seeds/migrations/012_videos_resources.sql`, with Hebrew + Arabic seed rows and public-read RLS). Both pages now fetch rows via new `getVideos`/`getResources` helpers in `src/lib/db.ts` and pick `_ar` fields with `_he` fallback per locale; the moved per-item keys were removed from `messages/he.json` and `messages/ar.json` (page chrome keys remain). `pnpm qa:mint --check` probes the new tables' schema and seed counts; `qa/SETUP.md`'s migration list updated. The migration must be run manually in the Supabase SQL editor (QA + prod); completed TODO item removed.
+
+---
+
 ## [0.3.121] — 2026-07-14
 
 ### Fixed
-- The root 404 (`global-not-found.tsx`) is no longer hardwired to Hebrew: it now resolves the visitor's locale from the `NEXT_LOCALE` cookie, then `Accept-Language` (new `detectLocale` helper in `src/i18n/detect-locale.ts`, q-value aware and tolerant of RFC 9110 whitespace/case variants), then the default — so Arabic visitors on locale-less URLs get the Arabic 404. Verifying this surfaced a pre-existing gap, recorded as TODO item 6: on Next 16.3.0-preview.5, `notFound()` bubbled from the `[locale]` layout renders Next's built-in shell instead of `global-not-found`.
+- The root 404 (`global-not-found.tsx`) is no longer hardwired to Hebrew: it now resolves the visitor's locale from the `NEXT_LOCALE` cookie, then `Accept-Language` (new `detectLocale` helper in `src/i18n/detect-locale.ts`, q-value aware and tolerant of RFC 9110 whitespace/case variants), then the default — so Arabic visitors on locale-less URLs get the Arabic 404. Verifying this surfaced a pre-existing gap, recorded as TODO item 5 (numbering as of 0.3.122): on Next 16.3.0-preview.5, `notFound()` bubbled from the `[locale]` layout renders Next's built-in shell instead of `global-not-found`.
 
 ---
 

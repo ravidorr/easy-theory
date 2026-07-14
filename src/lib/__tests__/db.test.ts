@@ -6,6 +6,8 @@ import {
   getUserStats,
   getTopicProgress,
   getSigns,
+  getVideos,
+  getResources,
   getUserSchedule,
   getUsersScheduledForDay,
   getUserMedals,
@@ -112,6 +114,28 @@ describe("getSigns", () => {
 
   it("returns [] on null", async () => {
     expect(await getSigns(makeClient(null))).toEqual([]);
+  });
+});
+
+describe("getVideos", () => {
+  it("returns videos", async () => {
+    const videos = [{ id: "v1", youtube_id: "gd6ES_aAdI0", section: "marathon" }];
+    expect(await getVideos(makeClient(videos))).toEqual(videos);
+  });
+
+  it("returns [] on null", async () => {
+    expect(await getVideos(makeClient(null))).toEqual([]);
+  });
+});
+
+describe("getResources", () => {
+  it("returns resources", async () => {
+    const resources = [{ id: "r1", href: "https://m.noeg.co.il/", section: "practice" }];
+    expect(await getResources(makeClient(resources))).toEqual(resources);
+  });
+
+  it("returns [] on null", async () => {
+    expect(await getResources(makeClient(null))).toEqual([]);
   });
 });
 

@@ -34,6 +34,36 @@ export type Sign = {
   category: string;
 };
 
+export type Video = {
+  id: string;
+  youtube_id: string;
+  section: "marathon" | "lesson";
+  is_featured: boolean;
+  order_index: number;
+  title_he: string;
+  title_ar: string | null;
+  description_he: string | null;
+  description_ar: string | null;
+  tag_he: string | null;
+  tag_ar: string | null;
+  duration_label_he: string | null;
+  duration_label_ar: string | null;
+};
+
+export type Resource = {
+  id: string;
+  href: string;
+  section: "official" | "practice";
+  order_index: number;
+  title_he: string;
+  title_ar: string | null;
+  description_he: string | null;
+  description_ar: string | null;
+  icon_type: "sign" | "char";
+  icon_value: string;
+  icon_variant: "neutral" | "primary" | "success" | "muted";
+};
+
 export type UserStats = {
   user_id: string;
   star_points: number;
@@ -85,6 +115,24 @@ export async function getQuestionsForTopic(
     .select("*")
     .eq("topic_id", topicId)
     .order("question_number");
+  return data ?? [];
+}
+
+export async function getVideos(supabase: SupabaseClient): Promise<Video[]> {
+  const { data } = await supabase
+    .from("videos")
+    .select("*")
+    .order("order_index");
+  return data ?? [];
+}
+
+export async function getResources(
+  supabase: SupabaseClient
+): Promise<Resource[]> {
+  const { data } = await supabase
+    .from("resources")
+    .select("*")
+    .order("order_index");
   return data ?? [];
 }
 
