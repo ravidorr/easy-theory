@@ -1,0 +1,128 @@
+{
+  "run_id": "2026-07-14T19-55_001-home-and-quiz",
+  "charter_id": "001-home-and-quiz",
+  "charter_path": "qa/charters/001-home-and-quiz.md",
+  "started_at": "2026-07-14T16:55:00Z",
+  "finished_at": "2026-07-14T20:31:00Z",
+  "environment": {
+    "base_url": "http://localhost:3100",
+    "git_sha": "cd095d1a60cee1421a6faac16f49b51a18218cff",
+    "app_version": "0.3.130",
+    "supabase_host": "nvgqczaesfeotijjcbed.supabase.co",
+    "viewport": "390x844",
+    "locale": "he"
+  },
+  "checks": [
+    {
+      "id": "CHK-AUTH-01",
+      "verdict": "pass",
+      "observed": "Fresh visit redirected to /he/auth/login; email field and submit button visible.",
+      "evidence": ["screenshots/step-01-login-redirect.png"]
+    },
+    {
+      "id": "CHK-AUTH-02",
+      "verdict": "pass",
+      "observed": "Minted session landed on /he without login loop.",
+      "evidence": ["screenshots/step-02-dashboard-before.png"]
+    },
+    {
+      "id": "CHK-HOME-01",
+      "verdict": "pass",
+      "observed": "Streak 2, points 410, four topics with numeric progress rendered.",
+      "evidence": ["screenshots/step-02-dashboard-before.png"]
+    },
+    {
+      "id": "CHK-HOME-02",
+      "verdict": "pass",
+      "observed": "Hebrew copy with lang=he and dir=rtl; no raw translation keys.",
+      "evidence": ["screenshots/step-02-dashboard-before.png"]
+    },
+    {
+      "id": "CHK-QUIZ-01",
+      "verdict": "pass",
+      "observed": "#quiz-container present with question, four options, and question image.",
+      "evidence": ["screenshots/step-03-quiz-first-question.png"]
+    },
+    {
+      "id": "CHK-QUIZ-02",
+      "verdict": "pass",
+      "observed": "Correct feedback showed textual confirmation; wrong answer showed textual feedback and advanced progress.",
+      "evidence": ["screenshots/step-04-correct-feedback.png", "screenshots/step-05-wrong-feedback.png"]
+    },
+    {
+      "id": "CHK-QUIZ-03",
+      "verdict": "fail",
+      "observed": "501 quiz submissions returned 200 but 364 returned 429 while the UI continued.",
+      "evidence": ["network.log", "console.log"]
+    },
+    {
+      "id": "CHK-QUIZ-04",
+      "verdict": "pass",
+      "observed": "Final screen showed 122/501 correct; POST /api/progress returned 200.",
+      "evidence": ["screenshots/step-06-quiz-final.png", "network.log"]
+    },
+    {
+      "id": "CHK-QUIZ-05",
+      "verdict": "pass",
+      "observed": "Dashboard changed from 23/501 to 501/501 on traffic-laws and points from 410 to 1540.",
+      "evidence": ["screenshots/step-02-dashboard-before.png", "screenshots/step-07-dashboard-after.png"]
+    },
+    {
+      "id": "CHK-CONSOLE-01",
+      "verdict": "fail",
+      "observed": "Console contained 364 error-level failed-resource entries for 429 quiz submissions.",
+      "evidence": ["console.log", "network.log"]
+    },
+    {
+      "id": "CHK-A11Y-01",
+      "verdict": "pass",
+      "observed": "Headings, button names, lang/dir correct; question image had alt text; feedback conveyed in text not color alone.",
+      "evidence": ["screenshots/step-03-quiz-first-question.png", "screenshots/step-04-correct-feedback.png", "screenshots/step-05-wrong-feedback.png"]
+    },
+    {
+      "id": "CHK-COPY-RTL-01",
+      "verdict": "pass",
+      "observed": "Visible Home, Quiz, and TabBar strings matched Hebrew messages without direction breakage.",
+      "evidence": ["screenshots/step-02-dashboard-before.png", "screenshots/step-05-wrong-feedback.png", "screenshots/step-06-quiz-final.png"]
+    }
+  ],
+  "findings": [
+    {
+      "id": "F-001",
+      "title": "Stop quiz completion when answer submissions are rejected",
+      "severity": "major",
+      "confidence": "high",
+      "category": "data",
+      "related_checks": ["CHK-QUIZ-03", "CHK-CONSOLE-01"],
+      "repro_steps": [
+        "Open an authenticated topic quiz with many questions.",
+        "Confirm answers at a steady pace (~1 per second).",
+        "Observe 429 responses on POST /api/quiz while the UI continues.",
+        "Finish the quiz and return to the dashboard."
+      ],
+      "expected": "A rejected answer produces a visible retry/error state, and completion is not saved until required answer records are accepted.",
+      "actual": "364 answer submissions returned 429, but the UI displayed 122/501 on the final screen, POST /api/progress returned 200, and the dashboard showed 501/501 questions answered.",
+      "evidence": ["network.log", "console.log", "screenshots/step-06-quiz-final.png", "screenshots/step-07-dashboard-after.png"]
+    }
+  ],
+  "known_issues_observed": [],
+  "not_tested": [
+    "Push notifications / service worker",
+    "Arabic locale",
+    "Email OTP send path (auth is minted)",
+    "Flashcards, schedule, videos, resources, credits, more pages",
+    "Desktop viewport",
+    "Exploration budget probes (double-click, browser back mid-quiz, reload mid-quiz)"
+  ],
+  "limitations": [
+    "Quiz auto-answered with 900ms pacing; 364 submissions still hit rate limits.",
+    "Exploration budget not executed due to timebox on the long quiz."
+  ],
+  "coverage_summary": {
+    "total": 12,
+    "pass": 10,
+    "fail": 2,
+    "blocked": 0,
+    "not_checked": 0
+  }
+}

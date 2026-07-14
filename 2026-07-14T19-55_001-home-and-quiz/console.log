@@ -1,0 +1,3 @@
+[CHK-QUIZ-03] 364 error-level console entries: Failed to load resource 429 (Too Many Requests) on POST /api/quiz
+[CHK-CONSOLE-01] Preload warnings for unused CSS chunks (Next.js dev mode) — triaged, not counted as failures
+[CHK-CONSOLE-01] 364 error-level entries from rejected quiz submissions (429)
