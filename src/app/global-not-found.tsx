@@ -1,6 +1,7 @@
 import { Rubik } from "next/font/google";
+import { cookies, headers } from "next/headers";
 import { getTranslations } from "next-intl/server";
-import { routing } from "@/i18n/routing";
+import { detectLocale } from "@/i18n/detect-locale";
 import { NotFoundContent } from "@/components/NotFoundContent";
 import "@/app/globals.css";
 
@@ -13,15 +14,19 @@ const rubik = Rubik({
 
 // Global 404, handled at the routing level: covers URLs that match no route
 // and notFound() bubbling to the root (e.g. the [locale] layout's invalid-
-// locale guard). Rendered outside any layout, so it must supply its own
-// <html> and resolve strings explicitly in the default locale.
+// locale guard). Rendered outside any layout with no next-intl request
+// context, so it must supply its own <html> and resolve the locale itself
+// from the NEXT_LOCALE cookie / Accept-Language header. Both supported
+// locales are RTL, so dir stays fixed.
 export default async function GlobalNotFound() {
-  const t = await getTranslations({
-    locale: routing.defaultLocale,
-    namespace: "NotFound",
-  });
+  const [cookieStore, headerStore] = await Promise.all([cookies(), headers()]);
+  const locale = detectLocale(
+    cookieStore.get("NEXT_LOCALE")?.value,
+    headerStore.get("accept-language")
+  );
+  const t = await getTranslations({ locale, namespace: "NotFound" });
   return (
-    <html lang={routing.defaultLocale} dir="rtl" className={rubik.variable}>
+    <html lang={locale} dir="rtl" className={rubik.variable}>
       <body>
         <NotFoundContent
           strings={{
@@ -30,7 +35,7 @@ export default async function GlobalNotFound() {
             cta: t("cta"),
             signAlt: t("signAlt"),
           }}
-          homeHref={`/${routing.defaultLocale}`}
+          homeHref={`/${locale}`}
         />
       </body>
     </html>
