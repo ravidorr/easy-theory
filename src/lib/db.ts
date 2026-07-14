@@ -87,11 +87,28 @@ export type Schedule = {
   notify: boolean;
 };
 
+// Failed queries throw instead of pretending the result is empty — a silent
+// fallback made a failure indistinguishable from "no rows", which hid the
+// review-page mistakes bug. Page-level callers surface these via
+// src/app/[locale]/error.tsx. The one deliberate exception is
+// getBookmarkedQuestionIds (see its comment).
+function throwOnDbError(
+  error: { message: string } | null,
+  context: string
+): void {
+  if (error) {
+    throw new Error(`${context} query failed: ${error.message}`, {
+      cause: error,
+    });
+  }
+}
+
 export async function getTopics(supabase: SupabaseClient): Promise<Topic[]> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("topics")
     .select("*")
     .order("order_index");
+  throwOnDbError(error, "getTopics: topics");
   return data ?? [];
 }
 
@@ -99,11 +116,12 @@ export async function getTopicBySlug(
   supabase: SupabaseClient,
   slug: string
 ): Promise<Topic | null> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("topics")
     .select("*")
     .eq("slug", slug)
-    .single();
+    .maybeSingle();
+  throwOnDbError(error, "getTopicBySlug: topics");
   return data ?? null;
 }
 
@@ -111,29 +129,32 @@ export async function getQuestionsForTopic(
   supabase: SupabaseClient,
   topicId: string
 ): Promise<Question[]> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("questions")
     .select("*")
     .eq("topic_id", topicId)
     .order("question_number");
+  throwOnDbError(error, "getQuestionsForTopic: questions");
   return data ?? [];
 }
 
 export async function getVideos(supabase: SupabaseClient): Promise<Video[]> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("videos")
     .select("*")
     .order("order_index");
+  throwOnDbError(error, "getVideos: videos");
   return data ?? [];
 }
 
 export async function getResources(
   supabase: SupabaseClient
 ): Promise<Resource[]> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("resources")
     .select("*")
     .order("order_index");
+  throwOnDbError(error, "getResources: resources");
   return data ?? [];
 }
 
@@ -141,11 +162,12 @@ export async function getUserStats(
   supabase: SupabaseClient,
   userId: string
 ): Promise<UserStats> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("user_stats")
     .select("*")
     .eq("user_id", userId)
-    .single();
+    .maybeSingle();
+  throwOnDbError(error, "getUserStats: user_stats");
   return (
     data ?? {
       user_id: userId,
@@ -160,10 +182,11 @@ export async function getTopicProgress(
   supabase: SupabaseClient,
   userId: string
 ): Promise<TopicProgress[]> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("user_topic_progress")
     .select("topic_id, status, best_score, last_studied_at")
     .eq("user_id", userId);
+  throwOnDbError(error, "getTopicProgress: user_topic_progress");
   return data ?? [];
 }
 
@@ -171,11 +194,12 @@ export async function getSigns(
   supabase: SupabaseClient,
   limit = 100
 ): Promise<Sign[]> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("signs")
     .select("*")
     .order("sign_number")
     .limit(limit);
+  throwOnDbError(error, "getSigns: signs");
   return data ?? [];
 }
 
@@ -183,11 +207,12 @@ export async function getUserSchedule(
   supabase: SupabaseClient,
   userId: string
 ): Promise<Schedule[]> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("user_schedule")
     .select("*")
     .eq("user_id", userId)
     .order("day_of_week");
+  throwOnDbError(error, "getUserSchedule: user_schedule");
   return data ?? [];
 }
 
@@ -202,11 +227,15 @@ export async function getUsersScheduledForDay(
   supabase: SupabaseClient,
   dayOfWeek: number
 ): Promise<ScheduleWithUser[]> {
-  const { data } = await supabase
+  // A swallowed error here made the notify cron "succeed" with zero
+  // notifications sent — throwing turns that into a visible HTTP 500 for the
+  // cron caller.
+  const { data, error } = await supabase
     .from("user_schedule")
     .select("user_id, start_time, duration_minutes, locale")
     .eq("day_of_week", dayOfWeek)
     .eq("notify", true);
+  throwOnDbError(error, "getUsersScheduledForDay: user_schedule");
   return data ?? [];
 }
 
@@ -214,11 +243,12 @@ export async function getUserMedals(
   supabase: SupabaseClient,
   userId: string
 ): Promise<{ medal_slug: string; earned_at: string }[]> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("user_medals")
     .select("medal_slug, earned_at")
     .eq("user_id", userId)
     .order("earned_at");
+  throwOnDbError(error, "getUserMedals: user_medals");
   return data ?? [];
 }
 
@@ -239,10 +269,11 @@ export async function getPushSubscriptionsForUsers(
   supabase: SupabaseClient,
   userIds: string[]
 ): Promise<PushSubscriptionRow[]> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("user_push_subscriptions")
     .select("user_id, endpoint, auth, p256dh")
     .in("user_id", userIds);
+  throwOnDbError(error, "getPushSubscriptionsForUsers: user_push_subscriptions");
   return data ?? [];
 }
 
@@ -268,11 +299,7 @@ async function fetchQuestionsByIds(
         .from("questions")
         .select("*")
         .in("id", chunk);
-      if (error) {
-        throw new Error(`fetchQuestionsByIds: questions query failed: ${error.message}`, {
-          cause: error,
-        });
-      }
+      throwOnDbError(error, "fetchQuestionsByIds: questions");
       return data ?? [];
     })
   );
@@ -376,11 +403,7 @@ export async function getMistakesForTopic(
     .eq("questions.topic_id", topicId)
     .order("answered_at", { ascending: false });
 
-  if (error) {
-    throw new Error(`getMistakesForTopic: responses query failed: ${error.message}`, {
-      cause: error,
-    });
-  }
+  throwOnDbError(error, "getMistakesForTopic: responses");
   if (!responses?.length) return [];
 
   const latestByQuestion = new Map<
@@ -465,11 +488,7 @@ export async function getBookmarkedQuestions(
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
 
-  if (error) {
-    throw new Error(`getBookmarkedQuestions: bookmarks query failed: ${error.message}`, {
-      cause: error,
-    });
-  }
+  throwOnDbError(error, "getBookmarkedQuestions: bookmarks");
   if (!bookmarks?.length) return [];
 
   const questions = await fetchQuestionsByIds(
@@ -500,7 +519,10 @@ export async function getRandomExamQuestions(
   supabase: SupabaseClient,
   count: number
 ): Promise<Question[]> {
-  const { data: idRows } = await supabase.from("questions").select("id");
+  const { data: idRows, error: idsError } = await supabase
+    .from("questions")
+    .select("id");
+  throwOnDbError(idsError, "getRandomExamQuestions: question ids");
   if (!idRows?.length) return [];
 
   const pickedIds = sampleIds(
@@ -508,10 +530,11 @@ export async function getRandomExamQuestions(
     count
   );
 
-  const { data: questions } = await supabase
+  const { data: questions, error: questionsError } = await supabase
     .from("questions")
     .select("*")
     .in("id", pickedIds);
+  throwOnDbError(questionsError, "getRandomExamQuestions: questions");
   if (!questions?.length) return [];
 
   // .in() doesn't preserve order — restore the shuffled order.
@@ -524,12 +547,13 @@ export async function getExamAttempts(
   userId: string,
   limit = 20
 ): Promise<ExamAttempt[]> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("user_exam_attempts")
     .select("id, score, total, passed, duration_seconds, created_at")
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
     .limit(limit);
+  throwOnDbError(error, "getExamAttempts: user_exam_attempts");
   return data ?? [];
 }
 
@@ -552,13 +576,15 @@ export async function getTopicAccuracy(
   const byTopic = new Map<string, { correct: number; total: number }>();
 
   for (let from = 0; ; from += TOPIC_ACCURACY_PAGE_SIZE) {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("user_quiz_responses")
       .select("is_correct, questions(topic_id)")
       .eq("user_id", userId)
       .order("question_id")
       .range(from, from + TOPIC_ACCURACY_PAGE_SIZE - 1);
 
+    // A mid-pagination failure would otherwise silently truncate the results.
+    throwOnDbError(error, "getTopicAccuracy: user_quiz_responses");
     const rows = data ?? [];
     for (const row of rows) {
       // supabase-js may type a to-one nested relation as object or array.
@@ -580,7 +606,10 @@ export async function getTopicAccuracy(
 export async function getTopicQuestionCounts(
   supabase: SupabaseClient
 ): Promise<Record<string, number>> {
-  const { data } = await supabase.from("topics").select("id, questions(count)");
+  const { data, error } = await supabase
+    .from("topics")
+    .select("id, questions(count)");
+  throwOnDbError(error, "getTopicQuestionCounts: topics");
 
   const counts: Record<string, number> = {};
   for (const row of data ?? []) {
@@ -596,26 +625,29 @@ export async function markTopicCompleted(
   userId: string,
   topicId: string
 ): Promise<void> {
-  const { data: existing } = await supabase
+  const { data: existing, error: existingError } = await supabase
     .from("user_topic_progress")
     .select("id, status")
     .eq("user_id", userId)
     .eq("topic_id", topicId)
-    .single();
+    .maybeSingle();
+  throwOnDbError(existingError, "markTopicCompleted: progress lookup");
 
   if (existing) {
     if (existing.status !== "completed") {
-      await supabase
+      const { error } = await supabase
         .from("user_topic_progress")
         .update({ status: "completed", last_studied_at: new Date().toISOString() })
         .eq("id", existing.id);
+      throwOnDbError(error, "markTopicCompleted: progress update");
     }
   } else {
-    await supabase.from("user_topic_progress").insert({
+    const { error } = await supabase.from("user_topic_progress").insert({
       user_id: userId,
       topic_id: topicId,
       status: "completed",
       last_studied_at: new Date().toISOString(),
     });
+    throwOnDbError(error, "markTopicCompleted: progress insert");
   }
 }

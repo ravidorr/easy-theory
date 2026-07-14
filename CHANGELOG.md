@@ -24,6 +24,13 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ---
 
+## [0.3.128] — 2026-07-14
+
+### Changed
+- `src/lib/db.ts` read helpers no longer swallow Supabase errors: every helper now throws on a failed query (with the original error as `cause`) instead of returning an empty/zero-state result — the pattern that hid the review-page mistakes bug. Pages surface these via the localized error boundary; a failed notify-cron query now returns HTTP 500 instead of silently notifying nobody; a mid-pagination failure in `getTopicAccuracy` no longer truncates results. `getTopicBySlug`, `getUserStats`, and `markTopicCompleted` switched from `.single()` to `.maybeSingle()` so the normal "no rows" case (unknown slug 404, new-user zero-state, first completion insert) keeps working. The one deliberate exception is `getBookmarkedQuestionIds`, which keeps its documented soft fallback. Throw-path tests added for every hardened helper.
+
+---
+
 ## [0.3.127] — 2026-07-14
 
 ### Added

@@ -42,11 +42,13 @@ function chain(result: { data: unknown; error?: unknown }) {
   return mock;
 }
 
-function makeClient(data: unknown) {
+function makeClient(data: unknown, error: { message: string } | null = null) {
   return {
-    from: vi.fn().mockReturnValue(chain({ data })),
+    from: vi.fn().mockReturnValue(chain({ data: error ? null : data, error })),
   } as unknown as SupabaseClient;
 }
+
+const boom = { message: "boom" };
 
 // ─── Simple query helpers ────────────────────────────────────────────────────
 
@@ -59,6 +61,12 @@ describe("getTopics", () => {
   it("returns [] when Supabase returns null", async () => {
     expect(await getTopics(makeClient(null))).toEqual([]);
   });
+
+  it("throws when the query fails", async () => {
+    await expect(getTopics(makeClient(null, boom))).rejects.toThrow(
+      /getTopics: topics query failed: boom/
+    );
+  });
 });
 
 describe("getTopicBySlug", () => {
@@ -70,6 +78,12 @@ describe("getTopicBySlug", () => {
   it("returns null when not found", async () => {
     expect(await getTopicBySlug(makeClient(null), "nope")).toBeNull();
   });
+
+  it("throws when the query fails", async () => {
+    await expect(getTopicBySlug(makeClient(null, boom), "signs")).rejects.toThrow(
+      /getTopicBySlug: topics query failed: boom/
+    );
+  });
 });
 
 describe("getQuestionsForTopic", () => {
@@ -80,6 +94,12 @@ describe("getQuestionsForTopic", () => {
 
   it("returns [] on null", async () => {
     expect(await getQuestionsForTopic(makeClient(null), "t1")).toEqual([]);
+  });
+
+  it("throws when the query fails", async () => {
+    await expect(getQuestionsForTopic(makeClient(null, boom), "t1")).rejects.toThrow(
+      /getQuestionsForTopic: questions query failed: boom/
+    );
   });
 });
 
@@ -98,6 +118,12 @@ describe("getUserStats", () => {
       last_active_date: null,
     });
   });
+
+  it("throws when the query fails instead of faking zero-state stats", async () => {
+    await expect(getUserStats(makeClient(null, boom), "u1")).rejects.toThrow(
+      /getUserStats: user_stats query failed: boom/
+    );
+  });
 });
 
 describe("getTopicProgress", () => {
@@ -108,6 +134,12 @@ describe("getTopicProgress", () => {
 
   it("returns [] on null", async () => {
     expect(await getTopicProgress(makeClient(null), "u1")).toEqual([]);
+  });
+
+  it("throws when the query fails", async () => {
+    await expect(getTopicProgress(makeClient(null, boom), "u1")).rejects.toThrow(
+      /getTopicProgress: user_topic_progress query failed: boom/
+    );
   });
 });
 
@@ -120,6 +152,12 @@ describe("getSigns", () => {
   it("returns [] on null", async () => {
     expect(await getSigns(makeClient(null))).toEqual([]);
   });
+
+  it("throws when the query fails", async () => {
+    await expect(getSigns(makeClient(null, boom))).rejects.toThrow(
+      /getSigns: signs query failed: boom/
+    );
+  });
 });
 
 describe("getVideos", () => {
@@ -130,6 +168,12 @@ describe("getVideos", () => {
 
   it("returns [] on null", async () => {
     expect(await getVideos(makeClient(null))).toEqual([]);
+  });
+
+  it("throws when the query fails", async () => {
+    await expect(getVideos(makeClient(null, boom))).rejects.toThrow(
+      /getVideos: videos query failed: boom/
+    );
   });
 });
 
@@ -142,6 +186,12 @@ describe("getResources", () => {
   it("returns [] on null", async () => {
     expect(await getResources(makeClient(null))).toEqual([]);
   });
+
+  it("throws when the query fails", async () => {
+    await expect(getResources(makeClient(null, boom))).rejects.toThrow(
+      /getResources: resources query failed: boom/
+    );
+  });
 });
 
 describe("getUserSchedule", () => {
@@ -152,6 +202,12 @@ describe("getUserSchedule", () => {
 
   it("returns [] on null", async () => {
     expect(await getUserSchedule(makeClient(null), "u1")).toEqual([]);
+  });
+
+  it("throws when the query fails", async () => {
+    await expect(getUserSchedule(makeClient(null, boom), "u1")).rejects.toThrow(
+      /getUserSchedule: user_schedule query failed: boom/
+    );
   });
 });
 
@@ -164,6 +220,12 @@ describe("getUsersScheduledForDay", () => {
   it("returns [] on null", async () => {
     expect(await getUsersScheduledForDay(makeClient(null), 0)).toEqual([]);
   });
+
+  it("throws when the query fails instead of silently notifying nobody", async () => {
+    await expect(getUsersScheduledForDay(makeClient(null, boom), 0)).rejects.toThrow(
+      /getUsersScheduledForDay: user_schedule query failed: boom/
+    );
+  });
 });
 
 describe("getUserMedals", () => {
@@ -175,6 +237,12 @@ describe("getUserMedals", () => {
   it("returns [] on null", async () => {
     expect(await getUserMedals(makeClient(null), "u1")).toEqual([]);
   });
+
+  it("throws when the query fails", async () => {
+    await expect(getUserMedals(makeClient(null, boom), "u1")).rejects.toThrow(
+      /getUserMedals: user_medals query failed: boom/
+    );
+  });
 });
 
 describe("getPushSubscriptionsForUsers", () => {
@@ -185,6 +253,14 @@ describe("getPushSubscriptionsForUsers", () => {
 
   it("returns [] on null", async () => {
     expect(await getPushSubscriptionsForUsers(makeClient(null), ["u1"])).toEqual([]);
+  });
+
+  it("throws when the query fails", async () => {
+    await expect(
+      getPushSubscriptionsForUsers(makeClient(null, boom), ["u1"])
+    ).rejects.toThrow(
+      /getPushSubscriptionsForUsers: user_push_subscriptions query failed: boom/
+    );
   });
 });
 
@@ -608,16 +684,29 @@ describe("upsertSrsCard", () => {
 
 // ─── Exam helpers ────────────────────────────────────────────────────────────
 
-function makeExamQuestionsClient(ids: string[], questionRows: QuestionRow[] | null) {
+function makeExamQuestionsClient(
+  ids: string[],
+  questionRows: QuestionRow[] | null,
+  {
+    idsError = null as { message: string } | null,
+    questionsError = null as { message: string } | null,
+  } = {}
+) {
   let questionCallCount = 0;
   return {
     from: vi.fn().mockImplementation((table: string) => {
       if (table === "questions") {
         questionCallCount++;
         if (questionCallCount === 1) {
-          return chain({ data: ids.map((id) => ({ id })) });
+          return chain({
+            data: idsError ? null : ids.map((id) => ({ id })),
+            error: idsError,
+          });
         }
-        return chain({ data: questionRows });
+        return chain({
+          data: questionsError ? null : questionRows,
+          error: questionsError,
+        });
       }
       return chain({ data: [] });
     }),
@@ -679,6 +768,20 @@ describe("getRandomExamQuestions", () => {
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe("q1");
   });
+
+  it("throws when the id query fails instead of building an empty exam", async () => {
+    const supabase = makeExamQuestionsClient([], [], { idsError: boom });
+    await expect(getRandomExamQuestions(supabase, 30)).rejects.toThrow(
+      /getRandomExamQuestions: question ids query failed: boom/
+    );
+  });
+
+  it("throws when the details query fails", async () => {
+    const supabase = makeExamQuestionsClient(["q1"], [], { questionsError: boom });
+    await expect(getRandomExamQuestions(supabase, 30)).rejects.toThrow(
+      /getRandomExamQuestions: questions query failed: boom/
+    );
+  });
 });
 
 describe("getExamAttempts", () => {
@@ -691,6 +794,12 @@ describe("getExamAttempts", () => {
 
   it("returns [] on null", async () => {
     expect(await getExamAttempts(makeClient(null), "u1")).toEqual([]);
+  });
+
+  it("throws when the query fails", async () => {
+    await expect(getExamAttempts(makeClient(null, boom), "u1")).rejects.toThrow(
+      /getExamAttempts: user_exam_attempts query failed: boom/
+    );
   });
 });
 
@@ -774,6 +883,28 @@ describe("getTopicAccuracy", () => {
     expect(page1.range).toHaveBeenCalledWith(0, 999);
     expect(page2.range).toHaveBeenCalledWith(1000, 1999);
   });
+
+  it("throws when the query fails", async () => {
+    await expect(getTopicAccuracy(makeClient(null, boom), "u1")).rejects.toThrow(
+      /getTopicAccuracy: user_quiz_responses query failed: boom/
+    );
+  });
+
+  it("throws on a mid-pagination failure instead of truncating results", async () => {
+    const page1 = Array.from({ length: 1000 }, () => ({
+      is_correct: true,
+      questions: { topic_id: "t1" },
+    }));
+    const from = vi
+      .fn()
+      .mockReturnValueOnce(chain({ data: page1 }))
+      .mockReturnValueOnce(chain({ data: null, error: boom }));
+    const client = { from } as unknown as SupabaseClient;
+
+    await expect(getTopicAccuracy(client, "u1")).rejects.toThrow(
+      /getTopicAccuracy: user_quiz_responses query failed: boom/
+    );
+  });
 });
 
 describe("getTopicQuestionCounts", () => {
@@ -801,20 +932,36 @@ describe("getTopicQuestionCounts", () => {
   it("returns {} on null", async () => {
     expect(await getTopicQuestionCounts(makeClient(null))).toEqual({});
   });
+
+  it("throws when the query fails", async () => {
+    await expect(getTopicQuestionCounts(makeClient(null, boom))).rejects.toThrow(
+      /getTopicQuestionCounts: topics query failed: boom/
+    );
+  });
 });
 
 // ─── markTopicCompleted ──────────────────────────────────────────────────────
 
-function makeMarkTopicClient(existing: { id: string; status: string } | null) {
-  const updateEq = vi.fn().mockResolvedValue({ data: null });
+function makeMarkTopicClient(
+  existing: { id: string; status: string } | null,
+  {
+    existingError = null as { message: string } | null,
+    updateError = null as { message: string } | null,
+    insertError = null as { message: string } | null,
+  } = {}
+) {
+  const updateEq = vi.fn().mockResolvedValue({ data: null, error: updateError });
   const updateFn = vi.fn().mockReturnValue({ eq: updateEq });
-  const insertFn = vi.fn().mockResolvedValue({ data: null });
+  const insertFn = vi.fn().mockResolvedValue({ data: null, error: insertError });
 
   const fromMock = {
     select: vi.fn().mockReturnValue({
       eq: vi.fn().mockReturnValue({
         eq: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({ data: existing }),
+          maybeSingle: vi.fn().mockResolvedValue({
+            data: existingError ? null : existing,
+            error: existingError,
+          }),
         }),
       }),
     }),
@@ -851,6 +998,30 @@ describe("markTopicCompleted", () => {
     await markTopicCompleted(client, "u1", "t1");
     expect(updateFn).not.toHaveBeenCalled();
     expect(insertFn).not.toHaveBeenCalled();
+  });
+
+  it("throws when the progress lookup fails", async () => {
+    const { client } = makeMarkTopicClient(null, { existingError: boom });
+    await expect(markTopicCompleted(client, "u1", "t1")).rejects.toThrow(
+      /markTopicCompleted: progress lookup query failed: boom/
+    );
+  });
+
+  it("throws when the update fails", async () => {
+    const { client } = makeMarkTopicClient(
+      { id: "r1", status: "in-progress" },
+      { updateError: boom }
+    );
+    await expect(markTopicCompleted(client, "u1", "t1")).rejects.toThrow(
+      /markTopicCompleted: progress update query failed: boom/
+    );
+  });
+
+  it("throws when the insert fails", async () => {
+    const { client } = makeMarkTopicClient(null, { insertError: boom });
+    await expect(markTopicCompleted(client, "u1", "t1")).rejects.toThrow(
+      /markTopicCompleted: progress insert query failed: boom/
+    );
   });
 });
 
@@ -903,6 +1074,11 @@ describe("getBookmarkedQuestionIds", () => {
 
   it("returns an empty Set when Supabase returns null", async () => {
     const supabase = makeBookmarksClient({ bookmarks: null });
+    expect(await getBookmarkedQuestionIds(supabase, "u1")).toEqual(new Set());
+  });
+
+  it("falls back to an empty Set when the query fails (deliberate soft fallback)", async () => {
+    const supabase = makeBookmarksClient({ bookmarksError: boom });
     expect(await getBookmarkedQuestionIds(supabase, "u1")).toEqual(new Set());
   });
 });
