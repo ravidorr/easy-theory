@@ -20,7 +20,7 @@ import {
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 // Builds a chainable Supabase query mock that resolves to `result`.
-function chain(result: { data: unknown }) {
+function chain(result: { data: unknown; error?: unknown }) {
   const mock: Record<string, unknown> = {};
   for (const m of ["select", "eq", "order", "limit", "in", "range"]) {
     mock[m] = vi.fn().mockReturnValue(mock);
@@ -172,22 +172,32 @@ type Response = {
 type QuestionRow = Record<string, unknown> & { id: string };
 
 function makeMistakesClient({
-  questionIds = [] as string[],
   responses = [] as Response[],
-  questionDetails = [] as QuestionRow[],
+  questionDetails = [] as QuestionRow[] | null,
+  responsesError = null as { message: string } | null,
+  questionsError = null as { message: string } | null,
 } = {}) {
-  let questionCallCount = 0;
   return {
     from: vi.fn().mockImplementation((table: string) => {
-      if (table === "questions") {
-        questionCallCount++;
-        if (questionCallCount === 1) {
-          return chain({ data: questionIds.map((id) => ({ id })) });
-        }
-        return chain({ data: questionDetails });
-      }
       if (table === "user_quiz_responses") {
-        return chain({ data: responses });
+        return chain({ data: responsesError ? null : responses, error: responsesError });
+      }
+      if (table === "questions") {
+        // The details fetch is chunked — return only the requested ids so
+        // multi-chunk calls merge back into the full set.
+        return {
+          select: vi.fn().mockReturnValue({
+            in: vi.fn((_col: string, ids: string[]) =>
+              chain({
+                data:
+                  questionsError || !questionDetails
+                    ? null
+                    : questionDetails.filter((q) => ids.includes(q.id)),
+                error: questionsError,
+              })
+            ),
+          }),
+        };
       }
       return chain({ data: [] });
     }),
@@ -195,22 +205,13 @@ function makeMistakesClient({
 }
 
 describe("getMistakesForTopic", () => {
-  it("returns [] when the topic has no questions", async () => {
-    const supabase = makeMistakesClient({ questionIds: [] });
-    expect(await getMistakesForTopic(supabase, "u1", "t1")).toEqual([]);
-  });
-
   it("returns [] when the user has no responses for the topic", async () => {
-    const supabase = makeMistakesClient({
-      questionIds: ["q1", "q2"],
-      responses: [],
-    });
+    const supabase = makeMistakesClient({ responses: [] });
     expect(await getMistakesForTopic(supabase, "u1", "t1")).toEqual([]);
   });
 
   it("returns [] when all latest responses are correct", async () => {
     const supabase = makeMistakesClient({
-      questionIds: ["q1"],
       responses: [{ question_id: "q1", selected_option: "a", is_correct: true, answered_at: "2024-01-01" }],
     });
     expect(await getMistakesForTopic(supabase, "u1", "t1")).toEqual([]);
@@ -219,7 +220,6 @@ describe("getMistakesForTopic", () => {
   it("returns questions with selected_option for latest incorrect responses", async () => {
     const questionDetail = { id: "q1", question_he: "What?", correct_option: "a" };
     const supabase = makeMistakesClient({
-      questionIds: ["q1"],
       responses: [
         { question_id: "q1", selected_option: "b", is_correct: false, answered_at: "2024-01-01" },
       ],
@@ -231,10 +231,21 @@ describe("getMistakesForTopic", () => {
     expect(result[0].selected_option).toBe("b");
   });
 
+  it("filters responses by topic server-side via the questions join", async () => {
+    const responsesChain = chain({ data: [] });
+    const supabase = {
+      from: vi.fn().mockReturnValue(responsesChain),
+    } as unknown as SupabaseClient;
+    await getMistakesForTopic(supabase, "u1", "t1");
+    expect(responsesChain.select).toHaveBeenCalledWith(
+      expect.stringContaining("questions!inner(topic_id)")
+    );
+    expect(responsesChain.eq).toHaveBeenCalledWith("questions.topic_id", "t1");
+  });
+
   it("uses the latest response per question — answered wrong then right → not a mistake", async () => {
     // Responses ordered newest-first (as Supabase returns them with order ascending: false).
     const supabase = makeMistakesClient({
-      questionIds: ["q1"],
       responses: [
         // latest: correct
         { question_id: "q1", selected_option: "a", is_correct: true, answered_at: "2024-01-02" },
@@ -248,7 +259,6 @@ describe("getMistakesForTopic", () => {
   it("uses the latest response per question — answered right then wrong → is a mistake", async () => {
     const questionDetail = { id: "q1", question_he: "What?", correct_option: "a" };
     const supabase = makeMistakesClient({
-      questionIds: ["q1"],
       responses: [
         // latest: wrong
         { question_id: "q1", selected_option: "b", is_correct: false, answered_at: "2024-01-02" },
@@ -264,18 +274,16 @@ describe("getMistakesForTopic", () => {
 
   it("returns [] when the question details fetch yields null data", async () => {
     const supabase = makeMistakesClient({
-      questionIds: ["q1"],
       responses: [
         { question_id: "q1", selected_option: "b", is_correct: false, answered_at: "2024-01-01" },
       ],
-      questionDetails: null as unknown as QuestionRow[],
+      questionDetails: null,
     });
     expect(await getMistakesForTopic(supabase, "u1", "t1")).toEqual([]);
   });
 
   it("returns [] when mistakeIds is empty (all latest responses are correct)", async () => {
     const supabase = makeMistakesClient({
-      questionIds: ["q1", "q2"],
       responses: [
         { question_id: "q1", selected_option: "a", is_correct: true, answered_at: "2024-01-01" },
         { question_id: "q2", selected_option: "c", is_correct: true, answered_at: "2024-01-01" },
@@ -284,10 +292,49 @@ describe("getMistakesForTopic", () => {
     expect(await getMistakesForTopic(supabase, "u1", "t1")).toEqual([]);
   });
 
+  it("throws when the responses query fails instead of hiding mistakes", async () => {
+    const supabase = makeMistakesClient({ responsesError: { message: "boom" } });
+    await expect(getMistakesForTopic(supabase, "u1", "t1")).rejects.toThrow(
+      /responses query failed: boom/
+    );
+  });
+
+  it("throws when a question details chunk fails", async () => {
+    const supabase = makeMistakesClient({
+      responses: [
+        { question_id: "q1", selected_option: "b", is_correct: false, answered_at: "2024-01-01" },
+      ],
+      questionsError: { message: "boom" },
+    });
+    await expect(getMistakesForTopic(supabase, "u1", "t1")).rejects.toThrow(
+      /questions query failed: boom/
+    );
+  });
+
+  it("chunks the question details fetch to stay under URL length limits", async () => {
+    // 150 wrong answers → two .in() chunks (100 + 50) merged back together.
+    const ids = Array.from({ length: 150 }, (_, i) => `q${i}`);
+    const supabase = makeMistakesClient({
+      responses: ids.map((id) => ({
+        question_id: id,
+        selected_option: "b",
+        is_correct: false,
+        answered_at: "2024-01-01",
+      })),
+      questionDetails: ids.map((id) => ({ id, question_he: "?", correct_option: "a" })),
+    });
+    const result = await getMistakesForTopic(supabase, "u1", "t1");
+    expect(result).toHaveLength(150);
+    expect(result.every((q) => q.selected_option === "b")).toBe(true);
+    const questionCalls = vi
+      .mocked(supabase.from)
+      .mock.calls.filter(([table]) => table === "questions");
+    expect(questionCalls).toHaveLength(2);
+  });
+
   describe("lastSession scope", () => {
     it("includes latest-session mistakes and excludes older-session mistakes", async () => {
       const supabase = makeMistakesClient({
-        questionIds: ["q1", "q2"],
         responses: [
           // latest session s2: q1 wrong
           { question_id: "q1", selected_option: "b", is_correct: false, answered_at: "2024-01-02", session_id: "s2" },
@@ -303,7 +350,6 @@ describe("getMistakesForTopic", () => {
 
     it("returns [] when the last session is clean even if older sessions have mistakes", async () => {
       const supabase = makeMistakesClient({
-        questionIds: ["q1", "q2"],
         responses: [
           { question_id: "q1", selected_option: "a", is_correct: true, answered_at: "2024-01-02", session_id: "s2" },
           { question_id: "q2", selected_option: "c", is_correct: false, answered_at: "2024-01-01", session_id: "s1" },
@@ -314,7 +360,6 @@ describe("getMistakesForTopic", () => {
 
     it("falls back to all-time when the newest response has no session_id (legacy data)", async () => {
       const supabase = makeMistakesClient({
-        questionIds: ["q1", "q2"],
         responses: [
           { question_id: "q1", selected_option: "b", is_correct: false, answered_at: "2024-01-02", session_id: null },
           { question_id: "q2", selected_option: "c", is_correct: false, answered_at: "2024-01-01", session_id: null },
@@ -330,7 +375,6 @@ describe("getMistakesForTopic", () => {
 
     it("excludes legacy null-session rows when the newest response has a session_id", async () => {
       const supabase = makeMistakesClient({
-        questionIds: ["q1", "q2"],
         responses: [
           { question_id: "q1", selected_option: "b", is_correct: false, answered_at: "2024-01-02", session_id: "s1" },
           { question_id: "q2", selected_option: "c", is_correct: false, answered_at: "2024-01-01", session_id: null },
@@ -344,7 +388,6 @@ describe("getMistakesForTopic", () => {
 
     it('explicit "all" scope ignores session boundaries', async () => {
       const supabase = makeMistakesClient({
-        questionIds: ["q1", "q2"],
         responses: [
           { question_id: "q1", selected_option: "b", is_correct: false, answered_at: "2024-01-02", session_id: "s2" },
           { question_id: "q2", selected_option: "c", is_correct: false, answered_at: "2024-01-01", session_id: "s1" },
@@ -359,7 +402,7 @@ describe("getMistakesForTopic", () => {
     });
 
     it("returns [] when there are no responses", async () => {
-      const supabase = makeMistakesClient({ questionIds: ["q1"], responses: [] });
+      const supabase = makeMistakesClient({ responses: [] });
       expect(await getMistakesForTopic(supabase, "u1", "t1", "lastSession")).toEqual([]);
     });
   });

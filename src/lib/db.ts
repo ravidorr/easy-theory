@@ -197,27 +197,64 @@ export async function getPushSubscriptionsForUsers(
 
 export type MistakeScope = "all" | "lastSession";
 
+// ~100 UUIDs ≈ 4KB of URL — safely under request-line limits. A single .in()
+// with a full topic's worth of ids (501 on the largest topic) produces an
+// ~18KB GET URL that the server rejects.
+const IN_FILTER_CHUNK_SIZE = 100;
+
+async function fetchQuestionsByIds(
+  supabase: SupabaseClient,
+  ids: string[]
+): Promise<Question[]> {
+  const chunks: string[][] = [];
+  for (let i = 0; i < ids.length; i += IN_FILTER_CHUNK_SIZE) {
+    chunks.push(ids.slice(i, i + IN_FILTER_CHUNK_SIZE));
+  }
+
+  const results = await Promise.all(
+    chunks.map(async (chunk) => {
+      const { data, error } = await supabase
+        .from("questions")
+        .select("*")
+        .in("id", chunk);
+      if (error) {
+        throw new Error(`fetchQuestionsByIds: questions query failed: ${error.message}`, {
+          cause: error,
+        });
+      }
+      return data ?? [];
+    })
+  );
+
+  return results.flat();
+}
+
 export async function getMistakesForTopic(
   supabase: SupabaseClient,
   userId: string,
   topicId: string,
   scope: MistakeScope = "all"
 ): Promise<QuizMistake[]> {
-  const { data: topicQuestions } = await supabase
-    .from("questions")
-    .select("id")
-    .eq("topic_id", topicId);
-
-  if (!topicQuestions?.length) return [];
-  const questionIds = topicQuestions.map((q) => q.id);
-
-  const { data: responses } = await supabase
+  // Filter by topic server-side via the questions join — passing all topic
+  // question ids to .in() breaks on large topics (see IN_FILTER_CHUNK_SIZE).
+  // One row per (user, question) thanks to the upsert in the quiz route, and
+  // the join narrows to a single topic (largest: 501 questions), so this stays
+  // under Supabase's 1000-row response cap without paging — unlike
+  // getTopicAccuracy. Revisit if any topic approaches 1000 questions.
+  const { data: responses, error } = await supabase
     .from("user_quiz_responses")
-    .select("question_id, selected_option, is_correct, answered_at, session_id")
+    .select(
+      "question_id, selected_option, is_correct, answered_at, session_id, questions!inner(topic_id)"
+    )
     .eq("user_id", userId)
-    .in("question_id", questionIds)
+    .eq("questions.topic_id", topicId)
     .order("answered_at", { ascending: false });
 
+  if (error) {
+    throw new Error(`getMistakesForTopic: responses query failed: ${error.message}`, {
+      cause: error,
+    });
+  }
   if (!responses?.length) return [];
 
   const latestByQuestion = new Map<
@@ -248,12 +285,9 @@ export async function getMistakesForTopic(
 
   if (!mistakeIds.length) return [];
 
-  const { data: questions } = await supabase
-    .from("questions")
-    .select("*")
-    .in("id", mistakeIds);
+  const questions = await fetchQuestionsByIds(supabase, mistakeIds);
 
-  return (questions ?? []).map((q) => ({
+  return questions.map((q) => ({
     ...q,
     selected_option: latestByQuestion.get(q.id)!.selected_option as "a" | "b" | "c" | "d",
   }));
