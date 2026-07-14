@@ -1,0 +1,7 @@
+[step-02-flashcards-load] warnings only:
+- Image aspect ratio warning for sign-101.svg (next/image)
+- Vercel analytics/speed insights debug logs
+- CSS preload not used warnings (3)
+- Fast Refresh rebuild log (dev only)
+
+[step-04-after-deck-run] zero error-level console entries observed.

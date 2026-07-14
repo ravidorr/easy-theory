@@ -1,0 +1,9 @@
+{
+  "hasContainer": true,
+  "deckLength": 277,
+  "countText": "כרטיס 1 מתוך 277",
+  "imgSrc": "http://localhost:3100/signs/sign-101.svg",
+  "imgAlt": "כביש משובש.",
+  "lang": "he",
+  "dir": "rtl"
+}

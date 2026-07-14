@@ -1,0 +1,162 @@
+{
+  "run_id": "2026-07-14T21-09_004-flashcards",
+  "charter_id": "004-flashcards",
+  "charter_path": "qa/charters/004-flashcards.md",
+  "started_at": "2026-07-14T21:09:00Z",
+  "finished_at": "2026-07-14T21:15:00Z",
+  "environment": {
+    "base_url": "http://localhost:3100",
+    "git_sha": "cd095d1a60cee1421a6faac16f49b51a18218cff",
+    "app_version": "0.3.130",
+    "supabase_host": "nvgqczaesfeotijjcbed.supabase.co",
+    "viewport": "390x844",
+    "locale": "he"
+  },
+  "checks": [
+    {
+      "id": "CHK-FC-01",
+      "verdict": "pass",
+      "observed": "/he/flashcards rendered #flashcards-container with 277 signs in #fc-data; first card showed /signs/sign-101.svg and #fc-count read כרטיס 1 מתוך 277.",
+      "evidence": [
+        "screenshots/step-02-first-card-front.png",
+        "step-02-flashcards-dom.json"
+      ]
+    },
+    {
+      "id": "CHK-FC-02",
+      "verdict": "pass",
+      "observed": "Tapping the card area toggled .flipped on .flashcard-wrap; back face showed #fc-name כביש משובש and #fc-badge תמרור 101 matching the first #fc-data entry.",
+      "evidence": [
+        "screenshots/step-03-card-flipped.png",
+        "screenshots/step-02-first-card-front.png"
+      ]
+    },
+    {
+      "id": "CHK-FC-03",
+      "verdict": "pass",
+      "observed": "#fc-no and #fc-yes advanced the deck; #fc-count and #fc-progress width updated numerically with no NaN or undefined text.",
+      "evidence": [
+        "step-04-replay-dom.json",
+        "screenshots/step-04-mid-pass.png"
+      ]
+    },
+    {
+      "id": "CHK-FC-04",
+      "verdict": "pass",
+      "observed": "After marking the first three cards don't-know and completing the first pass, card כביש משובש (תמרור 101) reappeared for replay while known cards did not.",
+      "evidence": [
+        "step-04-replay-dom.json",
+        "screenshots/step-04-mid-pass.png"
+      ]
+    },
+    {
+      "id": "CHK-FC-05",
+      "verdict": "fail",
+      "observed": "277 POST /api/srs requests fired while marking cards; the charter oracle expects no /api/ traffic during flip/mark.",
+      "evidence": [
+        "network.log",
+        "step-04-replay-dom.json"
+      ]
+    },
+    {
+      "id": "CHK-FC-06",
+      "verdict": "pass",
+      "observed": "Sampled visible cards rendered sign images with alt text and naturalWidth > 0; no broken-image icon observed on the active card.",
+      "evidence": [
+        "screenshots/step-02-first-card-front.png",
+        "screenshots/step-04-mid-pass.png"
+      ]
+    },
+    {
+      "id": "CHK-CONSOLE-01",
+      "verdict": "pass",
+      "observed": "Browser console contained zero error-level entries across load, flip, and deck advancement (warnings only).",
+      "evidence": [
+        "console.log"
+      ]
+    },
+    {
+      "id": "CHK-A11Y-01",
+      "verdict": "fail",
+      "observed": "Sign images had alt text and yes/no buttons had visible labels, but .flashcard-wrap lacked role/name for the flip control and the page had no top-level heading (only h2 on card back).",
+      "evidence": [
+        "screenshots/step-02-first-card-front.png",
+        "step-02-flashcards-dom.json"
+      ]
+    },
+    {
+      "id": "CHK-COPY-RTL-01",
+      "verdict": "pass",
+      "observed": "Visible strings matched messages/he.json Flashcards namespace; document lang=he dir=rtl with no raw keys or English leakage.",
+      "evidence": [
+        "screenshots/step-02-first-card-front.png",
+        "step-02-flashcards-dom.json"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "F-001",
+      "title": "Flashcard grading POSTs to /api/srs despite client-side charter expectation",
+      "severity": "question",
+      "confidence": "high",
+      "category": "network",
+      "related_checks": ["CHK-FC-05"],
+      "repro_steps": [
+        "Authenticate and open /he/flashcards.",
+        "Mark several cards with ידעתי or עוד לא.",
+        "Inspect the network log while advancing."
+      ],
+      "expected": "No /api/ requests while flipping and marking cards (fully client-side session per charter).",
+      "actual": "Each first-time grade fired POST /api/srs (277 requests observed while running through the deck).",
+      "evidence": [
+        "network.log",
+        "step-04-replay-dom.json"
+      ],
+      "known_issue_match": null,
+      "notes": "flashcard.js gradeCard() persists SM-2 grades fire-and-forget; charter narrative may be stale."
+    },
+    {
+      "id": "F-002",
+      "title": "Flashcard flip target lacks accessible name and role",
+      "severity": "minor",
+      "confidence": "high",
+      "category": "a11y",
+      "related_checks": ["CHK-A11Y-01"],
+      "repro_steps": [
+        "Open /he/flashcards.",
+        "Inspect .flashcard-wrap in the accessibility tree.",
+        "Attempt to identify an operable flip control by role/name."
+      ],
+      "expected": "The card flip control exposes role and accessible name (button or equivalent).",
+      "actual": ".flashcard-wrap is a bare div with no role, aria-label, or tabindex; flip hint is plain text inside the clickable region.",
+      "evidence": [
+        "screenshots/step-02-first-card-front.png",
+        "step-02-flashcards-dom.json"
+      ],
+      "known_issue_match": null
+    }
+  ],
+  "known_issues_observed": [],
+  "not_tested": [
+    "Completing all 277 cards manually (automated bounded sample only)",
+    "Sign questions inside quizzes (001)",
+    "Arabic locale (007)",
+    "Offline cached sign images (011)",
+    "Desktop viewport",
+    "Deck-complete screen (stopped at first replay card)",
+    "Broken image 404 fallback (no 404ing sign sampled)"
+  ],
+  "limitations": [
+    "Browser retained an existing session cookie before mint; unauthenticated redirect not re-verified on this page.",
+    "Deck advancement scripted via DOM clicks for bounded replay proof.",
+    "Network log captured while many /api/srs requests were still pending."
+  ],
+  "coverage_summary": {
+    "total": 9,
+    "pass": 7,
+    "fail": 2,
+    "blocked": 0,
+    "not_checked": 0
+  }
+}
