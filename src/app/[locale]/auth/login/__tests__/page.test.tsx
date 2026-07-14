@@ -3,6 +3,10 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import LoginPage, { generateMetadata } from "../page";
 
+vi.mock("next/image", () => ({
+  default: ({ src, alt, className }: { src: string; alt?: string; className?: string }) =>
+    React.createElement("img", { src, alt, className }),
+}));
 vi.mock("next/script", () => ({
   default: () => React.createElement("div", null),
 }));

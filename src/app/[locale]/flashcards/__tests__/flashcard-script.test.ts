@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { readFileSync } from "fs";
 import { resolve } from "path";
 
@@ -7,47 +7,55 @@ const flashcardScript = readFileSync(
   "utf-8"
 );
 
-function cardMarkup(index: number) {
-  return `
-    <div class="flashcard-wrap" data-index="${index}" style="display:${index === 0 ? "flex" : "none"}">
-      <div class="flashcard-inner">
-        <div class="flashcard-face">front ${index}</div>
-        <div class="flashcard-face">back ${index}</div>
-      </div>
-    </div>`;
-}
+type CardData = { img: string; alt: string; name: string; badge: string };
 
-function setupDOM(total = 3) {
+const SIGNS: CardData[] = [
+  { img: "/signs/sign-301.png", alt: "חנייה אסורה", name: "חנייה אסורה", badge: "תמרור 301" },
+  { img: "/signs/sign-205.png", alt: "עצור", name: "עצור", badge: "תמרור 205" },
+  { img: "/signs/sign-101.svg", alt: "כביש משובש", name: "כביש משובש", badge: "תמרור 101" },
+];
+
+const STALE_SRCSET = "/_next/image?url=%2Fsigns%2Fsign-301.png&w=96&q=75 1x";
+
+function setupDOM(signs: CardData[] | string = SIGNS, { withDataEl = true } = {}) {
+  const json = typeof signs === "string" ? signs : JSON.stringify(signs);
+  const first = typeof signs === "string" ? SIGNS[0] : (signs[0] ?? SIGNS[0]);
   document.body.innerHTML = `
-    <div id="flashcards-container" data-total="${total}">
-      ${Array.from({ length: total }, (_, i) => cardMarkup(i)).join("")}
-    </div>
-    <span id="fc-count"></span>
-    <div id="fc-progress"></div>
-    <button id="fc-yes"></button>
-    <button id="fc-no"></button>
+    <main>
+      <span id="fc-count"></span>
+      <div id="fc-progress"></div>
+      <div id="flashcards-container" data-total="${typeof signs === "string" ? 0 : signs.length}">
+        <div class="flashcard-wrap" data-index="0" style="display:flex">
+          <div class="flashcard-inner">
+            <div class="flashcard-face">
+              <img class="fc-front-img" src="${first.img}" alt="${first.alt}" srcset="${STALE_SRCSET}" sizes="96px" />
+            </div>
+            <div class="flashcard-face flashcard-back-face">
+              <img class="fc-back-img" src="${first.img}" alt="${first.alt}" srcset="${STALE_SRCSET}" sizes="96px" />
+              <h2 id="fc-name">${first.name}</h2>
+              <span id="fc-badge">${first.badge}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      ${withDataEl ? `<script type="application/json" id="fc-data">${json}</script>` : ""}
+      <button id="fc-no"></button>
+      <button id="fc-yes"></button>
+    </main>
   `;
   eval(flashcardScript);
 }
 
-function cards() {
-  return Array.from(
-    document.querySelectorAll<HTMLElement>(".flashcard-wrap")
-  );
+function card() {
+  return document.querySelector(".flashcard-wrap") as HTMLElement;
 }
 
-function visibleIndexes() {
-  return cards()
-    .map((c, i) => (c.style.display !== "none" ? i : -1))
-    .filter((i) => i >= 0);
+function frontImg() {
+  return document.querySelector(".fc-front-img") as HTMLImageElement;
 }
 
-function clickYes() {
-  (document.getElementById("fc-yes") as HTMLButtonElement).click();
-}
-
-function clickNo() {
-  (document.getElementById("fc-no") as HTMLButtonElement).click();
+function backImg() {
+  return document.querySelector(".fc-back-img") as HTMLImageElement;
 }
 
 function countText() {
@@ -58,87 +66,113 @@ function progressWidth() {
   return (document.getElementById("fc-progress") as HTMLElement).style.width;
 }
 
+function clickYes() {
+  (document.getElementById("fc-yes") as HTMLButtonElement).click();
+}
+
+function clickNo() {
+  (document.getElementById("fc-no") as HTMLButtonElement).click();
+}
+
 describe("flashcard.js", () => {
+  let preloadedSrcs: string[];
+
   beforeEach(() => {
-    setupDOM();
+    preloadedSrcs = [];
+    vi.stubGlobal(
+      "Image",
+      class {
+        set src(value: string) {
+          preloadedSrcs.push(value);
+        }
+      }
+    );
   });
 
   afterEach(() => {
+    vi.unstubAllGlobals();
     delete (window as unknown as { __t?: Record<string, string> }).__t;
+    document.body.innerHTML = "";
   });
 
-  it("shows only the first card with count and progress on load", () => {
-    expect(visibleIndexes()).toEqual([0]);
-    expect(cards()[0].style.display).toBe("flex");
+  it("initializes count and progress without re-rendering the SSR'd first card", () => {
+    setupDOM();
     expect(countText()).toBe("כרטיס 1 מתוך 3");
-    expect(progressWidth()).toBe((1 / 3) * 100 + "%");
+    expect(progressWidth()).toBe(`${(1 / 3) * 100}%`);
+    // Card 0 keeps its server-rendered (optimized) srcset.
+    expect(frontImg().getAttribute("srcset")).toBe(STALE_SRCSET);
+    expect(preloadedSrcs).toEqual([SIGNS[1].img]);
   });
 
-  it("toggles the flipped class when a card is clicked", () => {
-    const card = cards()[0];
-    card.click();
-    expect(card.classList.contains("flipped")).toBe(true);
-    card.click();
-    expect(card.classList.contains("flipped")).toBe(false);
+  it("flips the card on click and toggles back", () => {
+    setupDOM();
+    card().click();
+    expect(card().classList.contains("flipped")).toBe(true);
+    card().click();
+    expect(card().classList.contains("flipped")).toBe(false);
   });
 
-  it("advances to the next card on 'yes' and resets flip state", () => {
-    cards()[0].click();
-    expect(cards()[0].classList.contains("flipped")).toBe(true);
-
+  it("advances on yes: swaps content, clears srcset, resets flip", () => {
+    setupDOM();
+    card().click();
     clickYes();
-
-    expect(visibleIndexes()).toEqual([1]);
-    expect(cards()[0].classList.contains("flipped")).toBe(false);
+    expect(frontImg().getAttribute("src")).toBe(SIGNS[1].img);
+    expect(backImg().getAttribute("src")).toBe(SIGNS[1].img);
+    expect(frontImg().hasAttribute("srcset")).toBe(false);
+    expect(frontImg().hasAttribute("sizes")).toBe(false);
+    expect(frontImg().alt).toBe(SIGNS[1].alt);
+    expect(document.getElementById("fc-name")!.textContent).toBe(SIGNS[1].name);
+    expect(document.getElementById("fc-badge")!.textContent).toBe(SIGNS[1].badge);
+    expect(card().classList.contains("flipped")).toBe(false);
     expect(countText()).toBe("כרטיס 2 מתוך 3");
-    expect(progressWidth()).toBe((2 / 3) * 100 + "%");
+    expect(progressWidth()).toBe(`${(2 / 3) * 100}%`);
   });
 
-  it("shows the done state after answering 'yes' to every card", () => {
+  it("preloads the upcoming card on advance", () => {
+    setupDOM();
     clickYes();
-    clickYes();
-    clickYes();
-
-    expect(visibleIndexes()).toEqual([]);
-    expect(countText()).toBe("הושלם! 3 כרטיסים");
-    expect(progressWidth()).toBe("100%");
-    expect(
-      (document.getElementById("fc-yes") as HTMLButtonElement).disabled
-    ).toBe(true);
-    expect(
-      (document.getElementById("fc-no") as HTMLButtonElement).disabled
-    ).toBe(true);
-    const container = document.getElementById("flashcards-container")!;
-    expect(container.lastElementChild!.textContent).toBe("כל הכרטיסים עברו!");
+    expect(preloadedSrcs).toContain(SIGNS[2].img);
   });
 
   it("replays 'don't know' cards in order after the last card", () => {
+    setupDOM();
     clickNo(); // card 0 → don't know
     clickYes(); // card 1
     clickNo(); // card 2 → don't know, queue = [0, 2]
 
-    expect(visibleIndexes()).toEqual([0]);
+    expect(frontImg().getAttribute("src")).toBe(SIGNS[0].img);
     clickYes();
-    expect(visibleIndexes()).toEqual([2]);
+    expect(frontImg().getAttribute("src")).toBe(SIGNS[2].img);
     clickYes();
-
-    expect(visibleIndexes()).toEqual([]);
     expect(countText()).toBe("הושלם! 3 כרטיסים");
   });
 
   it("re-queues a card answered 'no' during replay until it is known", () => {
+    setupDOM();
     clickNo(); // card 0
     clickYes(); // card 1
     clickNo(); // card 2 → replay starts at card 0
 
     clickNo(); // still don't know card 0 → back of queue
-    expect(visibleIndexes()).toEqual([2]);
+    expect(frontImg().getAttribute("src")).toBe(SIGNS[2].img);
     clickYes();
-    expect(visibleIndexes()).toEqual([0]);
+    expect(frontImg().getAttribute("src")).toBe(SIGNS[0].img);
     clickYes();
-
-    expect(visibleIndexes()).toEqual([]);
     expect(countText()).toBe("הושלם! 3 כרטיסים");
+  });
+
+  it("shows the done state after answering 'yes' to every card", () => {
+    setupDOM();
+    clickYes();
+    clickYes();
+    clickYes();
+    expect(countText()).toBe("הושלם! 3 כרטיסים");
+    expect(progressWidth()).toBe("100%");
+    expect(card().style.display).toBe("none");
+    expect((document.getElementById("fc-yes") as HTMLButtonElement).disabled).toBe(true);
+    expect((document.getElementById("fc-no") as HTMLButtonElement).disabled).toBe(true);
+    const container = document.getElementById("flashcards-container")!;
+    expect(container.lastElementChild!.textContent).toBe("כל הכרטיסים עברו!");
   });
 
   it("uses window.__t translations when provided", () => {
@@ -147,7 +181,7 @@ describe("flashcard.js", () => {
       done: "done: {total} cards",
       allDone: "all done!",
     };
-    setupDOM(1);
+    setupDOM([SIGNS[0]]);
 
     expect(countText()).toBe("card 1 of 1");
     clickYes();
@@ -156,15 +190,27 @@ describe("flashcard.js", () => {
     expect(container.lastElementChild!.textContent).toBe("all done!");
   });
 
-  it("does nothing when the container reports zero cards", () => {
-    document.body.innerHTML = `
-      <div id="flashcards-container" data-total="0"></div>
-      <span id="fc-count">untouched</span>
-      <button id="fc-yes"></button>
-      <button id="fc-no"></button>
-    `;
-    expect(() => eval(flashcardScript)).not.toThrow();
-    expect(countText()).toBe("untouched");
+  it("falls back to the placeholder on image error, without looping", () => {
+    setupDOM();
+    clickYes();
+    frontImg().dispatchEvent(new Event("error"));
+    expect(frontImg().src).toContain("/placeholder.svg");
+    frontImg().dispatchEvent(new Event("error"));
+    expect(frontImg().src).toContain("/placeholder.svg");
+  });
+
+  it("does nothing when the payload is empty", () => {
+    setupDOM([]);
+    expect(countText()).toBe("");
+    clickYes();
+    expect(frontImg().getAttribute("src")).toBe(SIGNS[0].img);
+  });
+
+  it("does nothing when the payload is malformed or missing", () => {
+    expect(() => setupDOM("not-json")).not.toThrow();
+    expect(countText()).toBe("");
+    expect(() => setupDOM(SIGNS, { withDataEl: false })).not.toThrow();
+    expect(countText()).toBe("");
   });
 
   it("does nothing when the container is missing", () => {

@@ -14,8 +14,8 @@ vi.mock("next/navigation", () => ({
 vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
 vi.mock("@/lib/db", () => ({ getSigns: vi.fn() }));
 vi.mock("@/components/SignImage", () => ({
-  SignImage: ({ src, alt }: { src: string; alt: string }) =>
-    React.createElement("img", { src, alt }),
+  SignImage: ({ src, alt, className }: { src: string; alt: string; className?: string }) =>
+    React.createElement("img", { src, alt, className }),
 }));
 vi.mock("next/link", () => ({
   default: ({ href, children, ...rest }: { href: string; children: unknown }) =>
@@ -159,6 +159,65 @@ describe("FlashcardsPage", () => {
     const progress = container.querySelector<HTMLElement>("#fc-progress");
     expect(progress?.style.width).toBe("0%");
     expect(container.querySelectorAll(".flashcard-wrap")).toHaveLength(0);
+    expect(JSON.parse(container.querySelector("#fc-data")!.textContent!)).toEqual([]);
+  });
+
+  it("renders only the first card even with multiple signs", async () => {
+    mockGetSigns.mockResolvedValue([SIGN_1, SIGN_2] as never);
+    const jsx = await FlashcardsPage();
+    const { container } = render(jsx);
+    const cards = container.querySelectorAll(".flashcard-wrap");
+    expect(cards).toHaveLength(1);
+    expect(cards[0].querySelector("img")?.getAttribute("src")).toBe(SIGN_1.image_path);
+  });
+
+  it("exposes the DOM hooks flashcard.js relies on", async () => {
+    mockGetSigns.mockResolvedValue([SIGN_1] as never);
+    const jsx = await FlashcardsPage();
+    const { container } = render(jsx);
+    expect(container.querySelector(".fc-front-img")).toBeTruthy();
+    expect(container.querySelector(".fc-back-img")).toBeTruthy();
+    expect(container.querySelector("#fc-name")).toBeTruthy();
+    expect(container.querySelector("#fc-badge")).toBeTruthy();
+  });
+
+  it("embeds all signs in the #fc-data JSON payload", async () => {
+    mockGetSigns.mockResolvedValue([SIGN_1, SIGN_2] as never);
+    const jsx = await FlashcardsPage();
+    const { container } = render(jsx);
+    const data = JSON.parse(container.querySelector("#fc-data")!.textContent!);
+    expect(data).toEqual([
+      {
+        img: "/signs/sign-301.png",
+        alt: "חנייה אסורה",
+        name: "חנייה אסורה",
+        badge: "תמרור 301",
+      },
+      {
+        img: "/signs/sign-205.png",
+        alt: "עצור",
+        name: "עצור",
+        badge: "תמרור 205",
+      },
+    ]);
+  });
+
+  it("applies cleanName to payload names and escapes < in the JSON", async () => {
+    const signs = [
+      SIGN_1,
+      { ...SIGN_2, name_he: "עצור, תמיד" },
+      { ...SIGN_2, id: "s3", sign_number: "206", name_he: "9999" },
+      { ...SIGN_2, id: "s4", sign_number: "207", name_he: "a<script>b" },
+    ];
+    mockGetSigns.mockResolvedValue(signs as never);
+    const jsx = await FlashcardsPage();
+    const { container } = render(jsx);
+    const raw = container.querySelector("#fc-data")!.textContent!;
+    expect(raw).not.toContain("<script");
+    const data = JSON.parse(raw);
+    expect(data[1].name).toBe("עצור");
+    expect(data[2].name).toBe("תמרור 206");
+    expect(data[3].alt).toBe("a<script>b");
   });
 
   it("uses name_ar for ar locale and falls back to name_he when missing", async () => {
@@ -166,8 +225,10 @@ describe("FlashcardsPage", () => {
     const signAr = { ...SIGN_1, name_ar: "ممنوع الوقوف" };
     mockGetSigns.mockResolvedValue([signAr, SIGN_2] as never);
     const jsx = await FlashcardsPage();
-    render(jsx);
+    const { container } = render(jsx);
     expect(screen.getByText("ممنوع الوقوف")).toBeInTheDocument();
-    expect(screen.getByText("עצור")).toBeInTheDocument();
+    const data = JSON.parse(container.querySelector("#fc-data")!.textContent!);
+    expect(data[0].name).toBe("ممنوع الوقوف");
+    expect(data[1].name).toBe("עצור");
   });
 });

@@ -31,8 +31,12 @@ export function SignImage({ src, alt = "", size = "sm", className, style }: Sign
       height={px}
       className={["sign-image", styles.root, className].filter(Boolean).join(" ")}
       style={style}
-      onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/placeholder.svg"; }}
-      unoptimized
+      onError={(e) => {
+        const img = e.currentTarget as HTMLImageElement;
+        // Clear srcset too: with the optimizer's srcset present, setting src alone doesn't stick.
+        img.srcset = "";
+        img.src = "/placeholder.svg";
+      }}
     />
   );
 }

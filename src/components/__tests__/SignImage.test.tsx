@@ -62,9 +62,11 @@ describe("SignImage", () => {
 
   it("falls back to /placeholder.svg on image load error", () => {
     render(<SignImage src="/signs/sign-146.png" alt="test" />);
-    const img = screen.getByRole("img", { name: "test" });
+    const img = screen.getByRole("img", { name: "test" }) as HTMLImageElement;
+    img.srcset = "/_next/image?url=%2Fsigns%2Fsign-146.png&w=96&q=75 1x";
     fireEvent.error(img);
     expect(img).toHaveAttribute("src", "/placeholder.svg");
+    expect(img.srcset).toBe("");
   });
 
   it("does not apply mixBlendMode multiply", () => {
