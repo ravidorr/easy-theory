@@ -82,6 +82,12 @@ describe("POST /api/exam", () => {
     expect(res.status).toBe(400);
   });
 
+  it("returns 400 on non-object JSON body", async () => {
+    mockCreateClient.mockResolvedValue(makeClient().client as never);
+    const res = await POST(makeRequest("[1, 2]"));
+    expect(res.status).toBe(400);
+  });
+
   it("returns 400 when answers is not an array", async () => {
     mockCreateClient.mockResolvedValue(makeClient().client as never);
     const res = await POST(makeRequest({ answers: "nope" }));

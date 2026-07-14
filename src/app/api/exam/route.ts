@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { EXAM_QUESTION_COUNT, EXAM_PASS_MARK, scoreExam } from "@/lib/exam";
 import type { ExamAnswer } from "@/lib/exam";
-import { getApiTranslator } from "@/lib/api";
+import { getApiTranslator, parseJsonBody } from "@/lib/api";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const OPTION_RE = /^[a-d]$/;
@@ -24,14 +24,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: t("tooManyRequests") }, { status: 429 });
   }
 
-  let body: Record<string, unknown>;
-  try {
-    body = await request.json();
-  } catch {
+  const body = await parseJsonBody(request);
+  if (!body) {
     return NextResponse.json({ error: t("missingParams") }, { status: 400 });
   }
 
-  const { answers, duration_seconds } = body ?? {};
+  const { answers, duration_seconds } = body;
   if (!Array.isArray(answers)) {
     return NextResponse.json({ error: t("missingParams") }, { status: 400 });
   }

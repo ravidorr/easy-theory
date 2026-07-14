@@ -24,6 +24,13 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ---
 
+## [0.3.126] — 2026-07-14
+
+### Changed
+- The exam API route now parses its request body with the shared `parseJsonBody` helper from `src/lib/api.ts` like every other body-reading route, so non-object JSON payloads (numbers, strings, arrays) are rejected with a 400 at parse time instead of relying on downstream field validation; completed TODO item removed.
+
+---
+
 ## [0.3.122] — 2026-07-14
 
 ### Changed
