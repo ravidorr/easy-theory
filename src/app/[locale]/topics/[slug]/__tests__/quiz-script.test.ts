@@ -528,6 +528,65 @@ describe("quiz.js – reward score and feedback", () => {
     ).toBe("flex");
   });
 
+  it("keeps recovered feedback visible after a touch retry double-tap", async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(errorResponse(500, "שמירת התשובה נכשלה"))
+        .mockResolvedValueOnce({ ok: true, json: async () => ({}) })
+    );
+    setupDOM();
+    clickOption(0, "a");
+    clickAction();
+    await flushAsyncWork();
+
+    dispatchPointerAction("touch", 1);
+    await flushAsyncWork();
+    dispatchPointerAction("touch", 1);
+
+    expect(messageText()).toBe("יפה מאוד!");
+    expect(actionButton().disabled).toBe(true);
+    expect(
+      (document.querySelectorAll(".quiz-slide")[0] as HTMLElement).style.display
+    ).toBe("flex");
+
+    vi.advanceTimersByTime(TOUCH_DOUBLE_TAP_SUPPRESSION_MS);
+    expect(actionButton().disabled).toBe(false);
+
+    dispatchPointerAction("touch", 1);
+    expect(
+      (document.querySelectorAll(".quiz-slide")[1] as HTMLElement).style.display
+    ).toBe("flex");
+  });
+
+  it("keeps a failed touch retry disabled until its suppression window expires", async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(errorResponse(500, "שמירת התשובה נכשלה"))
+        .mockResolvedValueOnce(errorResponse(500, "שמירת התשובה נכשלה שוב"))
+    );
+    setupDOM();
+    clickOption(0, "a");
+    clickAction();
+    await flushAsyncWork();
+
+    dispatchPointerAction("touch", 1);
+    await flushAsyncWork();
+
+    expect(messageText()).toBe("שמירת התשובה נכשלה שוב");
+    expect(actionButton().disabled).toBe(true);
+
+    vi.advanceTimersByTime(TOUCH_DOUBLE_TAP_SUPPRESSION_MS);
+
+    expect(actionButton().disabled).toBe(false);
+    expect(actionButton().textContent).toBe("נסי שוב");
+  });
+
   it("does not let the touch timeout override pending persistence", async () => {
     vi.useFakeTimers();
     let resolveRequest!: (response: {

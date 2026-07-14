@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.108] - 2026-07-14
+
+### Fixed
+- Touch retry double-taps no longer advance past recovered quiz feedback, and retry outcomes remain disabled until the active touch suppression window expires.
+
+---
+
 ## [0.3.107] - 2026-07-14
 
 ### Fixed

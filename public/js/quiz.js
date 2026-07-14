@@ -137,6 +137,23 @@
     }
   }
 
+  function actionIsAvailableForPersistenceState() {
+    return (
+      answerPersistence === "failed" ||
+      answerPersistence === "succeeded" ||
+      answerPersistence === "blocked"
+    );
+  }
+
+  function suppressTouchActivation() {
+    touchAdvanceSuppressed = true;
+    setActionAvailable(false);
+    window.setTimeout(function () {
+      touchAdvanceSuppressed = false;
+      setActionAvailable(actionIsAvailableForPersistenceState());
+    }, TOUCH_DOUBLE_TAP_SUPPRESSION_MS);
+  }
+
   function persistResume() {
     saveResume({
       i: currentIndex,
@@ -530,15 +547,13 @@
       if (!slide) return;
       if (!confirmed && selectedOption) {
         if (isTouchActivation) {
-          touchAdvanceSuppressed = true;
-          setActionAvailable(false);
-          window.setTimeout(function () {
-            touchAdvanceSuppressed = false;
-            setActionAvailable(answerPersistence !== "pending");
-          }, TOUCH_DOUBLE_TAP_SUPPRESSION_MS);
+          suppressTouchActivation();
         }
         handleConfirm(slide);
       } else if (answerPersistence === "failed") {
+        if (isTouchActivation) {
+          suppressTouchActivation();
+        }
         submitAnswer(slide);
       } else if (answerPersistence === "succeeded" && event.detail <= 1) {
         handleAdvance();
