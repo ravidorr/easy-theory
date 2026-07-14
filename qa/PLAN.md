@@ -21,9 +21,12 @@ auth. Decisions made:
    returns (`data.properties.hashed_token`).
 3. **Scope**: pilot — framework + ONE charter (home dashboard + topic quiz flow)
    validated end-to-end.
-4. **Trigger**: manual `/qa-explore <charter-path>` project skill. Human review gate: the
-   agent **never** mutates GitHub (no issues/PRs/comments) — findings are local files
-   only; humans file the issues.
+4. **Trigger**: manual `/qa-explore <charter-path>` project skill. Findings are
+   published straight to GitHub: the agent files `qa`-labeled issues (deduping against
+   open ones) and pushes evidence to the `qa-evidence` branch; humans triage the issues.
+   (The pilot originally kept findings as local files with a human filing gate — review
+   feedback was that local-folder findings are invisible and go unactioned, so the gate
+   moved from "filing" to "triage".)
 
 ## Grounding facts
 
@@ -55,11 +58,12 @@ qa/
   charters/TEMPLATE.md              # annotated charter template
   charters/001-home-and-quiz.md     # pilot charter
   schema/findings.schema.json       # report schema (documentation + validator reference)
-  runs/                             # run artifacts — gitignored + markdownlint-ignored
+  runs/                             # ephemeral staging (gitignored) — published to GitHub, then deleted
 scripts/qa/
   mint-session.ts                   # session mint + prod guards + --check seed sanity
   qa-dev.sh                         # QA dev server wrapper (port 3100) with guards
   validate-report.ts                # mechanical report-completeness gate
+  publish-evidence.sh               # push a run dir to the qa-evidence branch
 .claude/skills/qa-explore/SKILL.md  # the runner skill
 .env.qa.example                     # committed template; real .env.qa stays gitignored
 ```
@@ -105,10 +109,12 @@ complete, `not_tested` is non-empty, coverage arithmetic is correct.
 
 - `qa-dev.sh` and `mint-session.ts` refuse to run if `.env.qa` is missing, `QA_ENV=1` is
   not set, or the Supabase URL matches the one in `.env.local` (production).
-- The skill never mutates GitHub/Slack/email. Findings land as local files; per-finding
-  issue DRAFTS go to `qa/runs/<id>/proposed-issues/` and humans file the approved ones
-  (`gh issue create --body-file …`). The committed `.claude/settings.json` denies
-  `gh issue` mutations and GitHub-MCP issue tools repo-wide as a mechanical backstop.
+- The skill's external mutations are scoped to QA publishing only: push to the
+  `qa-evidence` branch (via `pnpm qa:publish-evidence`), `gh issue create/comment/close`
+  for findings and run reports, and idempotent `gh label create`. No code pushes, PRs,
+  issue edits/deletes, or Slack/email. The committed `.claude/settings.json` allows
+  exactly that set and still denies `gh issue edit/delete` and the GitHub-MCP
+  issue-update tool as a mechanical backstop.
 - A check without observed evidence is `blocked` or `not-checked`, never `pass`.
 
 ## Validation of the pilot
@@ -130,4 +136,4 @@ complete, `not_tested` is non-empty, coverage arithmetic is correct.
 
 More charters (Arabic locale, flashcards, schedule, retry/review, dark mode,
 zero-progress persona), video/trace capture, scheduled post-deploy smoke loop, CI
-integration, cross-run findings dedupe/diff.
+integration. (Cross-run dedupe now happens against open `qa` issues at publish time.)

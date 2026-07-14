@@ -1,20 +1,24 @@
 ---
 name: qa-explore
-description: Run an agentic exploratory QA session against the local QA environment from a test charter. Use when the user invokes /qa-explore with a charter path, or asks to "run QA", "exploratory QA", "smoke test the app", or "test a charter". Requires the one-time setup in qa/SETUP.md. Produces a structured findings report under qa/runs/.
+description: Run an agentic exploratory QA session against the local QA environment from a test charter. Use when the user invokes /qa-explore with a charter path, or asks to "run QA", "exploratory QA", "smoke test the app", or "test a charter". Requires the one-time setup in qa/SETUP.md. Publishes findings as GitHub issues, with evidence on the qa-evidence branch.
 ---
 
 # qa-explore — charter-driven exploratory QA
 
 Run the charter given as the argument (e.g. `qa/charters/001-home-and-quiz.md`) against
-the local QA environment, capture evidence, and produce a validated structured report.
-You are a QA multiplier, not a rubber stamp: your job is to find what's wrong and to be
-precise about what you did and did not verify.
+the local QA environment, capture evidence, validate the structured report, and publish
+the results to GitHub (issues + evidence branch). You are a QA multiplier, not a rubber
+stamp: your job is to find what's wrong and to be precise about what you did and did
+not verify.
 
 ## Hard rules (non-negotiable)
 
-1. **Never mutate the outside world.** Do not create/comment/close GitHub issues or PRs,
-   do not push, do not run mutating `gh` commands, do not send Slack/email. Findings are
-   local files under `qa/runs/`; humans review them and file issues.
+1. **Only the scoped QA mutations of the outside world.** The ONLY external mutations
+   allowed during a run are: (a) `pnpm qa:publish-evidence <run-dir>` (pushes to the
+   `qa-evidence` branch only), (b) `gh issue create` / `gh issue comment` /
+   `gh issue close` for this run's findings and run report, and (c) idempotent
+   `gh label create --force` for the QA labels. Nothing else: no pushing code branches,
+   no PRs, no editing or deleting existing issues, no Slack/email.
 2. **Never run against production.** Abort unless preflight proves the QA Supabase
    project is in use (the guards in `qa:dev` / `qa:mint` enforce this — do not work
    around them).
@@ -24,10 +28,11 @@ precise about what you did and did not verify.
 4. Do not edit product code, seeds, or the charter during a run. If the charter is
    wrong, report that and stop.
 
-Rule 1 is enforced mechanically for issues: the committed `.claude/settings.json`
-denies `gh issue` mutations and the GitHub-MCP issue tools repo-wide. PR/push tooling
-stays allowed for normal development — the skill rule (not a permission) covers those
-during QA runs.
+Rule 1 is backed mechanically where possible: the committed `.claude/settings.json`
+allows `gh issue create/comment/close`, `gh label create`, and the publish script, and
+still denies `gh issue edit/delete` and the GitHub-MCP issue-update tool. PR/push
+tooling stays allowed for normal development — the skill rule (not a permission)
+covers those during QA runs.
 
 ## Phase 1 — Preflight
 
@@ -41,7 +46,8 @@ during QA runs.
 5. Seed sanity: `pnpm qa:mint --check`. Abort on failure ("DB not seeded — see
    qa/SETUP.md").
 6. Create the run dir: `qa/runs/<YYYY-MM-DDTHH-mm>_<charter-id>/` with a `screenshots/`
-   subdirectory.
+   subdirectory. This is ephemeral staging — it is published to GitHub in Phase 4 and
+   deleted in teardown.
 7. Record the environment block: `git rev-parse HEAD`, `package.json` version, base_url,
    viewport, locale, and the Supabase host (host only — never keys).
 
@@ -80,7 +86,7 @@ Conventions:
   reason "timebox". Then, if time allows, do the bounded free exploration in
   `exploration_budget` — findings from exploration are regular findings.
 
-## Phase 4 — Report
+## Phase 4 — Report & publish
 
 1. Write `findings.json` in the run dir per `qa/schema/findings.schema.json`.
 2. Write `report.md`: header + environment block → verdict summary (one line, e.g.
@@ -89,28 +95,56 @@ Conventions:
    confidence, repro steps, expected/actual, evidence links) → **NOT tested**
    (mandatory, at minimum echoing the charter's out_of_scope) → known issues observed →
    limitations and next-charter suggestions.
-3. For every finding, write a ready-to-file issue draft at
-   `proposed-issues/<finding-id>-<slug>.md` in the run dir:
-   - First line: `# <issue title>` (imperative, prefixed with the severity in brackets,
-     e.g. `# [major] Progress not saved when …`)
-   - Then a `Suggested labels:` line (`bug` / `a11y` / `copy` / `product-question` per
-     the finding category; `question`-severity findings get `product-question`, not `bug`)
-   - Then the body: repro steps, expected/actual, severity + confidence, environment
-     block, and evidence paths (note they live locally in the run dir — attach manually)
-   - These are DRAFTS. Never file them yourself. The human files approved ones with:
-     `gh issue create --title "…" --body-file qa/runs/<run>/proposed-issues/<file>.md`
-4. Run `pnpm qa:validate-report <run-dir> <charter-path>`. Fix the report until it
-   passes — this gate is not optional.
-5. Final message to the user: one-paragraph outcome, the run-dir path, the checks
-   matrix, the explicit NOT-tested list, and the list of proposed-issue drafts awaiting
-   human review. Never a bare "all good".
+3. Run `pnpm qa:validate-report <run-dir> <charter-path>`. Fix the report until it
+   passes — this gate is not optional, and nothing gets published before it passes.
+4. Publish the evidence: `pnpm qa:publish-evidence <run-dir>`. It pushes the run dir to
+   the `qa-evidence` branch and prints the raw base URL
+   (`https://raw.githubusercontent.com/<slug>/qa-evidence/<run-id>/`). Use that URL for
+   every evidence reference in issue bodies — screenshots embed inline with
+   `![…](<base-url>screenshots/step-NN-<slug>.png)`.
+5. Ensure the QA labels exist (idempotent — `--force` updates in place):
+   `gh label create qa --color 5319e7 --description "Filed by the QA agent" --force`,
+   and likewise `qa-run` (archived run reports), `a11y`, `copy`, `product-question`.
+   The type labels `bug` and `enhancement` are GitHub defaults — assume they exist.
+6. Dedup before filing: fetch open QA issues once —
+   `gh issue list --state open --label qa --json number,title,body`. A finding matches
+   an existing issue when it describes the same symptom in the same flow (judge by
+   title + repro, not exact wording). For each match, do NOT file a new issue; instead
+   `gh issue comment <number>` with "Still reproduces in run `<run-id>`", the severity +
+   confidence observed this run, and evidence links.
+7. File one issue per remaining (new) finding:
+   - Title: imperative, prefixed with the severity in brackets, e.g.
+     `[major] Progress not saved when …`
+   - Labels: `qa` + exactly one TYPE label + category labels where they apply:
+     - Type: `bug` for defects (something behaves wrongly — the usual case),
+       `enhancement` for findings that are really a feature/improvement request,
+       `product-question` for `question`-severity findings (possibly intentional —
+       needs a product decision, not `bug`)
+     - Category (additive, when relevant): `a11y` for accessibility findings, `copy`
+       for copy/translation findings (e.g. an a11y defect gets `qa` + `bug` + `a11y`)
+   - Body: repro steps, expected/actual, severity + confidence, environment block,
+     inline screenshots + evidence links into `qa-evidence`, and a "Found in run
+     `<run-id>`" line (link the run-report issue after step 8 is done, or reference
+     the `qa-evidence` run URL).
+8. File the run-report issue (every run, even with zero findings): title
+   `QA run <run-id>: <verdict summary>`, labels `qa` + `qa-run`. Body: the full
+   `report.md` content with evidence paths rewritten to `qa-evidence` raw URLs, links
+   to every finding issue and dedup comment posted in steps 6–7, and `findings.json`
+   inside a collapsed `<details>` block. Then close it immediately
+   (`gh issue close <number> --reason completed`) — it is an archived record, not a
+   task; open `qa`-labeled issues must stay = actionable findings only.
+9. If any publish step (4–8) fails: stop publishing, keep the local run dir, and tell
+   the user exactly what was and was not published. Never delete an unpublished run.
+10. Final message to the user: one-paragraph outcome, the checks matrix, the explicit
+    NOT-tested list, the created issue URLs (findings + run report), any dedup
+    comments posted, and the `qa-evidence` run URL. Never a bare "all good".
 
 ## Phase 5 — Teardown
 
 - Close the browser (`browser_close`).
 - Kill the dev server only if this run started it.
-- **Back up the run dir**: `cp -R qa/runs/<run-id> ~/qa-runs-backup/`. Run artifacts are
-  gitignored and workspace tooling has deleted untracked files before — the backup
-  outside the repo is the durable copy.
+- **Delete the run dir** (`rm -rf qa/runs/<run-id>`) — but only if Phase 4 published
+  everything successfully. The durable copy is GitHub: the issues and the `qa-evidence`
+  branch. On a partial publish, keep the dir and say so in the final message.
 - Note in the report that the test user's data was mutated by the run (expected;
   `qa/SETUP.md` has a reset snippet).

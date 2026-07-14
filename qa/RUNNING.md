@@ -22,31 +22,41 @@ The skill does everything itself:
 3. **Execution** — works through every charter check in persona, capturing screenshots,
    console errors, and failed network requests as evidence, then spends the charter's
    bounded exploration budget on edge probes.
-4. **Report** — writes `qa/runs/<timestamp>_<charter-id>/` containing `report.md`
-   (human-first), `findings.json` (machine-readable), evidence files, and a ready-to-file
-   GitHub issue draft per finding under `proposed-issues/`. The run must pass
-   `pnpm qa:validate-report` — a check verdict without on-disk evidence is rejected.
+4. **Report & publish** — stages `report.md` (human-first), `findings.json`
+   (machine-readable), and evidence files in `qa/runs/<timestamp>_<charter-id>/`; the
+   run must pass `pnpm qa:validate-report` (a check verdict without on-disk evidence is
+   rejected). Then it publishes: pushes the run dir to the `qa-evidence` branch
+   (`pnpm qa:publish-evidence`), files one GitHub issue per new finding — labeled with
+   `qa`, a type label (`bug` / `enhancement` / `product-question`), and category labels
+   (`a11y`, `copy`) where relevant, screenshots inline — comments "still reproduces"
+   on matching open `qa` issues instead of filing duplicates, and files + closes a
+   `qa-run` run-report issue as the archived record.
 5. **Teardown** — closes the browser, stops the dev server if the run started it, and
-   backs up the run dir to `~/qa-runs-backup/`.
+   deletes the local run dir (the durable copy is GitHub). On a partial publish the
+   dir is kept and the final message says exactly what was and wasn't published.
 
 ## Read the results
 
-Start with `qa/runs/<run>/report.md`: verdict summary → checks matrix → findings (each
-with severity, confidence, repro steps, evidence) → the mandatory **NOT tested** list.
+Everything lives on GitHub:
+
+- **Findings** — open issues labeled `qa` (each: severity in the title, repro steps,
+  expected/actual, confidence, environment, inline screenshots).
+- **Run reports** — closed issues labeled `qa-run` (verdict summary → checks matrix →
+  findings → the mandatory **NOT tested** list, plus `findings.json` in a collapsed
+  block).
+- **Raw evidence** — the `qa-evidence` branch, one `<run-id>/` directory per run.
 
 Severity rubric: `blocker` / `major` / `minor` / `cosmetic` / `question` (possibly
 intentional — needs a human decision). Confidence: `high` (reproduced twice) / `medium`
 (seen once) / `low` (suspected).
 
-## File issues (human-only)
+## Triage issues (human)
 
-The agent never touches GitHub — that's a hard rule, mechanically enforced by the deny
-rules in `.claude/settings.json`. Review the drafts and file the ones you approve:
-
-```bash
-gh issue create --title "<title from the draft>" \
-  --body-file "qa/runs/<run>/proposed-issues/<finding>.md"
-```
+The agent files the issues; your job is triage on GitHub: close findings that are
+invalid or intentional (say why — the agent reads open `qa` issues to dedup future
+runs), adjust severity, and pick up the real ones. The agent can create, comment on,
+and close QA issues, but editing or deleting issues stays denied in
+`.claude/settings.json`.
 
 ## Write a new charter
 
@@ -67,8 +77,10 @@ Declare `out_of_scope` honestly (it feeds the NOT-tested section) and list
 | `pnpm qa:mint --check` | Verify DB connectivity + seed counts |
 | `pnpm qa:mint` | Print a one-time login URL for manual poking |
 | `pnpm qa:validate-report <run-dir> <charter>` | Re-run the report completeness gate |
+| `pnpm qa:publish-evidence <run-dir>` | Push a run dir to the `qa-evidence` branch |
 
 ## Design docs
 
 [PLAN.md](PLAN.md) — the framework design, safety rails, and validation history.
-Run artifacts under `qa/runs/` are gitignored; the durable copy is `~/qa-runs-backup/`.
+`qa/runs/` is gitignored ephemeral staging; the durable copy is GitHub (issues +
+the `qa-evidence` branch).
