@@ -7,6 +7,13 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
   },
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "i.ytimg.com", pathname: "/vi/**" },
+    ],
+    // Sign/question images are immutable; a long TTL cuts Vercel transformations.
+    minimumCacheTTL: 2678400,
+  },
 };
 
 export default withNextIntl(nextConfig);

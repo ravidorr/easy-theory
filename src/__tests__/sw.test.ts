@@ -256,6 +256,20 @@ describe("sw.js", () => {
       expect(fetchMock).not.toHaveBeenCalled();
     });
 
+    it("caches optimized /_next/image responses in the images cache", async () => {
+      const networkResponse = makeResponse();
+      fetchMock.mockResolvedValue(networkResponse);
+      const imageUrl = "/_next/image?url=%2Fsigns%2Fsign-301.png&w=96&q=75";
+      const first = await dispatchFetch(makeRequest(imageUrl));
+      expect(first.response).toBe(networkResponse);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+
+      const second = await dispatchFetch(makeRequest(imageUrl));
+      expect(second.response).toBe(networkResponse);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(cachesMock.stores.get(IMAGES_CACHE)!.size).toBe(1);
+    });
+
     it("serves hashed _next/static assets cache-first", async () => {
       const cached = makeResponse();
       cachesMock.seed(STATIC_CACHE, makeRequest("/_next/static/chunks/main.js"), cached);

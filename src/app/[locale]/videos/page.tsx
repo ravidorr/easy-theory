@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase";
 import { TabBar } from "@/components/TabBar";
 import { Icon } from "@/components/Icon";
@@ -43,10 +44,11 @@ export default async function VideosPage() {
             className={styles.featuredLink}
           >
             <div className={styles.thumbnailFeatured}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src="https://i.ytimg.com/vi/gd6ES_aAdI0/hqdefault.jpg"
                 alt=""
+                fill
+                sizes="(max-width: 480px) 100vw, 440px"
                 className={styles.thumbnailImg}
               />
               <span className={styles.playBtnLg}>
@@ -67,10 +69,11 @@ export default async function VideosPage() {
             className={styles.rowLink}
           >
             <div className={styles.thumbnailRow}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src="https://i.ytimg.com/vi/WsVi4kEiaPE/hqdefault.jpg"
                 alt=""
+                fill
+                sizes="120px"
                 className={styles.thumbnailImg}
               />
               <span className={styles.playBtnSm}>
@@ -96,10 +99,11 @@ export default async function VideosPage() {
               className={styles.rowLink}
             >
               <div className={styles.thumbnailRow}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   src={`https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`}
                   alt=""
+                  fill
+                  sizes="120px"
                   className={styles.thumbnailImg}
                 />
                 <span className={styles.playBtnSm}>

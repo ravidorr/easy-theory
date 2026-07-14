@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase";
 import {
   getTopics,
@@ -239,8 +240,7 @@ export default async function HomePage() {
                   <div className={styles.topicLink}>
                     {topic.icon && (
                       <div className={styles.topicIconWrap}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={topic.icon} alt="" className={styles.topicIconImg} />
+                        <Image src={topic.icon} alt="" width={34} height={34} className={styles.topicIconImg} />
                       </div>
                     )}
                     <div className={styles.topicBody}>
@@ -294,8 +294,7 @@ export default async function HomePage() {
                 <div className={styles.topicLink}>
                   {topic.icon && (
                     <div className={styles.topicIconWrap}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={topic.icon} alt="" className={styles.topicIconImg} />
+                      <Image src={topic.icon} alt="" width={34} height={34} className={styles.topicIconImg} />
                     </div>
                   )}
                   <div className={styles.topicBody}>

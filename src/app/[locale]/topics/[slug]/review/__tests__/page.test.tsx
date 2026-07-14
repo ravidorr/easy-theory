@@ -6,6 +6,10 @@ import { createClient } from "@/lib/supabase";
 import { getTopicBySlug, getMistakesForTopic } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
 
+vi.mock("next/image", () => ({
+  default: ({ src, alt, className }: { src: string; alt?: string; className?: string }) =>
+    React.createElement("img", { src, alt, className }),
+}));
 vi.mock("next/navigation", () => ({
   redirect: vi.fn().mockImplementation(() => {
     throw new Error("redirect");
