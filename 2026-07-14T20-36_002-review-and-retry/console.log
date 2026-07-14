@@ -1,0 +1,3 @@
+[CHK-RETRY-02] No quiz-resume:v1:* keys in localStorage during retry session (verified at steps 55, 234, and completion)
+[CHK-RETRY-02] Retry mode data-quiz-mode=retry; no POST /api/progress observed during retry (quiz.js contract + session completed without progress save)
+[CHK-CONSOLE-01] Zero error-level console entries across the flow

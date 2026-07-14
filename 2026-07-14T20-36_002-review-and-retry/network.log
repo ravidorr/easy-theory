@@ -1,0 +1,3 @@
+Retry session: POST /api/quiz per confirmed answer (2xx observed during automation)
+Retry session: NO POST /api/progress
+Setup quiz: POST /api/progress [200] once on safety topic completion

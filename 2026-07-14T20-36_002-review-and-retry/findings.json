@@ -1,0 +1,41 @@
+{
+  "run_id": "2026-07-14T20-36_002-review-and-retry",
+  "charter_id": "002-review-and-retry",
+  "charter_path": "qa/charters/002-review-and-retry.md",
+  "started_at": "2026-07-14T20:36:00Z",
+  "finished_at": "2026-07-14T21:15:00Z",
+  "environment": {
+    "base_url": "http://localhost:3100",
+    "git_sha": "cd095d1a60cee1421a6faac16f49b51a18218cff",
+    "app_version": "0.3.130",
+    "supabase_host": "nvgqczaesfeotijjcbed.supabase.co",
+    "viewport": "390x844",
+    "locale": "he"
+  },
+  "checks": [
+    {"id": "CHK-REVIEW-01", "verdict": "pass", "observed": "Review listed all last-session wrong answers with question, wrong pick, and correct answer labels.", "evidence": ["screenshots/step-05-review-last-session.png"]},
+    {"id": "CHK-REVIEW-02", "verdict": "pass", "observed": "Scope toggle showed aria-current on active option; all-time view was superset of last-session list.", "evidence": ["screenshots/step-05-review-last-session.png", "screenshots/step-06-review-all-time.png"]},
+    {"id": "CHK-REVIEW-03", "verdict": "pass", "observed": "Empty state before setup quiz showed localized copy and all-time scope link.", "evidence": ["screenshots/step-02-review-empty-state.png"]},
+    {"id": "CHK-RETRY-01", "verdict": "pass", "observed": "Retry page had data-quiz-mode=retry and data-total=234 matching last-session mistakes.", "evidence": ["screenshots/step-07-retry-first-question.png"]},
+    {"id": "CHK-RETRY-02", "verdict": "pass", "observed": "Retry submitted answers via /api/quiz; no /api/progress POST; no quiz-resume localStorage keys.", "evidence": ["network.log", "console.log", "screenshots/step-08-retry-final.png"]},
+    {"id": "CHK-RETRY-03", "verdict": "pass", "observed": "Safety topic remained 305/305 after retry; retry did not alter saved progress.", "evidence": ["screenshots/step-09-dashboard-after-retry.png"]},
+    {"id": "CHK-RETRY-04", "verdict": "pass", "observed": "Vehicle /retry redirected to /review when no last-session mistakes.", "evidence": ["screenshots/step-01-retry-redirect-to-review.png"]},
+    {"id": "CHK-CONSOLE-01", "verdict": "pass", "observed": "Zero error-level console entries across the flow.", "evidence": ["console.log"]},
+    {"id": "CHK-A11Y-01", "verdict": "pass", "observed": "Scope group labeled; aria-current on active scope; textual wrong/correct labels in review rows.", "evidence": ["screenshots/step-05-review-last-session.png", "screenshots/step-06-review-all-time.png"]},
+    {"id": "CHK-COPY-RTL-01", "verdict": "pass", "observed": "Review/Retry Hebrew copy rendered without raw keys or direction breakage.", "evidence": ["screenshots/step-02-review-empty-state.png", "screenshots/step-05-review-last-session.png"]}
+  ],
+  "findings": [],
+  "known_issues_observed": [],
+  "not_tested": [
+    "Quiz mechanics beyond setup (covered by 001)",
+    "Arabic locale review/retry",
+    "Exam-result review",
+    "Desktop viewport",
+    "Exploration budget (reload mid-retry, browser back, deep-link, retry twice)"
+  ],
+  "limitations": [
+    "Setup quiz completed all 305 safety questions (not a short 5-question session) due to session recording requirements.",
+    "Dashboard before-retry screenshot taken after setup quiz; retry comparison uses unchanged 305/305 state."
+  ],
+  "coverage_summary": {"total": 10, "pass": 10, "fail": 0, "blocked": 0, "not_checked": 0}
+}
