@@ -1,0 +1,1 @@
+[logout] POST /api/auth/logout 200; subsequent GET /he redirected to /he/auth/login.
