@@ -67,6 +67,69 @@ const admin = createClient(url, serviceRoleKey, {
 
 // ── --check: connectivity + seed sanity (used by the qa-explore preflight) ──
 
+// Row counts alone gave false confidence once: the QA project had all the data
+// but predated migrations 007-010, so every quiz submission 500'd mid-run.
+// Probe one cheap schema object per migration the app depends on. Auth-gated
+// RPCs are probed with dummy args and must raise not_authenticated (P0001);
+// reaching that raise proves the function exists without mutating anything.
+// Probing RPCs with empty args is ambiguous: PGRST202 then only means the
+// zero-arg overload is absent, not that the function is missing.
+async function checkSchema(): Promise<number> {
+  let failures = 0;
+
+  const columnProbes = [
+    { table: "user_quiz_responses", column: "session_id", migration: "006" },
+    { table: "user_exam_attempts", column: "id", migration: "007" },
+    { table: "user_schedule", column: "locale", migration: "009" },
+  ];
+  for (const { table, column, migration } of columnProbes) {
+    const { error } = await admin.from(table).select(column, { count: "exact", head: true });
+    if (error) {
+      console.error(
+        `qa:mint --check - schema ${table}.${column} (migration ${migration}): ${error.message}`
+      );
+      failures += 1;
+    } else {
+      console.error(`qa:mint --check - schema ${table}.${column} (migration ${migration}): ok`);
+    }
+  }
+
+  const NIL_UUID = "00000000-0000-0000-0000-000000000000";
+  const rpcProbes = [
+    {
+      fn: "replace_user_schedule",
+      migration: "008/009",
+      args: { p_days: [], p_start_time: "00:00", p_duration_minutes: 45, p_notify: true, p_locale: "he" },
+    },
+    {
+      fn: "submit_quiz_answer",
+      migration: "010",
+      args: {
+        p_idempotency_key: "qa-check-probe",
+        p_question_id: NIL_UUID,
+        p_selected_option: "a",
+        p_session_id: NIL_UUID,
+        p_topic_id: NIL_UUID,
+      },
+    },
+  ];
+  for (const { fn, migration, args } of rpcProbes) {
+    const { error } = await admin.rpc(fn, args);
+    if (error && /not_authenticated/.test(error.message)) {
+      console.error(`qa:mint --check - schema rpc ${fn} (migration ${migration}): ok`);
+    } else {
+      console.error(
+        `qa:mint --check - schema rpc ${fn} (migration ${migration}): ${
+          error ? error.message : "executed without raising not_authenticated"
+        }`
+      );
+      failures += 1;
+    }
+  }
+
+  return failures;
+}
+
 async function checkSeeds(): Promise<void> {
   const expected: Record<string, number> = { topics: 1, questions: 1273, signs: 277 };
   let failures = 0;
@@ -82,8 +145,11 @@ async function checkSeeds(): Promise<void> {
     console.error(`qa:mint --check - ${table}: ${count ?? 0} rows`);
     if ((count ?? 0) < minRows) failures += 1;
   }
+  failures += await checkSchema();
   if (failures > 0) {
-    fail("QA database is unreachable or not fully seeded. See qa/SETUP.md.");
+    fail(
+      "QA database is unreachable, not fully seeded, or its schema is missing migrations. See qa/SETUP.md."
+    );
   }
   console.error("qa:mint --check - OK");
 }

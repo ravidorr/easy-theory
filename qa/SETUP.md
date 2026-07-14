@@ -24,12 +24,19 @@ In the project's **SQL editor**, run these files in exactly this order:
 4. `seeds/signs.sql`
 5. `seeds/signs_names_patch.sql`
 6. `seeds/rate_limits.sql`
-7. `seeds/migrations/001_quiz_responses_unique.sql`
-8. `seeds/migrations/002_fix_correct_options.sql`
-9. `seeds/migrations/002_fix_sign_409_correct_answer.sql`
-10. `seeds/migrations/003_fix_sign_102_name.sql`
-11. `seeds/migrations/004_quiz_responses_update_policy.sql`
-12. `seeds/migrations/005_arabic_columns.sql`
+7. **every file in `seeds/migrations/` in filename order** (as of this writing:
+   `001_quiz_responses_unique.sql`, `002_fix_correct_options.sql`,
+   `002_fix_sign_409_correct_answer.sql`, `003_fix_sign_102_name.sql`,
+   `004_quiz_responses_update_policy.sql`, `005_arabic_columns.sql`,
+   `006_quiz_responses_session_id.sql`, `007_exam_attempts.sql`,
+   `008_replace_user_schedule.sql`, `009_schedule_locale.sql`,
+   `010_quiz_submission_idempotency.sql`)
+
+**Keep the QA project's schema in sync**: whenever a new file lands in
+`seeds/migrations/`, run it in the QA project's SQL editor too. The app's code assumes
+all migrations are applied — a stale QA schema fails mid-run (e.g. every quiz
+submission 500s), and `pnpm qa:mint --check` now probes one schema object per
+migration to catch this drift in preflight.
 
 Sanity-check the result:
 

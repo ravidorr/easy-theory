@@ -22,6 +22,18 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ---
 
+## [0.3.119] — 2026-07-14
+
+### Added
+- Twelve new exploratory-QA charters (`qa/charters/002`–`013`) covering the rest of the app beyond the 001 pilot: mistake review + retry, exam simulation, flashcards, schedule + reminders, More hub (stats/theme/language/logout), Arabic locale sweep, login/auth edge cases, new-user empty states, static pages + 404 handling, PWA/offline caching, desktop viewport sweep, and light-theme sweep.
+
+### Fixed
+- Misspelled review mistake-count copy in `messages/he.json`: `Review.mistakeCountOne`/`mistakeCountMany` now read "שגויה"/"שגויות" instead of "שגית" (found by the 002 charter run; Arabic strings were already correct).
+- `pnpm qa:mint --check` now probes one schema object per migration (columns from 006/007/009, auth-gated RPCs from 008–010 via dummy-args calls that must raise `not_authenticated`), so a QA project with stale schema fails preflight instead of 500-ing mid-run; `qa/SETUP.md`'s seed list no longer stops at migration 005 and tells maintainers to keep the QA schema in sync.
+- QA browser tooling artifacts (`.playwright-mcp/`) are gitignored.
+
+---
+
 ## [0.3.117] — 2026-07-14
 
 ### Changed
