@@ -32,13 +32,10 @@ function makeClient({
   questions = [] as unknown[],
   questionsError = false,
 } = {}) {
-  let questionsCalled = false;
   return {
     from: vi.fn().mockImplementation((table: string) => {
       if (table === "topics") return chain(topic);
       if (table === "questions") {
-        // Only return questions after topic is found
-        questionsCalled = true;
         return chain(questions, questionsError ? { message: "db error" } : null);
       }
       return chain(null);
@@ -50,11 +47,14 @@ describe("GET /api/topics/[slug]", () => {
   beforeEach(() => { vi.clearAllMocks(); });
 
   it("returns 404 when topic is not found", async () => {
-    mockCreateClient.mockResolvedValue(makeClient({ topic: null }) as never);
+    const client = makeClient({ topic: null });
+    mockCreateClient.mockResolvedValue(client as never);
     const res = await GET(makeRequest("nope"), makeParams("nope"));
     expect(res.status).toBe(404);
     const body = await res.json();
     expect(body).toHaveProperty("error");
+    expect(client.from).toHaveBeenCalledTimes(1);
+    expect(client.from).toHaveBeenCalledWith("topics");
   });
 
   it("returns the questions array for a valid slug", async () => {

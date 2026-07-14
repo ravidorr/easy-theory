@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Vitest coverage output
     "coverage/**",
+    // Imported Designer output (tokens consumed by app; not app source)
+    "design-system/**",
   ]),
 ]);
 
