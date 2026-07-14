@@ -1,0 +1,58 @@
+{
+  "run_id": "2026-07-14T21-11_005-schedule-and-reminders",
+  "charter_id": "005-schedule-and-reminders",
+  "charter_path": "qa/charters/005-schedule-and-reminders.md",
+  "started_at": "2026-07-14T21:11:00Z",
+  "finished_at": "2026-07-14T21:18:00Z",
+  "environment": {
+    "base_url": "http://localhost:3100",
+    "git_sha": "cd095d1a60cee1421a6faac16f49b51a18218cff",
+    "app_version": "0.3.130",
+    "supabase_host": "nvgqczaesfeotijjcbed.supabase.co",
+    "viewport": "390x844",
+    "locale": "he"
+  },
+  "checks": [
+    {"id": "CHK-SCHED-01", "verdict": "pass", "observed": "Schedule page showed 7 .day-btn, #time-input, three duration options, #notify-toggle switch, and #save-schedule-btn with 45min pre-selected.", "evidence": ["screenshots/step-01-schedule-initial.png"]},
+    {"id": "CHK-SCHED-02", "verdict": "pass", "observed": "Tapping days א and ד toggled data-selected and updated #days-label and #summary-text.", "evidence": ["screenshots/step-02-schedule-selected.png"]},
+    {"id": "CHK-SCHED-03", "verdict": "pass", "observed": "Time changed to 19:30 and 45 דק׳ remained the sole active duration in summary.", "evidence": ["screenshots/step-02-schedule-selected.png"]},
+    {"id": "CHK-SCHED-04", "verdict": "pass", "observed": "Save with notify off triggered PUT /api/schedule and redirected to /he.", "evidence": ["network.log", "screenshots/step-02-schedule-selected.png"]},
+    {"id": "CHK-SCHED-05", "verdict": "pass", "observed": "Reopening /he/schedule showed days א+ד, time 19:30, duration 45, notify false.", "evidence": ["screenshots/step-03-schedule-persisted.png"]},
+    {"id": "CHK-SCHED-06", "verdict": "fail", "observed": "With notify toggled on, save stuck on שומרים... awaiting Notification.requestPermission; schedule did not save or redirect.", "evidence": ["network.log", "screenshots/step-03-schedule-persisted.png"]},
+    {"id": "CHK-CONSOLE-01", "verdict": "pass", "observed": "Zero error-level console entries during schedule flow.", "evidence": ["console.log"]},
+    {"id": "CHK-A11Y-01", "verdict": "pass", "observed": "Day/duration buttons expose aria-pressed; notify switch has role and aria-checked; time input labeled; h1 present.", "evidence": ["screenshots/step-01-schedule-initial.png"]},
+    {"id": "CHK-COPY-RTL-01", "verdict": "pass", "observed": "Hebrew Schedule copy rendered RTL without raw keys; time 19:30 displayed correctly.", "evidence": ["screenshots/step-02-schedule-selected.png"]}
+  ],
+  "findings": [
+    {
+      "id": "F-001",
+      "title": "Schedule save hangs when reminders are on and notification permission is pending",
+      "severity": "major",
+      "confidence": "medium",
+      "category": "functional",
+      "related_checks": ["CHK-SCHED-06"],
+      "repro_steps": [
+        "Open /he/schedule with days selected.",
+        "Turn #notify-toggle on.",
+        "Click #save-schedule-btn in an environment where Notification.requestPermission does not resolve promptly."
+      ],
+      "expected": "Saving still succeeds even if push permission cannot be granted.",
+      "actual": "Save button remained disabled on שומרים... and no redirect or confirmed PUT occurred while awaiting permission.",
+      "evidence": ["network.log", "screenshots/step-03-schedule-persisted.png"],
+      "known_issue_match": null
+    }
+  ],
+  "known_issues_observed": [],
+  "not_tested": [
+    "Actual push delivery and /api/cron/notify",
+    "Email reminder fallback",
+    "Service-worker push events (011)",
+    "Arabic locale (007)",
+    "Desktop viewport"
+  ],
+  "limitations": [
+    "Notify-on save tested in automated Chrome DevTools where permission prompt may not resolve.",
+    "First save redirect inferred from subsequent GET /he in network log."
+  ],
+  "coverage_summary": {"total": 9, "pass": 8, "fail": 1, "blocked": 0, "not_checked": 0}
+}
