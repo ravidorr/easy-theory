@@ -8,7 +8,7 @@ import { SignImage } from "@/components/SignImage";
 import { Icon } from "@/components/Icon";
 import { InlineMarkdown } from "@/components/InlineMarkdown";
 import { createClient } from "@/lib/supabase";
-import { getTopicBySlug, getMistakesForTopic } from "@/lib/db";
+import { getTopicBySlug, getMistakesForTopic, getBookmarkedQuestionIds } from "@/lib/db";
 import type { Question } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
 import styles from "../page.module.css";
@@ -40,12 +40,14 @@ function QuestionSlide({
   index,
   topicId,
   letters,
+  bookmarked,
   t,
 }: {
   question: Question;
   index: number;
   topicId: string;
   letters: string[];
+  bookmarked: boolean;
   t: TranslateFn;
 }) {
   const qAny = question as Record<string, unknown>;
@@ -77,6 +79,15 @@ function QuestionSlide({
       style={{ display: index === 0 ? "flex" : "none" }}
     >
       <div className={styles.questionContainer}>
+        <button
+          type="button"
+          className={`bookmark-toggle ${styles.bookmarkCorner}`}
+          data-question-id={question.id}
+          aria-pressed={bookmarked ? "true" : "false"}
+          aria-label={t("bookmarkLabel")}
+        >
+          <Icon name="bookmark" size={20} />
+        </button>
         {imageUrl && (
           isWide ? (
             <div className={styles.imgWide}>
@@ -143,7 +154,10 @@ export default async function RetryMistakesPage({
   const topic = await getTopicBySlug(supabase, slug);
   if (!topic) notFound();
 
-  const mistakes = await getMistakesForTopic(supabase, user.id, topic.id, "lastSession");
+  const [mistakes, bookmarkedIds] = await Promise.all([
+    getMistakesForTopic(supabase, user.id, topic.id, "lastSession"),
+    getBookmarkedQuestionIds(supabase, user.id),
+  ]);
   if (mistakes.length === 0) redirect(`/topics/${slug}/review`);
 
   const total = mistakes.length;
@@ -196,6 +210,7 @@ export default async function RetryMistakesPage({
             index={i}
             topicId={topic.id}
             letters={letters}
+            bookmarked={bookmarkedIds.has(q.id)}
             t={tQuiz}
           />
         ))}
@@ -231,6 +246,7 @@ export default async function RetryMistakesPage({
       </main>
 
       <Script src="/js/quiz.js" strategy="afterInteractive" />
+      <Script src="/js/bookmark.js" strategy="afterInteractive" />
     </>
   );
 }

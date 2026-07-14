@@ -45,6 +45,7 @@ vi.mock("next-intl/server", () => ({
       Quiz: { answerBtn: "צדקתי?" },
       Schedule: { saved: "נשמר!" },
       Flashcard: { done: "הושלם!" },
+      Bookmark: { bookmarkSaveError: "שגיאה בשמירה" },
     },
   }),
   getTranslations: vi.fn().mockResolvedValue((key: string) => key),
@@ -106,6 +107,7 @@ describe("LocaleLayout", () => {
     expect(html).toContain("window.__locale");
     expect(html).toContain("window.__t");
     expect(html).toContain('"he"');
+    expect(html).toContain("bookmarkSaveError");
   });
 
   it("defaults to dark theme when no theme cookie", async () => {

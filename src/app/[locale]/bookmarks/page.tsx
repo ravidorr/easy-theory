@@ -1,4 +1,4 @@
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import Script from "next/script";
@@ -8,8 +8,8 @@ import { SignImage } from "@/components/SignImage";
 import { Icon } from "@/components/Icon";
 import { InlineMarkdown } from "@/components/InlineMarkdown";
 import { createClient } from "@/lib/supabase";
-import { getTopicBySlug, getMistakesForTopic, getBookmarkedQuestionIds } from "@/lib/db";
-import type { MistakeScope, QuizMistake } from "@/lib/db";
+import { getBookmarkedQuestions } from "@/lib/db";
+import type { BookmarkedQuestion } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
 import styles from "./page.module.css";
 
@@ -35,15 +35,13 @@ function signNumberFromUrl(url: string): string | null {
 // its meaning — a full description would give away the answer.
 type TranslateFn = (key: string, values?: Record<string, string | number>) => string;
 
-function QuestionReview({
+function BookmarkCard({
   question,
   letters,
-  bookmarked,
   t,
 }: {
-  question: QuizMistake;
+  question: BookmarkedQuestion;
   letters: string[];
-  bookmarked: boolean;
   t: TranslateFn;
 }) {
   const qAny = question as Record<string, unknown>;
@@ -71,7 +69,7 @@ function QuestionReview({
         type="button"
         className={`bookmark-toggle ${styles.bookmarkCorner}`}
         data-question-id={question.id}
-        aria-pressed={bookmarked ? "true" : "false"}
+        aria-pressed="true"
         aria-label={t("bookmarkLabel")}
       >
         <Icon name="bookmark" size={20} />
@@ -100,12 +98,7 @@ function QuestionReview({
       <div className={styles.optionsList}>
         {options.map(([key, text], i) => {
           const optionSignImg = resolveOptionSignImage(text);
-          const state =
-            key === question.correct_option
-              ? "correct"
-              : key === question.selected_option
-              ? "wrong"
-              : undefined;
+          const state = key === question.correct_option ? "correct" : undefined;
 
           return (
             <div
@@ -130,9 +123,6 @@ function QuestionReview({
               {state === "correct" && (
                 <span className="sr-only">{t("optionCorrectSr")}</span>
               )}
-              {state === "wrong" && (
-                <span className="sr-only">{t("optionWrongSr")}</span>
-              )}
             </div>
           );
         })}
@@ -141,55 +131,24 @@ function QuestionReview({
   );
 }
 
-export default async function ReviewPage({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ slug: string }>;
-  searchParams: Promise<{ scope?: string }>;
-}) {
-  const { slug } = await params;
-  const { scope: scopeParam } = await searchParams;
-  const scope: MistakeScope = scopeParam === "all" ? "all" : "lastSession";
+export default async function BookmarksPage() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect(`/auth/login?next=/topics/${slug}/review`);
+  if (!user) redirect("/auth/login?next=/bookmarks");
 
   const locale = await getLocale();
-  const t = await getTranslations("Review");
+  const t = await getTranslations("Bookmarks");
   const tQuiz = await getTranslations("Quiz");
 
-  const topic = await getTopicBySlug(supabase, slug);
-  if (!topic) notFound();
-
-  const [mistakes, bookmarkedIds] = await Promise.all([
-    getMistakesForTopic(supabase, user.id, topic.id, scope),
-    getBookmarkedQuestionIds(supabase, user.id),
-  ]);
-
-  // Retry always practices the LAST session's mistakes — hide the button when that
-  // session is clean so it can't bounce straight back to an empty review.
-  let showRetry: boolean;
-  let hasOlderMistakes = false;
-  if (scope === "lastSession") {
-    showRetry = mistakes.length > 0;
-    if (!showRetry) {
-      hasOlderMistakes =
-        (await getMistakesForTopic(supabase, user.id, topic.id, "all")).length > 0;
-    }
-  } else {
-    showRetry =
-      mistakes.length > 0 &&
-      (await getMistakesForTopic(supabase, user.id, topic.id, "lastSession")).length > 0;
-  }
+  const bookmarks = await getBookmarkedQuestions(supabase, user.id);
 
   const questionField = locale === "ar" ? "question_ar" : "question_he";
   const explanationField = locale === "ar" ? "explanation_ar" : "explanation_he";
   const letters = tQuiz("letters").split(",");
 
-  const localizedMistakes = mistakes.map((q) => {
+  const localizedBookmarks = bookmarks.map((q) => {
     const qAny = q as Record<string, unknown>;
     return {
       ...q,
@@ -205,66 +164,28 @@ export default async function ReviewPage({
   return (
     <main className={styles.page}>
       <div className={styles.topBar}>
-        <Link href={`/topics/${slug}`} className={styles.closeBtn} aria-label={tQuiz("closeLabel")}>
+        <Link href="/more" className={styles.closeBtn} aria-label={tQuiz("closeLabel")}>
           ✕
         </Link>
         <h1>{t("topBarTitle")}</h1>
       </div>
 
-      <div className={styles.scopeToggle} role="group" aria-label={t("scopeLabel")}>
-        <Link
-          href={`/topics/${slug}/review`}
-          className={styles.scopeOption}
-          data-active={scope === "lastSession" || undefined}
-          aria-current={scope === "lastSession" ? "page" : undefined}
-        >
-          {t("scopeLastSession")}
-        </Link>
-        <Link
-          href={`/topics/${slug}/review?scope=all`}
-          className={styles.scopeOption}
-          data-active={scope === "all" || undefined}
-          aria-current={scope === "all" ? "page" : undefined}
-        >
-          {t("scopeAllTime")}
-        </Link>
-      </div>
-
-      {localizedMistakes.length === 0 ? (
+      {localizedBookmarks.length === 0 ? (
         <div className={styles.emptyState}>
-          <span className={styles.emptyEmoji}>🎉</span>
-          <p className={styles.emptyHint}>
-            {hasOlderMistakes ? t("emptyHintLastSession") : t("emptyHint")}
-          </p>
-          {hasOlderMistakes && (
-            <Link href={`/topics/${slug}/review?scope=all`} className={`btn-secondary ${styles.btnWide}`}>
-              {t("viewAllMistakes")}
-            </Link>
-          )}
+          <p className={styles.emptyHint}>{t("emptyHint")}</p>
           <Link href="/" className={`btn-primary ${styles.btnWide}`}>
             {t("backHome")}
           </Link>
         </div>
       ) : (
         <>
-          <p className={styles.mistakeCount}>
-            {localizedMistakes.length === 1
-              ? t("mistakeCountOne")
-              : t("mistakeCountMany", { count: localizedMistakes.length })}
+          <p className={styles.bookmarkCount}>
+            {localizedBookmarks.length === 1
+              ? t("countOne")
+              : t("countMany", { count: localizedBookmarks.length })}
           </p>
-          {showRetry && (
-            <Link href={`/topics/${slug}/retry`} className={`btn-primary ${styles.btnFull}`}>
-              {t("retryBtn")}
-            </Link>
-          )}
-          {localizedMistakes.map((mistake) => (
-            <QuestionReview
-              key={mistake.id}
-              question={mistake}
-              letters={letters}
-              bookmarked={bookmarkedIds.has(mistake.id)}
-              t={tQuiz}
-            />
+          {localizedBookmarks.map((bookmark) => (
+            <BookmarkCard key={bookmark.id} question={bookmark} letters={letters} t={tQuiz} />
           ))}
           <Link href="/" className={`btn-primary ${styles.btnFull} ${styles.returnLink}`}>
             {t("backHome")}

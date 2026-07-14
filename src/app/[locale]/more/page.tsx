@@ -85,6 +85,14 @@ export default async function MorePage() {
             <Icon name="chevron-left" size={18} className={styles.navChevron} />
           </Link>
 
+          <Link href="/bookmarks" className={`${styles.navRow} ${styles.navRowBordered}`}>
+            <span className={styles.navIcon}>
+              <Icon name="bookmark" size={20} />
+            </span>
+            <span className={styles.navRowLabel}>{t("navBookmarks")}</span>
+            <Icon name="chevron-left" size={18} className={styles.navChevron} />
+          </Link>
+
           <Link href="/credits" className={styles.navRow}>
             <span className={styles.navIcon}>
               <Icon name="heart" size={20} />

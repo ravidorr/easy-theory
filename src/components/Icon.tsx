@@ -164,6 +164,12 @@ const ICONS = {
     viewBox: "0 0 24 24",
     content: <path d="M20 6 9 17l-5-5" {...stroke} strokeWidth={2.5} />,
   },
+  bookmark: {
+    viewBox: "0 0 24 24",
+    content: (
+      <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" {...stroke} />
+    ),
+  },
 } satisfies Record<string, { viewBox: string; content: ReactElement }>;
 
 export type IconName = keyof typeof ICONS;

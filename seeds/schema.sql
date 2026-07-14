@@ -96,6 +96,13 @@ CREATE TABLE IF NOT EXISTS user_exam_attempts (
   CHECK (score <= total)
 );
 
+CREATE TABLE IF NOT EXISTS user_question_bookmarks (
+  user_id     UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  question_id UUID NOT NULL REFERENCES questions(id) ON DELETE CASCADE,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (user_id, question_id)
+);
+
 CREATE TABLE IF NOT EXISTS user_push_subscriptions (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id    UUID REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -151,3 +158,8 @@ CREATE POLICY "own delete" ON user_push_subscriptions FOR DELETE USING (user_id 
 ALTER TABLE user_exam_attempts ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "own select" ON user_exam_attempts FOR SELECT USING (user_id = auth.uid());
 CREATE POLICY "own insert" ON user_exam_attempts FOR INSERT WITH CHECK (user_id = auth.uid());
+
+ALTER TABLE user_question_bookmarks ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "own select" ON user_question_bookmarks FOR SELECT USING (user_id = auth.uid());
+CREATE POLICY "own insert" ON user_question_bookmarks FOR INSERT WITH CHECK (user_id = auth.uid());
+CREATE POLICY "own delete" ON user_question_bookmarks FOR DELETE USING (user_id = auth.uid());

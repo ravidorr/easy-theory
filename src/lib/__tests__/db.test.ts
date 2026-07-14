@@ -13,6 +13,8 @@ import {
   getUserMedals,
   getPushSubscriptionsForUsers,
   getMistakesForTopic,
+  getBookmarkedQuestionIds,
+  getBookmarkedQuestions,
   markTopicCompleted,
   getRandomExamQuestions,
   getExamAttempts,
@@ -677,5 +679,111 @@ describe("markTopicCompleted", () => {
     await markTopicCompleted(client, "u1", "t1");
     expect(updateFn).not.toHaveBeenCalled();
     expect(insertFn).not.toHaveBeenCalled();
+  });
+});
+
+// ─── Bookmarks ───────────────────────────────────────────────────────────────
+
+type BookmarkRow = { question_id: string; created_at: string };
+
+function makeBookmarksClient({
+  bookmarks = [] as BookmarkRow[] | null,
+  questionDetails = [] as QuestionRow[] | null,
+  bookmarksError = null as { message: string } | null,
+  questionsError = null as { message: string } | null,
+} = {}) {
+  return {
+    from: vi.fn().mockImplementation((table: string) => {
+      if (table === "user_question_bookmarks") {
+        return chain({ data: bookmarksError ? null : bookmarks, error: bookmarksError });
+      }
+      if (table === "questions") {
+        // The details fetch is chunked — return only the requested ids.
+        return {
+          select: vi.fn().mockReturnValue({
+            in: vi.fn((_col: string, ids: string[]) =>
+              chain({
+                data:
+                  questionsError || !questionDetails
+                    ? null
+                    : questionDetails.filter((q) => ids.includes(q.id)),
+                error: questionsError,
+              })
+            ),
+          }),
+        };
+      }
+      return chain({ data: [] });
+    }),
+  } as unknown as SupabaseClient;
+}
+
+describe("getBookmarkedQuestionIds", () => {
+  it("returns a Set of the user's bookmarked question ids", async () => {
+    const supabase = makeBookmarksClient({
+      bookmarks: [
+        { question_id: "q1", created_at: "2026-01-02" },
+        { question_id: "q2", created_at: "2026-01-01" },
+      ],
+    });
+    expect(await getBookmarkedQuestionIds(supabase, "u1")).toEqual(new Set(["q1", "q2"]));
+  });
+
+  it("returns an empty Set when Supabase returns null", async () => {
+    const supabase = makeBookmarksClient({ bookmarks: null });
+    expect(await getBookmarkedQuestionIds(supabase, "u1")).toEqual(new Set());
+  });
+});
+
+describe("getBookmarkedQuestions", () => {
+  it("returns [] when the user has no bookmarks", async () => {
+    const supabase = makeBookmarksClient({ bookmarks: [] });
+    expect(await getBookmarkedQuestions(supabase, "u1")).toEqual([]);
+  });
+
+  it("returns questions in bookmark order with bookmarked_at attached", async () => {
+    const supabase = makeBookmarksClient({
+      bookmarks: [
+        { question_id: "q2", created_at: "2026-01-02" },
+        { question_id: "q1", created_at: "2026-01-01" },
+      ],
+      questionDetails: [
+        { id: "q1", question_he: "First?" },
+        { id: "q2", question_he: "Second?" },
+      ],
+    });
+    const result = await getBookmarkedQuestions(supabase, "u1");
+    expect(result.map((q) => q.id)).toEqual(["q2", "q1"]);
+    expect(result[0].bookmarked_at).toBe("2026-01-02");
+    expect(result[1].bookmarked_at).toBe("2026-01-01");
+  });
+
+  it("skips bookmarks whose question row is missing", async () => {
+    const supabase = makeBookmarksClient({
+      bookmarks: [
+        { question_id: "q1", created_at: "2026-01-02" },
+        { question_id: "q-deleted", created_at: "2026-01-01" },
+      ],
+      questionDetails: [{ id: "q1", question_he: "First?" }],
+    });
+    const result = await getBookmarkedQuestions(supabase, "u1");
+    expect(result.map((q) => q.id)).toEqual(["q1"]);
+  });
+
+  it("throws when the bookmarks query fails instead of hiding bookmarks", async () => {
+    const supabase = makeBookmarksClient({ bookmarksError: { message: "boom" } });
+    await expect(getBookmarkedQuestions(supabase, "u1")).rejects.toThrow(
+      /bookmarks query failed: boom/
+    );
+  });
+
+  it("throws when a question details chunk fails", async () => {
+    const supabase = makeBookmarksClient({
+      bookmarks: [{ question_id: "q1", created_at: "2026-01-01" }],
+      questionsError: { message: "boom" },
+    });
+    await expect(getBookmarkedQuestions(supabase, "u1")).rejects.toThrow(
+      /questions query failed: boom/
+    );
   });
 });

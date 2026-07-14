@@ -132,10 +132,6 @@
   text-align: center;
 }
 
-.emptyEmoji {
-  font-size: 48px;
-}
-
 .emptyHint {
   margin: 0;
   font-size: var(--type-body-size);
@@ -146,7 +142,7 @@
   min-width: 180px;
 }
 
-.mistakeCount {
+.bookmarkCount {
   margin: 0;
   font-size: var(--type-small-size);
   color: var(--text-muted);
@@ -158,33 +154,4 @@
 
 .returnLink {
   margin-top: 8px;
-}
-
-.scopeToggle {
-  display: flex;
-  gap: 4px;
-  padding: 4px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-}
-
-.scopeOption {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 36px;
-  padding: 8px 12px;
-  border-radius: var(--radius-lg);
-  color: var(--text-muted);
-  font-weight: 600;
-  font-size: var(--type-small-size);
-  text-decoration: none;
-}
-
-.scopeOption[data-active] {
-  background: var(--surface);
-  color: var(--text);
-  box-shadow: var(--shadow-card);
 }

@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import ReviewPage from "../page";
 import { createClient } from "@/lib/supabase";
-import { getTopicBySlug, getMistakesForTopic } from "@/lib/db";
+import { getTopicBySlug, getMistakesForTopic, getBookmarkedQuestionIds } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
 
 vi.mock("next/image", () => ({
@@ -22,6 +22,11 @@ vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
 vi.mock("@/lib/db", () => ({
   getTopicBySlug: vi.fn(),
   getMistakesForTopic: vi.fn(),
+  getBookmarkedQuestionIds: vi.fn(),
+}));
+vi.mock("next/script", () => ({
+  default: ({ src }: { src: string }) =>
+    React.createElement("script", { "data-src": src }),
 }));
 vi.mock("@/components/SignImage", () => ({
   SignImage: ({ src, alt = "" }: { src: string; alt?: string }) =>
@@ -39,6 +44,7 @@ vi.mock("next-intl/server", () => ({
 const mockCreateClient = vi.mocked(createClient);
 const mockGetTopicBySlug = vi.mocked(getTopicBySlug);
 const mockGetMistakes = vi.mocked(getMistakesForTopic);
+const mockGetBookmarkedIds = vi.mocked(getBookmarkedQuestionIds);
 
 const TOPIC = { id: "t1", slug: "signs", name_he: "תמרורים" };
 
@@ -84,6 +90,7 @@ describe("ReviewPage", () => {
     mockCreateClient.mockResolvedValue(makeClient() as never);
     mockGetTopicBySlug.mockResolvedValue(TOPIC as never);
     mockGetMistakes.mockResolvedValue([]);
+    mockGetBookmarkedIds.mockResolvedValue(new Set());
     vi.mocked(getTranslations).mockResolvedValue((key: string) => key);
     vi.mocked(getLocale).mockResolvedValue("he");
   });
@@ -349,6 +356,34 @@ describe("ReviewPage", () => {
     const { container } = render(jsx);
     expect(container.querySelector("a.btn-primary")).toBeTruthy();
     expect(container.querySelector("a button")).toBeNull();
+  });
+
+  describe("bookmark toggle", () => {
+    it("renders an unpressed toggle with the question id when not bookmarked", async () => {
+      mockGetMistakes.mockResolvedValue([MISTAKE_A] as never);
+      const jsx = await callPage();
+      const { container } = render(jsx);
+      const toggle = container.querySelector(".bookmark-toggle");
+      expect(toggle?.getAttribute("aria-pressed")).toBe("false");
+      expect(toggle?.getAttribute("data-question-id")).toBe("q1");
+      expect(toggle?.getAttribute("aria-label")).toBe("bookmarkLabel");
+    });
+
+    it("renders a pressed toggle when the question is bookmarked", async () => {
+      mockGetMistakes.mockResolvedValue([MISTAKE_A] as never);
+      mockGetBookmarkedIds.mockResolvedValue(new Set(["q1"]));
+      const jsx = await callPage();
+      const { container } = render(jsx);
+      expect(
+        container.querySelector('.bookmark-toggle[aria-pressed="true"]')
+      ).toBeTruthy();
+    });
+
+    it("loads the bookmark script", async () => {
+      const jsx = await callPage();
+      const { container } = render(jsx);
+      expect(container.querySelector('script[data-src="/js/bookmark.js"]')).toBeTruthy();
+    });
   });
 
   describe("scope toggle", () => {
