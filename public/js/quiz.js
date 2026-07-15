@@ -117,15 +117,65 @@
   const finalScore = document.getElementById("final-score");
   const footer = document.getElementById("quiz-footer");
 
-  let currentIndex = resumed ? resumed.i : 0;
-  let selectedOption = null;
-  let confirmed = false;
-  let answerPersistence = "idle";
-  let answerFeedback = "";
+  function parseAnsweredIds() {
+    try {
+      const raw = container.dataset.answeredIds;
+      if (!raw) return new Set();
+      const arr = JSON.parse(raw);
+      return new Set(
+        Array.isArray(arr) ? arr.filter(function (id) { return typeof id === "string"; }) : []
+      );
+    } catch {
+      return new Set();
+    }
+  }
+
+  function firstUnansweredIndex(answered) {
+    for (let i = 0; i < slides.length; i++) {
+      const qid = slides[i].dataset.questionId;
+      if (!qid || !answered.has(qid)) return i;
+    }
+    return slides.length;
+  }
+
+  const answeredIds = storageKey ? parseAnsweredIds() : new Set();
+  const firstUnanswered = storageKey ? firstUnansweredIndex(answeredIds) : 0;
+
   let pendingSubmission = resumed ? resumed.pendingSubmission || null : null;
   let acknowledgedSubmission = resumed
     ? resumed.acknowledgedSubmission || null
     : null;
+
+  function slideHasActiveSubmission(index) {
+    const slide = slides[index];
+    if (!slide) return false;
+    const qid = slide.dataset.questionId;
+    if (pendingSubmission && pendingSubmission.questionId === qid) return true;
+    if (acknowledgedSubmission && acknowledgedSubmission.questionId === qid) return true;
+    return false;
+  }
+
+  let currentIndex;
+  if (resumed) {
+    currentIndex = resumed.i;
+  } else if (storageKey) {
+    currentIndex = firstUnanswered;
+  } else {
+    currentIndex = 0;
+  }
+
+  if (storageKey && resumed) {
+    const slide = slides[currentIndex];
+    const qid = slide && slide.dataset.questionId;
+    if (qid && answeredIds.has(qid) && !slideHasActiveSubmission(currentIndex)) {
+      currentIndex = firstUnanswered;
+    }
+  }
+
+  let selectedOption = null;
+  let confirmed = false;
+  let answerPersistence = "idle";
+  let answerFeedback = "";
   let score = resumed ? resumed.score | 0 : 0;
   let points = resumed ? resumed.points | 0 : 0;
   let actionActivationIsTouch = false;
@@ -243,6 +293,22 @@
     const pct = ((index + 1) / total) * 100;
     if (progressFill) progressFill.style.width = pct + "%";
     if (countEl) countEl.textContent = tf(t.count || '{current} מתוך {total}', { current: index + 1, total: total });
+  }
+
+  function showAllComplete() {
+    slides.forEach(function (s) { s.style.display = "none"; });
+    if (footer) footer.style.display = "none";
+    if (finalScreen) finalScreen.style.display = "flex";
+    const answeredCount = parseInt(container.dataset.answeredCount, 10);
+    const coverageCount = Number.isFinite(answeredCount) ? answeredCount : total;
+    if (finalScore) {
+      finalScore.textContent = tf(
+        t.finalAllAnswered || "{answered} מתוך {total} שאלות נענו",
+        { answered: coverageCount, total: total }
+      );
+    }
+    if (progressFill) progressFill.style.width = "100%";
+    if (countEl) countEl.textContent = tf(t.count || '{current} מתוך {total}', { current: total, total: total });
   }
 
   function showSlide(index) {
@@ -585,6 +651,10 @@
   }
 
   if (points > 0 && rewardScore) rewardScore.textContent = String(points);
-  showSlide(currentIndex);
-  restoreSubmissionState();
+  if (!resumed && storageKey && firstUnanswered >= total) {
+    showAllComplete();
+  } else {
+    showSlide(currentIndex);
+    restoreSubmissionState();
+  }
 })();

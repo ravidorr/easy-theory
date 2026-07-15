@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import TopicQuizPage from "../page";
 import { createClient } from "@/lib/supabase";
-import { getTopicBySlug, getQuestionsForTopic, getBookmarkedQuestionIds } from "@/lib/db";
+import { getTopicBySlug, getQuestionsForTopic, getBookmarkedQuestionIds, getAnsweredQuestionIdsForTopic } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
 import { SIGNS_QUESTION_15_AR } from "@/lib/content/signs-question-15-ar";
 
@@ -24,6 +24,7 @@ vi.mock("@/lib/db", () => ({
   getTopicBySlug: vi.fn(),
   getQuestionsForTopic: vi.fn(),
   getBookmarkedQuestionIds: vi.fn(),
+  getAnsweredQuestionIdsForTopic: vi.fn(),
 }));
 vi.mock("@/components/SignImage", () => ({
   SignImage: ({ src, alt = "" }: { src: string; alt?: string }) =>
@@ -45,6 +46,7 @@ const mockCreateClient = vi.mocked(createClient);
 const mockGetTopicBySlug = vi.mocked(getTopicBySlug);
 const mockGetQuestions = vi.mocked(getQuestionsForTopic);
 const mockGetBookmarkedIds = vi.mocked(getBookmarkedQuestionIds);
+const mockGetAnsweredIds = vi.mocked(getAnsweredQuestionIdsForTopic);
 
 const TOPIC = { id: "t1", slug: "signs", name_he: "תמרורים" };
 const QUESTION = {
@@ -70,6 +72,7 @@ describe("TopicQuizPage", () => {
     mockGetTopicBySlug.mockResolvedValue(TOPIC as never);
     mockGetQuestions.mockResolvedValue([]);
     mockGetBookmarkedIds.mockResolvedValue(new Set());
+    mockGetAnsweredIds.mockResolvedValue(new Set());
     vi.mocked(getTranslations).mockResolvedValue((key: string) => key);
     vi.mocked(getLocale).mockResolvedValue("he");
   });
@@ -99,6 +102,16 @@ describe("TopicQuizPage", () => {
     const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "he" }) });
     render(jsx);
     expect(screen.getByText("מה המשמעות של תמרור זה?")).toBeInTheDocument();
+  });
+
+  it("embeds server-side answered question ids on the quiz container", async () => {
+    mockGetQuestions.mockResolvedValue([QUESTION] as never);
+    mockGetAnsweredIds.mockResolvedValue(new Set(["q-prev"]) as never);
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "he" }) });
+    const { container } = render(jsx);
+    const quiz = container.querySelector("#quiz-container");
+    expect(quiz?.getAttribute("data-answered-ids")).toBe(JSON.stringify(["q-prev"]));
+    expect(quiz?.getAttribute("data-answered-count")).toBe("1");
   });
 
   it("renders quiz count translation key", async () => {

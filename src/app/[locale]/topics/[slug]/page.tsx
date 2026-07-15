@@ -8,7 +8,7 @@ import { SignImage } from "@/components/SignImage";
 import { Icon } from "@/components/Icon";
 import { InlineMarkdown } from "@/components/InlineMarkdown";
 import { createClient } from "@/lib/supabase";
-import { getTopicBySlug, getQuestionsForTopic, getBookmarkedQuestionIds } from "@/lib/db";
+import { getTopicBySlug, getQuestionsForTopic, getBookmarkedQuestionIds, getAnsweredQuestionIdsForTopic } from "@/lib/db";
 import type { Question } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
 import { localizeQuestion } from "@/lib/content-locale";
@@ -154,9 +154,10 @@ export default async function TopicQuizPage({
   const topic = await getTopicBySlug(supabase, slug);
   if (!topic) notFound();
 
-  const [questions, bookmarkedIds] = await Promise.all([
+  const [questions, bookmarkedIds, answeredIds] = await Promise.all([
     getQuestionsForTopic(supabase, topic.id),
     getBookmarkedQuestionIds(supabase, user.id),
+    getAnsweredQuestionIdsForTopic(supabase, user.id, topic.id),
   ]);
   const total = questions.length;
 
@@ -174,6 +175,8 @@ export default async function TopicQuizPage({
         data-topic-id={topic.id}
         data-total={total}
         data-user-id={user.id}
+        data-answered-ids={JSON.stringify([...answeredIds])}
+        data-answered-count={answeredIds.size}
         className={styles.page}
       >
         <div className={styles.topBar}>

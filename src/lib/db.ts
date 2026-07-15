@@ -457,6 +457,20 @@ export async function getMistakesForTopic(
   });
 }
 
+export async function getAnsweredQuestionIdsForTopic(
+  supabase: SupabaseClient,
+  userId: string,
+  topicId: string
+): Promise<Set<string>> {
+  const { data, error } = await supabase
+    .from("user_quiz_responses")
+    .select("question_id, questions!inner(topic_id)")
+    .eq("user_id", userId)
+    .eq("questions.topic_id", topicId);
+  throwOnDbError(error, "getAnsweredQuestionIdsForTopic: user_quiz_responses");
+  return new Set((data ?? []).map((row) => row.question_id));
+}
+
 export type BookmarkedQuestion = Question & {
   bookmarked_at: string;
 };

@@ -13,6 +13,7 @@ import {
   getUserMedals,
   getPushSubscriptionsForUsers,
   getMistakesForTopic,
+  getAnsweredQuestionIdsForTopic,
   getBookmarkedQuestionIds,
   getBookmarkedQuestions,
   getSignSrsCards,
@@ -571,6 +572,32 @@ describe("getMistakesForTopic", () => {
       const supabase = makeMistakesClient({ responses: [] });
       expect(await getMistakesForTopic(supabase, "u1", "t1", "lastSession")).toEqual([]);
     });
+  });
+});
+
+describe("getAnsweredQuestionIdsForTopic", () => {
+  it("returns distinct answered question ids for the topic", async () => {
+    const supabase = makeMistakesClient({
+      responses: [
+        { question_id: "q1", selected_option: "a", is_correct: true, answered_at: "2024-01-02" },
+        { question_id: "q2", selected_option: "b", is_correct: false, answered_at: "2024-01-01" },
+      ],
+    });
+    expect(await getAnsweredQuestionIdsForTopic(supabase, "u1", "t1")).toEqual(
+      new Set(["q1", "q2"])
+    );
+  });
+
+  it("returns an empty Set when the user has no responses for the topic", async () => {
+    const supabase = makeMistakesClient({ responses: [] });
+    expect(await getAnsweredQuestionIdsForTopic(supabase, "u1", "t1")).toEqual(new Set());
+  });
+
+  it("throws when the responses query fails", async () => {
+    const supabase = makeMistakesClient({ responsesError: boom });
+    await expect(getAnsweredQuestionIdsForTopic(supabase, "u1", "t1")).rejects.toThrow(
+      /getAnsweredQuestionIdsForTopic: user_quiz_responses query failed: boom/
+    );
   });
 });
 
