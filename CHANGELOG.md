@@ -4,7 +4,11 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ## [Unreleased]
 
+### Added
+- Topic quiz skip-answered on fresh sessions: server-known answered question IDs are passed to `quiz.js`, which starts at the first unanswered slide (global counter matches dashboard progress); same-browser reload still resumes via `localStorage`; all-answered topics show the final screen with home + review links (fixes #117)
+
 ### Changed
+- Home-and-quiz QA charter: CHK-QUIZ-06/07 cover cross-browser skip-answered entry and same-browser localStorage resume
 - Flashcards QA charter CHK-FC-05 now expects SRS persistence via POST `/api/srs` (resolves #130; charter was stale after migration 014)
 
 ### Fixed

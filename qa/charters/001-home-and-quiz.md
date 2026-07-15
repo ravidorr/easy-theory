@@ -51,6 +51,12 @@ checks:
   - id: CHK-QUIZ-05
     desc: "Progress persists: dashboard reflects the completed quiz"
     oracle: "Back on /he, the topic's progress/stats differ from the CHK-HOME-01 screenshot in the expected direction"
+  - id: CHK-QUIZ-06
+    desc: "Cross-browser continue: quiz opens at the first unanswered question when server progress exists"
+    oracle: "Given dashboard topic progress > 0 (e.g. 2/501), clear `localStorage` for the origin (or use a fresh browser profile), open the topic quiz: counter shows the next global index (e.g. 3 מתוך 501), not 1; if every question in the topic is already answered, `#quiz-final` shows with home + review links instead of slide 1"
+  - id: CHK-QUIZ-07
+    desc: "Same-browser reload still resumes mid-quiz via localStorage"
+    oracle: "Answer at least one question, reload mid-quiz without clearing storage: quiz restores the saved slide/index (including a pending retry state when applicable); `quiz-resume:v1:*` in Application → Local Storage matches the visible slide"
   - id: CHK-CONSOLE-01
     desc: "No console errors anywhere in the flow"
     oracle: "Browser console contains zero error-level entries across all steps (warnings triaged case by case)"
@@ -60,7 +66,7 @@ checks:
   - id: CHK-COPY-RTL-01
     desc: "No hardcoded or direction-broken strings in the flow"
     oracle: "Visible strings exist in he.json (Home/Quiz/TabBar namespaces); no LTR-leaking punctuation or mixed-direction breakage"
-exploration_budget: "After all checks, up to 5 min within scope: rapid double-click on confirm, browser back mid-quiz, page reload mid-quiz, empty-progress edge (if user is fresh)"
+exploration_budget: "After all checks, up to 5 min within scope: rapid double-click on confirm, browser back mid-quiz, page reload mid-quiz (same-browser resume per CHK-QUIZ-07), fresh-profile entry with partial server progress (skip-answered per CHK-QUIZ-06), empty-progress edge (if user is fresh)"
 ---
 
 ## Narrative
@@ -76,8 +82,11 @@ Route hints:
 - Topic links on the dashboard go to `/he/topics/<slug>`. Use the first/suggested topic.
 - The quiz is driven by `public/js/quiz.js`: answer options are buttons inside
   `#quiz-container`; confirming an answer POSTs `/api/quiz`; finishing the batch shows
-  `#quiz-final` and POSTs `/api/progress`. If a quiz batch is long, answer efficiently —
-  the goal is the loop and its persistence, not deliberation.
+  `#quiz-final` and POSTs `/api/progress`. On a fresh browser session, the page passes
+  server-known answered question IDs via `data-answered-ids` and the client starts at
+  the first unanswered slide (global counter matches dashboard progress); same-browser
+  reload still wins via `quiz-resume:v1:*` in localStorage. If a quiz batch is long,
+  answer efficiently — the goal is the loop and its persistence, not deliberation.
 - Copy sources: `messages/he.json`, namespaces `Home`, `Quiz`, `TabBar`. Compare what you
   see against these when something reads oddly.
 - Meaningful-step screenshots: login redirect, authed dashboard, quiz first question,

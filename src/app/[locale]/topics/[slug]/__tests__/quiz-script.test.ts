@@ -24,11 +24,25 @@ function slideHTML(index: number, correct: string) {
   `;
 }
 
-function setupDOM(opts: { userId?: string; quizMode?: string } = {}) {
+function setupDOM(opts: {
+  userId?: string;
+  quizMode?: string;
+  answeredIds?: string[];
+  answeredCount?: number;
+} = {}) {
   const userAttr = opts.userId ? ` data-user-id="${opts.userId}"` : "";
   const modeAttr = opts.quizMode ? ` data-quiz-mode="${opts.quizMode}"` : "";
+  const answeredAttr = opts.answeredIds
+    ? ` data-answered-ids='${JSON.stringify(opts.answeredIds)}'`
+    : "";
+  const answeredCountAttr =
+    opts.answeredCount != null
+      ? ` data-answered-count="${opts.answeredCount}"`
+      : opts.answeredIds
+        ? ` data-answered-count="${opts.answeredIds.length}"`
+        : "";
   document.body.innerHTML = `
-    <main id="quiz-container" data-topic-id="t1" data-total="2"${userAttr}${modeAttr}>
+    <main id="quiz-container" data-topic-id="t1" data-total="2"${userAttr}${modeAttr}${answeredAttr}${answeredCountAttr}>
       <div id="quiz-progress-fill"></div>
       <span id="quiz-count"></span>
       ${slideHTML(0, "a")}
@@ -51,6 +65,14 @@ function setupDOM(opts: { userId?: string; quizMode?: string } = {}) {
 
 function scoreText() {
   return document.getElementById("reward-score")!.textContent;
+}
+
+function countText() {
+  return document.getElementById("quiz-count")!.textContent;
+}
+
+function finalScoreText() {
+  return document.getElementById("final-score")!.textContent;
 }
 
 function messageText() {
@@ -996,5 +1018,78 @@ describe("quiz.js – resume", () => {
     expect(scoreText()).toBe("0");
     expect(actionButton().disabled).toBe(true);
     expect(actionButton().textContent).toBe("צדקתי?");
+  });
+});
+
+describe("quiz.js – skip answered", () => {
+  const KEY = "quiz-resume:v1:u1:t1";
+
+  function slideDisplay(index: number) {
+    return (document.querySelectorAll(".quiz-slide")[index] as HTMLElement).style.display;
+  }
+
+  beforeEach(() => {
+    localStorage.clear();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) })
+    );
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("starts at the first unanswered question on a fresh session", () => {
+    setupDOM({ userId: "u1", answeredIds: ["q1"] });
+    expect(slideDisplay(0)).toBe("none");
+    expect(slideDisplay(1)).toBe("flex");
+    expect(countText()).toBe("2 מתוך 2");
+  });
+
+  it("keeps a pending localStorage resume on an already-answered question", () => {
+    localStorage.setItem(
+      KEY,
+      JSON.stringify({
+        i: 0,
+        score: 0,
+        points: 0,
+        sessionId: "s-1",
+        total: 2,
+        pendingSubmission: {
+          questionId: "q1",
+          selectedOption: "a",
+          idempotencyKey: "key-1",
+        },
+      })
+    );
+    setupDOM({ userId: "u1", answeredIds: ["q1"] });
+    expect(slideDisplay(0)).toBe("flex");
+    expect(slideDisplay(1)).toBe("none");
+    expect(actionButton().textContent).toBe("לנסות שוב");
+  });
+
+  it("bumps a stale resume forward when the saved slide was already answered", () => {
+    localStorage.setItem(
+      KEY,
+      JSON.stringify({ i: 0, score: 0, points: 0, sessionId: "s-1", total: 2 })
+    );
+    setupDOM({ userId: "u1", answeredIds: ["q1"] });
+    expect(slideDisplay(0)).toBe("none");
+    expect(slideDisplay(1)).toBe("flex");
+  });
+
+  it("shows the final screen when every question was already answered", () => {
+    setupDOM({ userId: "u1", answeredIds: ["q1", "q2"], answeredCount: 2 });
+    expect(slideDisplay(0)).toBe("none");
+    expect(document.getElementById("quiz-footer")!.style.display).toBe("none");
+    expect(document.getElementById("quiz-final")!.style.display).toBe("flex");
+    expect(finalScoreText()).toBe("2 מתוך 2 שאלות נענו");
+  });
+
+  it("does not skip answered questions in retry mode", () => {
+    setupDOM({ userId: "u1", quizMode: "retry", answeredIds: ["q1"] });
+    expect(slideDisplay(0)).toBe("flex");
+    expect(slideDisplay(1)).toBe("none");
   });
 });
