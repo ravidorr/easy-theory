@@ -44,7 +44,9 @@ Everything lives on GitHub:
 - **Run reports** — closed issues labeled `qa-run` (verdict summary → checks matrix →
   findings → the mandatory **NOT tested** list, plus `findings.json` in a collapsed
   block).
-- **Raw evidence** — the `qa-evidence` branch, one `<run-id>/` directory per run.
+- **Evidence folder** — the `qa-evidence` branch, one `<run-id>/` directory per run.
+  Issue bodies link to the GitHub tree URL (`https://github.com/<slug>/tree/qa-evidence/<run-id>`)
+  so the folder is clickable; raw URLs are used only for inline screenshot embeds.
 
 Severity rubric: `blocker` / `major` / `minor` / `cosmetic` / `question` (possibly
 intentional — needs a human decision). Confidence: `high` (reproduced twice) / `medium`

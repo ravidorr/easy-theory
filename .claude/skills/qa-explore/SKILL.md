@@ -98,10 +98,13 @@ Conventions:
 3. Run `pnpm qa:validate-report <run-dir> <charter-path>`. Fix the report until it
    passes — this gate is not optional, and nothing gets published before it passes.
 4. Publish the evidence: `pnpm qa:publish-evidence <run-dir>`. It pushes the run dir to
-   the `qa-evidence` branch and prints the raw base URL
-   (`https://raw.githubusercontent.com/<slug>/qa-evidence/<run-id>/`). Use that URL for
-   every evidence reference in issue bodies — screenshots embed inline with
-   `![…](<base-url>screenshots/step-NN-<slug>.png)`.
+   the `qa-evidence` branch and prints two URLs:
+   - **Tree URL** (stdout line 1): `https://github.com/<slug>/tree/qa-evidence/<run-id>`
+     — the clickable run folder. Use this for every human-facing evidence link in issue
+     bodies (`Evidence`, "Found in run", dedup comments, final message). Never use a raw
+     directory URL (`raw.githubusercontent.com/.../<run-id>/`) as a link — it 404s.
+   - **Raw screenshots base** (stdout line 2, `raw-screenshots-base=…`): prefix for
+     inline images only — `![…](<raw-base>/screenshots/step-NN-<slug>.png)`.
 5. Ensure the QA labels exist (idempotent — `--force` updates in place):
    `gh label create qa --color 5319e7 --description "Filed by the QA agent" --force`,
    and likewise `qa-run` (archived run reports), `a11y`, `copy`, `product-question`.
@@ -112,7 +115,7 @@ Conventions:
    an existing issue when it describes the same symptom in the same flow (judge by
    title + repro, not exact wording). For each match, do NOT file a new issue; instead
    `gh issue comment <number>` with "Still reproduces in run `<run-id>`", the severity +
-   confidence observed this run, and evidence links.
+   confidence observed this run, and evidence links (tree URL + inline screenshots).
 7. File one issue per remaining (new) finding:
    - Title: imperative, prefixed with the severity in brackets, e.g.
      `[major] Progress not saved when …`
@@ -124,12 +127,13 @@ Conventions:
      - Category (additive, when relevant): `a11y` for accessibility findings, `copy`
        for copy/translation findings (e.g. an a11y defect gets `qa` + `bug` + `a11y`)
    - Body: repro steps, expected/actual, severity + confidence, environment block,
-     inline screenshots + evidence links into `qa-evidence`, and a "Found in run
-     `<run-id>`" line (link the run-report issue after step 8 is done, or reference
-     the `qa-evidence` run URL).
+     inline screenshots (raw URLs) + a clickable **Evidence** link (GitHub tree URL to
+     the run folder), and a "Found in run `<run-id>`" line (link the run-report issue
+     after step 8 is done, or the tree URL).
 8. File the run-report issue (every run, even with zero findings): title
    `QA run <run-id>: <verdict summary>`, labels `qa` + `qa-run`. Body: the full
-   `report.md` content with evidence paths rewritten to `qa-evidence` raw URLs, links
+   `report.md` content with screenshot paths rewritten to raw URLs (inline embeds) and
+   a tree URL at the top for browsing the run folder, links
    to every finding issue and dedup comment posted in steps 6–7, and `findings.json`
    inside a collapsed `<details>` block. Then close it immediately
    (`gh issue close <number> --reason completed`) — it is an archived record, not a
@@ -138,7 +142,8 @@ Conventions:
    the user exactly what was and was not published. Never delete an unpublished run.
 10. Final message to the user: one-paragraph outcome, the checks matrix, the explicit
     NOT-tested list, the created issue URLs (findings + run report), any dedup
-    comments posted, and the `qa-evidence` run URL. Never a bare "all good".
+    comments posted, and the `qa-evidence` tree URL (not the raw base URL). Never a bare
+    "all good".
 
 ## Phase 5 — Teardown
 

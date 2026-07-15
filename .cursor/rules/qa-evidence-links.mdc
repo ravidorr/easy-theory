@@ -1,0 +1,18 @@
+---
+description: QA issue evidence links must use GitHub tree URLs, not raw directory URLs
+globs: qa/**,.claude/skills/qa-explore/**,scripts/qa/**
+alwaysApply: false
+---
+
+# QA evidence links in GitHub issues
+
+When filing or commenting on QA findings (`qa` label) or run reports (`qa-run`):
+
+- **Run folder links** (Evidence, "Found in run", dedup comments): use the GitHub **tree** URL:
+  `https://github.com/<owner>/<repo>/tree/qa-evidence/<run-id>`
+- **Inline screenshots** in issue bodies: use **raw** file URLs:
+  `https://raw.githubusercontent.com/<owner>/<repo>/qa-evidence/<run-id>/screenshots/...`
+
+Never link to a raw directory URL (`raw.githubusercontent.com/.../<run-id>/`) — it always 404s because GitHub raw does not serve directory listings.
+
+`pnpm qa:publish-evidence` prints the tree URL on line 1 and `raw-screenshots-base=…` on line 2.
