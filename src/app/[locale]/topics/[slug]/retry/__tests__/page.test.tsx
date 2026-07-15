@@ -264,13 +264,13 @@ describe("RetryMistakesPage", () => {
     expect(container.querySelector(".quiz-slide h2")?.textContent).toBe("");
   });
 
-  it("falls back to option_a for ar locale when option_a_ar is missing", async () => {
+  it("does not fall back to option_a for ar locale when option_a_ar is missing", async () => {
     vi.mocked(getLocale).mockResolvedValue("ar" as never);
     const m = { ...MISTAKE_A, option_b_ar: "انعطف يمينًا" };
     mockGetMistakes.mockResolvedValue([m] as never);
     const jsx = await RetryMistakesPage({ params: Promise.resolve({ slug: "signs" }) });
     const { container } = render(jsx);
-    expect(container.querySelector('[data-option="a"]')?.textContent).toContain("עצור");
+    expect(container.querySelector('[data-option="a"]')?.textContent).not.toContain("עצור");
     expect(container.querySelector('[data-option="b"]')?.textContent).toContain("انعطف يمينًا");
   });
 

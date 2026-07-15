@@ -15,6 +15,7 @@ import { computeReadiness, findWeakestTopics, READINESS_MAX_ATTEMPTS } from "@/l
 import { TabBar } from "@/components/TabBar";
 import { Icon } from "@/components/Icon";
 import { getTranslations, getLocale } from "next-intl/server";
+import { localizedRecordField } from "@/lib/content-locale";
 import styles from "./page.module.css";
 
 function PathProgress({ total = 5, current = 1 }: { total?: number; current?: number }) {
@@ -90,8 +91,18 @@ export default async function HomePage() {
     return t("greetingEvening");
   }
 
-  const nameField = locale === "ar" ? "name_ar" : "name_he";
-  const descField = locale === "ar" ? "description_ar" : "description_he";
+  function getTopicName(topic: { name_he: string; name_ar?: string | null }) {
+    return localizedRecordField(locale, topic as Record<string, unknown>, "name_he", "name_ar");
+  }
+
+  function getTopicDescription(topic: { description_he: string | null; description_ar?: string | null }) {
+    return localizedRecordField(
+      locale,
+      topic as Record<string, unknown>,
+      "description_he",
+      "description_ar"
+    );
+  }
 
   return (
     <>
@@ -136,7 +147,7 @@ export default async function HomePage() {
           <div className={styles.todayCard}>
             <span className={styles.todayBadge}>{t("todayBadge")}</span>
             <div className={styles.todayTaskInfo}>
-              <h2>{(todayTopic as Record<string, unknown>)[nameField] as string ?? todayTopic.name_he}</h2>
+              <h2>{getTopicName(todayTopic)}</h2>
               <span className={styles.todayTaskDesc}>
                 {t("todayTaskDesc", { count: questionCounts[todayTopic.id] ?? 0 })}
               </span>
@@ -228,8 +239,7 @@ export default async function HomePage() {
             </div>
             {weakTopics.map(({ topic, accuracy }) => {
               const percent = Math.round(accuracy * 100);
-              const topicAny = topic as Record<string, unknown>;
-              const topicName = (topicAny[nameField] as string) ?? topic.name_he;
+              const localizedTopicName = getTopicName(topic);
               return (
                 <Link
                   key={topic.id}
@@ -244,7 +254,7 @@ export default async function HomePage() {
                     )}
                     <div className={styles.topicBody}>
                       <div className={styles.topicTitleRow}>
-                        <span className={styles.topicName}>{topicName}</span>
+                        <span className={styles.topicName}>{localizedTopicName}</span>
                         <span className={styles.weakTopicPct}>
                           {t("weakTopicAccuracy", { percent })}
                         </span>
@@ -281,9 +291,8 @@ export default async function HomePage() {
             // Completed topics keep showing the quiz score; in-progress ones
             // show coverage so the card moves with every answered question.
             const pct = done ? prog?.best_score ?? 0 : coveragePct;
-            const topicAny = topic as Record<string, unknown>;
-            const topicName = (topicAny[nameField] as string) ?? topic.name_he;
-            const topicDesc = (topicAny[descField] as string) ?? topic.description_he;
+            const localizedTopicName = getTopicName(topic);
+            const localizedTopicDesc = getTopicDescription(topic);
             return (
               <Link
                 key={topic.id}
@@ -298,7 +307,7 @@ export default async function HomePage() {
                   )}
                   <div className={styles.topicBody}>
                     <div className={styles.topicTitleRow}>
-                      <span className={styles.topicName}>{topicName}</span>
+                      <span className={styles.topicName}>{localizedTopicName}</span>
                       <span className={`${styles.topicStatus} ${done ? styles.topicStatusDone : ""}`}>
                         {done
                           ? t("topicCompleted")
@@ -307,8 +316,8 @@ export default async function HomePage() {
                           : t("topicNotStarted")}
                       </span>
                     </div>
-                    {topicDesc && (
-                      <span className={styles.topicDesc}>{topicDesc}</span>
+                    {localizedTopicDesc && (
+                      <span className={styles.topicDesc}>{localizedTopicDesc}</span>
                     )}
                     <div className={styles.progressTrack}>
                       <div

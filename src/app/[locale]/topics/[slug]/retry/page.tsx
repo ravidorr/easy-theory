@@ -11,6 +11,7 @@ import { createClient } from "@/lib/supabase";
 import { getTopicBySlug, getMistakesForTopic, getBookmarkedQuestionIds } from "@/lib/db";
 import type { Question } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
+import { localizeQuestion } from "@/lib/content-locale";
 import styles from "../page.module.css";
 
 function resolveImageUrl(url: string | null | undefined): string | null {
@@ -161,22 +162,12 @@ export default async function RetryMistakesPage({
   if (mistakes.length === 0) redirect(`/topics/${slug}/review`);
 
   const total = mistakes.length;
-  const questionField = locale === "ar" ? "question_ar" : "question_he";
-  const explanationField = locale === "ar" ? "explanation_ar" : "explanation_he";
   const letters = tQuiz("letters").split(",");
 
-  const localizedMistakes = mistakes.map((q) => {
-    const qAny = q as Record<string, unknown>;
-    return {
-      ...q,
-      question_display: qAny[questionField] as string ?? q.question_he,
-      explanation_display: qAny[explanationField] as string ?? q.explanation_he,
-      option_a_display: locale === "ar" ? ((qAny.option_a_ar as string) ?? q.option_a) : q.option_a,
-      option_b_display: locale === "ar" ? ((qAny.option_b_ar as string) ?? q.option_b) : q.option_b,
-      option_c_display: locale === "ar" ? ((qAny.option_c_ar as string) ?? q.option_c) : q.option_c,
-      option_d_display: locale === "ar" ? ((qAny.option_d_ar as string) ?? q.option_d) : q.option_d,
-    };
-  });
+  const localizedMistakes = mistakes.map((q) => ({
+    ...q,
+    ...localizeQuestion(locale, q as Record<string, unknown>),
+  }));
 
   return (
     <>

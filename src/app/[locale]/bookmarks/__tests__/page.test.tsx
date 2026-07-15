@@ -186,12 +186,12 @@ describe("BookmarksPage", () => {
     expect(sign?.getAttribute("alt")).toBe("signAlt");
   });
 
-  it("falls back to Hebrew question text for ar locale when question_ar is absent", async () => {
+  it("does not fall back to Hebrew question text for ar locale when question_ar is absent", async () => {
     vi.mocked(getLocale).mockResolvedValue("ar" as never);
     mockGetBookmarks.mockResolvedValue([BOOKMARK_A] as never);
     const jsx = await BookmarksPage();
     render(jsx);
-    expect(screen.getByText("מה המשמעות של תמרור זה?")).toBeInTheDocument();
+    expect(screen.queryByText("מה המשמעות של תמרור זה?")).not.toBeInTheDocument();
   });
 
   it("links back to the more page from the top bar", async () => {

@@ -7,6 +7,7 @@ import { getSigns, getSignSrsCards } from "@/lib/db";
 import type { Sign, SrsCard } from "@/lib/db";
 import { isDue } from "@/lib/srs";
 import { getTranslations, getLocale } from "next-intl/server";
+import { localizedRecordField } from "@/lib/content-locale";
 import styles from "./page.module.css";
 
 function cleanName(name: string, fallback: string): string {
@@ -102,12 +103,13 @@ export default async function FlashcardsPage() {
   const { deck, dueCount } = orderDeck(signs, srsCards);
   const total = deck.length;
 
-  // Use Arabic sign name if available
-  const nameField = locale === "ar" ? "name_ar" : "name_he";
-
   function getSignName(sign: Sign): string {
-    const signAny = sign as Record<string, unknown>;
-    return (signAny[nameField] as string) ?? sign.name_he;
+    return localizedRecordField(
+      locale,
+      sign as Record<string, unknown>,
+      "name_he",
+      "name_ar"
+    );
   }
 
   const cards: FlashcardData[] = deck.map((sign) => {

@@ -489,12 +489,11 @@ describe("HomePage", () => {
       expect(screen.getByText("تعلم أولوية المرور")).toBeInTheDocument();
     });
 
-    it("falls back to name_he when name_ar is missing", async () => {
+    it("does not show Hebrew topic names when name_ar is missing", async () => {
       mockGetTopics.mockResolvedValue([TOPIC_A] as never);
       const jsx = await HomePage();
       render(jsx);
-      // Today card + topic list both fall back to the Hebrew name
-      expect(screen.getAllByText("תמרורים").length).toBeGreaterThan(0);
+      expect(screen.queryByText("תמרורים")).not.toBeInTheDocument();
     });
   });
 });

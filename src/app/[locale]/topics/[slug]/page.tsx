@@ -11,6 +11,7 @@ import { createClient } from "@/lib/supabase";
 import { getTopicBySlug, getQuestionsForTopic, getBookmarkedQuestionIds } from "@/lib/db";
 import type { Question } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
+import { localizeQuestion } from "@/lib/content-locale";
 import styles from "./page.module.css";
 
 function resolveImageUrl(url: string | null | undefined): string | null {
@@ -159,24 +160,12 @@ export default async function TopicQuizPage({
   ]);
   const total = questions.length;
 
-  // Pick locale-specific field names
-  const questionField = locale === "ar" ? "question_ar" : "question_he";
-  const explanationField = locale === "ar" ? "explanation_ar" : "explanation_he";
   const letters = t("letters").split(",");
 
-  // Attach display fields
-  const localizedQuestions = questions.map((q) => {
-    const qAny = q as Record<string, unknown>;
-    return {
-      ...q,
-      question_display: qAny[questionField] as string ?? q.question_he,
-      explanation_display: qAny[explanationField] as string ?? q.explanation_he,
-      option_a_display: locale === "ar" ? ((qAny.option_a_ar as string) ?? q.option_a) : q.option_a,
-      option_b_display: locale === "ar" ? ((qAny.option_b_ar as string) ?? q.option_b) : q.option_b,
-      option_c_display: locale === "ar" ? ((qAny.option_c_ar as string) ?? q.option_c) : q.option_c,
-      option_d_display: locale === "ar" ? ((qAny.option_d_ar as string) ?? q.option_d) : q.option_d,
-    };
-  });
+  const localizedQuestions = questions.map((q) => ({
+    ...q,
+    ...localizeQuestion(locale, q as Record<string, unknown>),
+  }));
 
   return (
     <>
