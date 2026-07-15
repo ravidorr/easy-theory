@@ -1,0 +1,2 @@
+[step-08-retry-answer] POST /api/quiz 200 - retry answer submitted
+[step-08-retry-answer] No POST /api/progress observed during retry answer

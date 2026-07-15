@@ -1,0 +1,103 @@
+{
+  "run_id": "2026-07-15T17-37_002-review-and-retry",
+  "charter_id": "002-review-and-retry",
+  "charter_path": "qa/charters/002-review-and-retry.md",
+  "started_at": "2026-07-15T14:37:00Z",
+  "finished_at": "2026-07-15T14:45:00Z",
+  "environment": {
+    "base_url": "http://localhost:3100",
+    "git_sha": "172d979df3635ffe402dc96c524ee32122e05c2f",
+    "app_version": "0.3.141",
+    "supabase_host": "nvgqczaesfeotijjcbed.supabase.co",
+    "viewport": "390x844",
+    "locale": "he"
+  },
+  "checks": [
+    {
+      "id": "CHK-REVIEW-01",
+      "verdict": "pass",
+      "observed": "Last-session review on vehicle topic lists 22 wrong-answer rows; each row shows question text, user's wrong pick marked תשובה שגויה, and correct answer marked תשובה נכונה, including our deliberate misses (e.g. אביזרים קשיחים, משענות הראש).",
+      "evidence": ["screenshots/step-04-review-last-session.png"]
+    },
+    {
+      "id": "CHK-REVIEW-02",
+      "verdict": "pass",
+      "observed": "Scope toggle shows התרגול האחרון with data-active=true and aria-current=page; כל הזמנים links to ?scope=all with 23 mistakes (superset of 22 last-session).",
+      "evidence": ["screenshots/step-04-review-last-session.png", "screenshots/step-05-review-all-time.png"]
+    },
+    {
+      "id": "CHK-REVIEW-03",
+      "verdict": "blocked",
+      "observed": "Could not observe last-session empty state: seeded QA user has last-session mistakes on all four topics (vehicle 22, signs 1, safety 158, traffic-laws 379).",
+      "evidence": [],
+      "reason": "seeded user state — no topic with zero last-session mistakes without DB reset"
+    },
+    {
+      "id": "CHK-RETRY-01",
+      "verdict": "pass",
+      "observed": "Retry page has #quiz-container with data-quiz-mode=retry and data-total=22 matching last-session mistake count; first question matches review list (בלמים warning light).",
+      "evidence": ["screenshots/step-08-retry-first-question.png"]
+    },
+    {
+      "id": "CHK-RETRY-02",
+      "verdict": "pass",
+      "observed": "Confirmed retry answer POSTed /api/quiz 200; no POST /api/progress; pre-existing quiz-resume key unchanged during retry (no new keys written).",
+      "evidence": ["screenshots/step-08-retry-first-question.png", "network.log"]
+    },
+    {
+      "id": "CHK-RETRY-03",
+      "verdict": "pass",
+      "observed": "Dashboard vehicle topic progress unchanged at 34% הצלחה and 36/106 questions before and after partial retry session.",
+      "evidence": ["screenshots/step-07-dashboard-before-retry.png", "screenshots/step-09-dashboard-after-retry.png"]
+    },
+    {
+      "id": "CHK-RETRY-04",
+      "verdict": "blocked",
+      "observed": "Could not test retry redirect: all seeded topics have last-session mistakes so /retry loads quiz instead of redirecting to /review.",
+      "evidence": [],
+      "reason": "seeded user state — no topic with zero last-session mistakes"
+    },
+    {
+      "id": "CHK-CONSOLE-01",
+      "verdict": "pass",
+      "observed": "Zero error-level console entries across review and retry flow; only Vercel analytics debug logs in development.",
+      "evidence": ["console.log"]
+    },
+    {
+      "id": "CHK-A11Y-01",
+      "verdict": "pass",
+      "observed": "Scope toggle uses aria-current=page on active option; review rows label תשובה שגויה/תשובה נכונה in text; h1 סקירת טעויות present; question images have alt תמונה המצורפת לשאלה.",
+      "evidence": ["screenshots/step-04-review-last-session.png"]
+    },
+    {
+      "id": "CHK-COPY-RTL-01",
+      "verdict": "pass",
+      "observed": "Visible strings match he.json Review/Retry namespaces (סקירת טעויות, התרגול האחרון, כל הזמנים, חזרה על הטעויות); no raw keys or LTR breakage observed.",
+      "evidence": ["screenshots/step-04-review-last-session.png", "screenshots/step-08-retry-first-question.png"]
+    }
+  ],
+  "findings": [],
+  "known_issues_observed": [],
+  "not_tested": [
+    "Quiz answer/confirm mechanics beyond setup needs (charter out_of_scope, covered by 001)",
+    "Review/retry in Arabic locale (007)",
+    "Exam-result review (003)",
+    "Desktop viewport",
+    "Review empty state UI (blocked — no zero-mistake topic in seeded user)",
+    "Retry redirect when no mistakes (blocked — same)",
+    "Retry final completion screen (partial retry only — 1 of 22 answered)",
+    "Exploration budget: reload mid-retry, browser back, deep-link ?scope=all, retry twice"
+  ],
+  "limitations": [
+    "Browser session retained prior auth cookies; unauthed redirect not observed on fresh session",
+    "QA user had in-progress vehicle session; last-session mistake count (22) exceeds deliberate setup wrongs (5-7)",
+    "Could not observe empty-state or retry-redirect without resetting user quiz session data"
+  ],
+  "coverage_summary": {
+    "total": 10,
+    "pass": 8,
+    "fail": 0,
+    "blocked": 2,
+    "not_checked": 0
+  }
+}
