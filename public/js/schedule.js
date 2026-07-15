@@ -112,10 +112,6 @@
     saveBtn.textContent = t.saving || "שומרים...";
 
     try {
-      if (notifyOn && window.pushHelpers) {
-        await window.pushHelpers.subscribeToPush();
-      }
-
       const res = await fetch("/api/schedule", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -128,6 +124,10 @@
       });
 
       if (!res.ok) throw new Error("save failed");
+
+      if (notifyOn && window.pushHelpers) {
+        void window.pushHelpers.subscribeToPush();
+      }
 
       saveBtn.textContent = t.saved || "נשמר!";
       setTimeout(function () {
