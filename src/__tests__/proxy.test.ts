@@ -127,10 +127,9 @@ describe("proxy middleware", () => {
     });
 
     it("does not open-redirect via protocol-relative next paths", async () => {
-      const res = await proxy(makeRequest("/he//evil.com"));
+      const res = await proxy(makeRequest("/he//foo"));
       const location = res.headers.get("location") ?? "";
-      expect(location).not.toContain("evil.com");
-      expect(location).toContain("next=%2F");
+      expect(location).toBe("http://localhost/he/auth/login?next=%2F");
     });
 
     it("redirects /ar/topics to /ar/auth/login", async () => {
