@@ -317,13 +317,13 @@ describe("ReviewPage", () => {
     expect(screen.queryByText("עצור")).not.toBeInTheDocument();
   });
 
-  it("falls back to option_a for ar locale when option_a_ar is missing", async () => {
+  it("does not fall back to option_a for ar locale when option_a_ar is missing", async () => {
     vi.mocked(getLocale).mockResolvedValue("ar" as never);
     const m = { ...MISTAKE_A, option_b_ar: "انعطف يمينًا" };
     mockGetMistakes.mockResolvedValue([m] as never);
     const jsx = await callPage();
     render(jsx);
-    expect(screen.getByText("עצור")).toBeInTheDocument();
+    expect(screen.queryByText("עצור")).not.toBeInTheDocument();
     expect(screen.getByText("انعطف يمينًا")).toBeInTheDocument();
   });
 

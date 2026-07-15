@@ -168,14 +168,14 @@ describe("VideosPage", () => {
     expect(screen.getByText("marathon featured he")).toBeInTheDocument();
   });
 
-  it("renders Arabic fields for the ar locale, falling back to Hebrew", async () => {
+  it("renders Arabic fields for the ar locale without Hebrew fallback", async () => {
     vi.mocked(getLocale).mockResolvedValue("ar");
     const jsx = await VideosPage();
     render(jsx);
     expect(screen.getByText("marathon featured ar")).toBeInTheDocument();
     expect(screen.getByText("lesson 1 ar")).toBeInTheDocument();
-    // lesson 2 has no Arabic translation, so the Hebrew text is shown
-    expect(screen.getByText("lesson 2 he")).toBeInTheDocument();
+    expect(screen.queryByText("lesson 2 he")).not.toBeInTheDocument();
+    expect(screen.queryByText("marathon featured he")).not.toBeInTheDocument();
   });
 
   it("renders all YouTube links with rel=noopener noreferrer", async () => {

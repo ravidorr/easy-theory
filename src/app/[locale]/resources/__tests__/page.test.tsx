@@ -158,13 +158,14 @@ describe("ResourcesPage", () => {
     expect(screen.getByText("wikipedia he")).toBeInTheDocument();
   });
 
-  it("renders Arabic fields for the ar locale, falling back to Hebrew", async () => {
+  it("renders Arabic fields for the ar locale without Hebrew fallback", async () => {
     vi.mocked(getLocale).mockResolvedValue("ar");
     const jsx = await ResourcesPage();
     render(jsx);
     expect(screen.getByText("signs chart ar")).toBeInTheDocument();
-    // the question bank row has no Arabic translation, so the Hebrew text is shown
-    expect(screen.getByText("question bank he")).toBeInTheDocument();
+    expect(screen.getByText("simulator ar")).toBeInTheDocument();
+    expect(screen.queryByText("question bank he")).not.toBeInTheDocument();
+    expect(screen.queryByText("signs chart he")).not.toBeInTheDocument();
   });
 
   it("renders no resource links when the table is empty", async () => {

@@ -5,6 +5,7 @@ import { getResources, type Resource } from "@/lib/db";
 import { TabBar } from "@/components/TabBar";
 import { Icon } from "@/components/Icon";
 import { getLocale, getTranslations } from "next-intl/server";
+import { localizedContent } from "@/lib/content-locale";
 import styles from "./page.module.css";
 
 const ExternalIcon = () => <Icon name="external" size={18} className={styles.externalIcon} />;
@@ -25,8 +26,7 @@ export default async function ResourcesPage() {
 
   const t = await getTranslations("Resources");
   const locale = await getLocale();
-  const loc = (he: string | null, ar: string | null) =>
-    locale === "ar" ? (ar ?? he) : he;
+  const loc = (he: string | null, ar: string | null) => localizedContent(locale, he, ar);
 
   const resources = await getResources(supabase);
   const sections = [

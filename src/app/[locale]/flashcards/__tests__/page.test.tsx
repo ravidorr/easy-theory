@@ -293,7 +293,7 @@ describe("FlashcardsPage", () => {
     expect(data[3].alt).toBe("a<script>b");
   });
 
-  it("uses name_ar for ar locale and falls back to name_he when missing", async () => {
+  it("uses name_ar for ar locale and does not fall back to name_he when missing", async () => {
     vi.mocked(getLocale).mockResolvedValue("ar" as never);
     const signAr = { ...SIGN_1, name_ar: "ممنوع الوقوف" };
     mockGetSigns.mockResolvedValue([signAr, SIGN_2] as never);
@@ -302,6 +302,7 @@ describe("FlashcardsPage", () => {
     expect(screen.getByText("ممنوع الوقوف")).toBeInTheDocument();
     const data = JSON.parse(container.querySelector("#fc-data")!.textContent!);
     expect(data[0].name).toBe("ممنوع الوقوف");
-    expect(data[1].name).toBe("עצור");
+    expect(data[1].name).toBe("");
+    expect(data[1].alt).toBe("");
   });
 });

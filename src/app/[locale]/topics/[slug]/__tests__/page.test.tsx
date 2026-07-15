@@ -273,13 +273,13 @@ describe("TopicQuizPage", () => {
     expect(optionA?.textContent).not.toContain("עצור");
   });
 
-  it("falls back to option_a for ar locale when option_a_ar is missing", async () => {
+  it("does not fall back to option_a for ar locale when option_a_ar is missing", async () => {
     vi.mocked(getLocale).mockResolvedValue("ar" as never);
     const q = { ...QUESTION, option_b_ar: "انعطف يمينًا" };
     mockGetQuestions.mockResolvedValue([q] as never);
     const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "ar" }) });
     const { container } = render(jsx);
-    expect(container.querySelector('[data-option="a"]')?.textContent).toContain("עצור");
+    expect(container.querySelector('[data-option="a"]')?.textContent).not.toContain("עצור");
     expect(container.querySelector('[data-option="b"]')?.textContent).toContain("انعطف يمينًا");
   });
 

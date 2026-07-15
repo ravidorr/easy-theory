@@ -5,6 +5,7 @@ import { getVideos } from "@/lib/db";
 import { TabBar } from "@/components/TabBar";
 import { Icon } from "@/components/Icon";
 import { getLocale, getTranslations } from "next-intl/server";
+import { localizedContent } from "@/lib/content-locale";
 import styles from "./page.module.css";
 
 const PlayIcon = ({ size = 20 }: { size?: number }) => (
@@ -20,8 +21,7 @@ export default async function VideosPage() {
 
   const t = await getTranslations("Videos");
   const locale = await getLocale();
-  const loc = (he: string | null, ar: string | null) =>
-    locale === "ar" ? (ar ?? he) : he;
+  const loc = (he: string | null, ar: string | null) => localizedContent(locale, he, ar);
 
   const videos = await getVideos(supabase);
   const featured = videos.find((v) => v.section === "marathon" && v.is_featured);
