@@ -1,0 +1,41 @@
+{
+  "run_id": "2026-07-15T17-42_003-exam-simulation",
+  "charter_id": "003-exam-simulation",
+  "charter_path": "qa/charters/003-exam-simulation.md",
+  "started_at": "2026-07-15T14:42:00Z",
+  "finished_at": "2026-07-15T14:50:00Z",
+  "environment": {
+    "base_url": "http://localhost:3100",
+    "git_sha": "172d979df3635ffe402dc96c524ee32122e05c2f",
+    "app_version": "0.3.141",
+    "supabase_host": "nvgqczaesfeotijjcbed.supabase.co",
+    "viewport": "390x844",
+    "locale": "he"
+  },
+  "checks": [
+    {"id": "CHK-EXAM-01", "verdict": "pass", "observed": "Landing shows 30 questions, 40 minutes, pass mark 26, start button, and attempt history with prior attempts.", "evidence": ["screenshots/step-01-exam-landing.png"]},
+    {"id": "CHK-EXAM-02", "verdict": "pass", "observed": "#exam-container data-total=30; zero elements with data-correct in DOM before submission.", "evidence": ["screenshots/step-02-exam-first-question.png"]},
+    {"id": "CHK-EXAM-03", "verdict": "not-checked", "observed": "", "evidence": [], "reason": "Exam submitted with zero answers before prev/next and answered-counter flow could be exercised"},
+    {"id": "CHK-EXAM-04", "verdict": "pass", "observed": "Timer started at 39:58 and decreased to 39:47 across 3-second observation.", "evidence": ["screenshots/step-02-exam-first-question.png"]},
+    {"id": "CHK-EXAM-05", "verdict": "pass", "observed": "Submit with 30 unanswered raised confirm dialog: יש 30 שאלות שלא נענו. להגיש בכל זאת?; dismiss returned to run.", "evidence": ["screenshots/step-02-exam-first-question.png"]},
+    {"id": "CHK-EXAM-06", "verdict": "pass", "observed": "Result screen shows 0 מתוך 30 נכון with fail verdict (ציון עובר: 26); consistent with score < 26.", "evidence": ["screenshots/step-03-exam-result.png"]},
+    {"id": "CHK-EXAM-07", "verdict": "pass", "observed": "History now lists new 0/30 attempt dated 15 ביולי 2026; best score remains 1 (max of prior attempts).", "evidence": ["screenshots/step-04-exam-history.png"]},
+    {"id": "CHK-EXAM-08", "verdict": "pass", "observed": "Home readiness card shows מוכנות נמוכה at 5% with no NaN/undefined.", "evidence": ["screenshots/step-05-home-readiness.png"]},
+    {"id": "CHK-CONSOLE-01", "verdict": "pass", "observed": "No error-level console entries; only analytics debug logs and CSS preload warnings.", "evidence": ["console.log"]},
+    {"id": "CHK-A11Y-01", "verdict": "pass", "observed": "Timer and answered counter are plain text; h1 סימולציית מבחן on landing; confirm dialog keyboard-dismissable via dismiss action.", "evidence": ["screenshots/step-01-exam-landing.png", "screenshots/step-02-exam-first-question.png"]},
+    {"id": "CHK-COPY-RTL-01", "verdict": "pass", "observed": "Hebrew Exam namespace strings visible; timer 39:58 and scores render without direction breakage.", "evidence": ["screenshots/step-01-exam-landing.png", "screenshots/step-03-exam-result.png"]}
+  ],
+  "findings": [],
+  "known_issues_observed": [],
+  "not_tested": [
+    "40-minute timer expiry / auto-submit (out_of_scope)",
+    "Timer warning at <=5:00 (out_of_scope)",
+    "Topic quiz mechanics (001) and mistake review (002)",
+    "Arabic locale (007)",
+    "Desktop viewport",
+    "CHK-EXAM-03 navigation and answered-counter with selections",
+    "Exploration budget items"
+  ],
+  "limitations": ["Exam run ended with zero answered questions; mid-run navigation not verified"],
+  "coverage_summary": {"total": 11, "pass": 10, "fail": 0, "blocked": 0, "not_checked": 1}
+}
