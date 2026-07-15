@@ -111,6 +111,28 @@ describe("proxy middleware", () => {
       expect(res.headers.get("location")).toContain("/he/auth/login");
     });
 
+    it("preserves the return path as a next query param", async () => {
+      const res = await proxy(makeRequest("/he/exam"));
+      expect(res.status).toBe(307);
+      expect(res.headers.get("location")).toBe(
+        "http://localhost/he/auth/login?next=%2Fexam"
+      );
+    });
+
+    it("preserves query strings in the return path", async () => {
+      const res = await proxy(makeRequest("/he/topics/signs"));
+      expect(res.headers.get("location")).toBe(
+        "http://localhost/he/auth/login?next=%2Ftopics%2Fsigns"
+      );
+    });
+
+    it("does not open-redirect via protocol-relative next paths", async () => {
+      const res = await proxy(makeRequest("/he//evil.com"));
+      const location = res.headers.get("location") ?? "";
+      expect(location).not.toContain("evil.com");
+      expect(location).toContain("next=%2F");
+    });
+
     it("redirects /ar/topics to /ar/auth/login", async () => {
       const res = await proxy(makeRequest("/ar/topics"));
       expect(res.status).toBe(307);
