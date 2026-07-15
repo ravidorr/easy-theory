@@ -240,18 +240,52 @@ describe("schedule.js – successful save", () => {
     expect(loc.href).toBe("/");
   });
 
-  it("subscribes to push before saving when notifications are on", async () => {
+  it("saves schedule before subscribing to push when notifications are on", async () => {
     const helpers = stubPushHelpers();
+    let resolvePush: (value: boolean) => void = () => {};
+    helpers.subscribeToPush.mockReturnValue(
+      new Promise<boolean>((resolve) => {
+        resolvePush = resolve;
+      })
+    );
     const fetchMock = vi.fn().mockResolvedValue({ ok: true });
     vi.stubGlobal("fetch", fetchMock);
 
     clickSave();
     await new Promise((r) => setTimeout(r, 0));
 
+    expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(helpers.subscribeToPush).toHaveBeenCalledTimes(1);
-    expect(helpers.subscribeToPush.mock.invocationCallOrder[0]).toBeLessThan(
-      fetchMock.mock.invocationCallOrder[0]
+    expect(fetchMock.mock.invocationCallOrder[0]).toBeLessThan(
+      helpers.subscribeToPush.mock.invocationCallOrder[0]
     );
+
+    resolvePush(false);
+    await new Promise((r) => setTimeout(r, 0));
+  });
+
+  it("still saves when push permission never resolves", async () => {
+    vi.useFakeTimers();
+    const helpers = stubPushHelpers();
+    helpers.subscribeToPush.mockReturnValue(new Promise(() => {}));
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true });
+    vi.stubGlobal("fetch", fetchMock);
+    const loc = { href: "" };
+    Object.defineProperty(window, "location", {
+      value: loc,
+      writable: true,
+      configurable: true,
+    });
+
+    clickSave();
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(fetchMock).toHaveBeenCalledWith("/api/schedule", expect.any(Object));
+    const btn = document.getElementById("save-schedule-btn") as HTMLButtonElement;
+    expect(btn.textContent).toBe("נשמר!");
+    await vi.advanceTimersByTimeAsync(800);
+    expect(loc.href).toBe("/");
+    vi.useRealTimers();
   });
 
   it("skips the push subscription when notifications are off", async () => {
