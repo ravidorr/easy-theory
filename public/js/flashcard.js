@@ -95,22 +95,37 @@
     if (progressFill) progressFill.style.width = (display / total * 100) + "%";
   }
 
+  const backFace = card.querySelector(".flashcard-back-face");
+
+  function setFlipState(isFlipped) {
+    flipped = isFlipped;
+    card.classList.toggle("flipped", flipped);
+    card.setAttribute("aria-expanded", flipped ? "true" : "false");
+    if (backFace) backFace.setAttribute("aria-hidden", flipped ? "false" : "true");
+  }
+
   function renderCard(index) {
     const sign = signs[index];
     setImg(frontImg, sign.img, sign.alt);
     setImg(backImg, sign.img, sign.alt);
     if (nameEl) nameEl.textContent = sign.name;
     if (badgeEl) badgeEl.textContent = sign.badge;
-    card.classList.remove("flipped");
-    flipped = false;
+    setFlipState(false);
     updateUI(index);
     preload(index + 1);
     if (dontKnow.length > 0) preload(dontKnow[0]);
   }
 
-  card.addEventListener("click", function () {
-    flipped = !flipped;
-    card.classList.toggle("flipped", flipped);
+  function toggleFlip() {
+    setFlipState(!flipped);
+  }
+
+  card.addEventListener("click", toggleFlip);
+  card.addEventListener("keydown", function (event) {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      toggleFlip();
+    }
   });
 
   function showDone() {

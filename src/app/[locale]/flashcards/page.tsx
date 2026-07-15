@@ -44,9 +44,12 @@ function orderDeck(signs: Sign[], srsCards: SrsCard[]): { deck: Sign[]; dueCount
 
 function SignCard({ card, flipHint }: { card: FlashcardData; flipHint: string }) {
   return (
-    <div
+    <button
+      type="button"
       className={`flashcard-wrap ${styles.flashcardItem}`}
       data-index={0}
+      aria-label={flipHint}
+      aria-expanded="false"
       style={{ display: "flex" }}
     >
       <div className="flashcard-inner">
@@ -58,9 +61,11 @@ function SignCard({ card, flipHint }: { card: FlashcardData; flipHint: string })
             className="fc-front-img"
             style={{ width: "65%", maxHeight: "60%" }}
           />
-          <span className={styles.flashcardHint}>{flipHint}</span>
+          <span className={styles.flashcardHint} aria-hidden="true">
+            {flipHint}
+          </span>
         </div>
-        <div className="flashcard-face flashcard-back-face">
+        <div className="flashcard-face flashcard-back-face" aria-hidden="true">
           <SignImage
             src={card.img}
             alt={card.alt}
@@ -76,7 +81,7 @@ function SignCard({ card, flipHint }: { card: FlashcardData; flipHint: string })
           </span>
         </div>
       </div>
-    </div>
+    </button>
   );
 }
 
