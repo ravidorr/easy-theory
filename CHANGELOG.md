@@ -5,14 +5,11 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 ## [Unreleased]
 
 ### Fixed
-<<<<<<< HEAD
 - Flashcard flip control is now a named `button` with `aria-expanded`, keyboard support (Enter/Space), and `aria-hidden` on the back face when collapsed
 - Localized 404 pages now include the tab bar so users can navigate back without using the CTA alone
 - theme-color meta now follows the active theme on first paint and when toggling light/dark mode on the More page
 - Quiz no longer advances or completes while answer submissions are pending or failed; stale submission responses are ignored after retries
-=======
 - Schedule save no longer blocks on pending `Notification.requestPermission()` when reminders are enabled; PUT `/api/schedule` runs first and push subscription is best-effort afterward
->>>>>>> 8a69224 (Fix schedule save hang when push permission pending (#133).)
 
 ### Added
 - Question bookmarks: a new `user_question_bookmarks` table (migration `013_question_bookmarks.sql`, composite `(user_id, question_id)` PK with own-rows RLS), an idempotent `PUT /api/bookmarks` route (auth + rate limit + UUID validation), a bookmark toggle on every quiz/retry slide and review card (server-rendered `aria-pressed` state, driven by the shared `public/js/bookmark.js` with optimistic flip, busy guard, and a polite live-region error announcement), and a `/bookmarks` browse page (correct answer + explanation per card, un-bookmark in place) linked from a new row on the More page. New `bookmark` icon in the Icon component; new `Bookmarks`/`More.navBookmarks`/`Quiz.bookmarkLabel`/`Api.bookmarkUpdateFailed`/`JS.Bookmark` keys in he + ar.
