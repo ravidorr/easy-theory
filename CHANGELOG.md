@@ -4,6 +4,9 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ## [Unreleased]
 
+### Changed
+- Flashcards QA charter CHK-FC-05 now expects SRS persistence via POST `/api/srs` (resolves #130; charter was stale after migration 014)
+
 ### Fixed
 - Add Arabic content for signs question 15 (migration `015_signs_question_15_arabic.sql`; fixes #136 where `/ar/topics/signs` first question showed a Hebrew stem with Arabic UI)
 - Arabic locale no longer falls back to Hebrew for DB content (signs, topics, questions, videos, resources); missing `_ar` values render empty instead of leaking Hebrew, fixing #137 where flashcards showed `name_he` for sign 103; resources and videos page tests updated to match
