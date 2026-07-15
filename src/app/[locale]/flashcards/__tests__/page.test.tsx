@@ -119,20 +119,32 @@ describe("FlashcardsPage", () => {
     expect(screen.getByText("flipHint")).toBeInTheDocument();
   });
 
+  it("exposes the flip control as an accessible button", async () => {
+    mockGetSigns.mockResolvedValue([SIGN_1] as never);
+    const jsx = await FlashcardsPage();
+    render(jsx);
+    const flipControl = screen.getByRole("button", { name: "flipHint" });
+    expect(flipControl).toHaveAttribute("aria-expanded", "false");
+    expect(flipControl.querySelector(".flashcard-back-face")).toHaveAttribute(
+      "aria-hidden",
+      "true"
+    );
+  });
+
   it("trims name at first comma when name contains a comma", async () => {
     const sign = { ...SIGN_1, name_he: "חנייה אסורה, מוחלטת" };
     mockGetSigns.mockResolvedValue([sign] as never);
     const jsx = await FlashcardsPage();
-    render(jsx);
-    expect(screen.getByRole("heading", { name: "חנייה אסורה" })).toBeInTheDocument();
+    const { container } = render(jsx);
+    expect(container.querySelector("#fc-name")).toHaveTextContent("חנייה אסורה");
   });
 
   it("falls back to the localized signBadge label for a purely-numeric name_he", async () => {
     const numericSign = { ...SIGN_1, name_he: "9999" };
     mockGetSigns.mockResolvedValue([numericSign] as never);
     const jsx = await FlashcardsPage();
-    render(jsx);
-    expect(screen.getByRole("heading", { name: "תמרור 301" })).toBeInTheDocument();
+    const { container } = render(jsx);
+    expect(container.querySelector("#fc-name")).toHaveTextContent("תמרור 301");
   });
 
   it("truncates long sign names with ellipsis", async () => {
@@ -142,9 +154,8 @@ describe("FlashcardsPage", () => {
     };
     mockGetSigns.mockResolvedValue([longSign] as never);
     const jsx = await FlashcardsPage();
-    render(jsx);
-    const heading = screen.getByRole("heading");
-    expect(heading.textContent).toContain("…");
+    const { container } = render(jsx);
+    expect(container.querySelector("#fc-name")!.textContent).toContain("…");
   });
 
   it("renders back link to home (/)", async () => {

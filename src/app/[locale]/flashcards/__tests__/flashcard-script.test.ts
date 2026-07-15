@@ -29,18 +29,18 @@ function setupDOM(signs: CardData[] | string = SIGNS, { withDataEl = true } = {}
       <span id="fc-count"></span>
       <div id="fc-progress"></div>
       <div id="flashcards-container" data-total="${typeof signs === "string" ? 0 : signs.length}">
-        <div class="flashcard-wrap" data-index="0" style="display:flex">
+        <button type="button" class="flashcard-wrap" data-index="0" aria-label="הקשי לראות את השם" aria-expanded="false" style="display:flex">
           <div class="flashcard-inner">
             <div class="flashcard-face">
               <img class="fc-front-img" src="${first.img}" alt="${first.alt}" srcset="${STALE_SRCSET}" sizes="96px" />
             </div>
-            <div class="flashcard-face flashcard-back-face">
+            <div class="flashcard-face flashcard-back-face" aria-hidden="true">
               <img class="fc-back-img" src="${first.img}" alt="${first.alt}" srcset="${STALE_SRCSET}" sizes="96px" />
               <h2 id="fc-name">${first.name}</h2>
               <span id="fc-badge">${first.badge}</span>
             </div>
           </div>
-        </div>
+        </button>
       </div>
       ${withDataEl ? `<script type="application/json" id="fc-data">${json}</script>` : ""}
       <button id="fc-no"></button>
@@ -121,7 +121,17 @@ describe("flashcard.js", () => {
     setupDOM();
     card().click();
     expect(card().classList.contains("flipped")).toBe(true);
+    expect(card().getAttribute("aria-expanded")).toBe("true");
     card().click();
+    expect(card().classList.contains("flipped")).toBe(false);
+    expect(card().getAttribute("aria-expanded")).toBe("false");
+  });
+
+  it("flips the card on Enter and Space", () => {
+    setupDOM();
+    card().dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    expect(card().classList.contains("flipped")).toBe(true);
+    card().dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
     expect(card().classList.contains("flipped")).toBe(false);
   });
 
