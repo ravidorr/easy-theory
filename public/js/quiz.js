@@ -130,6 +130,7 @@
   let points = resumed ? resumed.points | 0 : 0;
   let actionActivationIsTouch = false;
   let touchAdvanceSuppressed = false;
+  let submissionGeneration = 0;
 
   function setActionAvailable(available) {
     if (actionBtn) {
@@ -390,6 +391,7 @@
     acknowledgedSubmission = null;
     persistResume();
     const idempotencyKey = pendingSubmission.idempotencyKey;
+    const generation = ++submissionGeneration;
     let request;
     try {
       request = fetch("/api/quiz", {
@@ -405,6 +407,7 @@
     }
 
     request.then(function (res) {
+      if (generation !== submissionGeneration) return null;
       if (res.ok) {
         return res.json().catch(function () { return {}; });
       }
@@ -422,6 +425,7 @@
         return null;
       });
     }).then(function (data) {
+      if (generation !== submissionGeneration) return;
       if (data === null) return;
       answerPersistence = "succeeded";
       const acknowledged = pendingSubmission;
@@ -446,6 +450,7 @@
         setActionAvailable(true);
       }
     }).catch(function () {
+      if (generation !== submissionGeneration) return;
       showRetryableSubmissionFailure(
         t.saveAnswerError || "לא הצלחנו לשמור את התשובה. אפשר לנסות שוב."
       );
@@ -502,6 +507,7 @@
   }
 
   function handleAdvance() {
+    if (answerPersistence !== "succeeded") return;
     acknowledgedSubmission = null;
     currentIndex++;
     if (currentIndex >= total) {
