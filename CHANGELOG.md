@@ -5,6 +5,7 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 ## [Unreleased]
 
 ### Fixed
+- send-otp: use `AUTH_CALLBACK_ORIGIN` for magic-link redirect URL (fixes QA 500 when Supabase allowlist differs from request origin); log Supabase errors server-side; omit `Secure` on `auth_redirect` cookie outside production so localhost QA can persist the post-login path
 - Flashcard flip control is now a named `button` with `aria-expanded`, keyboard support (Enter/Space), and `aria-hidden` on the back face when collapsed
 - Localized 404 pages now include the tab bar so users can navigate back without using the CTA alone
 - theme-color meta now follows the active theme on first paint and when toggling light/dark mode on the More page

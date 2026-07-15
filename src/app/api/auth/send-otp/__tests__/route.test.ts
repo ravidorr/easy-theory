@@ -100,6 +100,32 @@ describe("POST /api/auth/send-otp", () => {
     );
   });
 
+  it("uses AUTH_CALLBACK_ORIGIN when set", async () => {
+    vi.stubEnv("AUTH_CALLBACK_ORIGIN", "http://localhost:3100");
+    const client = makeClient();
+    mockCreateClient.mockResolvedValue(client as never);
+    await POST(makeRequest({ email: "user@example.com" }));
+    expect(client.auth.signInWithOtp).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: expect.objectContaining({
+          emailRedirectTo: "http://localhost:3100/auth/callback",
+        }),
+      })
+    );
+    vi.unstubAllEnvs();
+  });
+
+  it("omits Secure flag on auth_redirect cookie outside production", async () => {
+    vi.stubEnv("NODE_ENV", "development");
+    const client = makeClient();
+    mockCreateClient.mockResolvedValue(client as never);
+    const res = await POST(makeRequest({ email: "user@example.com" }));
+    const cookie = res.headers.get("set-cookie") ?? "";
+    expect(cookie).toMatch(/auth_redirect=%2F/);
+    expect(cookie).not.toMatch(/Secure/);
+    vi.unstubAllEnvs();
+  });
+
   it("sets auth_redirect cookie to next path on success", async () => {
     const client = makeClient();
     mockCreateClient.mockResolvedValue(client as never);
