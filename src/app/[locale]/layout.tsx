@@ -87,6 +87,12 @@ export default async function LocaleLayout({
         )}
         <script
           dangerouslySetInnerHTML={{
+            __html:
+              '(function(){var t=document.documentElement.dataset.theme||"dark";var c=t==="light"?"#f5f7fc":"#131829";var m=document.querySelector(\'meta[name="theme-color"]\');if(m){m.setAttribute("content",c);}else{var n=document.createElement("meta");n.setAttribute("name","theme-color");n.setAttribute("content",c);document.head.appendChild(n);}})();',
+          }}
+        />
+        <script
+          dangerouslySetInnerHTML={{
             __html: `window.__locale=${JSON.stringify(currentLocale)};window.__t=${JSON.stringify(jsT)};window.__tf=function(s,v){return s.replace(/\\{(\\w+)\\}/g,function(_,k){return v[k]??_;});};`,
           }}
         />
