@@ -1,0 +1,49 @@
+{
+  "run_id": "2026-07-15T17-46_005-schedule-and-reminders",
+  "charter_id": "005-schedule-and-reminders",
+  "charter_path": "qa/charters/005-schedule-and-reminders.md",
+  "started_at": "2026-07-15T14:46:00Z",
+  "finished_at": "2026-07-15T14:55:00Z",
+  "environment": {
+    "base_url": "http://localhost:3100",
+    "git_sha": "172d979df3635ffe402dc96c524ee32122e05c2f",
+    "app_version": "0.3.141",
+    "supabase_host": "nvgqczaesfeotijjcbed.supabase.co",
+    "viewport": "390x844",
+    "locale": "he"
+  },
+  "checks": [
+    {"id": "CHK-SCHED-01", "verdict": "pass", "observed": "7 day buttons, time input, 3 duration options, notify switch, save button present; prior schedule pre-selected.", "evidence": ["screenshots/step-01-schedule-initial.png"]},
+    {"id": "CHK-SCHED-02", "verdict": "pass", "observed": "Day buttons toggle pressed state; summary shows 2 מפגשים בשבוע after selecting א and ד.", "evidence": ["screenshots/step-01-schedule-initial.png"]},
+    {"id": "CHK-SCHED-03", "verdict": "pass", "observed": "Time 19:30 and 45 דק׳ duration reflected in summary text.", "evidence": ["screenshots/step-01-schedule-initial.png"]},
+    {"id": "CHK-SCHED-04", "verdict": "fail", "observed": "Save persisted schedule via API but page stayed on /he/schedule with שומרים... disabled; no redirect to /he.", "evidence": ["screenshots/step-03-schedule-persisted.png", "network.log"]},
+    {"id": "CHK-SCHED-05", "verdict": "pass", "observed": "Reloaded /he/schedule shows א+ד, 19:30, 45 דק׳ matching saved API data.", "evidence": ["screenshots/step-03-schedule-persisted.png"]},
+    {"id": "CHK-SCHED-06", "verdict": "blocked", "observed": "Notify switch toggled to checked but push permission unavailable in automation; save hung on שומרים...", "evidence": [], "reason": "browser push permission unavailable in MCP automation"},
+    {"id": "CHK-CONSOLE-01", "verdict": "pass", "observed": "No error-level console entries.", "evidence": ["console.log"]},
+    {"id": "CHK-A11Y-01", "verdict": "pass", "observed": "Day/duration buttons use pressed state; time input labeled; notify switch role present.", "evidence": ["screenshots/step-01-schedule-initial.png"]},
+    {"id": "CHK-COPY-RTL-01", "verdict": "pass", "observed": "Hebrew Schedule copy; HH:MM renders correctly.", "evidence": ["screenshots/step-01-schedule-initial.png"]}
+  ],
+  "findings": [
+    {
+      "id": "F-001",
+      "title": "Schedule save hangs without redirect when notify toggle is on",
+      "severity": "major",
+      "confidence": "medium",
+      "category": "functional",
+      "related_checks": ["CHK-SCHED-04", "CHK-SCHED-06"],
+      "repro_steps": [
+        "Mint auth and open /he/schedule",
+        "Select two days, set time 19:30, 45 min duration",
+        "Enable notify toggle",
+        "Click save"
+      ],
+      "expected": "PUT /api/schedule returns 2xx and browser navigates to /he",
+      "actual": "Save button stuck on שומרים...; page remains on /he/schedule though schedule data eventually persists via API",
+      "evidence": ["screenshots/step-03-schedule-persisted.png", "network.log"]
+    }
+  ],
+  "known_issues_observed": [],
+  "not_tested": ["Push delivery/cron", "Email fallback", "Arabic locale", "Desktop viewport", "Exploration budget"],
+  "limitations": ["Push permission blocked in automation caused save UI hang"],
+  "coverage_summary": {"total": 9, "pass": 7, "fail": 1, "blocked": 1, "not_checked": 0}
+}
