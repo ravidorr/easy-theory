@@ -11,7 +11,11 @@ just `/qa-explore <charter>`.
 2. In **Authentication → Sign In / Providers**, make sure the **Email** provider is
    enabled. Nothing else is needed — the test user is created programmatically with a
    confirmed email, and login links are minted via the admin API (no emails are sent).
-3. Note from **Settings → API**: the project URL, the `anon` key, and the
+3. In **Authentication → URL Configuration**, add `http://localhost:3100/auth/callback`
+   to **Redirect URLs** and set **Site URL** to `http://localhost:3100`. Without this,
+   `POST /api/auth/send-otp` returns 500 when charter `008-auth-and-login-edges` exercises
+   real OTP delivery.
+4. Note from **Settings → API**: the project URL, the `anon` key, and the
    `service_role` key.
 
 ## 2. Seed the database

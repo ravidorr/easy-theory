@@ -15,7 +15,9 @@ export async function POST(request: Request) {
     typeof next === "string" && next.startsWith("/") && !next.startsWith("//")
       ? next
       : "/";
-  const emailRedirectTo = `${requestUrl.origin}/auth/callback`;
+  const callbackOrigin =
+    process.env.AUTH_CALLBACK_ORIGIN?.replace(/\/$/, "") || requestUrl.origin;
+  const emailRedirectTo = `${callbackOrigin}/auth/callback`;
 
   if (!email || typeof email !== "string") {
     return NextResponse.json({ error: t("emailMissing") }, { status: 400 });
@@ -40,13 +42,14 @@ export async function POST(request: Request) {
   });
 
   if (error) {
+    console.error("[send-otp] signInWithOtp failed:", error.message);
     return NextResponse.json({ error: t("otpSendFailed") }, { status: 500 });
   }
 
   const response = NextResponse.json({ ok: true });
   response.cookies.set("auth_redirect", safeNext, {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
     maxAge: 600,
