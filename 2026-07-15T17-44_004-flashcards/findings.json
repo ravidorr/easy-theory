@@ -1,0 +1,31 @@
+{
+  "run_id": "2026-07-15T17-44_004-flashcards",
+  "charter_id": "004-flashcards",
+  "charter_path": "qa/charters/004-flashcards.md",
+  "started_at": "2026-07-15T14:44:00Z",
+  "finished_at": "2026-07-15T14:52:00Z",
+  "environment": {
+    "base_url": "http://localhost:3100",
+    "git_sha": "172d979df3635ffe402dc96c524ee32122e05c2f",
+    "app_version": "0.3.141",
+    "supabase_host": "nvgqczaesfeotijjcbed.supabase.co",
+    "viewport": "390x844",
+    "locale": "he"
+  },
+  "checks": [
+    {"id": "CHK-FC-01", "verdict": "pass", "observed": "#flashcards-container present; #fc-data parses to 277 signs; first card shows /signs/ image with Hebrew alt.", "evidence": ["screenshots/step-01-fc-front.png"]},
+    {"id": "CHK-FC-02", "verdict": "pass", "observed": "קליק להיפוך button toggles aria-expanded; #fc-name and #fc-badge show sign name תמרור 220 on interaction.", "evidence": ["screenshots/step-02-fc-flipped.png"]},
+    {"id": "CHK-FC-03", "verdict": "pass", "observed": "#fc-yes/#fc-no advance #fc-count from 1→17 without NaN; progress text updates.", "evidence": ["screenshots/step-01-fc-front.png"]},
+    {"id": "CHK-FC-04", "verdict": "not-checked", "observed": "", "evidence": [], "reason": "timebox — replay loop end not reached within bounded sample"},
+    {"id": "CHK-FC-05", "verdict": "pass", "observed": "First grades fired POST /api/srs (15 observed during sample); deck advanced without blocking.", "evidence": ["screenshots/step-01-fc-front.png"]},
+    {"id": "CHK-FC-06", "verdict": "pass", "observed": "Sampled cards render sign SVG images; no broken-image icons observed.", "evidence": ["screenshots/step-01-fc-front.png"]},
+    {"id": "CHK-CONSOLE-01", "verdict": "pass", "observed": "No error-level console entries.", "evidence": ["console.log"]},
+    {"id": "CHK-A11Y-01", "verdict": "pass", "observed": "Flip button קליק להיפוך; עוד לא/ידעתי ✓ named buttons; images have alt text.", "evidence": ["screenshots/step-01-fc-front.png"]},
+    {"id": "CHK-COPY-RTL-01", "verdict": "pass", "observed": "Hebrew Flashcards copy visible; sign names RTL.", "evidence": ["screenshots/step-01-fc-front.png"]}
+  ],
+  "findings": [],
+  "known_issues_observed": [],
+  "not_tested": ["Full 277-card deck", "Don't-know replay at end of pass", "Arabic locale", "Offline cached images", "Desktop viewport", "Exploration budget"],
+  "limitations": ["Replay loop not verified to completion"],
+  "coverage_summary": {"total": 9, "pass": 8, "fail": 0, "blocked": 0, "not_checked": 1}
+}
