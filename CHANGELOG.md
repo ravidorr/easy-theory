@@ -11,6 +11,7 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 - Quiz no longer advances or completes while answer submissions are pending or failed; stale submission responses are ignored after retries
 - Schedule save no longer blocks on pending `Notification.requestPermission()` when reminders are enabled; PUT `/api/schedule` runs first and push subscription is best-effort afterward
 - Auth proxy: preserve the original path as `?next=` when redirecting unauthenticated users to login (fixes deep-link return path dropped on `/he/exam` etc.); reject protocol-relative return paths
+- QA evidence links in GitHub issues: `pnpm qa:publish-evidence` now emits a clickable tree URL for issue bodies (raw directory URLs always 404); raw URLs remain for inline screenshot embeds only
 
 ### Added
 - Question bookmarks: a new `user_question_bookmarks` table (migration `013_question_bookmarks.sql`, composite `(user_id, question_id)` PK with own-rows RLS), an idempotent `PUT /api/bookmarks` route (auth + rate limit + UUID validation), a bookmark toggle on every quiz/retry slide and review card (server-rendered `aria-pressed` state, driven by the shared `public/js/bookmark.js` with optimistic flip, busy guard, and a polite live-region error announcement), and a `/bookmarks` browse page (correct answer + explanation per card, un-bookmark in place) linked from a new row on the More page. New `bookmark` icon in the Icon component; new `Bookmarks`/`More.navBookmarks`/`Quiz.bookmarkLabel`/`Api.bookmarkUpdateFailed`/`JS.Bookmark` keys in he + ar.

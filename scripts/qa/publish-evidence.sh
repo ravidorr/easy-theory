@@ -1,7 +1,8 @@
 #!/bin/sh
 # Publish a QA run dir to the orphan `qa-evidence` branch so screenshots and
-# reports are linkable from GitHub issues (public repo → raw URLs render
-# inline). Uses a temporary worktree so the main working tree is untouched.
+# reports are linkable from GitHub issues. Prints a tree URL (clickable in issues)
+# and a raw-screenshots-base prefix (inline image embeds only). Uses a temporary
+# worktree so the main working tree is untouched.
 # Usage: pnpm qa:publish-evidence qa/runs/<run-id>
 set -e
 
@@ -56,4 +57,7 @@ else
   git -C "$WT" push --quiet origin "$BRANCH"
 fi
 
-echo "https://raw.githubusercontent.com/$SLUG/$BRANCH/$RUN_ID/"
+TREE_URL="https://github.com/$SLUG/tree/$BRANCH/$RUN_ID"
+RAW_BASE="https://raw.githubusercontent.com/$SLUG/$BRANCH/$RUN_ID"
+echo "$TREE_URL"
+echo "raw-screenshots-base=$RAW_BASE"
