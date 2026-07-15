@@ -5,7 +5,7 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 ## [Unreleased]
 
 ### Fixed
-- Arabic locale no longer falls back to Hebrew for DB content (signs, topics, questions, videos, resources); missing `_ar` values render empty instead of leaking Hebrew, fixing #137 where flashcards showed `name_he` for sign 103
+- Arabic locale no longer falls back to Hebrew for DB content (signs, topics, questions, videos, resources); missing `_ar` values render empty instead of leaking Hebrew, fixing #137 where flashcards showed `name_he` for sign 103; resources and videos page tests updated to match
 - send-otp: use `AUTH_CALLBACK_ORIGIN` for magic-link redirect URL (fixes QA 500 when Supabase allowlist differs from request origin); log Supabase errors server-side; omit `Secure` on `auth_redirect` cookie outside production so localhost QA can persist the post-login path
 - Flashcard flip control is now a named `button` with `aria-expanded`, keyboard support (Enter/Space), and `aria-hidden` on the back face when collapsed
 - Localized 404 pages now include the tab bar so users can navigate back without using the CTA alone
