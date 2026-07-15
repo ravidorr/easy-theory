@@ -1,0 +1,123 @@
+{
+  "run_id": "2026-07-15T17-29_001-home-and-quiz",
+  "charter_id": "001-home-and-quiz",
+  "charter_path": "qa/charters/001-home-and-quiz.md",
+  "started_at": "2026-07-15T14:29:00.000Z",
+  "finished_at": "2026-07-15T14:36:00.000Z",
+  "environment": {
+    "base_url": "http://localhost:3100",
+    "git_sha": "172d979df3635ffe402dc96c524ee32122e05c2f",
+    "app_version": "0.3.141",
+    "supabase_host": "nvgqczaesfeotijjcbed.supabase.co",
+    "viewport": "390x844",
+    "locale": "he"
+  },
+  "checks": [
+    {
+      "id": "CHK-AUTH-01",
+      "verdict": "pass",
+      "observed": "Unauthed GET / redirected to /he/auth/login with email field and submit button visible.",
+      "evidence": ["screenshots/step-01-login-redirect.png"]
+    },
+    {
+      "id": "CHK-AUTH-02",
+      "verdict": "pass",
+      "observed": "Minted magic-link session landed on /he dashboard with streak, score, and topic widgets; no login loop.",
+      "evidence": ["screenshots/step-02-dashboard.png"]
+    },
+    {
+      "id": "CHK-HOME-01",
+      "verdict": "pass",
+      "observed": "Dashboard showed streak 3, score 3010, four seeded topics with numeric progress (e.g. הכרת הרכב 6/106).",
+      "evidence": ["screenshots/step-02-dashboard.png"]
+    },
+    {
+      "id": "CHK-HOME-02",
+      "verdict": "pass",
+      "observed": "Hebrew RTL UI with no raw i18n keys; html dir=rtl lang=he confirmed.",
+      "evidence": ["screenshots/step-02-dashboard.png"]
+    },
+    {
+      "id": "CHK-QUIZ-01",
+      "verdict": "pass",
+      "observed": "Vehicle topic quiz loaded at question 7/106 with heading, four answer buttons, and quiz container present.",
+      "evidence": ["screenshots/step-03-quiz-question.png"]
+    },
+    {
+      "id": "CHK-QUIZ-02",
+      "verdict": "pass",
+      "observed": "Answer select, confirm, and feedback loop worked; counter advanced 7→8→9; correct and wrong feedback text shown.",
+      "evidence": ["screenshots/step-04-correct-feedback.png", "screenshots/step-05-wrong-feedback.png"]
+    },
+    {
+      "id": "CHK-QUIZ-03",
+      "verdict": "pass",
+      "observed": "Every confirmed answer issued POST /api/quiz with HTTP 200; no 4xx/5xx in network log.",
+      "evidence": ["network.log", "screenshots/step-04-correct-feedback.png"]
+    },
+    {
+      "id": "CHK-QUIZ-04",
+      "verdict": "blocked",
+      "observed": "Final screen UI verified on completed traffic-laws topic (501/501, home + review links); POST /api/progress not observed because vehicle session could not be finished (78 questions remain).",
+      "evidence": ["screenshots/step-06-quiz-final.png"],
+      "reason": "Could not complete a full quiz session within timebox to trigger POST /api/progress"
+    },
+    {
+      "id": "CHK-QUIZ-05",
+      "verdict": "pass",
+      "observed": "Dashboard vehicle progress increased from 6/106 to 28/106 and score from 3010 to 3060 after quiz answers.",
+      "evidence": ["screenshots/step-02-dashboard.png", "screenshots/step-07-dashboard-after.png"]
+    },
+    {
+      "id": "CHK-QUIZ-06",
+      "verdict": "pass",
+      "observed": "After clearing localStorage, vehicle quiz resumed at 9/106 (server progress) instead of question 1.",
+      "evidence": ["screenshots/step-09-cross-browser-resume.png"]
+    },
+    {
+      "id": "CHK-QUIZ-07",
+      "verdict": "pass",
+      "observed": "Mid-quiz reload restored slide index 8 in quiz-resume:v1 localStorage and resumed at question 9/106.",
+      "evidence": ["screenshots/step-08-quiz-resume-reload.png"]
+    },
+    {
+      "id": "CHK-CONSOLE-01",
+      "verdict": "pass",
+      "observed": "No error-level console entries across login, dashboard, and quiz flow; only dev preload warnings.",
+      "evidence": ["console.log"]
+    },
+    {
+      "id": "CHK-A11Y-01",
+      "verdict": "pass",
+      "observed": "Headings present per page; answer buttons expose accessible names including תשובה נכונה/שגויה; feedback also in live region text.",
+      "evidence": ["screenshots/step-04-correct-feedback.png", "screenshots/step-05-wrong-feedback.png"]
+    },
+    {
+      "id": "CHK-COPY-RTL-01",
+      "verdict": "pass",
+      "observed": "Visible strings match Hebrew Home/Quiz namespaces; RTL layout intact with no English leakage in flow.",
+      "evidence": ["screenshots/step-02-dashboard.png", "screenshots/step-03-quiz-question.png"]
+    }
+  ],
+  "findings": [],
+  "known_issues_observed": [],
+  "not_tested": [
+    "Push notifications / service worker",
+    "Arabic locale",
+    "Email OTP send-otp path (auth was minted)",
+    "Flashcards, schedule, videos, resources, credits, more pages",
+    "Desktop viewport",
+    "POST /api/progress on live quiz completion (blocked by remaining question count)"
+  ],
+  "limitations": [
+    "Test user already had substantial progress on several topics; vehicle topic still has 78 unanswered questions.",
+    "Playwright CLI screenshots for some steps used separate unauthenticated sessions; primary evidence from Chrome DevTools MCP session."
+  ],
+  "coverage_summary": {
+    "total": 14,
+    "pass": 13,
+    "fail": 0,
+    "blocked": 1,
+    "not_checked": 0
+  }
+}

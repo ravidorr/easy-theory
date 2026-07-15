@@ -1,0 +1,10 @@
+[step-01-login-redirect] no errors
+[step-02-dashboard-auth] no errors (Vercel analytics debug logs only)
+[step-03-quiz-vehicle] no errors
+[step-04-correct-feedback] no errors
+[step-05-wrong-feedback] no errors
+[step-06-quiz-final-traffic-laws] no errors
+[step-07-dashboard-after] no errors
+[step-08-reload-resume] no errors
+[step-09-cross-browser-resume] no errors
+Warnings observed (non-blocking): CSS preload warnings on dashboard load

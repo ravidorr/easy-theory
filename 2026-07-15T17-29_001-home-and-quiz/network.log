@@ -1,0 +1,10 @@
+[step-01-login-redirect] GET /he/auth/login 200
+[step-02-dashboard-auth] GET /he 200
+[step-03-quiz-vehicle] GET /he/topics/vehicle 200
+[step-04-correct-feedback] POST /api/quiz 200
+[step-05-wrong-feedback] POST /api/quiz 200
+[step-06-quiz-final-traffic-laws] GET /he/topics/traffic-laws 200 (no POST /api/progress — topic already complete)
+[step-07-dashboard-after] GET /he 200
+[step-08-reload-resume] GET /he/topics/vehicle 200
+[step-09-cross-browser-resume] GET /he/topics/vehicle 200 (after localStorage.clear)
+All observed POST /api/quiz calls returned 200; no 4xx/5xx on quiz flow
