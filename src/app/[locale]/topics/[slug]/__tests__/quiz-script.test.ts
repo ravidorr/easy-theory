@@ -414,6 +414,36 @@ describe("quiz.js – rejected answer persistence", () => {
       (document.querySelectorAll(".quiz-slide")[1] as HTMLElement).style.display
     ).toBe("flex");
   });
+
+  it("does not advance past a question until its submission succeeds", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(errorResponse(429, "יותר מדי בקשות"))
+        .mockResolvedValueOnce({ ok: true, json: async () => ({}) })
+    );
+    setupDOM();
+
+    clickOption(0, "a");
+    clickAction();
+    await flushAsyncWork();
+
+    expect(
+      (document.querySelectorAll(".quiz-slide")[0] as HTMLElement).style.display
+    ).toBe("flex");
+    expect(
+      (document.querySelectorAll(".quiz-slide")[1] as HTMLElement).style.display
+    ).toBe("none");
+
+    clickAction();
+    await flushAsyncWork();
+    clickAction();
+
+    expect(
+      (document.querySelectorAll(".quiz-slide")[1] as HTMLElement).style.display
+    ).toBe("flex");
+  });
 });
 
 describe("quiz.js – reward score and feedback", () => {
