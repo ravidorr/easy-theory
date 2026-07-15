@@ -14,6 +14,11 @@ vi.mock("next-intl/server", () => ({
   getLocale: vi.fn().mockResolvedValue("he"),
 }));
 
+vi.mock("@/components/TabBar", () => ({
+  TabBar: ({ active }: { active: string }) =>
+    React.createElement("nav", { "data-testid": "tab-bar", "data-active": active }),
+}));
+
 describe("NotFound ([locale])", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -32,5 +37,10 @@ describe("NotFound ([locale])", () => {
     vi.mocked(getLocale).mockResolvedValue("ar");
     render(await NotFound());
     expect(screen.getByText("cta").closest("a")).toHaveAttribute("href", "/ar");
+  });
+
+  it("renders the tab bar for recovery navigation", async () => {
+    render(await NotFound());
+    expect(screen.getByTestId("tab-bar")).toHaveAttribute("data-active", "home");
   });
 });
