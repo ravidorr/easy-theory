@@ -5,6 +5,7 @@ import TopicQuizPage from "../page";
 import { createClient } from "@/lib/supabase";
 import { getTopicBySlug, getQuestionsForTopic, getBookmarkedQuestionIds } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
+import { SIGNS_QUESTION_15_AR } from "@/lib/content/signs-question-15-ar";
 
 vi.mock("next/image", () => ({
   default: ({ src, alt, className }: { src: string; alt?: string; className?: string }) =>
@@ -271,6 +272,26 @@ describe("TopicQuizPage", () => {
     const optionA = container.querySelector('[data-option="a"]');
     expect(optionA?.textContent).toContain("قف");
     expect(optionA?.textContent).not.toContain("עצור");
+  });
+
+  it("renders Arabic question text for signs question 15 in ar locale", async () => {
+    vi.mocked(getLocale).mockResolvedValue("ar" as never);
+    const q = {
+      ...QUESTION,
+      question_number: SIGNS_QUESTION_15_AR.question_number,
+      question_he: SIGNS_QUESTION_15_AR.question_he,
+      question_ar: SIGNS_QUESTION_15_AR.question_ar,
+      option_a_ar: SIGNS_QUESTION_15_AR.option_a_ar,
+      option_b_ar: SIGNS_QUESTION_15_AR.option_b_ar,
+      option_c_ar: SIGNS_QUESTION_15_AR.option_c_ar,
+      option_d_ar: SIGNS_QUESTION_15_AR.option_d_ar,
+    };
+    mockGetQuestions.mockResolvedValue([q] as never);
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "ar" }) });
+    render(jsx);
+    expect(screen.getByText(SIGNS_QUESTION_15_AR.question_ar)).toBeInTheDocument();
+    expect(screen.queryByText(SIGNS_QUESTION_15_AR.question_he)).not.toBeInTheDocument();
+    expect(screen.getByText(SIGNS_QUESTION_15_AR.option_a_ar)).toBeInTheDocument();
   });
 
   it("does not fall back to option_a for ar locale when option_a_ar is missing", async () => {
