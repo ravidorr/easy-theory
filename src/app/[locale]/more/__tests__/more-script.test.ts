@@ -15,6 +15,7 @@ function setupDOM(theme?: string) {
   } else {
     document.documentElement.dataset.theme = theme;
   }
+  document.head.innerHTML = '<meta name="theme-color" content="#131829">';
   document.body.innerHTML = `
     <button id="dark-mode-toggle" role="switch"><span></span></button>
     <button id="logout-btn"></button>
@@ -75,6 +76,16 @@ describe("more.js", () => {
     expect(document.cookie).toContain("theme=light");
     expect(toggle().getAttribute("aria-checked")).toBe("false");
     expect(knob().style.insetInlineStart).toBe("3px");
+    expect(
+      document.querySelector('meta[name="theme-color"]')!.getAttribute("content")
+    ).toBe("#f5f7fc");
+  });
+
+  it("syncs theme-color meta to the current theme on load", () => {
+    setupDOM("light");
+    expect(
+      document.querySelector('meta[name="theme-color"]')!.getAttribute("content")
+    ).toBe("#f5f7fc");
   });
 
   it("switches back to dark mode on a second click", () => {

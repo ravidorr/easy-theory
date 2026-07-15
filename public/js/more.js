@@ -1,4 +1,17 @@
 (function () {
+  const THEME_COLORS = { light: "#f5f7fc", dark: "#131829" };
+
+  function syncThemeColorMeta(theme) {
+    const color = THEME_COLORS[theme === "light" ? "light" : "dark"];
+    let meta = document.querySelector('meta[name="theme-color"]');
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.setAttribute("name", "theme-color");
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute("content", color);
+  }
+
   const toggle = document.getElementById("dark-mode-toggle");
   const knob = toggle && toggle.querySelector("span");
 
@@ -12,14 +25,17 @@
   if (toggle) {
     const currentTheme = document.documentElement.dataset.theme ?? "dark";
     updateSwitch(currentTheme === "dark");
+    syncThemeColorMeta(currentTheme);
 
     toggle.addEventListener("click", function () {
       const wasDark = toggle.getAttribute("aria-checked") === "true";
       const isDark = !wasDark;
-      document.documentElement.dataset.theme = isDark ? "dark" : "light";
+      const theme = isDark ? "dark" : "light";
+      document.documentElement.dataset.theme = theme;
       document.cookie =
-        "theme=" + (isDark ? "dark" : "light") + "; path=/; max-age=31536000; SameSite=Lax; Secure";
+        "theme=" + theme + "; path=/; max-age=31536000; SameSite=Lax; Secure";
       updateSwitch(isDark);
+      syncThemeColorMeta(theme);
     });
   }
 
