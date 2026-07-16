@@ -5,6 +5,7 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 ## [Unreleased]
 
 ### Added
+- TODO.md now holds a prioritized action list distilled from an external UX review (quiz flow speed, richer progress visualization, personalized homepage, gamification, microinteractions, and polish items)
 - Topic quiz skip-answered on fresh sessions: server-known answered question IDs are passed to `quiz.js`, which starts at the first unanswered slide (global counter matches dashboard progress); same-browser reload still resumes via `localStorage`; all-answered topics show the final screen with home + review links (fixes #117)
 
 ### Changed
