@@ -13,28 +13,32 @@
   }
 
   async function subscribeToPush() {
-    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return false;
+    try {
+      if (!("serviceWorker" in navigator) || !("PushManager" in window)) return false;
 
-    const vapidKey = getVapidKey();
-    if (!vapidKey) return false;
+      const vapidKey = getVapidKey();
+      if (!vapidKey) return false;
 
-    const permission = await Notification.requestPermission();
-    if (permission !== "granted") return false;
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") return false;
 
-    const reg = await navigator.serviceWorker.ready;
-    const subscription = await reg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(vapidKey),
-    });
+      const reg = await navigator.serviceWorker.ready;
+      const subscription = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(vapidKey),
+      });
 
-    const subJson = subscription.toJSON();
-    const res = await fetch("/api/push/subscribe", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(subJson),
-    });
+      const subJson = subscription.toJSON();
+      const res = await fetch("/api/push/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(subJson),
+      });
 
-    return res.ok;
+      return res.ok;
+    } catch {
+      return false;
+    }
   }
 
   async function unsubscribeFromPush() {

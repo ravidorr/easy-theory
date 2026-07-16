@@ -155,6 +155,16 @@ describe("push.js", () => {
       const helpers = loadScript();
       await expect(helpers.subscribeToPush()).resolves.toBe(false);
     });
+
+    it("returns false when push subscription throws", async () => {
+      const registration = makeRegistration();
+      registration.pushManager.subscribe.mockRejectedValue(new Error("push failed"));
+      stubPushEnvironment({ registration });
+      addVapidMeta();
+
+      const helpers = loadScript();
+      await expect(helpers.subscribeToPush()).resolves.toBe(false);
+    });
   });
 
   describe("unsubscribeFromPush", () => {

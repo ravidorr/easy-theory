@@ -5,9 +5,9 @@ import { resolve } from "path";
 const swScript = readFileSync(resolve(__dirname, "../../public/sw.js"), "utf-8");
 
 const ORIGIN = "http://localhost";
-const STATIC_CACHE = "clearroad-static-v1";
-const PAGES_CACHE = "clearroad-pages-v1";
-const IMAGES_CACHE = "clearroad-images-v1";
+const STATIC_CACHE = "clearroad-static-v2";
+const PAGES_CACHE = "clearroad-pages-v2";
+const IMAGES_CACHE = "clearroad-images-v2";
 
 interface FakeResponse {
   ok: boolean;

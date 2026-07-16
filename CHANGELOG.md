@@ -13,6 +13,7 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ### Fixed
 - First correct answer now initializes home streak/points pills after returning from a quiz (fixes #169): quiz submissions persist latest stats for client-side pill sync, home/more opt out of stale router cache, and quiz home links use full-page locale navigation
+- Schedule save with reminders enabled no longer hangs on stale cached `schedule.js` from the service worker (fixes #165): bump the SW cache to `v2`, redirect to `/${locale}` after save, and swallow push subscription errors so save/redirect always complete
 - Add Arabic content for signs question 15 (migration `015_signs_question_15_arabic.sql`; fixes #136 where `/ar/topics/signs` first question showed a Hebrew stem with Arabic UI)
 - Arabic locale no longer falls back to Hebrew for DB content (signs, topics, questions, videos, resources); missing `_ar` values render empty instead of leaking Hebrew, fixing #137 where flashcards showed `name_he` for sign 103; resources and videos page tests updated to match
 - send-otp: use `AUTH_CALLBACK_ORIGIN` for magic-link redirect URL (fixes QA 500 when Supabase allowlist differs from request origin); log Supabase errors server-side; omit `Secure` on `auth_redirect` cookie outside production so localhost QA can persist the post-login path
