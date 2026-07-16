@@ -11,9 +11,19 @@ import {
   getExamAttempts,
   getTopicAccuracy,
   getTopicQuestionCounts,
+  getQuestionNumbersForTopic,
+  getAnsweredQuestionIdsForTopic,
+  getQuizAccuracyForWindow,
 } from "@/lib/db";
 import { nextMedalTarget } from "@/lib/quiz";
 import { computeReadiness, findWeakestTopics, READINESS_MAX_ATTEMPTS } from "@/lib/readiness";
+import {
+  buildGreetingContext,
+  dayWindow,
+  findResumePoint,
+  pickLastStudiedInProgressTopic,
+  selectFocusTopic,
+} from "@/lib/personalization";
 import { TabBar } from "@/components/TabBar";
 import { Icon } from "@/components/Icon";
 import { getTranslations, getLocale } from "next-intl/server";
@@ -57,13 +67,33 @@ export default async function HomePage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/auth/login?next=/");
 
-  const [stats, topics, progressRows, examAttempts, topicAccuracy, questionCounts] = await Promise.all([
+  // Personalized greeting inputs: yesterday's accuracy uses the Asia/Jerusalem
+  // day, like the streak logic. It only depends on the user, so it joins the
+  // main fetch round.
+  const now = new Date();
+  const yesterdayWindow = dayWindow(now, 1);
+
+  const [
+    stats,
+    topics,
+    progressRows,
+    examAttempts,
+    topicAccuracy,
+    questionCounts,
+    yesterdayAccuracy,
+  ] = await Promise.all([
     getUserStats(supabase, user.id),
     getTopics(supabase),
     getTopicProgress(supabase, user.id),
     getExamAttempts(supabase, user.id, READINESS_MAX_ATTEMPTS),
     getTopicAccuracy(supabase, user.id),
     getTopicQuestionCounts(supabase),
+    getQuizAccuracyForWindow(
+      supabase,
+      user.id,
+      yesterdayWindow.fromIso,
+      yesterdayWindow.toIso
+    ),
   ]);
 
   const progressMap = Object.fromEntries(progressRows.map((p) => [p.topic_id, p]));
@@ -81,6 +111,29 @@ export default async function HomePage() {
     topics.find((t) => progressMap[t.id]?.status === "in_progress") ??
     topics.find((t) => !progressMap[t.id] || progressMap[t.id].status === "not_started") ??
     null;
+
+  // Resume point in the last-studied topic. Only this fetch depends on the
+  // main round; it is skipped entirely when nothing is in progress. The
+  // greeting lines are all optional; new users get none.
+  const lastStudied = pickLastStudiedInProgressTopic(progressRows);
+  let resumePoint = null;
+  if (lastStudied) {
+    const [topicQuestions, answeredIds] = await Promise.all([
+      getQuestionNumbersForTopic(supabase, lastStudied.topic_id),
+      getAnsweredQuestionIdsForTopic(supabase, user.id, lastStudied.topic_id),
+    ]);
+    resumePoint = findResumePoint(topicQuestions, answeredIds);
+  }
+  const focusTopic = selectFocusTopic(weakTopics, lastStudied?.topic_id ?? null);
+  const personalLines = buildGreetingContext({
+    resume:
+      resumePoint && lastStudied
+        ? { ...resumePoint, topicId: lastStudied.topic_id }
+        : null,
+    yesterday: yesterdayAccuracy,
+    focusTopicId: focusTopic?.topic_id ?? null,
+    now,
+  });
 
   // Overall theory progress across the listed topics: sums the same maps the
   // topic cards use, so no extra queries are needed.
@@ -153,6 +206,44 @@ export default async function HomePage() {
           ) : stats.streak_days >= 30 ? (
             <span className={styles.medalNudge}>{t("allMedals")}</span>
           ) : null}
+          {personalLines.length > 0 && (
+            <div className={styles.personalLines}>
+              {personalLines.map((line) => {
+                if (line.kind === "yesterday") {
+                  return (
+                    <span key={line.kind} className={styles.personalLine}>
+                      {line.good
+                        ? t("yesterdayAccuracyHigh", { percent: line.percent })
+                        : t("yesterdayAccuracyLow", { percent: line.percent })}
+                    </span>
+                  );
+                }
+                const topic = topicsById.get(line.topicId);
+                if (!topic) return null;
+                if (line.kind === "resume") {
+                  return (
+                    <Link
+                      key={line.kind}
+                      href={`/topics/${topic.slug}`}
+                      className={styles.personalLineLink}
+                    >
+                      {line.minutes === 1
+                        ? t("resumeLineOneMinute", { number: line.questionNumber })
+                        : t("resumeLine", {
+                            number: line.questionNumber,
+                            minutes: line.minutes,
+                          })}
+                    </Link>
+                  );
+                }
+                return (
+                  <span key={line.kind} className={styles.personalLine}>
+                    {t("focusTopicLine", { topic: getTopicName(topic) })}
+                  </span>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {todayTopic ? (

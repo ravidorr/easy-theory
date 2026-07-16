@@ -38,4 +38,15 @@ describe("locale messages", () => {
       expect(messages.Home.topicsRemainingOne).toBeTruthy();
     }
   });
+
+  it("keeps the ICU placeholders of the personalized greeting strings in both locales", () => {
+    for (const messages of [he, ar]) {
+      expect(messages.Home.resumeLine).toContain("{number}");
+      expect(messages.Home.resumeLine).toContain("{minutes}");
+      expect(messages.Home.resumeLineOneMinute).toContain("{number}");
+      expect(messages.Home.yesterdayAccuracyHigh).toContain("{percent}");
+      expect(messages.Home.yesterdayAccuracyLow).toContain("{percent}");
+      expect(messages.Home.focusTopicLine).toContain("{topic}");
+    }
+  });
 });

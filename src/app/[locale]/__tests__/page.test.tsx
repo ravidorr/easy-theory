@@ -10,6 +10,9 @@ import {
   getExamAttempts,
   getTopicAccuracy,
   getTopicQuestionCounts,
+  getQuestionNumbersForTopic,
+  getAnsweredQuestionIdsForTopic,
+  getQuizAccuracyForWindow,
 } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
 
@@ -30,6 +33,9 @@ vi.mock("@/lib/db", () => ({
   getExamAttempts: vi.fn(),
   getTopicAccuracy: vi.fn(),
   getTopicQuestionCounts: vi.fn(),
+  getQuestionNumbersForTopic: vi.fn(),
+  getAnsweredQuestionIdsForTopic: vi.fn(),
+  getQuizAccuracyForWindow: vi.fn(),
 }));
 vi.mock("next/link", () => ({
   default: ({ href, children, ...rest }: { href: string; children: unknown }) =>
@@ -50,6 +56,9 @@ const mockGetProgress = vi.mocked(getTopicProgress);
 const mockGetExamAttempts = vi.mocked(getExamAttempts);
 const mockGetTopicAccuracy = vi.mocked(getTopicAccuracy);
 const mockGetQuestionCounts = vi.mocked(getTopicQuestionCounts);
+const mockGetQuestionNumbers = vi.mocked(getQuestionNumbersForTopic);
+const mockGetAnsweredIds = vi.mocked(getAnsweredQuestionIdsForTopic);
+const mockGetWindowAccuracy = vi.mocked(getQuizAccuracyForWindow);
 
 const TOPIC_A = { id: "t1", slug: "signs", name_he: "תמרורים", icon: null };
 const TOPIC_B = { id: "t2", slug: "priority", name_he: "זכות קדימה", icon: null };
@@ -68,6 +77,9 @@ describe("HomePage", () => {
     mockGetExamAttempts.mockResolvedValue([]);
     mockGetTopicAccuracy.mockResolvedValue([]);
     mockGetQuestionCounts.mockResolvedValue({ t1: 20, t2: 10 });
+    mockGetQuestionNumbers.mockResolvedValue([]);
+    mockGetAnsweredIds.mockResolvedValue(new Set());
+    mockGetWindowAccuracy.mockResolvedValue({ correct: 0, total: 0 });
     vi.mocked(getTranslations).mockResolvedValue((key: string) => key);
     vi.mocked(getLocale).mockResolvedValue("he");
   });
@@ -525,6 +537,110 @@ describe("HomePage", () => {
       render(jsx);
       expect(screen.getByText("weakTopicsHeader")).toBeInTheDocument();
       expect(screen.getAllByText("إشارات المرور").length).toBeGreaterThan(0);
+    });
+  });
+
+  describe("personalized greeting", () => {
+    const valuesT = ((key: string, values?: Record<string, unknown>) =>
+      values ? `${key}|${JSON.stringify(values)}` : key) as never;
+
+    it("renders no personal lines for a brand-new user", async () => {
+      const jsx = await HomePage();
+      render(jsx);
+      expect(screen.queryByText(/resumeLine/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/yesterdayAccuracy/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/focusTopicLine/)).not.toBeInTheDocument();
+      // The base greeting is unaffected.
+      expect(screen.getByText(/greeting(Morning|Noon|Evening)/)).toBeInTheDocument();
+    });
+
+    it("links the resume line to the last-studied topic with question and minutes", async () => {
+      vi.mocked(getTranslations).mockResolvedValue(valuesT);
+      mockGetProgress.mockResolvedValue([
+        {
+          topic_id: "t1",
+          status: "in_progress",
+          best_score: 50,
+          last_studied_at: "2026-07-15T10:00:00Z",
+        },
+      ] as never);
+      mockGetQuestionNumbers.mockResolvedValue(
+        Array.from({ length: 13 }, (_, i) => ({
+          id: `q${i + 1}`,
+          question_number: i + 1,
+        }))
+      );
+      mockGetAnsweredIds.mockResolvedValue(new Set(["q1"]));
+      const jsx = await HomePage();
+      const { container } = render(jsx);
+      // First unanswered is q2; 12 remaining at 1.5 q/min rounds to 8 minutes.
+      const line = screen.getByText('resumeLine|{"number":2,"minutes":8}');
+      expect(line.closest("a")?.getAttribute("href")).toBe("/topics/signs");
+      expect(mockGetQuestionNumbers).toHaveBeenCalledWith(expect.anything(), "t1");
+      expect(container.querySelectorAll('a[href="/topics/signs"]').length).toBeGreaterThan(1);
+    });
+
+    it("uses the single-minute resume string when almost done", async () => {
+      vi.mocked(getTranslations).mockResolvedValue(valuesT);
+      mockGetProgress.mockResolvedValue([
+        {
+          topic_id: "t1",
+          status: "in_progress",
+          best_score: 50,
+          last_studied_at: "2026-07-15T10:00:00Z",
+        },
+      ] as never);
+      mockGetQuestionNumbers.mockResolvedValue([
+        { id: "q1", question_number: 1 },
+        { id: "q2", question_number: 2 },
+      ]);
+      mockGetAnsweredIds.mockResolvedValue(new Set(["q1"]));
+      const jsx = await HomePage();
+      render(jsx);
+      expect(screen.getByText('resumeLineOneMinute|{"number":2}')).toBeInTheDocument();
+    });
+
+    it("shows yesterday's accuracy when there was activity", async () => {
+      vi.mocked(getTranslations).mockResolvedValue(valuesT);
+      mockGetWindowAccuracy.mockResolvedValue({ correct: 9, total: 10 });
+      const jsx = await HomePage();
+      render(jsx);
+      expect(
+        screen.getByText('yesterdayAccuracyHigh|{"percent":90}')
+      ).toBeInTheDocument();
+    });
+
+    it("encourages improvement when yesterday's accuracy was low", async () => {
+      vi.mocked(getTranslations).mockResolvedValue(valuesT);
+      mockGetWindowAccuracy.mockResolvedValue({ correct: 3, total: 10 });
+      const jsx = await HomePage();
+      render(jsx);
+      expect(
+        screen.getByText('yesterdayAccuracyLow|{"percent":30}')
+      ).toBeInTheDocument();
+    });
+
+    it("suggests a weak topic as the focus line", async () => {
+      vi.mocked(getTranslations).mockResolvedValue(valuesT);
+      mockGetTopicAccuracy.mockResolvedValue([
+        { topic_id: "t2", correct: 2, total: 10 },
+      ]);
+      const jsx = await HomePage();
+      render(jsx);
+      expect(
+        screen.getByText('focusTopicLine|{"topic":"זכות קדימה"}')
+      ).toBeInTheDocument();
+    });
+
+    it("skips the resume fetch entirely when nothing is in progress", async () => {
+      mockGetProgress.mockResolvedValue([
+        { topic_id: "t1", status: "completed", best_score: 100 },
+      ] as never);
+      const jsx = await HomePage();
+      render(jsx);
+      expect(mockGetQuestionNumbers).not.toHaveBeenCalled();
+      expect(mockGetAnsweredIds).not.toHaveBeenCalled();
+      expect(screen.queryByText(/resumeLine/)).not.toBeInTheDocument();
     });
   });
 

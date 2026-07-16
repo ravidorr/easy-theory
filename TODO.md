@@ -1,6 +1,5 @@
 # TODO
 
-- [ ] **Personalized homepage.** Greet returning users with context: where they left off ("Last time you stopped on question 142, you'll finish in about 8 minutes"), yesterday's accuracy, and a suggested focus topic ("Let's improve traffic signs today"). The homepage should change between visits instead of looking the same every time.
 - [ ] **Microinteractions on completion.** When a lesson or the daily mission is completed: card slides away, confetti, XP counter increments, progress bar animates, next lesson fades in.
 - [ ] **Amplify gamification.** XP, levels, achievements, daily and weekly goals, perfect sessions, accuracy, longest streak, study time, and completion percent exist or are possible but are too quiet. Make them visible and prominent.
 - [ ] **More informative topic cards.** Every card currently has the identical image/title/status/description layout. Add difficulty, estimated duration, per-topic progress, XP reward, and completion percent so each card is informative at a glance.

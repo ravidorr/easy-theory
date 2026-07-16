@@ -617,6 +617,58 @@ export async function getTopicAccuracy(
   return [...byTopic.entries()].map(([topic_id, acc]) => ({ topic_id, ...acc }));
 }
 
+export type WindowAccuracy = {
+  correct: number;
+  total: number;
+};
+
+export async function getQuizAccuracyForWindow(
+  supabase: SupabaseClient,
+  userId: string,
+  fromIso: string,
+  toIso: string
+): Promise<WindowAccuracy> {
+  // Best-effort daily stats: responses are upserted (one row per question), so
+  // a question re-answered after the window moves out of it. A single day's
+  // rows stay far below the 1000-row response cap, so one lean select beats
+  // separate count queries.
+  const { data, error } = await supabase
+    .from("user_quiz_responses")
+    .select("is_correct")
+    .eq("user_id", userId)
+    .gte("answered_at", fromIso)
+    .lt("answered_at", toIso);
+  throwOnDbError(error, "getQuizAccuracyForWindow: user_quiz_responses");
+
+  const rows = data ?? [];
+  return {
+    correct: rows.filter((row) => row.is_correct).length,
+    total: rows.length,
+  };
+}
+
+export type QuestionRef = {
+  id: string;
+  question_number: number;
+};
+
+// A lean projection of getQuestionsForTopic for callers that only need the
+// ordering — keep the filter/order in sync with it. Unpaginated like its
+// sibling; revisit if any topic approaches 1000 questions (see
+// getTopicAccuracy).
+export async function getQuestionNumbersForTopic(
+  supabase: SupabaseClient,
+  topicId: string
+): Promise<QuestionRef[]> {
+  const { data, error } = await supabase
+    .from("questions")
+    .select("id, question_number")
+    .eq("topic_id", topicId)
+    .order("question_number");
+  throwOnDbError(error, "getQuestionNumbersForTopic: questions");
+  return data ?? [];
+}
+
 export async function getTopicQuestionCounts(
   supabase: SupabaseClient
 ): Promise<Record<string, number>> {
