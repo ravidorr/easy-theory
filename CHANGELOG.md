@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.147] — 2026-07-16
+
+### Changed
+- Richer progress visualization on the home page: the topics-section "X / Y" completed-topics badge is replaced with an overall percent, a progress bar, a localized "{answered} מתוך {total} שאלות נענו" counter, and a "נשארו עוד {count} שאלות" remaining line (swapped for a completion message at 100%); topic cards now show coverage percent alongside the answered count ("5/20 שאלות · 25%"). Overall totals are summed from the maps the page already fetches (no new queries) and only count listed topics. The overall percent is floored so it never reads 100% while questions remain, and a single remaining question gets a grammatical singular string. New `Home.topicsPercent`/`topicsAnsweredOverall`/`topicsRemaining`/`topicsRemainingOne`/`topicsAllAnswered` keys and `topicAnsweredCount` → `topicAnsweredCountPct` in he + ar. (TODO: richer progress visualization)
+
+---
+
 ## [0.3.146] — 2026-07-16
 
 ### Changed

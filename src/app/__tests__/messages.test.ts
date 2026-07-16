@@ -23,8 +23,19 @@ describe("locale messages", () => {
 
   it("keeps the ICU placeholders of the topic answered-count label in both locales", () => {
     for (const messages of [he, ar]) {
-      expect(messages.Home.topicAnsweredCount).toContain("{answered}");
-      expect(messages.Home.topicAnsweredCount).toContain("{total}");
+      expect(messages.Home.topicAnsweredCountPct).toContain("{answered}");
+      expect(messages.Home.topicAnsweredCountPct).toContain("{total}");
+      expect(messages.Home.topicAnsweredCountPct).toContain("{percent}");
+    }
+  });
+
+  it("keeps the ICU placeholders of the overall progress strings in both locales", () => {
+    for (const messages of [he, ar]) {
+      expect(messages.Home.topicsPercent).toContain("{percent}");
+      expect(messages.Home.topicsAnsweredOverall).toContain("{answered}");
+      expect(messages.Home.topicsAnsweredOverall).toContain("{total}");
+      expect(messages.Home.topicsRemaining).toContain("{count}");
+      expect(messages.Home.topicsRemainingOne).toBeTruthy();
     }
   });
 });

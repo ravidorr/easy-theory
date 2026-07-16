@@ -157,6 +157,20 @@
   color: var(--text-faint);
 }
 
+.overallProgress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.overallMeta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: var(--type-caption-size);
+  color: var(--text-muted);
+}
+
 .topicLink {
   background: var(--surface);
   border: 1px solid var(--border);
