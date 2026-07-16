@@ -1,3 +1,4 @@
+import { unstable_noStore as noStore } from "next/cache";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import Script from "next/script";
@@ -11,6 +12,7 @@ import { LanguageToggle } from "@/components/LanguageToggle";
 import styles from "./page.module.css";
 
 export default async function MorePage() {
+  noStore();
   const supabase = await createClient();
   const {
     data: { user },
@@ -55,7 +57,7 @@ export default async function MorePage() {
             <span className={`${styles.statIcon} ${styles.statIconStreak}`}>
               <Icon name="flame" size={18} />
             </span>
-            <span className={styles.statValue}>{stats.streak_days}</span>
+            <span className={styles.statValue} data-stat="streak">{stats.streak_days}</span>
             <span className={styles.statLabel}>{t("statStreak")}</span>
           </div>
           <div className={styles.statDivider} />
@@ -63,7 +65,7 @@ export default async function MorePage() {
             <span className={`${styles.statIcon} ${styles.statIconPoints}`}>
               <Icon name="star" size={18} />
             </span>
-            <span className={styles.statValue}>{stats.star_points}</span>
+            <span className={styles.statValue} data-stat="points">{stats.star_points}</span>
             <span className={styles.statLabel}>{t("statPoints")}</span>
           </div>
         </div>
@@ -157,6 +159,7 @@ export default async function MorePage() {
 
       <TabBar active="more" />
       <Script src="/js/more.js" strategy="afterInteractive" />
+      <Script src="/js/stats-pills.js" strategy="afterInteractive" />
     </>
   );
 }

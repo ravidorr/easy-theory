@@ -218,6 +218,26 @@
     });
   }
 
+  function persistLatestStats(data) {
+    if (
+      !data ||
+      typeof data.streak_days !== "number" ||
+      typeof data.new_total_stars !== "number"
+    ) {
+      return;
+    }
+    try {
+      sessionStorage.setItem(
+        "clearroad:stats",
+        JSON.stringify({
+          streak_days: data.streak_days,
+          star_points: data.new_total_stars,
+          savedAt: Date.now(),
+        })
+      );
+    } catch {}
+  }
+
   if (rewardFloat) {
     rewardFloat.addEventListener("animationend", function () {
       rewardFloat.removeAttribute("data-animate");
@@ -507,6 +527,7 @@
         feedbackMessage: rewardMessage ? rewardMessage.textContent : answerFeedback,
       };
       persistResume();
+      persistLatestStats(data);
       if (data.medals_earned && data.medals_earned.length) {
         medalQueue.push.apply(medalQueue, data.medals_earned);
         showNextMedal();

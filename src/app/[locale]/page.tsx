@@ -1,6 +1,8 @@
+import { unstable_noStore as noStore } from "next/cache";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import Script from "next/script";
 import { createClient } from "@/lib/supabase";
 import {
   getTopics,
@@ -45,6 +47,7 @@ function PathProgress({ total = 5, current = 1 }: { total?: number; current?: nu
 }
 
 export default async function HomePage() {
+  noStore();
   const locale = await getLocale();
   const t = await getTranslations("Home");
 
@@ -113,12 +116,12 @@ export default async function HomePage() {
             <span className={`${styles.pill} ${styles.pillStreak}`}>
               <Icon name="flame" size={15} />
               <span className="sr-only">{t("streakLabel")}</span>
-              {stats.streak_days}
+              <span data-stat="streak">{stats.streak_days}</span>
             </span>
             <span className={`${styles.pill} ${styles.pillPoints}`}>
               <Icon name="star" size={15} />
               <span className="sr-only">{t("pointsLabel")}</span>
-              {stats.star_points}
+              <span data-stat="points">{stats.star_points}</span>
             </span>
           </div>
         </div>
@@ -333,6 +336,7 @@ export default async function HomePage() {
         </div>
       </main>
       <TabBar active="home" />
+      <Script src="/js/stats-pills.js" strategy="afterInteractive" />
     </>
   );
 }
