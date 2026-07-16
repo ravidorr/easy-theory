@@ -18,3 +18,16 @@
 - [ ] **Increase vertical spacing between homepage sections** slightly; the page feels a little dense.
 - [ ] **Contextual empty states** instead of just showing zeros.
 - [ ] **Copy consistency pass.** Consistent gendered phrasing and imperative form across all Hebrew strings, mirrored in the Arabic translations.
+- [ ] **Replace native JavaScript dialogs with an HTML/CSS/JavaScript modal component:**
+  - `public/js/exam.js:186` - `window.confirm("יש X שאלות שלא נענו. להגיש בכל זאת?")` on exam submit
+  - `public/js/schedule.js:112` - `alert()` when no study day is selected
+  - `public/js/schedule.js:142` - `alert()` on schedule save error
+- [ ] **"Today's mission" dead-ends on a completed topic:** home recommends "חוקי התנועה · אפשר להמשיך מאיפה שעצרת" even though the topic is 501/501 complete, so the CTA lands on the "סיימת!" screen with nothing to do. The mission picker should skip completed topics or route to retry/review (the topic is at 24% success in "כדאי לחזק").
+- [ ] **Hebrew feedback rendered on the Arabic locale:** on `/ar/topics/vehicle`, a restored answer showed "בחרת ב־ג - לא נורא, ננסה שוב בפעם הבאה." in Hebrew. `public/js/quiz.js:417` builds the message with hardcoded Hebrew fallbacks (`t.rewardWrongPrefix || "בחרת ב־"`), and the answer-letter badge is restored from the Hebrew session. `public/js/exam.js` and `public/js/schedule.js` use the same Hebrew-fallback pattern.
+- [ ] **Exam question references an image, it does not show:** "לפניך תמרור 126. איזה תמרור מוצב בדרך..." rendered without the sign 126 image (other questions do show a question image), making it unanswerable without memorizing sign numbers.
+- [ ] **Mistakes review renders all questions at once:** `/topics/traffic-laws/review` painted all 379 wrong questions in a single page. Needs pagination or virtualization.
+- [ ] **Exam result copy does not scale with the score:** a 2/30 result shows "לא נורא, כמעט שם." (`messages/he.json:376`). Tier the message by score.
+- [ ] **Emoji hardcoded in the UI despite the no-emoji policy:** `src/app/[locale]/topics/[slug]/page.tsx:236` and `src/app/[locale]/topics/[slug]/review/page.tsx:232` render a party-popper emoji.
+- [ ] **Exam answer-review mode keeps leftover exam chrome:** the frozen countdown timer and the "נענו X מתוך 30" footer remain visible while reviewing answers.
+- [ ] **Saving the schedule redirects to Home instead of back to More** (where the user came from), with no success confirmation.
+- [ ] **Invalid nested interactive elements on the exam intro:** the start CTA is a `<button>` nested inside an `<a>` (`/exam` page), which is ambiguous for screen readers.
