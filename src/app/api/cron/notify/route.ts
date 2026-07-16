@@ -4,13 +4,14 @@ import webpush from "web-push";
 import { createAdminClient } from "@/lib/supabase";
 import { getUsersScheduledForDay, getPushSubscriptionsForUsers } from "@/lib/db";
 import { getNotifyTranslator } from "@/lib/api";
+import { APP_TIME_ZONE } from "@/lib/personalization";
 
 const APP_URL = "https://easy-theory-omega.vercel.app";
 
 function getIsraelDayOfWeek(): number {
   const now = new Date();
   const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: "Asia/Jerusalem",
+    timeZone: APP_TIME_ZONE,
     weekday: "short",
   }).formatToParts(now);
 

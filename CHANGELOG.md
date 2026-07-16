@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.148] — 2026-07-16
+
+### Added
+- Personalized homepage greeting: returning users now see up to two context lines under the time-of-day greeting — a resume link ("בפעם הקודמת עצרת בשאלה {number}. עוד בערך {minutes} דקות וסיימת את הנושא.", first unanswered question in the most recently studied in-progress topic, minutes estimated at 1.5 questions/minute), yesterday's accuracy ("אתמול ענית נכון על {percent}%...", encouraging vs celebratory copy split at 80%), and a weak-topic focus suggestion ("היום נחזק את {topic}.", reusing `findWeakestTopics`, never duplicating the resume topic). The resume line always leads; the second slot rotates daily by the Asia/Jerusalem calendar day so the page changes between visits; brand-new users see none of it. New `src/lib/personalization.ts` (timezone day-window with two-pass DST-safe midnight resolution, resume point, focus pick, line builder) plus lean db helpers `getQuizAccuracyForWindow` (single windowed select on `answered_at`; best-effort since responses are upserted) and `getQuestionNumbersForTopic`; the yesterday query joins the page's existing parallel fetch round, and the cron notify route now shares the `APP_TIME_ZONE` constant. New `Home.resumeLine`/`resumeLineOneMinute`/`yesterdayAccuracyHigh`/`yesterdayAccuracyLow`/`focusTopicLine` keys in he + ar. (TODO: personalized homepage)
+
+---
+
 ## [0.3.147] — 2026-07-16
 
 ### Changed

@@ -82,6 +82,29 @@
   color: var(--primary-soft-text);
 }
 
+.personalLines {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.personalLine {
+  font-size: var(--type-small-size);
+  color: var(--text-muted);
+}
+
+.personalLineLink {
+  font-size: var(--type-small-size);
+  font-weight: 600;
+  color: var(--primary-soft-text);
+  text-decoration: none;
+}
+
+.personalLineLink:hover {
+  text-decoration: underline;
+}
+
 .todayCard {
   background: var(--surface);
   border: 1px solid var(--border);
