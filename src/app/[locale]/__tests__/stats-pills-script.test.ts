@@ -39,4 +39,37 @@ describe("stats-pills.js", () => {
     expect(document.querySelector('[data-stat="streak"]')!.textContent).toBe("0");
     expect(document.querySelector('[data-stat="points"]')!.textContent).toBe("0");
   });
+
+  it("updates every element carrying the same data-stat attribute", () => {
+    document.body.innerHTML = `
+      <span data-stat="streak">0</span>
+      <span data-stat="streak">0</span>
+      <span data-stat="points">0</span>
+      <span data-stat="points">0</span>
+    `;
+    sessionStorage.setItem(
+      "clearroad:stats",
+      JSON.stringify({ streak_days: 4, star_points: 70 })
+    );
+
+    eval(statsPillsScript);
+
+    const streaks = [...document.querySelectorAll('[data-stat="streak"]')];
+    const points = [...document.querySelectorAll('[data-stat="points"]')];
+    expect(streaks.map((el) => el.textContent)).toEqual(["4", "4"]);
+    expect(points.map((el) => el.textContent)).toEqual(["70", "70"]);
+  });
+
+  it("skips stats that are missing or not numbers", () => {
+    sessionStorage.setItem(
+      "clearroad:stats",
+      JSON.stringify({ streak_days: "bad" })
+    );
+
+    eval(statsPillsScript);
+
+    expect(document.querySelector('[data-stat="streak"]')!.textContent).toBe("0");
+    expect(document.querySelector('[data-stat="points"]')!.textContent).toBe("0");
+    expect(sessionStorage.getItem("clearroad:stats")).toBeNull();
+  });
 });

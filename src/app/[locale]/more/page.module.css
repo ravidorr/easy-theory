@@ -24,7 +24,8 @@
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-card);
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px 8px;
   padding: 20px 16px;
 }
 
@@ -45,7 +46,8 @@
   margin-bottom: 4px;
 }
 
-.statIconStreak {
+.statIconStreak,
+.statIconLevel {
   background: var(--primary-soft);
   color: var(--primary-soft-text);
 }
@@ -53,6 +55,11 @@
 .statIconPoints {
   background: var(--gold-soft);
   color: var(--gold-text);
+}
+
+.statIconNeutral {
+  background: var(--surface-2);
+  color: var(--text-muted);
 }
 
 .statValue {
@@ -66,12 +73,7 @@
   font-size: var(--type-caption-size);
   color: var(--text-faint);
   font-weight: 500;
-}
-
-.statDivider {
-  width: 1px;
-  background: var(--border);
-  margin: 4px 16px;
+  text-align: center;
 }
 
 .navCard {

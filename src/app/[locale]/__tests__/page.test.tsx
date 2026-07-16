@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import React from "react";
 import HomePage from "../page";
 import { createClient } from "@/lib/supabase";
@@ -98,11 +98,75 @@ describe("HomePage", () => {
     expect(document.querySelector('[data-stat="points"]')?.textContent).toBe("42");
   });
 
-  it("labels the streak and points counters for screen readers", async () => {
+  it("labels every stat tile in the stats strip", async () => {
     const jsx = await HomePage();
     render(jsx);
-    expect(screen.getByText("streakLabel")).toHaveClass("sr-only");
-    expect(screen.getByText("pointsLabel")).toHaveClass("sr-only");
+    expect(screen.getByText("statsStreakLabel")).toBeInTheDocument();
+    expect(screen.getByText("statsPointsLabel")).toBeInTheDocument();
+    expect(screen.getByText("statsLevelLabel")).toBeInTheDocument();
+    expect(screen.getByText("dailyGoalLabel")).toBeInTheDocument();
+  });
+
+  it("renders exactly one live element per stat for the pill-sync script", async () => {
+    const jsx = await HomePage();
+    const { container } = render(jsx);
+    expect(container.querySelectorAll('[data-stat="streak"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-stat="points"]')).toHaveLength(1);
+  });
+
+  describe("stats strip", () => {
+    const valuesT = ((key: string, values?: Record<string, unknown>) =>
+      values ? `${key}|${JSON.stringify(values)}` : key) as never;
+
+    it("derives the level and points-to-next from star points", async () => {
+      vi.mocked(getTranslations).mockResolvedValue(valuesT);
+      // 150 points: level 2 spans 120-360, so 210 points remain.
+      mockGetStats.mockResolvedValue({ streak_days: 0, star_points: 150 } as never);
+      const jsx = await HomePage();
+      render(jsx);
+      const strip = screen.getByLabelText("statsStripLabel");
+      expect(within(strip).getByText("2")).toBeInTheDocument();
+      expect(screen.getByText('levelToNext|{"points":210}')).toBeInTheDocument();
+    });
+
+    it("fetches today's window separately from yesterday's", async () => {
+      await HomePage();
+      expect(mockGetWindowAccuracy).toHaveBeenCalledTimes(2);
+      const [yesterdayCall, todayCall] = mockGetWindowAccuracy.mock.calls;
+      expect(yesterdayCall[2]).not.toBe(todayCall[2]);
+      expect(yesterdayCall[3]).toBe(todayCall[2]);
+    });
+
+    it("shows daily-goal progress with the remaining count", async () => {
+      vi.mocked(getTranslations).mockResolvedValue(valuesT);
+      mockGetWindowAccuracy.mockResolvedValue({ correct: 5, total: 12 });
+      const jsx = await HomePage();
+      const { container } = render(jsx);
+      expect(
+        screen.getByText('dailyGoalValue|{"answered":12,"goal":20}')
+      ).toBeInTheDocument();
+      expect(screen.getByText('dailyGoalRemaining|{"count":8}')).toBeInTheDocument();
+      const widths = [...container.querySelectorAll("div")].map((d) => d.style.width);
+      expect(widths).toContain("60%");
+    });
+
+    it("uses the singular string when one question remains for the goal", async () => {
+      mockGetWindowAccuracy.mockResolvedValue({ correct: 10, total: 19 });
+      const jsx = await HomePage();
+      render(jsx);
+      expect(screen.getByText("dailyGoalRemainingOne")).toBeInTheDocument();
+    });
+
+    it("marks the goal as done and caps the bar at 100%", async () => {
+      mockGetWindowAccuracy.mockResolvedValue({ correct: 20, total: 25 });
+      const jsx = await HomePage();
+      const { container } = render(jsx);
+      expect(screen.getByText("dailyGoalDone")).toBeInTheDocument();
+      expect(screen.queryByText(/dailyGoalRemaining/)).not.toBeInTheDocument();
+      const widths = [...container.querySelectorAll("div")].map((d) => d.style.width);
+      expect(widths).toContain("100%");
+      expect(widths.every((w) => !w || parseInt(w, 10) <= 100)).toBe(true);
+    });
   });
 
   it("renders the today-card CTA as a link styled as a button, without a nested button", async () => {

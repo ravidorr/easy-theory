@@ -16,6 +16,11 @@ import {
   getQuizAccuracyForWindow,
 } from "@/lib/db";
 import { nextMedalTarget } from "@/lib/quiz";
+import {
+  DAILY_GOAL_QUESTIONS,
+  completionSummary,
+  levelForPoints,
+} from "@/lib/gamification";
 import { computeReadiness, findWeakestTopics, READINESS_MAX_ATTEMPTS } from "@/lib/readiness";
 import {
   buildGreetingContext,
@@ -72,6 +77,7 @@ export default async function HomePage() {
   // main fetch round.
   const now = new Date();
   const yesterdayWindow = dayWindow(now, 1);
+  const todayWindow = dayWindow(now, 0);
 
   const [
     stats,
@@ -81,6 +87,7 @@ export default async function HomePage() {
     topicAccuracy,
     questionCounts,
     yesterdayAccuracy,
+    todayAccuracy,
   ] = await Promise.all([
     getUserStats(supabase, user.id),
     getTopics(supabase),
@@ -93,6 +100,12 @@ export default async function HomePage() {
       user.id,
       yesterdayWindow.fromIso,
       yesterdayWindow.toIso
+    ),
+    getQuizAccuracyForWindow(
+      supabase,
+      user.id,
+      todayWindow.fromIso,
+      todayWindow.toIso
     ),
   ]);
 
@@ -137,17 +150,24 @@ export default async function HomePage() {
 
   // Overall theory progress across the listed topics: sums the same maps the
   // topic cards use, so no extra queries are needed.
-  const totalQuestions = topics.reduce((sum, topic) => sum + (questionCounts[topic.id] ?? 0), 0);
-  const answeredQuestions = topics.reduce((sum, topic) => sum + (answeredMap[topic.id] ?? 0), 0);
-  // Floor, not round: the bar must not show 100% while questions remain.
-  const overallPct =
-    totalQuestions > 0
-      ? Math.min(100, Math.floor((answeredQuestions / totalQuestions) * 100))
-      : 0;
-  const remainingQuestions = Math.max(totalQuestions - answeredQuestions, 0);
+  const completion = completionSummary(
+    topics.map((topic) => topic.id),
+    questionCounts,
+    answeredMap
+  );
 
   const nextMedal = nextMedalTarget(stats.streak_days);
   const daysToNextMedal = nextMedal !== null ? nextMedal - stats.streak_days : null;
+
+  const levelInfo = levelForPoints(stats.star_points);
+  const levelPct = Math.round(levelInfo.progress * 100);
+  const answeredToday = todayAccuracy.total;
+  const dailyGoalDone = answeredToday >= DAILY_GOAL_QUESTIONS;
+  const dailyGoalPct = Math.min(
+    100,
+    Math.round((answeredToday / DAILY_GOAL_QUESTIONS) * 100)
+  );
+  const dailyGoalRemaining = Math.max(DAILY_GOAL_QUESTIONS - answeredToday, 0);
 
   function timeGreeting() {
     const h = new Date().getHours();
@@ -174,18 +194,6 @@ export default async function HomePage() {
       <main className={styles.page}>
         <div className={styles.topBar}>
           <span className={styles.wordmark}>{t("wordmark")}</span>
-          <div className={styles.pillsRow}>
-            <span className={`${styles.pill} ${styles.pillStreak}`}>
-              <Icon name="flame" size={15} />
-              <span className="sr-only">{t("streakLabel")}</span>
-              <span data-stat="streak">{stats.streak_days}</span>
-            </span>
-            <span className={`${styles.pill} ${styles.pillPoints}`}>
-              <Icon name="star" size={15} />
-              <span className="sr-only">{t("pointsLabel")}</span>
-              <span data-stat="points">{stats.star_points}</span>
-            </span>
-          </div>
         </div>
 
         <div className={styles.greeting}>
@@ -245,6 +253,77 @@ export default async function HomePage() {
             </div>
           )}
         </div>
+
+        <section className={styles.statsStrip} aria-label={t("statsStripLabel")}>
+          <div className={styles.statTile}>
+            <span className={`${styles.statTileIcon} ${styles.statTileIconStreak}`}>
+              <Icon name="flame" size={18} />
+            </span>
+            <span className={styles.statTileValue} data-stat="streak">
+              {stats.streak_days}
+            </span>
+            <span className={styles.statTileLabel}>{t("statsStreakLabel")}</span>
+          </div>
+          <div className={styles.statTile}>
+            <span className={`${styles.statTileIcon} ${styles.statTileIconPoints}`}>
+              <Icon name="star" size={18} />
+            </span>
+            <span className={styles.statTileValue} data-stat="points">
+              {stats.star_points}
+            </span>
+            <span className={styles.statTileLabel}>{t("statsPointsLabel")}</span>
+          </div>
+          <div className={styles.statTile}>
+            <span className={`${styles.statTileIcon} ${styles.statTileIconLevel}`}>
+              <Icon name="gem" size={18} />
+            </span>
+            <span className={styles.statTileValue}>{levelInfo.level}</span>
+            <span className={styles.statTileLabel}>{t("statsLevelLabel")}</span>
+            <div className={`${styles.progressTrack} ${styles.statTileTrack}`}>
+              <div className={styles.progressFill} style={{ width: `${levelPct}%` }} />
+            </div>
+            <span className={styles.statTileCaption}>
+              {t("levelToNext", {
+                points: levelInfo.pointsForNextLevel - levelInfo.pointsIntoLevel,
+              })}
+            </span>
+          </div>
+          <div className={styles.statTile}>
+            <span
+              className={`${styles.statTileIcon} ${
+                dailyGoalDone ? styles.statTileIconGoalDone : styles.statTileIconGoal
+              }`}
+            >
+              <Icon name={dailyGoalDone ? "check" : "timer"} size={18} />
+            </span>
+            <span className={styles.statTileValue}>
+              {t("dailyGoalValue", {
+                answered: answeredToday,
+                goal: DAILY_GOAL_QUESTIONS,
+              })}
+            </span>
+            <span className={styles.statTileLabel}>{t("dailyGoalLabel")}</span>
+            <div className={`${styles.progressTrack} ${styles.statTileTrack}`}>
+              <div
+                className={`${styles.progressFill} ${
+                  dailyGoalDone ? styles.progressFillDone : ""
+                }`}
+                style={{ width: `${dailyGoalPct}%` }}
+              />
+            </div>
+            <span
+              className={`${styles.statTileCaption} ${
+                dailyGoalDone ? styles.statTileCaptionDone : ""
+              }`}
+            >
+              {dailyGoalDone
+                ? t("dailyGoalDone")
+                : dailyGoalRemaining === 1
+                ? t("dailyGoalRemainingOne")
+                : t("dailyGoalRemaining", { count: dailyGoalRemaining })}
+            </span>
+          </div>
+        </section>
 
         {todayTopic ? (
           <div className={styles.todayCard}>
@@ -381,27 +460,27 @@ export default async function HomePage() {
           <div className={styles.topicsHeader}>
             <h2>{t("topicsHeader")}</h2>
             <span className={styles.topicsCount}>
-              {t("topicsPercent", { percent: overallPct })}
+              {t("topicsPercent", { percent: completion.percent })}
             </span>
           </div>
 
           <div className={styles.overallProgress}>
             <div className={styles.progressTrack}>
-              <div className={styles.progressFill} style={{ width: `${overallPct}%` }} />
+              <div className={styles.progressFill} style={{ width: `${completion.percent}%` }} />
             </div>
             <div className={styles.overallMeta}>
               <span>
                 {t("topicsAnsweredOverall", {
-                  answered: answeredQuestions,
-                  total: totalQuestions,
+                  answered: completion.answeredQuestions,
+                  total: completion.totalQuestions,
                 })}
               </span>
               <span>
-                {remainingQuestions === 0
+                {completion.remainingQuestions === 0
                   ? t("topicsAllAnswered")
-                  : remainingQuestions === 1
+                  : completion.remainingQuestions === 1
                   ? t("topicsRemainingOne")
-                  : t("topicsRemaining", { count: remainingQuestions })}
+                  : t("topicsRemaining", { count: completion.remainingQuestions })}
               </span>
             </div>
           </div>

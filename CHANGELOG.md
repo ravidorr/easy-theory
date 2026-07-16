@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.151] — 2026-07-17
+
+### Added
+- Amplified gamification with zero schema changes: the homepage's tiny streak/points top-bar pills are replaced by a prominent 4-tile stats strip between the greeting and the daily mission — streak, points, a new level tile (derived purely from star points via `src/lib/gamification.ts`, quadratic curve tied to `POINTS_PER_CORRECT` so the full question bank spans ~15 levels, with a progress bar and "עוד {points} נקודות לרמה הבאה" caption), and a daily goal tile ("{answered}/20" from the existing Jerusalem-day window query, with a remaining-count caption, singular form, and a distinct done state). The More page stats card grows from 2 to 6 cells (streak, points, level, overall accuracy — a dash until anything is answered, never a fake 0 — questions answered, and completion percent) and the achievements grid doubles from 4 streak medals to 8 by adding four derived, display-only achievements (first topic, 100 questions, all topics, exam pass; earned ones show "הושג" in the date slot) computed at render from existing tables via `deriveAchievements`, with a typed slug join and a single render loop shared with the milestones. The overall-completion math (floor-not-round, listed topics only) moved into a shared `completionSummary` helper used by both pages so they can never disagree, `stats-pills.js` now updates every `[data-stat]` element, and a lean `hasPassedExam` db helper backs the exam achievement. New `Home` (statsStrip/level/dailyGoal) and `More` (statLevel/statAccuracy/statAnswered/statCompletion/ach*) keys in he + ar; the orphaned `streakLabel`/`pointsLabel` keys are removed. (TODO: amplify gamification)
+
+---
+
 ## [0.3.150] — 2026-07-17
 
 ### Fixed
