@@ -358,6 +358,30 @@ describe("quiz.js – rejected answer persistence", () => {
     );
   });
 
+  it("stores latest streak and star totals for dashboard pill sync", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          streak_days: 1,
+          new_total_stars: 10,
+        }),
+      })
+    );
+    setupDOM();
+
+    clickOption(0, "a");
+    clickAction();
+    await flushAsyncWork();
+
+    expect(JSON.parse(sessionStorage.getItem("clearroad:stats")!)).toEqual({
+      streak_days: 1,
+      star_points: 10,
+      savedAt: expect.any(Number),
+    });
+  });
+
   it("shows a retry action after a network failure", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
     setupDOM();

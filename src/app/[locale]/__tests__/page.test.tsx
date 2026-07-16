@@ -82,6 +82,8 @@ describe("HomePage", () => {
     render(jsx);
     expect(screen.getByText("7")).toBeInTheDocument();
     expect(screen.getByText("42")).toBeInTheDocument();
+    expect(document.querySelector('[data-stat="streak"]')?.textContent).toBe("7");
+    expect(document.querySelector('[data-stat="points"]')?.textContent).toBe("42");
   });
 
   it("labels the streak and points counters for screen readers", async () => {

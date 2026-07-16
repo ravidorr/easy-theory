@@ -180,9 +180,9 @@ export default async function TopicQuizPage({
         className={styles.page}
       >
         <div className={styles.topBar}>
-          <Link href="/" className={styles.closeBtn} aria-label={t("closeLabel")}>
+          <a href={`/${locale}`} className={styles.closeBtn} aria-label={t("closeLabel")}>
             ✕
-          </Link>
+          </a>
           <div className={styles.progressTrack}>
             <div
               id="quiz-progress-fill"
@@ -238,9 +238,9 @@ export default async function TopicQuizPage({
           <span className={styles.finalScore}>
             <span id="final-score"></span>
           </span>
-          <Link href="/" className={`btn-primary ${styles.btnWide}`}>
+          <a href={`/${locale}`} className={`btn-primary ${styles.btnWide}`}>
             {t("finalBackHome")}
-          </Link>
+          </a>
           <Link href={`/topics/${slug}/review`} className={`btn-secondary ${styles.btnWide}`}>
             {t("finalReview")}
           </Link>

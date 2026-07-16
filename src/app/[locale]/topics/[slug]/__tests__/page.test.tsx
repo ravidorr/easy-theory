@@ -365,7 +365,9 @@ describe("TopicQuizPage", () => {
   it("labels the close link for screen readers", async () => {
     const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "he" }) });
     const { container } = render(jsx);
-    expect(container.querySelector("a[aria-label='closeLabel']")).toBeTruthy();
+    const closeLink = container.querySelector("a[aria-label='closeLabel']");
+    expect(closeLink).toBeTruthy();
+    expect(closeLink?.getAttribute("href")).toBe("/he");
   });
 
   it("renders every option button with aria-pressed false", async () => {
