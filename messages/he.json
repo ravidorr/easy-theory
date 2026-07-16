@@ -110,6 +110,7 @@
     "milestone14": "שבועיים",
     "milestone30": "חודש",
     "darkMode": "מצב כהה",
+    "autoAdvance": "מעבר אוטומטי לשאלה הבאה",
     "language": "שפה",
     "logoutBtn": "יציאה מהחשבון"
   },
@@ -127,8 +128,8 @@
   "Quiz": {
     "count": "{current} מתוך {total}",
     "emptyQuestions": "אין שאלות זמינות לנושא זה עדיין.",
-    "answerBtn": "צדקתי?",
     "nextBtn": "לשאלה הבאה",
+    "autoAdvanceHint": "אחרי תשובה נכונה עוברים אוטומטית לשאלה הבאה. אפשר לכבות במסך \"עוד\".",
     "scoreLabel": "ניקוד",
     "closeLabel": "סגירה",
     "signAlt": "תמרור {number}",
@@ -322,7 +323,6 @@
     },
     "Quiz": {
       "count": "{current} מתוך {total}",
-      "answerBtn": "צדקתי?",
       "nextBtn": "לשאלה הבאה",
       "savingAnswer": "שומרים...",
       "saveAnswerError": "לא הצלחנו לשמור את התשובה. אפשר לנסות שוב.",

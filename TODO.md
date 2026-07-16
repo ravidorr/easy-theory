@@ -1,6 +1,5 @@
 # TODO
 
-- [ ] **Speed up the quiz flow.** Make it feel arcade-like: tap, instant feedback animation, auto-advance to the next question. Remove unnecessary waits so users doing hundreds of questions can enter flow state.
 - [ ] **Richer progress visualization.** Replace binary progress ("0 / 4") with granular per-topic progress: progress bar plus percent, "112 / 361 questions answered", and how much theory remains overall. People love seeing numbers go up.
 - [ ] **Personalized homepage.** Greet returning users with context: where they left off ("Last time you stopped on question 142, you'll finish in about 8 minutes"), yesterday's accuracy, and a suggested focus topic ("Let's improve traffic signs today"). The homepage should change between visits instead of looking the same every time.
 - [ ] **Microinteractions on completion.** When a lesson or the daily mission is completed: card slides away, confetti, XP counter increments, progress bar animates, next lesson fades in.

@@ -217,7 +217,7 @@ export default async function RetryMistakesPage({
           </div>
 
           <button id="quiz-next" className="btn-primary" disabled>
-            {tQuiz("answerBtn")}
+            {tQuiz("nextBtn")}
           </button>
         </div>
 

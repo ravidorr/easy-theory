@@ -31,6 +31,8 @@ export default async function MorePage() {
 
   const cookieStore = await cookies();
   const isDark = (cookieStore.get("theme")?.value ?? "dark") === "dark";
+  // Default is on; more.js corrects the default for reduced-motion users.
+  const autoAdvanceOn = cookieStore.get("quiz-auto-advance")?.value !== "off";
 
   const MILESTONES: { slug: string; label: string; icon: IconName }[] = [
     { slug: "streak-3", label: t("milestone3"), icon: "flame" },
@@ -140,6 +142,23 @@ export default async function MorePage() {
               className={`${styles.toggle} ${isDark ? styles.toggleOn : ""}`}
             >
               <span className={`${styles.toggleThumb} ${isDark ? styles.toggleThumbOn : ""}`} />
+            </span>
+          </label>
+
+          <label className={styles.settingsRow}>
+            <span className={styles.settingsIcon}>
+              <Icon name="play" size={20} />
+            </span>
+            <span className={styles.settingsRowLabel}>{t("autoAdvance")}</span>
+            <span
+              id="auto-advance-toggle"
+              role="switch"
+              aria-checked={autoAdvanceOn ? "true" : "false"}
+              className={`${styles.toggle} ${autoAdvanceOn ? styles.toggleOn : ""}`}
+            >
+              <span
+                className={`${styles.toggleThumb} ${autoAdvanceOn ? styles.toggleThumbOn : ""}`}
+              />
             </span>
           </label>
 

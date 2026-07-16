@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.146] — 2026-07-16
+
+### Changed
+- Arcade-style quiz flow: tapping an answer option now confirms it immediately (the "צדקתי?" step is gone), correct answers show instant pop/shake feedback and auto-advance to the next question after 900ms, and the footer button doubles as a skip during the countdown. Wrong answers still wait for a manual tap so the explanation can be read, and the no-advance-on-unsaved-answers guarantee is preserved: the countdown only completes once the submission persists, failures fall back to the existing retry flow, and medals/topic-completed messages cancel auto-advance. New "מעבר אוטומטי לשאלה הבאה" toggle on the More page (cookie-based, like dark mode; reduced-motion users default to the manual flow) with a once-per-session hint on the first question; the 300ms touch double-tap suppression now applies only to the retry path. New `More.autoAdvance` + `Quiz.autoAdvanceHint` keys and removed `answerBtn` in he + ar. (TODO: quiz flow speed)
+
+---
+
 ## [Unreleased]
 
 ### Added
