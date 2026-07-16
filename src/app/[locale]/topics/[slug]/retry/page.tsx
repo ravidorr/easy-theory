@@ -221,7 +221,7 @@ export default async function RetryMistakesPage({
           </button>
         </div>
 
-        <div id="quiz-final" className={`${styles.hidden} ${styles.quizFinal}`}>
+        <div id="quiz-final" className={`${styles.hidden} ${styles.quizFinal}`} tabIndex={-1}>
           <span className={styles.finalEmoji}>🎯</span>
           <h2>{tRetry("finalTitle")}</h2>
           <span className={styles.finalScore}>

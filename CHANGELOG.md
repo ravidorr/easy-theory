@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.149] — 2026-07-16
+
+### Added
+- Completion microinteractions on the topic quiz: finishing the last question now slides the answered card away (240ms, mirrored by `FINAL_EXIT_MS` in quiz.js), pulses the progress bar, and reveals the final screen with a celebration — a spring pop on the title, a 12-piece CSS-only confetti burst (design-token colors, one-shot, `forwards` fill), a score and XP count-up (`requestAnimationFrame` ease-out with a synchronous initial render so hidden tabs never show a blank score), and a staggered fade-in "next lesson" card linking to the next unfinished topic (new `selectNextTopic` in `src/lib/personalization.ts`, skips completed topics; suggestion data is soft-fallback so a progress query failure cannot take down the quiz). Everything is keyed off a single `data-celebrate` attribute set only when the topic is finished in-session — revisiting an already-finished topic gets the quiet screen (session XP pill hidden instead of a misleading 0) — and every animation is disabled under `prefers-reduced-motion` (reveal is then synchronous). Keyboard/screen-reader focus moves to the final screen when the footer button disappears (`tabIndex={-1}` on `#quiz-final`, also on the retry page). The quiz page now resolves the current topic from a single `getTopics` fetch instead of a separate slug lookup. New `Quiz.nextTopicLabel` key in he + ar. (TODO: microinteractions on completion)
+
+---
+
 ## [0.3.148] — 2026-07-16
 
 ### Added
