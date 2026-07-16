@@ -129,7 +129,7 @@ describe("POST /api/quiz", () => {
     expect(client.rpc).not.toHaveBeenCalled();
   });
 
-  it.each([
+  it.each<[Record<string, unknown>, string]>([
     [{ ...defaultBody, question_id: undefined }, "question id"],
     [{ ...defaultBody, question_id: "not-a-uuid" }, "malformed question id"],
     [{ ...defaultBody, topic_id: "not-a-uuid" }, "malformed topic id"],

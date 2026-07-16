@@ -8,6 +8,8 @@ const quizScript = readFileSync(
 );
 const TOUCH_DOUBLE_TAP_SUPPRESSION_MS = 300;
 const AUTO_ADVANCE_DELAY_MS = 900;
+const FINAL_EXIT_MS = 240;
+const COUNT_UP_MS = 700;
 
 function slideHTML(index: number, correct: string) {
   return `
@@ -30,6 +32,7 @@ function setupDOM(opts: {
   quizMode?: string;
   answeredIds?: string[];
   answeredCount?: number;
+  bareFinalScreen?: boolean;
 } = {}) {
   const userAttr = opts.userId ? ` data-user-id="${opts.userId}"` : "";
   const modeAttr = opts.quizMode ? ` data-quiz-mode="${opts.quizMode}"` : "";
@@ -57,8 +60,16 @@ function setupDOM(opts: {
         <button id="quiz-next" disabled>לשאלה הבאה</button>
         <p id="quiz-auto-advance-hint" style="display: none;">רמז</p>
       </div>
-      <div id="quiz-final">
+      <div id="quiz-final" tabindex="-1">
         <span id="final-score"></span>
+        ${
+          opts.bareFinalScreen
+            ? ""
+            : `
+        <span aria-hidden="true">${'<i class="confetti-piece"></i>'.repeat(12)}</span>
+        <span class="reward-pill"><span id="final-xp">0</span></span>
+        <a id="quiz-next-topic" href="/topics/next">השיעור הבא</a>`
+        }
       </div>
     </main>
   `;
@@ -649,6 +660,7 @@ describe("quiz.js – auto-advance", () => {
     clickOption(1, "b");
     await flushAsyncWork();
     vi.advanceTimersByTime(AUTO_ADVANCE_DELAY_MS);
+    vi.advanceTimersByTime(FINAL_EXIT_MS);
 
     expect(document.getElementById("quiz-final")!.style.display).toBe("flex");
     const progressBody = JSON.parse(fetchCalls("/api/progress")[0][1].body);
@@ -1018,6 +1030,126 @@ describe("quiz.js – assistive tech state", () => {
     document.querySelectorAll(".quiz-option").forEach((o) => {
       expect(o.querySelectorAll(".quiz-option-sr").length).toBeLessThanOrEqual(1);
     });
+  });
+});
+
+describe("quiz.js – completion celebration", () => {
+  beforeEach(() => {
+    resetTestState();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) })
+    );
+  });
+
+  afterEach(() => {
+    restoreTestState();
+  });
+
+  async function completeQuiz() {
+    clickOption(0, "a");
+    await flushAsyncWork();
+    clickAction();
+    clickOption(1, "b");
+    await flushAsyncWork();
+    clickAction();
+  }
+
+  function finalScreen() {
+    return document.getElementById("quiz-final")!;
+  }
+
+  function finalXpText() {
+    return document.getElementById("final-xp")!.textContent;
+  }
+
+  it("slides the last card away before revealing the final screen", async () => {
+    setupDOM();
+    await completeQuiz();
+
+    const lastSlide = document.querySelectorAll(".quiz-slide")[1]!;
+    expect(lastSlide.hasAttribute("data-exit")).toBe(true);
+    expect(
+      document.getElementById("quiz-progress-fill")!.hasAttribute("data-complete")
+    ).toBe(true);
+    expect(finalScreen().style.display).not.toBe("flex");
+
+    vi.advanceTimersByTime(FINAL_EXIT_MS);
+
+    expect(finalScreen().style.display).toBe("flex");
+    expect(finalScreen().hasAttribute("data-celebrate")).toBe(true);
+    expect(document.getElementById("quiz-footer")!.style.display).toBe("none");
+    expect(document.activeElement).toBe(finalScreen());
+  });
+
+  it("counts the score and XP up to their final values", async () => {
+    setupDOM();
+    await completeQuiz();
+    vi.advanceTimersByTime(FINAL_EXIT_MS);
+    vi.advanceTimersByTime(COUNT_UP_MS + 100);
+
+    expect(finalScoreText()).toBe("2 מתוך 2 נכון");
+    expect(finalXpText()).toBe("20");
+  });
+
+  it("shows the starting values immediately even if rAF frames never run (hidden tab)", async () => {
+    setupDOM();
+    await completeQuiz();
+    vi.stubGlobal("requestAnimationFrame", vi.fn());
+    vi.advanceTimersByTime(FINAL_EXIT_MS);
+
+    expect(finalScoreText()).toBe("0 מתוך 2 נכון");
+    expect(finalXpText()).toBe("0");
+  });
+
+  it("renders the localized template on intermediate count-up frames", async () => {
+    setupDOM();
+    await completeQuiz();
+    vi.advanceTimersByTime(FINAL_EXIT_MS);
+    vi.advanceTimersByTime(48);
+
+    expect(finalScoreText()).toMatch(/^\d+ מתוך 2 נכון$/);
+  });
+
+  it("skips the celebration and sets final values under reduced motion", async () => {
+    vi.stubGlobal("matchMedia", vi.fn().mockReturnValue({ matches: true }));
+    setupDOM();
+    await completeQuiz();
+    vi.advanceTimersByTime(0);
+
+    expect(finalScreen().style.display).toBe("flex");
+    expect(finalScreen().hasAttribute("data-celebrate")).toBe(false);
+    expect(finalScoreText()).toBe("2 מתוך 2 נכון");
+    expect(finalXpText()).toBe("20");
+  });
+
+  it("shows the quiet final screen when the topic was already complete on load", () => {
+    setupDOM({ userId: "u1", answeredIds: ["q1", "q2"] });
+
+    expect(finalScreen().style.display).toBe("flex");
+    expect(finalScreen().hasAttribute("data-celebrate")).toBe(false);
+    const pill = document.getElementById("final-xp")!.parentElement!;
+    expect(pill.style.display).toBe("none");
+  });
+
+  it("runs the completion sequence only once for a double activation", async () => {
+    setupDOM();
+    await completeQuiz();
+    clickAction();
+    vi.advanceTimersByTime(FINAL_EXIT_MS);
+
+    expect(fetchCalls("/api/progress")).toHaveLength(1);
+    expect(finalScreen().style.display).toBe("flex");
+  });
+
+  it("completes without the celebration extras in the retry layout", async () => {
+    setupDOM({ quizMode: "retry", bareFinalScreen: true });
+    await completeQuiz();
+    vi.advanceTimersByTime(FINAL_EXIT_MS + COUNT_UP_MS + 100);
+
+    expect(finalScreen().style.display).toBe("flex");
+    expect(finalScoreText()).toBe("2 מתוך 2 נכון");
+    expect(fetchCalls("/api/progress")).toHaveLength(0);
   });
 });
 

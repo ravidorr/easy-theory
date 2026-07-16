@@ -124,6 +124,28 @@ export function findResumePoint(
   return first ? { questionNumber: first.question_number, remaining } : null;
 }
 
+/** Picks the lesson to suggest after finishing a topic: the first other
+ *  topic still in progress, else the first untouched one. Completed topics
+ *  are skipped, which also makes this the right helper for the mission
+ *  picker once it stops recommending finished topics. */
+export function selectNextTopic<T extends { id: string }>(
+  topics: T[],
+  progressByTopicId: Record<string, Pick<TopicProgress, "status"> | undefined>,
+  excludeTopicId?: string | null
+): T | null {
+  const candidates = topics.filter((topic) => topic.id !== excludeTopicId);
+  return (
+    candidates.find(
+      (topic) => progressByTopicId[topic.id]?.status === "in_progress"
+    ) ??
+    candidates.find((topic) => {
+      const status = progressByTopicId[topic.id]?.status;
+      return status === undefined || status === "not_started";
+    }) ??
+    null
+  );
+}
+
 export function selectFocusTopic(
   weakTopics: WeakTopic[],
   excludeTopicId?: string | null

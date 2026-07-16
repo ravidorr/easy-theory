@@ -4,6 +4,7 @@ import React from "react";
 import RetryMistakesPage from "../page";
 import { createClient } from "@/lib/supabase";
 import { getTopicBySlug, getMistakesForTopic, getBookmarkedQuestionIds } from "@/lib/db";
+import type { QuizMistake } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
 
 vi.mock("next/image", () => ({
@@ -47,8 +48,10 @@ const mockGetBookmarkedIds = vi.mocked(getBookmarkedQuestionIds);
 
 const TOPIC = { id: "t1", slug: "signs", name_he: "תמרורים" };
 
-const MISTAKE_A = {
+const MISTAKE_A: QuizMistake = {
   id: "q1",
+  topic_id: "t1",
+  question_number: 1,
   question_he: "מה המשמעות של תמרור זה?",
   option_a: "עצור",
   option_b: "פנה ימינה",
@@ -58,10 +61,13 @@ const MISTAKE_A = {
   selected_option: "b",
   explanation_he: "תמרור זה משמעותו עצור",
   image_url: null,
+  due_at: null,
 };
 
-const MISTAKE_B = {
+const MISTAKE_B: QuizMistake = {
   id: "q2",
+  topic_id: "t1",
+  question_number: 2,
   question_he: "מה הגיל המינימלי?",
   option_a: "16",
   option_b: "17",
@@ -71,6 +77,7 @@ const MISTAKE_B = {
   selected_option: "a",
   explanation_he: null,
   image_url: null,
+  due_at: null,
 };
 
 function makeClient(user: { id: string } | null = { id: "u1" }) {
@@ -84,7 +91,7 @@ describe("RetryMistakesPage", () => {
     mockGetTopicBySlug.mockResolvedValue(TOPIC as never);
     mockGetMistakes.mockResolvedValue([MISTAKE_A]);
     mockGetBookmarkedIds.mockResolvedValue(new Set());
-    vi.mocked(getTranslations).mockResolvedValue((key: string) => key);
+    vi.mocked(getTranslations).mockResolvedValue(((key: string) => key) as never);
     vi.mocked(getLocale).mockResolvedValue("he");
   });
 

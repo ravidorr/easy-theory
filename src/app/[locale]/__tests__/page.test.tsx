@@ -80,7 +80,7 @@ describe("HomePage", () => {
     mockGetQuestionNumbers.mockResolvedValue([]);
     mockGetAnsweredIds.mockResolvedValue(new Set());
     mockGetWindowAccuracy.mockResolvedValue({ correct: 0, total: 0 });
-    vi.mocked(getTranslations).mockResolvedValue((key: string) => key);
+    vi.mocked(getTranslations).mockResolvedValue(((key: string) => key) as never);
     vi.mocked(getLocale).mockResolvedValue("he");
   });
 

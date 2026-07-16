@@ -91,7 +91,7 @@ describe("ReviewPage", () => {
     mockGetTopicBySlug.mockResolvedValue(TOPIC as never);
     mockGetMistakes.mockResolvedValue([]);
     mockGetBookmarkedIds.mockResolvedValue(new Set());
-    vi.mocked(getTranslations).mockResolvedValue((key: string) => key);
+    vi.mocked(getTranslations).mockResolvedValue(((key: string) => key) as never);
     vi.mocked(getLocale).mockResolvedValue("he");
   });
 

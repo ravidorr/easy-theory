@@ -14,6 +14,14 @@
   // the +10 float finishes.
   const AUTO_ADVANCE_DELAY_MS = 900;
   const AUTO_ADVANCE_HINT_KEY = "quiz-auto-advance-hint-seen";
+  // Matches the quiz-slide-exit animation (240ms in page.module.css) so the
+  // final screen appears right as the last card finishes sliding away.
+  const FINAL_EXIT_MS = 240;
+  const COUNT_UP_MS = 700;
+
+  const prefersReducedMotion =
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // Auto-advance to the next question after a correct answer: an explicit
   // cookie choice (More page toggle) wins; otherwise reduced-motion users
@@ -21,10 +29,7 @@
   const autoAdvanceEnabled = (function () {
     const match = document.cookie.match(/(?:^|;\s*)quiz-auto-advance=([^;]*)/);
     if (match) return match[1] !== "off";
-    return !(
-      typeof window.matchMedia === "function" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    );
+    return !prefersReducedMotion;
   })();
 
   // Resume state is persisted per user + topic so a reload continues the same
@@ -131,6 +136,7 @@
   const rewardMessage = document.getElementById("reward-message");
   const finalScreen = document.getElementById("quiz-final");
   const finalScore = document.getElementById("final-score");
+  const finalXp = document.getElementById("final-xp");
   const footer = document.getElementById("quiz-footer");
   const autoAdvanceHint = document.getElementById("quiz-auto-advance-hint");
 
@@ -382,10 +388,44 @@
     if (countEl) countEl.textContent = tf(t.count || '{current} מתוך {total}', { current: index + 1, total: total });
   }
 
-  function showAllComplete() {
+  function revealFinalScreen() {
     slides.forEach(function (s) { s.style.display = "none"; });
     if (footer) footer.style.display = "none";
     if (finalScreen) finalScreen.style.display = "flex";
+    updateProgress(total - 1);
+  }
+
+  // Eases a counter from 0 to its final value. Kept in this IIFE because the
+  // public/js scripts share no modules; lift out when other counters animate.
+  // The initial render is synchronous so the value is never blank when rAF
+  // frames are suspended (hidden tab).
+  function countUp(to, durationMs, render) {
+    if (
+      prefersReducedMotion ||
+      typeof window.requestAnimationFrame !== "function" ||
+      to === 0
+    ) {
+      render(to);
+      return;
+    }
+    render(0);
+    let start = null;
+    function frame(now) {
+      if (start === null) start = now;
+      const progress = Math.min((now - start) / durationMs, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      render(Math.round(to * eased));
+      if (progress < 1) window.requestAnimationFrame(frame);
+    }
+    window.requestAnimationFrame(frame);
+  }
+
+  // Quiet variant: the topic was already finished when the page loaded, so
+  // the final screen appears fully formed with no celebration. There is no
+  // session XP to show on a revisit (points is always 0 here), so the XP
+  // pill is hidden rather than shown as a misleading 0.
+  function showAllComplete() {
+    revealFinalScreen();
     const answeredCount = parseInt(container.dataset.answeredCount, 10);
     const coverageCount = Number.isFinite(answeredCount) ? answeredCount : total;
     if (finalScore) {
@@ -394,8 +434,32 @@
         { answered: coverageCount, total: total }
       );
     }
-    if (progressFill) progressFill.style.width = "100%";
-    if (countEl) countEl.textContent = tf(t.count || '{current} מתוך {total}', { current: total, total: total });
+    if (finalXp && finalXp.parentElement) {
+      finalXp.parentElement.style.display = "none";
+    }
+  }
+
+  // Celebration variant: CSS keys the staged pop/confetti/next-lesson
+  // animations off data-celebrate while the counters count up here.
+  function finishCelebration() {
+    revealFinalScreen();
+    if (finalScreen) {
+      if (!prefersReducedMotion) finalScreen.setAttribute("data-celebrate", "");
+      // The activation button was just hidden with the footer; move focus to
+      // the final screen so keyboard and screen-reader users are not dropped
+      // to the body.
+      finalScreen.focus();
+    }
+    if (finalScore) {
+      countUp(score, COUNT_UP_MS, function (value) {
+        finalScore.textContent = tf(t.finalScore || '{score} מתוך {total} נכון', { score: value, total: total });
+      });
+    }
+    if (finalXp) {
+      countUp(points, COUNT_UP_MS, function (value) {
+        finalXp.textContent = String(value);
+      });
+    }
   }
 
   function showSlide(index) {
@@ -683,18 +747,13 @@
 
   function handleAdvance() {
     if (answerPersistence !== "succeeded") return;
+    if (currentIndex >= total) return;
     disarmAutoAdvance();
     hideAutoAdvanceHint();
     acknowledgedSubmission = null;
     currentIndex++;
     if (currentIndex >= total) {
       clearResume();
-      slides.forEach(function (s) { s.style.display = "none"; });
-      if (footer) footer.style.display = "none";
-      if (finalScreen) finalScreen.style.display = "flex";
-      if (finalScore) finalScore.textContent = tf(t.finalScore || '{score} מתוך {total} נכון', { score: score, total: total });
-      if (progressFill) progressFill.style.width = "100%";
-      if (countEl) countEl.textContent = tf(t.count || '{current} מתוך {total}', { current: total, total: total });
 
       if (container.dataset.quizMode !== "retry") {
         const topicId = container.dataset.topicId;
@@ -707,6 +766,17 @@
             body: JSON.stringify({ topic_id: topicId, score: pct, status }),
           }).catch(function () {});
         }
+      }
+
+      // The answered card slides away first; the final screen takes over
+      // once its exit animation ends.
+      const exitingSlide = slides[currentIndex - 1];
+      if (exitingSlide) exitingSlide.setAttribute("data-exit", "");
+      if (progressFill) progressFill.setAttribute("data-complete", "");
+      if (prefersReducedMotion) {
+        finishCelebration();
+      } else {
+        window.setTimeout(finishCelebration, FINAL_EXIT_MS);
       }
     } else {
       persistResume();

@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import TopicQuizPage from "../page";
 import { createClient } from "@/lib/supabase";
-import { getTopicBySlug, getQuestionsForTopic, getBookmarkedQuestionIds, getAnsweredQuestionIdsForTopic } from "@/lib/db";
+import { getQuestionsForTopic, getBookmarkedQuestionIds, getAnsweredQuestionIdsForTopic, getTopics, getTopicProgress } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
 import { SIGNS_QUESTION_15_AR } from "@/lib/content/signs-question-15-ar";
 
@@ -21,10 +21,11 @@ vi.mock("next/navigation", () => ({
 }));
 vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
 vi.mock("@/lib/db", () => ({
-  getTopicBySlug: vi.fn(),
   getQuestionsForTopic: vi.fn(),
   getBookmarkedQuestionIds: vi.fn(),
   getAnsweredQuestionIdsForTopic: vi.fn(),
+  getTopics: vi.fn(),
+  getTopicProgress: vi.fn(),
 }));
 vi.mock("@/components/SignImage", () => ({
   SignImage: ({ src, alt = "" }: { src: string; alt?: string }) =>
@@ -43,12 +44,14 @@ vi.mock("next-intl/server", () => ({
 }));
 
 const mockCreateClient = vi.mocked(createClient);
-const mockGetTopicBySlug = vi.mocked(getTopicBySlug);
 const mockGetQuestions = vi.mocked(getQuestionsForTopic);
 const mockGetBookmarkedIds = vi.mocked(getBookmarkedQuestionIds);
 const mockGetAnsweredIds = vi.mocked(getAnsweredQuestionIdsForTopic);
+const mockGetTopics = vi.mocked(getTopics);
+const mockGetTopicProgress = vi.mocked(getTopicProgress);
 
 const TOPIC = { id: "t1", slug: "signs", name_he: "תמרורים" };
+const NEXT_TOPIC = { id: "t2", slug: "traffic-laws", name_he: "חוקי התנועה", name_ar: "قوانين المرور" };
 const QUESTION = {
   id: "q1",
   question_he: "מה המשמעות של תמרור זה?",
@@ -69,11 +72,12 @@ describe("TopicQuizPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockCreateClient.mockResolvedValue(makeClient() as never);
-    mockGetTopicBySlug.mockResolvedValue(TOPIC as never);
     mockGetQuestions.mockResolvedValue([]);
     mockGetBookmarkedIds.mockResolvedValue(new Set());
     mockGetAnsweredIds.mockResolvedValue(new Set());
-    vi.mocked(getTranslations).mockResolvedValue((key: string) => key);
+    mockGetTopics.mockResolvedValue([TOPIC, NEXT_TOPIC] as never);
+    mockGetTopicProgress.mockResolvedValue([]);
+    vi.mocked(getTranslations).mockResolvedValue(((key: string) => key) as never);
     vi.mocked(getLocale).mockResolvedValue("he");
   });
 
@@ -85,7 +89,6 @@ describe("TopicQuizPage", () => {
   });
 
   it("calls notFound when topic slug does not exist", async () => {
-    mockGetTopicBySlug.mockResolvedValue(null as never);
     await expect(
       TopicQuizPage({ params: Promise.resolve({ slug: "unknown", locale: "he" }) })
     ).rejects.toThrow("notFound");
@@ -352,6 +355,63 @@ describe("TopicQuizPage", () => {
     const float = container.querySelector("#reward-float");
     expect(float?.textContent).toBe("+10");
     expect(float?.closest("[aria-label='scoreLabel']")).toBeTruthy();
+  });
+
+  it("renders a hidden confetti container with 12 pieces on the final screen", async () => {
+    mockGetQuestions.mockResolvedValue([QUESTION] as never);
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "he" }) });
+    const { container } = render(jsx);
+    const confetti = container.querySelector("#quiz-final [aria-hidden='true']");
+    expect(confetti).toBeTruthy();
+    expect(confetti?.querySelectorAll("i")).toHaveLength(12);
+  });
+
+  it("renders the final XP counter starting at 0", async () => {
+    mockGetQuestions.mockResolvedValue([QUESTION] as never);
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "he" }) });
+    const { container } = render(jsx);
+    expect(container.querySelector("#final-xp")?.textContent).toBe("0");
+  });
+
+  it("links the final screen to the next unfinished topic", async () => {
+    mockGetQuestions.mockResolvedValue([QUESTION] as never);
+    mockGetTopicProgress.mockResolvedValue([
+      { topic_id: "t1", status: "in_progress", best_score: null, last_studied_at: null },
+    ]);
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "he" }) });
+    const { container } = render(jsx);
+    const nextLink = container.querySelector("#quiz-next-topic");
+    expect(nextLink?.getAttribute("href")).toBe("/topics/traffic-laws");
+    expect(nextLink?.textContent).toContain("nextTopicLabel");
+    expect(nextLink?.textContent).toContain("חוקי התנועה");
+  });
+
+  it("uses the Arabic topic name for the next-topic card in ar locale", async () => {
+    vi.mocked(getLocale).mockResolvedValue("ar" as never);
+    mockGetQuestions.mockResolvedValue([QUESTION] as never);
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "ar" }) });
+    const { container } = render(jsx);
+    const nextLink = container.querySelector("#quiz-next-topic");
+    expect(nextLink?.textContent).toContain("قوانين المرور");
+    expect(nextLink?.textContent).not.toContain("חוקי התנועה");
+  });
+
+  it("still renders the quiz when the progress query fails", async () => {
+    mockGetQuestions.mockResolvedValue([QUESTION] as never);
+    mockGetTopicProgress.mockRejectedValue(new Error("db down"));
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "he" }) });
+    const { container } = render(jsx);
+    expect(container.querySelector("#quiz-container")).toBeTruthy();
+  });
+
+  it("omits the next-topic card when every other topic is completed", async () => {
+    mockGetQuestions.mockResolvedValue([QUESTION] as never);
+    mockGetTopicProgress.mockResolvedValue([
+      { topic_id: "t2", status: "completed", best_score: 90, last_studied_at: null },
+    ]);
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "he" }) });
+    const { container } = render(jsx);
+    expect(container.querySelector("#quiz-next-topic")).toBeNull();
   });
 
   it("renders an empty question title when question_he is null", async () => {

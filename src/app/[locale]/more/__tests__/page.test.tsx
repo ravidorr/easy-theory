@@ -52,7 +52,7 @@ describe("MorePage", () => {
       last_active_date: null,
     });
     mockCookies.mockResolvedValue({ get: vi.fn().mockReturnValue({ value: "dark" }) } as never);
-    vi.mocked(getTranslations).mockResolvedValue((key: string) => key);
+    vi.mocked(getTranslations).mockResolvedValue(((key: string) => key) as never);
     vi.mocked(getLocale).mockResolvedValue("he");
   });
 

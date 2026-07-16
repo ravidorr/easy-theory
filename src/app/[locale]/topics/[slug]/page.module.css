@@ -65,6 +65,29 @@
   gap: 20px;
 }
 
+/* 240ms is mirrored by FINAL_EXIT_MS in public/js/quiz.js, which reveals the
+   final screen when this exit animation ends. */
+.slideItem[data-exit] {
+  animation: quiz-slide-exit 240ms var(--ease-out) forwards;
+}
+
+@keyframes quiz-slide-exit {
+  to {
+    opacity: 0;
+    transform: translateY(-24px);
+  }
+}
+
+.progressFill[data-complete] {
+  animation: progress-complete-pulse 500ms var(--ease-spring);
+}
+
+@keyframes progress-complete-pulse {
+  50% {
+    filter: brightness(1.35);
+  }
+}
+
 .questionContainer {
   display: flex;
   flex-direction: column;
@@ -219,12 +242,157 @@
 }
 
 .quizFinal {
+  position: relative;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 20px;
   text-align: center;
   padding: 40px 0;
+}
+
+.confetti {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.confettiPiece {
+  position: absolute;
+  inset-block-start: 0;
+  width: 8px;
+  height: 14px;
+  opacity: 0;
+}
+
+.confettiPiece:nth-child(4n + 1) {
+  background: var(--primary);
+}
+
+.confettiPiece:nth-child(4n + 2) {
+  background: var(--gold);
+}
+
+.confettiPiece:nth-child(4n + 3) {
+  background: var(--success);
+}
+
+.confettiPiece:nth-child(4n) {
+  background: var(--primary-soft-text);
+}
+
+.confettiPiece:nth-child(1) {
+  inset-inline-start: 4%;
+
+  --confetti-delay: 0ms;
+  --confetti-duration: 950ms;
+}
+
+.confettiPiece:nth-child(2) {
+  inset-inline-start: 12%;
+
+  --confetti-delay: 120ms;
+  --confetti-duration: 1100ms;
+}
+
+.confettiPiece:nth-child(3) {
+  inset-inline-start: 21%;
+
+  --confetti-delay: 40ms;
+  --confetti-duration: 1000ms;
+}
+
+.confettiPiece:nth-child(4) {
+  inset-inline-start: 30%;
+
+  --confetti-delay: 200ms;
+  --confetti-duration: 900ms;
+}
+
+.confettiPiece:nth-child(5) {
+  inset-inline-start: 38%;
+
+  --confetti-delay: 80ms;
+  --confetti-duration: 1200ms;
+}
+
+.confettiPiece:nth-child(6) {
+  inset-inline-start: 47%;
+
+  --confetti-delay: 160ms;
+  --confetti-duration: 950ms;
+}
+
+.confettiPiece:nth-child(7) {
+  inset-inline-start: 55%;
+
+  --confetti-delay: 20ms;
+  --confetti-duration: 1050ms;
+}
+
+.confettiPiece:nth-child(8) {
+  inset-inline-start: 63%;
+
+  --confetti-delay: 240ms;
+  --confetti-duration: 1150ms;
+}
+
+.confettiPiece:nth-child(9) {
+  inset-inline-start: 71%;
+
+  --confetti-delay: 100ms;
+  --confetti-duration: 900ms;
+}
+
+.confettiPiece:nth-child(10) {
+  inset-inline-start: 80%;
+
+  --confetti-delay: 180ms;
+  --confetti-duration: 1000ms;
+}
+
+.confettiPiece:nth-child(11) {
+  inset-inline-start: 88%;
+
+  --confetti-delay: 60ms;
+  --confetti-duration: 1100ms;
+}
+
+.confettiPiece:nth-child(12) {
+  inset-inline-start: 95%;
+
+  --confetti-delay: 220ms;
+  --confetti-duration: 1250ms;
+}
+
+.nextTopicCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 200px;
+  min-height: var(--hit-min);
+  padding: 12px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+.nextTopicLabel {
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  color: var(--text-muted);
+}
+
+.nextTopicName {
+  font-size: var(--type-body-size);
+  font-weight: 700;
+  color: var(--text);
 }
 
 .finalEmoji {
@@ -245,4 +413,64 @@
 
 .btnWide {
   min-width: 200px;
+}
+
+/* Completion celebration: quiz.js sets data-celebrate on the just-finished
+   path only; without it (already complete on load, reduced motion) the final
+   screen renders fully formed and the confetti stays invisible. */
+.quizFinal[data-celebrate] .finalEmoji,
+.quizFinal[data-celebrate] h2 {
+  animation: final-pop var(--dur-med) var(--ease-spring) backwards;
+}
+
+.quizFinal[data-celebrate] .finalScore,
+.quizFinal[data-celebrate] .rewardPill {
+  animation: final-fade-up var(--dur-med) var(--ease-out) 100ms backwards;
+}
+
+.quizFinal[data-celebrate] .nextTopicCard {
+  animation: final-fade-up 300ms var(--ease-out) 600ms backwards;
+}
+
+.quizFinal[data-celebrate] .confettiPiece {
+  animation: confetti-fall var(--confetti-duration, 1000ms) ease-in var(--confetti-delay, 0ms) forwards;
+}
+
+@keyframes final-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+}
+
+@keyframes final-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+@keyframes confetti-fall {
+  from {
+    opacity: 1;
+    transform: translateY(-16px) rotate(0turn);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(320px) rotate(2.5turn);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slideItem[data-exit],
+  .progressFill[data-complete],
+  .quizFinal[data-celebrate] .finalEmoji,
+  .quizFinal[data-celebrate] h2,
+  .quizFinal[data-celebrate] .finalScore,
+  .quizFinal[data-celebrate] .rewardPill,
+  .quizFinal[data-celebrate] .nextTopicCard,
+  .quizFinal[data-celebrate] .confettiPiece {
+    animation: none;
+  }
 }

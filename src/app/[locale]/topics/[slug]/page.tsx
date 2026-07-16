@@ -8,10 +8,11 @@ import { SignImage } from "@/components/SignImage";
 import { Icon } from "@/components/Icon";
 import { InlineMarkdown } from "@/components/InlineMarkdown";
 import { createClient } from "@/lib/supabase";
-import { getTopicBySlug, getQuestionsForTopic, getBookmarkedQuestionIds, getAnsweredQuestionIdsForTopic } from "@/lib/db";
+import { getQuestionsForTopic, getBookmarkedQuestionIds, getAnsweredQuestionIdsForTopic, getTopics, getTopicProgress } from "@/lib/db";
 import type { Question } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
-import { localizeQuestion } from "@/lib/content-locale";
+import { localizeQuestion, localizedRecordField } from "@/lib/content-locale";
+import { selectNextTopic } from "@/lib/personalization";
 import styles from "./page.module.css";
 
 function resolveImageUrl(url: string | null | undefined): string | null {
@@ -151,15 +152,22 @@ export default async function TopicQuizPage({
   const locale = await getLocale();
   const t = await getTranslations("Quiz");
 
-  const topic = await getTopicBySlug(supabase, slug);
+  const topics = await getTopics(supabase);
+  const topic = topics.find((candidate) => candidate.slug === slug);
   if (!topic) notFound();
 
-  const [questions, bookmarkedIds, answeredIds] = await Promise.all([
+  const [questions, bookmarkedIds, answeredIds, progressRows] = await Promise.all([
     getQuestionsForTopic(supabase, topic.id),
     getBookmarkedQuestionIds(supabase, user.id),
     getAnsweredQuestionIdsForTopic(supabase, user.id, topic.id),
+    // The next-lesson suggestion is decorative; a progress failure must not
+    // take down the quiz (same trade-off as getBookmarkedQuestionIds).
+    getTopicProgress(supabase, user.id).catch(() => []),
   ]);
   const total = questions.length;
+
+  const progressMap = Object.fromEntries(progressRows.map((p) => [p.topic_id, p]));
+  const nextTopic = selectNextTopic(topics, progressMap, topic.id);
 
   const letters = t("letters").split(",");
 
@@ -239,12 +247,34 @@ export default async function TopicQuizPage({
           </p>
         </div>
 
-        <div id="quiz-final" className={`${styles.hidden} ${styles.quizFinal}`}>
+        <div id="quiz-final" className={`${styles.hidden} ${styles.quizFinal}`} tabIndex={-1}>
+          <span className={styles.confetti} aria-hidden="true">
+            {Array.from({ length: 12 }, (_, i) => (
+              <i key={i} className={styles.confettiPiece} />
+            ))}
+          </span>
           <span className={styles.finalEmoji}>🎉</span>
           <h2>{t("finalTitle")}</h2>
           <span className={styles.finalScore}>
             <span id="final-score"></span>
           </span>
+          <span className={styles.rewardPill}>
+            <Icon name="star" size={12} />
+            <span className="sr-only">{t("scoreLabel")}</span>
+            <span id="final-xp">0</span>
+          </span>
+          {nextTopic ? (
+            <Link
+              href={`/topics/${nextTopic.slug}`}
+              id="quiz-next-topic"
+              className={styles.nextTopicCard}
+            >
+              <span className={styles.nextTopicLabel}>{t("nextTopicLabel")}</span>
+              <span className={styles.nextTopicName}>
+                {localizedRecordField(locale, nextTopic as Record<string, unknown>, "name_he", "name_ar")}
+              </span>
+            </Link>
+          ) : null}
           <a href={`/${locale}`} className={`btn-primary ${styles.btnWide}`}>
             {t("finalBackHome")}
           </a>

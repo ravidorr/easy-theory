@@ -6,6 +6,7 @@ import {
   findResumePoint,
   pickLastStudiedInProgressTopic,
   selectFocusTopic,
+  selectNextTopic,
 } from "../personalization";
 import type { QuestionRef, TopicProgress } from "../db";
 import type { WeakTopic } from "../readiness";
@@ -142,6 +143,48 @@ describe("selectFocusTopic", () => {
 
   it("falls back to the excluded topic when it is the only weak one", () => {
     expect(selectFocusTopic([weak("a")], "a")?.topic_id).toBe("a");
+  });
+});
+
+describe("selectNextTopic", () => {
+  const topics = [{ id: "a" }, { id: "b" }, { id: "c" }];
+
+  function statuses(map: Record<string, TopicProgress["status"]>) {
+    return Object.fromEntries(
+      Object.entries(map).map(([id, status]) => [id, { status }])
+    );
+  }
+
+  it("prefers another in-progress topic over an untouched one", () => {
+    expect(
+      selectNextTopic(topics, statuses({ a: "in_progress", c: "in_progress" }), "a")?.id
+    ).toBe("c");
+  });
+
+  it("excludes the current topic even when it is in progress", () => {
+    expect(selectNextTopic(topics, statuses({ a: "in_progress" }), "a")?.id).toBe("b");
+  });
+
+  it("falls back to the first topic without progress or not started", () => {
+    expect(
+      selectNextTopic(topics, statuses({ a: "completed", b: "not_started" }), "a")?.id
+    ).toBe("b");
+  });
+
+  it("skips completed topics", () => {
+    expect(
+      selectNextTopic(topics, statuses({ a: "completed", b: "completed" }), "a")?.id
+    ).toBe("c");
+  });
+
+  it("returns null when every other topic is completed", () => {
+    expect(
+      selectNextTopic(
+        topics,
+        statuses({ a: "in_progress", b: "completed", c: "completed" }),
+        "a"
+      )
+    ).toBeNull();
   });
 });
 
