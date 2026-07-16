@@ -669,6 +669,9 @@ describe("HomePage", () => {
       expect(screen.queryByText(/resumeLine/)).not.toBeInTheDocument();
       expect(screen.queryByText(/yesterdayAccuracy/)).not.toBeInTheDocument();
       expect(screen.queryByText(/focusTopicLine/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/masteredTopicLine/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/remainingQuestionsLine/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/examReadyLine/)).not.toBeInTheDocument();
       // The base greeting is unaffected.
       expect(screen.getByText(/greeting(Morning|Noon|Evening)/)).toBeInTheDocument();
     });
@@ -749,6 +752,79 @@ describe("HomePage", () => {
       expect(
         screen.getByText('focusTopicLine|{"topic":"זכות קדימה"}')
       ).toBeInTheDocument();
+    });
+
+    it("celebrates a mastered topic", async () => {
+      vi.mocked(getTranslations).mockResolvedValue(valuesT);
+      mockGetTopicAccuracy.mockResolvedValue([
+        { topic_id: "t2", correct: 9, total: 10 },
+      ]);
+      const jsx = await HomePage();
+      render(jsx);
+      expect(
+        screen.getByText('masteredTopicLine|{"topic":"זכות קדימה"}')
+      ).toBeInTheDocument();
+    });
+
+    it("links the exam-ready line to the mock exam at high readiness", async () => {
+      mockGetExamAttempts.mockResolvedValue([
+        {
+          id: "e1",
+          score: 30,
+          total: 30,
+          passed: true,
+          duration_seconds: 1800,
+          created_at: "2026-07-03",
+        },
+        {
+          id: "e2",
+          score: 29,
+          total: 30,
+          passed: true,
+          duration_seconds: 1800,
+          created_at: "2026-07-02",
+        },
+      ] as never);
+      const jsx = await HomePage();
+      render(jsx);
+      const line = screen.getByText("examReadyLine");
+      expect(line.closest("a")?.getAttribute("href")).toBe("/exam");
+    });
+
+    it("counts down the remaining questions past the halfway mark", async () => {
+      vi.mocked(getTranslations).mockResolvedValue(valuesT);
+      // 15 of 30 answered (exactly 50%), 15 remaining.
+      mockGetTopicAccuracy.mockResolvedValue([
+        { topic_id: "t1", correct: 12, total: 15 },
+      ]);
+      const jsx = await HomePage();
+      render(jsx);
+      expect(
+        screen.getByText('remainingQuestionsLine|{"count":15}')
+      ).toBeInTheDocument();
+    });
+
+    it("uses the singular remaining string for the last question", async () => {
+      vi.mocked(getTranslations).mockResolvedValue(valuesT);
+      // 29 of 30 answered, one question left.
+      mockGetTopicAccuracy.mockResolvedValue([
+        { topic_id: "t1", correct: 20, total: 20 },
+        { topic_id: "t2", correct: 9, total: 9 },
+      ]);
+      const jsx = await HomePage();
+      render(jsx);
+      expect(screen.getByText("remainingQuestionsLineOne")).toBeInTheDocument();
+    });
+
+    it("hides the remaining countdown below the halfway mark", async () => {
+      vi.mocked(getTranslations).mockResolvedValue(valuesT);
+      // 14 of 30 answered (46%).
+      mockGetTopicAccuracy.mockResolvedValue([
+        { topic_id: "t1", correct: 14, total: 14 },
+      ]);
+      const jsx = await HomePage();
+      render(jsx);
+      expect(screen.queryByText(/remainingQuestionsLine/)).not.toBeInTheDocument();
     });
 
     it("skips the resume fetch entirely when nothing is in progress", async () => {

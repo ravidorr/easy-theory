@@ -47,6 +47,10 @@ describe("locale messages", () => {
       expect(messages.Home.yesterdayAccuracyHigh).toContain("{percent}");
       expect(messages.Home.yesterdayAccuracyLow).toContain("{percent}");
       expect(messages.Home.focusTopicLine).toContain("{topic}");
+      expect(messages.Home.masteredTopicLine).toContain("{topic}");
+      expect(messages.Home.remainingQuestionsLine).toContain("{count}");
+      expect(messages.Home.remainingQuestionsLineOne).toBeTruthy();
+      expect(messages.Home.examReadyLine).toBeTruthy();
     }
   });
 });
