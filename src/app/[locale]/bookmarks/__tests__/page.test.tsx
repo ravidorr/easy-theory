@@ -74,7 +74,7 @@ describe("BookmarksPage", () => {
     vi.clearAllMocks();
     mockCreateClient.mockResolvedValue(makeClient() as never);
     mockGetBookmarks.mockResolvedValue([]);
-    vi.mocked(getTranslations).mockResolvedValue((key: string) => key);
+    vi.mocked(getTranslations).mockResolvedValue(((key: string) => key) as never);
     vi.mocked(getLocale).mockResolvedValue("he");
   });
 

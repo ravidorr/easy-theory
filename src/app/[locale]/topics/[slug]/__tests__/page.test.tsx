@@ -77,7 +77,7 @@ describe("TopicQuizPage", () => {
     mockGetAnsweredIds.mockResolvedValue(new Set());
     mockGetTopics.mockResolvedValue([TOPIC, NEXT_TOPIC] as never);
     mockGetTopicProgress.mockResolvedValue([]);
-    vi.mocked(getTranslations).mockResolvedValue((key: string) => key);
+    vi.mocked(getTranslations).mockResolvedValue(((key: string) => key) as never);
     vi.mocked(getLocale).mockResolvedValue("he");
   });
 

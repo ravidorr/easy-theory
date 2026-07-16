@@ -78,7 +78,7 @@ describe("POST /api/srs", () => {
     expect(res.status).toBe(400);
   });
 
-  it.each([
+  it.each<[Record<string, unknown>, string]>([
     [{ knew: true }, "missing sign_id"],
     [{ sign_id: "not-a-uuid", knew: true }, "malformed sign_id"],
     [{ sign_id: SIGN_ID }, "missing knew"],

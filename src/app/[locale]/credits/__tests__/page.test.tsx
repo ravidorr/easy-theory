@@ -33,7 +33,7 @@ describe("CreditsPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockCreateClient.mockResolvedValue(makeClient() as never);
-    vi.mocked(getTranslations).mockResolvedValue((key: string) => key);
+    vi.mocked(getTranslations).mockResolvedValue(((key: string) => key) as never);
   });
 
   it("redirects to /auth/login when not authenticated", async () => {

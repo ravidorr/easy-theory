@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.150] — 2026-07-17
+
+### Fixed
+- The repo now typechecks cleanly: `pnpm exec tsc --noEmit` reports 0 errors, down from 265. Test files gain the jest-dom matcher types by importing `@testing-library/jest-dom/vitest` in `vitest.setup.ts` (which is now included in `tsconfig.json`), page tests cast the `getTranslations` mock explicitly, `InlineMarkdown.test.tsx` imports its vitest globals, the retry-page test fixtures are typed as `QuizMistake` (adding the missing `topic_id`/`question_number`/`due_at` fields), and the heterogeneous `it.each` tables in the quiz and SRS route tests get an explicit `[Record<string, unknown>, string]` tuple type. Test-only change; no runtime behavior touched.
+
+---
+
 ## [0.3.149] — 2026-07-16
 
 ### Added
