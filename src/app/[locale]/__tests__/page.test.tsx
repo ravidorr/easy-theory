@@ -457,6 +457,10 @@ describe("HomePage", () => {
   });
 
   it("keeps best_score for the bar and label when completed", async () => {
+    vi.mocked(getTranslations).mockResolvedValue(((
+      key: string,
+      values?: Record<string, unknown>
+    ) => (values ? `${key}|${JSON.stringify(values)}` : key)) as never);
     mockGetTopics.mockResolvedValue([TOPIC_A] as never);
     mockGetProgress.mockResolvedValue([
       { topic_id: "t1", status: "completed", best_score: 85 },
@@ -464,9 +468,60 @@ describe("HomePage", () => {
     mockGetTopicAccuracy.mockResolvedValue([{ topic_id: "t1", correct: 20, total: 20 }]);
     const jsx = await HomePage();
     const { container } = render(jsx);
-    expect(screen.getByText("topicCompleted")).toBeInTheDocument();
+    expect(screen.getByText('topicCompletedScore|{"percent":85}')).toBeInTheDocument();
     const widths = [...container.querySelectorAll("div")].map((d) => d.style.width);
     expect(widths).toContain("85%");
+  });
+
+  it("falls back to plain topicCompleted when best_score is null", async () => {
+    mockGetTopics.mockResolvedValue([TOPIC_A] as never);
+    mockGetProgress.mockResolvedValue([
+      { topic_id: "t1", status: "completed", best_score: null },
+    ] as never);
+    mockGetTopicAccuracy.mockResolvedValue([{ topic_id: "t1", correct: 20, total: 20 }]);
+    const jsx = await HomePage();
+    render(jsx);
+    expect(screen.getByText("topicCompleted")).toBeInTheDocument();
+    expect(screen.queryByText(/topicCompletedScore/)).not.toBeInTheDocument();
+  });
+
+  it("shows difficulty, duration, and remaining-points chips on a fresh topic", async () => {
+    const jsx = await HomePage();
+    render(jsx);
+    // TOPIC_A slug "signs" is mapped easy; TOPIC_B slug "priority" is unmapped.
+    expect(screen.getByText("topicDifficultyEasy")).toBeInTheDocument();
+    expect(screen.queryByText("topicDifficultyMedium")).not.toBeInTheDocument();
+    expect(screen.queryByText("topicDifficultyHard")).not.toBeInTheDocument();
+    // 20 and 10 remaining questions both estimate under an hour.
+    expect(screen.getAllByText("topicDurationMinutes")).toHaveLength(2);
+    expect(screen.getAllByText("topicPointsRemaining")).toHaveLength(2);
+  });
+
+  it("formats the duration chip values from the remaining questions", async () => {
+    vi.mocked(getTranslations).mockResolvedValue(((
+      key: string,
+      values?: Record<string, unknown>
+    ) => (values ? `${key}|${JSON.stringify(values)}` : key)) as never);
+    mockGetTopics.mockResolvedValue([TOPIC_A] as never);
+    mockGetQuestionCounts.mockResolvedValue({ t1: 501 });
+    mockGetTopicAccuracy.mockResolvedValue([{ topic_id: "t1", correct: 1, total: 1 }]);
+    const jsx = await HomePage();
+    render(jsx);
+    expect(screen.getByText('topicDurationHours|{"hours":6}')).toBeInTheDocument();
+    expect(screen.getByText('topicPointsRemaining|{"points":5000}')).toBeInTheDocument();
+  });
+
+  it("hides the duration and points chips once a topic is completed", async () => {
+    mockGetTopics.mockResolvedValue([TOPIC_A] as never);
+    mockGetProgress.mockResolvedValue([
+      { topic_id: "t1", status: "completed", best_score: 85 },
+    ] as never);
+    mockGetTopicAccuracy.mockResolvedValue([{ topic_id: "t1", correct: 20, total: 20 }]);
+    const jsx = await HomePage();
+    render(jsx);
+    expect(screen.queryByText("topicDurationMinutes")).not.toBeInTheDocument();
+    expect(screen.queryByText("topicPointsRemaining")).not.toBeInTheDocument();
+    expect(screen.getByText("topicDifficultyEasy")).toBeInTheDocument();
   });
 
   it("passes the topic question count to the daily task description", async () => {
