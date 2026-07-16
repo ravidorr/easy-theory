@@ -8,6 +8,7 @@ const scheduleScript = readFileSync(
 );
 
 function setupDOM() {
+  (window as unknown as { __locale?: string }).__locale = "he";
   document.body.innerHTML = `
     <button id="save-schedule-btn">שמרי</button>
     <div id="day-picker">
@@ -237,7 +238,7 @@ describe("schedule.js – successful save", () => {
     expect(loc.href).toBe("");
 
     await vi.advanceTimersByTimeAsync(800);
-    expect(loc.href).toBe("/");
+    expect(loc.href).toBe("/he");
   });
 
   it("saves schedule before subscribing to push when notifications are on", async () => {
@@ -284,7 +285,7 @@ describe("schedule.js – successful save", () => {
     const btn = document.getElementById("save-schedule-btn") as HTMLButtonElement;
     expect(btn.textContent).toBe("נשמר!");
     await vi.advanceTimersByTimeAsync(800);
-    expect(loc.href).toBe("/");
+    expect(loc.href).toBe("/he");
     vi.useRealTimers();
   });
 
@@ -300,5 +301,24 @@ describe("schedule.js – successful save", () => {
     expect(helpers.subscribeToPush).not.toHaveBeenCalled();
     const body = JSON.parse(fetchMock.mock.calls[0][1].body);
     expect(body.notify).toBe(false);
+  });
+
+  it("redirects to the active locale home after save", async () => {
+    vi.useFakeTimers();
+    (window as unknown as { __locale?: string }).__locale = "ar";
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true });
+    vi.stubGlobal("fetch", fetchMock);
+    const loc = { href: "" };
+    Object.defineProperty(window, "location", {
+      value: loc,
+      writable: true,
+      configurable: true,
+    });
+
+    clickSave();
+    await vi.advanceTimersByTimeAsync(0);
+    await vi.advanceTimersByTimeAsync(800);
+    expect(loc.href).toBe("/ar");
+    vi.useRealTimers();
   });
 });

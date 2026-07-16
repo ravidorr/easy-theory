@@ -1,4 +1,4 @@
-const VERSION = "v1";
+const VERSION = "v2";
 const CACHE_PREFIX = "clearroad-";
 const STATIC_CACHE = `${CACHE_PREFIX}static-${VERSION}`;
 const PAGES_CACHE = `${CACHE_PREFIX}pages-${VERSION}`;

@@ -27,6 +27,11 @@
 
   let notifyOn = notifyToggle ? notifyToggle.dataset.on === "true" : true;
 
+  function scheduleHomePath() {
+    var locale = window.__locale || "he";
+    return "/" + locale;
+  }
+
   function updateSummary() {
     if (daysLabel) {
       daysLabel.textContent = selectedDays.size > 0
@@ -131,7 +136,7 @@
 
       saveBtn.textContent = t.saved || "נשמר!";
       setTimeout(function () {
-        window.location.href = "/";
+        window.location.href = scheduleHomePath();
       }, 800);
     } catch {
       alert(t.saveError || "שגיאה בשמירה, אפשר לנסות שוב.");
