@@ -571,6 +571,20 @@ export async function getExamAttempts(
   return data ?? [];
 }
 
+export async function hasPassedExam(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<boolean> {
+  const { data, error } = await supabase
+    .from("user_exam_attempts")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("passed", true)
+    .limit(1);
+  throwOnDbError(error, "hasPassedExam: user_exam_attempts");
+  return (data ?? []).length > 0;
+}
+
 export type TopicAccuracy = {
   topic_id: string;
   correct: number;

@@ -39,30 +39,82 @@
   color: var(--text);
 }
 
-.pillsRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.statsStrip {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 }
 
-.pill {
+.statTile {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.statTileIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  border-radius: var(--radius-pill);
-  padding: 6px 14px;
-  font-weight: 700;
-  font-size: 14px;
+  justify-content: center;
+  margin-bottom: 2px;
 }
 
-.pillStreak {
+.statTileIconStreak,
+.statTileIconLevel {
   background: var(--primary-soft);
   color: var(--primary-soft-text);
 }
 
-.pillPoints {
+.statTileIconPoints {
   background: var(--gold-soft);
   color: var(--gold-text);
+}
+
+.statTileIconGoal {
+  background: var(--surface-2);
+  color: var(--text-muted);
+}
+
+.statTileIconGoalDone {
+  background: var(--success-soft);
+  color: var(--success-text);
+}
+
+.statTileValue {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1;
+}
+
+.statTileLabel {
+  font-size: var(--type-caption-size);
+  font-weight: 500;
+  color: var(--text-faint);
+}
+
+.statTileTrack {
+  width: 100%;
+  margin-top: 4px;
+}
+
+.statTileCaption {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.statTileCaptionDone {
+  color: var(--success-text);
+  font-weight: 600;
 }
 
 .greeting {

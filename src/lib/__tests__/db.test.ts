@@ -22,6 +22,7 @@ import {
   markTopicCompleted,
   getRandomExamQuestions,
   getExamAttempts,
+  hasPassedExam,
   getTopicAccuracy,
   getTopicQuestionCounts,
   getQuizAccuracyForWindow,
@@ -828,6 +829,26 @@ describe("getExamAttempts", () => {
   it("throws when the query fails", async () => {
     await expect(getExamAttempts(makeClient(null, boom), "u1")).rejects.toThrow(
       /getExamAttempts: user_exam_attempts query failed: boom/
+    );
+  });
+});
+
+describe("hasPassedExam", () => {
+  it("returns true when a passed attempt exists", async () => {
+    expect(await hasPassedExam(makeClient([{ id: "e1" }]), "u1")).toBe(true);
+  });
+
+  it("returns false when no passed attempt exists", async () => {
+    expect(await hasPassedExam(makeClient([]), "u1")).toBe(false);
+  });
+
+  it("returns false on null data", async () => {
+    expect(await hasPassedExam(makeClient(null), "u1")).toBe(false);
+  });
+
+  it("throws when the query fails", async () => {
+    await expect(hasPassedExam(makeClient(null, boom), "u1")).rejects.toThrow(
+      /hasPassedExam: user_exam_attempts query failed: boom/
     );
   });
 });

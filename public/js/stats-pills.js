@@ -5,13 +5,15 @@
     raw = sessionStorage.getItem("clearroad:stats");
     if (!raw) return;
     var stats = JSON.parse(raw);
-    var streakEl = document.querySelector('[data-stat="streak"]');
-    var pointsEl = document.querySelector('[data-stat="points"]');
-    if (streakEl && typeof stats.streak_days === "number") {
-      streakEl.textContent = String(stats.streak_days);
+    if (typeof stats.streak_days === "number") {
+      document.querySelectorAll('[data-stat="streak"]').forEach(function (el) {
+        el.textContent = String(stats.streak_days);
+      });
     }
-    if (pointsEl && typeof stats.star_points === "number") {
-      pointsEl.textContent = String(stats.star_points);
+    if (typeof stats.star_points === "number") {
+      document.querySelectorAll('[data-stat="points"]').forEach(function (el) {
+        el.textContent = String(stats.star_points);
+      });
     }
     sessionStorage.removeItem("clearroad:stats");
   } catch {}
