@@ -207,6 +207,13 @@
   color: var(--text-muted);
 }
 
+.autoAdvanceHint {
+  margin: 0;
+  text-align: center;
+  font-size: var(--type-caption-size);
+  color: var(--text-muted);
+}
+
 .hidden {
   display: none;
 }

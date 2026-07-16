@@ -115,6 +115,36 @@ body {
   background: var(--danger-soft);
 }
 
+/* Arcade feedback: pop the revealed correct answer, shake a wrong pick.
+   Scoped to .quiz-slide so server-rendered result states (review page)
+   do not animate on load. */
+@keyframes quiz-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+@keyframes quiz-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(3px); }
+}
+
+.quiz-slide .quiz-option[data-state="correct"] {
+  animation: quiz-pop 180ms var(--ease-spring, ease-out);
+}
+
+.quiz-slide .quiz-option[data-state="wrong"] {
+  animation: quiz-shake 240ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quiz-slide .quiz-option[data-state="correct"],
+  .quiz-slide .quiz-option[data-state="wrong"] {
+    animation: none;
+  }
+}
+
 .quiz-option-badge {
   width: 28px;
   height: 28px;

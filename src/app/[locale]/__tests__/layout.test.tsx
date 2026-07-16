@@ -36,7 +36,7 @@ vi.mock("next-intl/server", () => ({
   getMessages: vi.fn().mockResolvedValue({
     JS: {
       Auth: { emailRequired: "יש להזין" },
-      Quiz: { answerBtn: "צדקתי?" },
+      Quiz: { nextBtn: "לשאלה הבאה" },
       Schedule: { saved: "נשמר!" },
       Flashcard: { done: "הושלם!" },
       Bookmark: { bookmarkSaveError: "שגיאה בשמירה" },

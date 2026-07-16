@@ -110,6 +110,7 @@
     "milestone14": "أسبوعان",
     "milestone30": "شهر",
     "darkMode": "الوضع الداكن",
+    "autoAdvance": "الانتقال التلقائي إلى السؤال التالي",
     "language": "اللغة",
     "logoutBtn": "تسجيل الخروج"
   },
@@ -127,8 +128,8 @@
   "Quiz": {
     "count": "{current} من {total}",
     "emptyQuestions": "لا توجد أسئلة متاحة لهذا الموضوع بعد.",
-    "answerBtn": "هل أصبت؟",
     "nextBtn": "السؤال التالي",
+    "autoAdvanceHint": "بعد الإجابة الصحيحة ننتقل تلقائياً إلى السؤال التالي. يمكن إيقاف ذلك من شاشة \"المزيد\".",
     "scoreLabel": "النقاط",
     "closeLabel": "إغلاق",
     "signAlt": "إشارة {number}",
@@ -322,7 +323,6 @@
     },
     "Quiz": {
       "count": "{current} من {total}",
-      "answerBtn": "هل أصبت؟",
       "nextBtn": "السؤال التالي",
       "savingAnswer": "جارٍ حفظ الإجابة...",
       "saveAnswerError": "تعذّر حفظ الإجابة. يمكن المحاولة مجدداً.",

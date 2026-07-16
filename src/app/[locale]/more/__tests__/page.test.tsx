@@ -106,17 +106,41 @@ describe("MorePage", () => {
 
   it("renders dark mode toggle switch set to true", async () => {
     const jsx = await MorePage();
-    render(jsx);
-    const toggle = screen.getByRole("switch");
+    const { container } = render(jsx);
+    const toggle = container.querySelector("#dark-mode-toggle");
     expect(toggle).toHaveAttribute("aria-checked", "true");
   });
 
   it("defaults to dark mode when theme cookie is absent", async () => {
     mockCookies.mockResolvedValue({ get: vi.fn().mockReturnValue(undefined) } as never);
     const jsx = await MorePage();
-    render(jsx);
-    const toggle = screen.getByRole("switch");
+    const { container } = render(jsx);
+    const toggle = container.querySelector("#dark-mode-toggle");
     expect(toggle).toHaveAttribute("aria-checked", "true");
+  });
+
+  it("defaults the auto-advance toggle to on when its cookie is absent", async () => {
+    mockCookies.mockResolvedValue({ get: vi.fn().mockReturnValue(undefined) } as never);
+    const jsx = await MorePage();
+    const { container } = render(jsx);
+    const toggle = container.querySelector("#auto-advance-toggle");
+    expect(toggle).toHaveAttribute("aria-checked", "true");
+  });
+
+  it("renders the auto-advance toggle off when the cookie opts out", async () => {
+    mockCookies.mockResolvedValue({
+      get: vi.fn((name: string) =>
+        name === "quiz-auto-advance" ? { value: "off" } : { value: "dark" }
+      ),
+    } as never);
+    const jsx = await MorePage();
+    const { container } = render(jsx);
+    const toggle = container.querySelector("#auto-advance-toggle");
+    expect(toggle).toHaveAttribute("aria-checked", "false");
+    expect(container.querySelector("#dark-mode-toggle")).toHaveAttribute(
+      "aria-checked",
+      "true"
+    );
   });
 
   it("formats earned-medal dates with the ar-IL locale for ar", async () => {
@@ -134,8 +158,8 @@ describe("MorePage", () => {
       get: vi.fn().mockReturnValue({ value: "light" }),
     } as never);
     const jsx = await MorePage();
-    render(jsx);
-    const toggle = screen.getByRole("switch");
+    const { container } = render(jsx);
+    const toggle = container.querySelector("#dark-mode-toggle");
     expect(toggle).toHaveAttribute("aria-checked", "false");
   });
 });

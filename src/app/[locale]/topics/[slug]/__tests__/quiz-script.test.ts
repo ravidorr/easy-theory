@@ -7,6 +7,7 @@ const quizScript = readFileSync(
   "utf-8"
 );
 const TOUCH_DOUBLE_TAP_SUPPRESSION_MS = 300;
+const AUTO_ADVANCE_DELAY_MS = 900;
 
 function slideHTML(index: number, correct: string) {
   return `
@@ -53,7 +54,8 @@ function setupDOM(opts: {
           <span id="reward-float">+10</span>
           <span id="reward-message"></span>
         </div>
-        <button id="quiz-next" disabled>צדקתי?</button>
+        <button id="quiz-next" disabled>לשאלה הבאה</button>
+        <p id="quiz-auto-advance-hint" style="display: none;">רמז</p>
       </div>
       <div id="quiz-final">
         <span id="final-score"></span>
@@ -81,6 +83,15 @@ function messageText() {
 
 function floatEl() {
   return document.getElementById("reward-float")!;
+}
+
+function hintEl() {
+  return document.getElementById("quiz-auto-advance-hint")!;
+}
+
+function slideDisplay(index: number) {
+  return (document.querySelectorAll(".quiz-slide")[index] as HTMLElement).style
+    .display;
 }
 
 function clickOption(slideIndex: number, option: string) {
@@ -138,6 +149,12 @@ function errorResponse(status: number, error: string) {
   };
 }
 
+function fetchCalls(url: string) {
+  return (fetch as ReturnType<typeof vi.fn>).mock.calls.filter(
+    (call) => call[0] === url
+  );
+}
+
 async function flushAsyncWork() {
   await Promise.resolve();
   await Promise.resolve();
@@ -145,15 +162,26 @@ async function flushAsyncWork() {
   await Promise.resolve();
 }
 
-describe("quiz.js – rejected answer persistence", () => {
-  function fetchCalls(url: string) {
-    return (fetch as ReturnType<typeof vi.fn>).mock.calls.filter(
-      (call) => call[0] === url
-    );
-  }
+// Fake timers keep the 900ms auto-advance countdown deterministic and stop
+// timers armed in one test from firing during a later one.
+function resetTestState() {
+  localStorage.clear();
+  sessionStorage.clear();
+  document.cookie = "quiz-auto-advance=; path=/; max-age=0";
+  vi.useFakeTimers();
+}
 
+function restoreTestState() {
+  vi.clearAllTimers();
+  vi.useRealTimers();
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+  document.cookie = "quiz-auto-advance=; path=/; max-age=0";
+}
+
+describe("quiz.js – rejected answer persistence", () => {
   beforeEach(() => {
-    localStorage.clear();
+    resetTestState();
     (
       window as unknown as {
         __t: Record<string, string>;
@@ -167,8 +195,7 @@ describe("quiz.js – rejected answer persistence", () => {
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
-    vi.unstubAllGlobals();
+    restoreTestState();
   });
 
   it("uses secure random bytes when randomUUID is unavailable", async () => {
@@ -185,7 +212,6 @@ describe("quiz.js – rejected answer persistence", () => {
     setupDOM();
 
     clickOption(0, "a");
-    clickAction();
     await flushAsyncWork();
 
     const requestBody = JSON.parse(fetchCalls("/api/quiz")[0][1].body);
@@ -208,7 +234,6 @@ describe("quiz.js – rejected answer persistence", () => {
     setupDOM();
 
     clickOption(0, "a");
-    clickAction();
     await flushAsyncWork();
 
     expect(messageText()).toBe("שמירת התשובה נכשלה");
@@ -239,7 +264,6 @@ describe("quiz.js – rejected answer persistence", () => {
       setupDOM({ userId: "u1" });
 
       clickOption(0, "a");
-      clickAction();
       await flushAsyncWork();
 
       expect(messageText()).toBe("שגיאת API מקומית");
@@ -258,7 +282,6 @@ describe("quiz.js – rejected answer persistence", () => {
     setupDOM({ userId: "u1" });
 
     clickOption(0, "a");
-    clickAction();
     await flushAsyncWork();
 
     expect(messageText()).toBe("לא מחוברת");
@@ -280,7 +303,6 @@ describe("quiz.js – rejected answer persistence", () => {
       setupDOM();
 
       clickOption(0, "a");
-      clickAction();
       await flushAsyncWork();
 
       expect(messageText()).toBe("שגיאה זמנית מקומית");
@@ -313,7 +335,6 @@ describe("quiz.js – rejected answer persistence", () => {
       setupDOM({ userId: "u1" });
 
       clickOption(0, "a");
-      clickAction();
       await flushAsyncWork();
 
       expect(messageText()).toBe("לא הצלחנו לשמור את התשובה. אפשר לנסות שוב.");
@@ -345,7 +366,6 @@ describe("quiz.js – rejected answer persistence", () => {
     setupDOM();
 
     clickOption(0, "a");
-    clickAction();
     await flushAsyncWork();
     clickAction();
     await flushAsyncWork();
@@ -372,7 +392,6 @@ describe("quiz.js – rejected answer persistence", () => {
     setupDOM();
 
     clickOption(0, "a");
-    clickAction();
     await flushAsyncWork();
 
     expect(JSON.parse(sessionStorage.getItem("clearroad:stats")!)).toEqual({
@@ -387,18 +406,15 @@ describe("quiz.js – rejected answer persistence", () => {
     setupDOM();
 
     clickOption(0, "a");
-    clickAction();
     await flushAsyncWork();
 
     expect(messageText()).toBe("לא הצלחנו לשמור את התשובה. אפשר לנסות שוב.");
     expect(actionButton().textContent).toBe("לנסות שוב");
     expect(actionButton().disabled).toBe(false);
-    expect(
-      (document.querySelectorAll(".quiz-slide")[0] as HTMLElement).style.display
-    ).toBe("flex");
+    expect(slideDisplay(0)).toBe("flex");
   });
 
-  it("does not allow advancing while answer persistence is pending", async () => {
+  it("holds a skip request until the pending submission persists", async () => {
     let resolveRequest!: (response: {
       ok: boolean;
       json: () => Promise<object>;
@@ -413,23 +429,51 @@ describe("quiz.js – rejected answer persistence", () => {
     setupDOM();
 
     clickOption(0, "a");
+
+    // Correct answer: the button is an enabled skip hatch while saving.
+    expect(actionButton().disabled).toBe(false);
+    expect(actionButton().textContent).toBe("לשאלה הבאה");
+
     clickAction();
+    expect(actionButton().disabled).toBe(true);
+    expect(actionButton().textContent).toBe("שומרים...");
+    expect(fetchCalls("/api/quiz")).toHaveLength(1);
+    expect(slideDisplay(0)).toBe("flex");
+
+    resolveRequest({ ok: true, json: async () => ({}) });
+    await flushAsyncWork();
+
+    expect(slideDisplay(1)).toBe("flex");
+  });
+
+  it("does not allow advancing a wrong answer while persistence is pending", async () => {
+    let resolveRequest!: (response: {
+      ok: boolean;
+      json: () => Promise<object>;
+    }) => void;
+    const pendingRequest = new Promise<{
+      ok: boolean;
+      json: () => Promise<object>;
+    }>((resolve) => {
+      resolveRequest = resolve;
+    });
+    vi.stubGlobal("fetch", vi.fn().mockReturnValue(pendingRequest));
+    setupDOM();
+
+    clickOption(0, "b");
 
     expect(actionButton().disabled).toBe(true);
-    clickAction();
+    expect(actionButton().textContent).toBe("שומרים...");
+    dispatchActionClick(1);
     expect(fetchCalls("/api/quiz")).toHaveLength(1);
-    expect(
-      (document.querySelectorAll(".quiz-slide")[0] as HTMLElement).style.display
-    ).toBe("flex");
+    expect(slideDisplay(0)).toBe("flex");
 
     resolveRequest({ ok: true, json: async () => ({}) });
     await flushAsyncWork();
 
     expect(actionButton().disabled).toBe(false);
     expect(actionButton().textContent).toBe("לשאלה הבאה");
-    expect(
-      (document.querySelectorAll(".quiz-slide")[0] as HTMLElement).style.display
-    ).toBe("flex");
+    expect(slideDisplay(0)).toBe("flex");
   });
 
   it("does not post completion after the final answer is rejected", async () => {
@@ -443,11 +487,9 @@ describe("quiz.js – rejected answer persistence", () => {
     setupDOM();
 
     clickOption(0, "a");
-    clickAction();
     await flushAsyncWork();
     clickAction();
     clickOption(1, "b");
-    clickAction();
     await flushAsyncWork();
     clickAction();
     await flushAsyncWork();
@@ -456,9 +498,7 @@ describe("quiz.js – rejected answer persistence", () => {
     expect(document.getElementById("quiz-final")!.style.display).not.toBe(
       "flex"
     );
-    expect(
-      (document.querySelectorAll(".quiz-slide")[1] as HTMLElement).style.display
-    ).toBe("flex");
+    expect(slideDisplay(1)).toBe("flex");
   });
 
   it("does not advance past a question until its submission succeeds", async () => {
@@ -472,29 +512,294 @@ describe("quiz.js – rejected answer persistence", () => {
     setupDOM();
 
     clickOption(0, "a");
-    clickAction();
     await flushAsyncWork();
 
-    expect(
-      (document.querySelectorAll(".quiz-slide")[0] as HTMLElement).style.display
-    ).toBe("flex");
-    expect(
-      (document.querySelectorAll(".quiz-slide")[1] as HTMLElement).style.display
-    ).toBe("none");
+    expect(slideDisplay(0)).toBe("flex");
+    expect(slideDisplay(1)).toBe("none");
 
     clickAction();
     await flushAsyncWork();
     clickAction();
 
-    expect(
-      (document.querySelectorAll(".quiz-slide")[1] as HTMLElement).style.display
-    ).toBe("flex");
+    expect(slideDisplay(1)).toBe("flex");
+  });
+});
+
+describe("quiz.js – auto-advance", () => {
+  beforeEach(() => {
+    resetTestState();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) })
+    );
+  });
+
+  afterEach(() => {
+    restoreTestState();
+  });
+
+  it("auto-advances to the next question after the countdown on a correct answer", async () => {
+    setupDOM();
+    clickOption(0, "a");
+    await flushAsyncWork();
+
+    expect(slideDisplay(0)).toBe("flex");
+    vi.advanceTimersByTime(AUTO_ADVANCE_DELAY_MS);
+    expect(slideDisplay(1)).toBe("flex");
+  });
+
+  it("waits for a slow submission and advances as soon as it persists", async () => {
+    let resolveRequest!: (response: {
+      ok: boolean;
+      json: () => Promise<object>;
+    }) => void;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockReturnValue(
+        new Promise((resolve) => {
+          resolveRequest = resolve;
+        })
+      )
+    );
+    setupDOM();
+
+    clickOption(0, "a");
+    vi.advanceTimersByTime(AUTO_ADVANCE_DELAY_MS);
+    expect(slideDisplay(0)).toBe("flex");
+
+    resolveRequest({ ok: true, json: async () => ({}) });
+    await flushAsyncWork();
+
+    expect(slideDisplay(1)).toBe("flex");
+  });
+
+  it("never auto-advances after a wrong answer", async () => {
+    setupDOM();
+    clickOption(0, "b");
+    await flushAsyncWork();
+
+    vi.advanceTimersByTime(AUTO_ADVANCE_DELAY_MS * 5);
+    expect(slideDisplay(0)).toBe("flex");
+    expect(actionButton().textContent).toBe("לשאלה הבאה");
+
+    clickAction();
+    expect(slideDisplay(1)).toBe("flex");
+  });
+
+  it("advances immediately on a skip tap and does not double-advance when the timer fires", async () => {
+    setupDOM();
+    clickOption(0, "a");
+    await flushAsyncWork();
+
+    expect(actionButton().disabled).toBe(false);
+    expect(actionButton().textContent).toBe("לשאלה הבאה");
+    clickAction();
+    expect(slideDisplay(1)).toBe("flex");
+
+    vi.advanceTimersByTime(AUTO_ADVANCE_DELAY_MS);
+    expect(slideDisplay(1)).toBe("flex");
+    expect(document.getElementById("quiz-final")!.style.display).not.toBe(
+      "flex"
+    );
+  });
+
+  it("does not auto-advance past an earned medal", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ medals_earned: ["streak-3"] }),
+      })
+    );
+    setupDOM();
+
+    clickOption(0, "a");
+    await flushAsyncWork();
+    vi.advanceTimersByTime(AUTO_ADVANCE_DELAY_MS);
+
+    expect(slideDisplay(0)).toBe("flex");
+    expect(document.querySelector('[role="dialog"]')).not.toBeNull();
+  });
+
+  it("does not auto-advance past the topic-completed message", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ topic_completed: true }),
+      })
+    );
+    setupDOM();
+
+    clickOption(0, "a");
+    await flushAsyncWork();
+    vi.advanceTimersByTime(AUTO_ADVANCE_DELAY_MS);
+
+    expect(slideDisplay(0)).toBe("flex");
+    expect(messageText()).toBe("כל הכבוד! סיימת את כל הנושא!");
+  });
+
+  it("shows the final screen and posts progress when the last question auto-advances", async () => {
+    setupDOM();
+
+    clickOption(0, "a");
+    await flushAsyncWork();
+    vi.advanceTimersByTime(AUTO_ADVANCE_DELAY_MS);
+
+    clickOption(1, "b");
+    await flushAsyncWork();
+    vi.advanceTimersByTime(AUTO_ADVANCE_DELAY_MS);
+
+    expect(document.getElementById("quiz-final")!.style.display).toBe("flex");
+    const progressBody = JSON.parse(fetchCalls("/api/progress")[0][1].body);
+    expect(progressBody).toMatchObject({ score: 100, status: "completed" });
+  });
+
+  it("cancels the countdown when the submission fails and stays manual after a retry", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(errorResponse(500, "שמירת התשובה נכשלה"))
+        .mockResolvedValueOnce({ ok: true, json: async () => ({}) })
+    );
+    setupDOM();
+
+    clickOption(0, "a");
+    await flushAsyncWork();
+    vi.advanceTimersByTime(AUTO_ADVANCE_DELAY_MS);
+    expect(slideDisplay(0)).toBe("flex");
+
+    clickAction();
+    await flushAsyncWork();
+    vi.advanceTimersByTime(AUTO_ADVANCE_DELAY_MS);
+    expect(slideDisplay(0)).toBe("flex");
+    expect(actionButton().textContent).toBe("לשאלה הבאה");
+
+    clickAction();
+    expect(slideDisplay(1)).toBe("flex");
+  });
+
+  it("keeps the manual flow when the auto-advance cookie is off", async () => {
+    document.cookie = "quiz-auto-advance=off";
+    setupDOM();
+
+    clickOption(0, "a");
+    expect(actionButton().disabled).toBe(true);
+    expect(actionButton().textContent).toBe("שומרים...");
+    await flushAsyncWork();
+
+    vi.advanceTimersByTime(AUTO_ADVANCE_DELAY_MS * 5);
+    expect(slideDisplay(0)).toBe("flex");
+    expect(actionButton().textContent).toBe("לשאלה הבאה");
+
+    clickAction();
+    expect(slideDisplay(1)).toBe("flex");
+  });
+
+  it("keeps the manual flow when reduced motion is preferred", async () => {
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn().mockReturnValue({ matches: true })
+    );
+    setupDOM();
+
+    clickOption(0, "a");
+    await flushAsyncWork();
+
+    vi.advanceTimersByTime(AUTO_ADVANCE_DELAY_MS * 5);
+    expect(slideDisplay(0)).toBe("flex");
+
+    clickAction();
+    expect(slideDisplay(1)).toBe("flex");
+  });
+
+  it("lets an explicit cookie override the reduced-motion default", async () => {
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn().mockReturnValue({ matches: true })
+    );
+    document.cookie = "quiz-auto-advance=on";
+    setupDOM();
+
+    clickOption(0, "a");
+    await flushAsyncWork();
+    vi.advanceTimersByTime(AUTO_ADVANCE_DELAY_MS);
+
+    expect(slideDisplay(1)).toBe("flex");
+  });
+
+  it("does not arm auto-advance when restoring an acknowledged submission", async () => {
+    setupDOM({ userId: "u1" });
+    clickOption(0, "a");
+    await flushAsyncWork();
+
+    // Reload before the countdown finishes: the restored state is manual.
+    // Drop the first instance's timer so only the new instance is observed.
+    vi.clearAllTimers();
+    setupDOM({ userId: "u1" });
+    vi.advanceTimersByTime(AUTO_ADVANCE_DELAY_MS * 5);
+
+    expect(slideDisplay(0)).toBe("flex");
+    expect(actionButton().textContent).toBe("לשאלה הבאה");
+    expect(actionButton().disabled).toBe(false);
+  });
+
+  it("ignores a second tap on the options after the answer locked", async () => {
+    setupDOM();
+    clickOption(0, "a");
+    clickOption(0, "c");
+    await flushAsyncWork();
+
+    expect(fetchCalls("/api/quiz")).toHaveLength(1);
+    const requestBody = JSON.parse(fetchCalls("/api/quiz")[0][1].body);
+    expect(requestBody.selected_option).toBe("a");
+  });
+});
+
+describe("quiz.js – auto-advance hint", () => {
+  beforeEach(() => {
+    resetTestState();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) })
+    );
+  });
+
+  afterEach(() => {
+    restoreTestState();
+  });
+
+  it("shows the hint once per browser session", () => {
+    setupDOM();
+    expect(hintEl().style.display).toBe("block");
+
+    setupDOM();
+    expect(hintEl().style.display).toBe("none");
+  });
+
+  it("hides the hint when advancing to the next question", async () => {
+    setupDOM();
+    expect(hintEl().style.display).toBe("block");
+
+    clickOption(0, "a");
+    await flushAsyncWork();
+    vi.advanceTimersByTime(AUTO_ADVANCE_DELAY_MS);
+
+    expect(slideDisplay(1)).toBe("flex");
+    expect(hintEl().style.display).toBe("none");
+  });
+
+  it("does not show the hint when auto-advance is off", () => {
+    document.cookie = "quiz-auto-advance=off";
+    setupDOM();
+    expect(hintEl().style.display).toBe("none");
   });
 });
 
 describe("quiz.js – reward score and feedback", () => {
   beforeEach(() => {
-    localStorage.clear();
+    resetTestState();
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) })
@@ -503,8 +808,7 @@ describe("quiz.js – reward score and feedback", () => {
   });
 
   afterEach(() => {
-    vi.useRealTimers();
-    vi.unstubAllGlobals();
+    restoreTestState();
   });
 
   it("starts with score 0 and an empty feedback message", () => {
@@ -514,7 +818,6 @@ describe("quiz.js – reward score and feedback", () => {
 
   it("adds 10 points, shows the correct message, and animates the float on a correct answer", () => {
     clickOption(0, "a");
-    clickAction();
     expect(scoreText()).toBe("10");
     expect(messageText()).toBe("יפה מאוד!");
     expect(floatEl().hasAttribute("data-animate")).toBe(true);
@@ -522,14 +825,12 @@ describe("quiz.js – reward score and feedback", () => {
 
   it("removes the float animation attribute when the animation ends", () => {
     clickOption(0, "a");
-    clickAction();
     floatEl().dispatchEvent(new Event("animationend"));
     expect(floatEl().hasAttribute("data-animate")).toBe(false);
   });
 
   it("keeps the score and shows the wrong-answer message on a wrong answer", () => {
     clickOption(0, "b");
-    clickAction();
     expect(scoreText()).toBe("0");
     expect(messageText()).toContain("בחרת ב־");
     expect(floatEl().hasAttribute("data-animate")).toBe(false);
@@ -537,7 +838,6 @@ describe("quiz.js – reward score and feedback", () => {
 
   it("clears the message but keeps the score when advancing to the next question", async () => {
     clickOption(0, "a");
-    clickAction();
     await flushAsyncWork();
     clickAction(); // advance
     expect(messageText()).toBe("");
@@ -546,66 +846,33 @@ describe("quiz.js – reward score and feedback", () => {
 
   it("keeps feedback visible for one mouse multi-click and advances on a later click", async () => {
     clickOption(0, "a");
-
-    dispatchActionClick(1);
     await flushAsyncWork();
+
     dispatchActionClick(2);
 
     expect(messageText()).toBe("יפה מאוד!");
-    expect(
-      (document.querySelectorAll(".quiz-slide")[0] as HTMLElement).style.display
-    ).toBe("flex");
+    expect(slideDisplay(0)).toBe("flex");
 
     dispatchActionClick(1);
 
-    expect(
-      (document.querySelectorAll(".quiz-slide")[1] as HTMLElement).style.display
-    ).toBe("flex");
+    expect(slideDisplay(1)).toBe("flex");
   });
 
   it("keeps feedback visible through repeated Enter and advances on a later press", async () => {
     clickOption(0, "a");
-
-    pressActionKey("Enter", false);
     await flushAsyncWork();
+
     pressActionKey("Enter", true);
 
     expect(messageText()).toBe("יפה מאוד!");
-    expect(
-      (document.querySelectorAll(".quiz-slide")[0] as HTMLElement).style.display
-    ).toBe("flex");
+    expect(slideDisplay(0)).toBe("flex");
 
     pressActionKey("Enter", false);
 
-    expect(
-      (document.querySelectorAll(".quiz-slide")[1] as HTMLElement).style.display
-    ).toBe("flex");
-  });
-
-  it("keeps a successful touch confirmation disabled for the suppression window", async () => {
-    vi.useFakeTimers();
-    clickOption(0, "a");
-
-    dispatchPointerAction("touch", 1);
-    await flushAsyncWork();
-
-    expect(actionButton().disabled).toBe(true);
-    dispatchPointerAction("touch", 1);
-    expect(
-      (document.querySelectorAll(".quiz-slide")[0] as HTMLElement).style.display
-    ).toBe("flex");
-
-    vi.advanceTimersByTime(TOUCH_DOUBLE_TAP_SUPPRESSION_MS);
-    expect(actionButton().disabled).toBe(false);
-
-    dispatchPointerAction("touch", 1);
-    expect(
-      (document.querySelectorAll(".quiz-slide")[1] as HTMLElement).style.display
-    ).toBe("flex");
+    expect(slideDisplay(1)).toBe("flex");
   });
 
   it("keeps recovered feedback visible after a touch retry double-tap", async () => {
-    vi.useFakeTimers();
     vi.stubGlobal(
       "fetch",
       vi
@@ -615,7 +882,6 @@ describe("quiz.js – reward score and feedback", () => {
     );
     setupDOM();
     clickOption(0, "a");
-    clickAction();
     await flushAsyncWork();
 
     dispatchPointerAction("touch", 1);
@@ -624,21 +890,16 @@ describe("quiz.js – reward score and feedback", () => {
 
     expect(messageText()).toBe("יפה מאוד!");
     expect(actionButton().disabled).toBe(true);
-    expect(
-      (document.querySelectorAll(".quiz-slide")[0] as HTMLElement).style.display
-    ).toBe("flex");
+    expect(slideDisplay(0)).toBe("flex");
 
     vi.advanceTimersByTime(TOUCH_DOUBLE_TAP_SUPPRESSION_MS);
     expect(actionButton().disabled).toBe(false);
 
     dispatchPointerAction("touch", 1);
-    expect(
-      (document.querySelectorAll(".quiz-slide")[1] as HTMLElement).style.display
-    ).toBe("flex");
+    expect(slideDisplay(1)).toBe("flex");
   });
 
   it("keeps a failed touch retry disabled until its suppression window expires", async () => {
-    vi.useFakeTimers();
     vi.stubGlobal(
       "fetch",
       vi
@@ -648,7 +909,6 @@ describe("quiz.js – reward score and feedback", () => {
     );
     setupDOM();
     clickOption(0, "a");
-    clickAction();
     await flushAsyncWork();
 
     dispatchPointerAction("touch", 1);
@@ -663,80 +923,46 @@ describe("quiz.js – reward score and feedback", () => {
     expect(actionButton().textContent).toBe("לנסות שוב");
   });
 
-  it("does not let the touch timeout override pending persistence", async () => {
-    vi.useFakeTimers();
-    let resolveRequest!: (response: {
-      ok: boolean;
-      json: () => Promise<object>;
-    }) => void;
+  it("uses the touchstart fallback to suppress Safari-style double taps on retry", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockReturnValue(
-        new Promise((resolve) => {
-          resolveRequest = resolve;
-        })
-      )
+      vi
+        .fn()
+        .mockResolvedValueOnce(errorResponse(500, "שמירת התשובה נכשלה"))
+        .mockResolvedValueOnce({ ok: true, json: async () => ({}) })
     );
     setupDOM();
     clickOption(0, "a");
-
-    dispatchPointerAction("touch", 1);
-    vi.advanceTimersByTime(TOUCH_DOUBLE_TAP_SUPPRESSION_MS);
-
-    expect(actionButton().disabled).toBe(true);
-    expect(
-      (document.querySelectorAll(".quiz-slide")[0] as HTMLElement).style.display
-    ).toBe("flex");
-
-    resolveRequest({ ok: true, json: async () => ({}) });
     await flushAsyncWork();
-
-    expect(actionButton().disabled).toBe(false);
-    expect(actionButton().textContent).toBe("לשאלה הבאה");
-  });
-
-  it("uses the touchstart fallback to suppress Safari-style double taps", async () => {
-    vi.useFakeTimers();
-    clickOption(0, "a");
 
     dispatchTouchFallbackAction(1);
     await flushAsyncWork();
 
     expect(actionButton().disabled).toBe(true);
     dispatchTouchFallbackAction(1);
-    expect(
-      (document.querySelectorAll(".quiz-slide")[0] as HTMLElement).style.display
-    ).toBe("flex");
+    expect(slideDisplay(0)).toBe("flex");
 
     vi.advanceTimersByTime(TOUCH_DOUBLE_TAP_SUPPRESSION_MS);
     dispatchTouchFallbackAction(1);
 
-    expect(
-      (document.querySelectorAll(".quiz-slide")[1] as HTMLElement).style.display
-    ).toBe("flex");
+    expect(slideDisplay(1)).toBe("flex");
   });
 
   it("keeps programmatic activations immediate", async () => {
     clickOption(0, "a");
-
-    dispatchActionClick(0);
     await flushAsyncWork();
 
     expect(actionButton().disabled).toBe(false);
     dispatchActionClick(0);
 
-    expect(
-      (document.querySelectorAll(".quiz-slide")[1] as HTMLElement).style.display
-    ).toBe("flex");
+    expect(slideDisplay(1)).toBe("flex");
   });
 
   it("accumulates points across correct answers", async () => {
     clickOption(0, "a");
-    clickAction();
     await flushAsyncWork();
     clickAction(); // advance to slide 2
     clickOption(1, "b");
-    clickAction();
     expect(scoreText()).toBe("20");
   });
 });
@@ -748,7 +974,7 @@ describe("quiz.js – assistive tech state", () => {
   }
 
   beforeEach(() => {
-    localStorage.clear();
+    resetTestState();
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) })
@@ -757,31 +983,20 @@ describe("quiz.js – assistive tech state", () => {
   });
 
   afterEach(() => {
-    vi.unstubAllGlobals();
+    restoreTestState();
   });
 
-  it("sets aria-pressed on the clicked option and clears it on its siblings", () => {
+  it("keeps the chosen option aria-pressed and locked after the one-tap answer", () => {
     clickOption(0, "b");
     expect(option(0, "b").getAttribute("aria-pressed")).toBe("true");
+    expect(option(0, "b").disabled).toBe(true);
     ["a", "c", "d"].forEach((opt) => {
       expect(option(0, opt).getAttribute("aria-pressed")).toBe("false");
     });
-
-    clickOption(0, "c");
-    expect(option(0, "c").getAttribute("aria-pressed")).toBe("true");
-    expect(option(0, "b").getAttribute("aria-pressed")).toBe("false");
   });
 
-  it("keeps the chosen option aria-pressed after confirmation", () => {
-    clickOption(0, "b");
-    clickAction();
-    expect(option(0, "b").getAttribute("aria-pressed")).toBe("true");
-    expect(option(0, "b").disabled).toBe(true);
-  });
-
-  it("adds screen-reader result text to the correct and wrong options on confirm", () => {
+  it("adds screen-reader result text to the correct and wrong options on answer", () => {
     clickOption(0, "b"); // correct is "a"
-    clickAction();
     expect(option(0, "a").querySelector(".quiz-option-sr")!.textContent).toBe("תשובה נכונה");
     expect(option(0, "b").querySelector(".quiz-option-sr")!.textContent).toBe("תשובה שגויה");
     expect(option(0, "c").querySelector(".quiz-option-sr")).toBeNull();
@@ -789,19 +1004,17 @@ describe("quiz.js – assistive tech state", () => {
 
   it("marks only the correct option when the answer is right", () => {
     clickOption(0, "a");
-    clickAction();
     expect(option(0, "a").querySelector(".quiz-option-sr")!.textContent).toBe("תשובה נכונה");
     ["b", "c", "d"].forEach((opt) => {
       expect(option(0, opt).querySelector(".quiz-option-sr")).toBeNull();
     });
   });
 
-  it("does not duplicate screen-reader result spans", () => {
+  it("does not duplicate screen-reader result spans", async () => {
     clickOption(0, "a");
-    clickAction();
+    await flushAsyncWork();
     clickAction(); // advance
     clickOption(1, "b");
-    clickAction();
     document.querySelectorAll(".quiz-option").forEach((o) => {
       expect(o.querySelectorAll(".quiz-option-sr").length).toBeLessThanOrEqual(1);
     });
@@ -811,18 +1024,8 @@ describe("quiz.js – assistive tech state", () => {
 describe("quiz.js – resume", () => {
   const KEY = "quiz-resume:v1:u1:t1";
 
-  function slideDisplay(index: number) {
-    return (document.querySelectorAll(".quiz-slide")[index] as HTMLElement).style.display;
-  }
-
-  function fetchCalls(url: string) {
-    return (fetch as ReturnType<typeof vi.fn>).mock.calls.filter(
-      (call) => call[0] === url
-    );
-  }
-
   beforeEach(() => {
-    localStorage.clear();
+    resetTestState();
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) })
@@ -830,13 +1033,12 @@ describe("quiz.js – resume", () => {
   });
 
   afterEach(() => {
-    vi.unstubAllGlobals();
+    restoreTestState();
   });
 
   it("saves position, score, and points on advance", async () => {
     setupDOM({ userId: "u1" });
     clickOption(0, "a");
-    clickAction(); // confirm
     await flushAsyncWork();
     clickAction(); // advance
     const saved = JSON.parse(localStorage.getItem(KEY)!);
@@ -860,8 +1062,7 @@ describe("quiz.js – resume", () => {
       JSON.stringify({ i: 1, score: 1, points: 10, sessionId: "s-1", total: 2 })
     );
     setupDOM({ userId: "u1" });
-    clickOption(1, "b");
-    clickAction(); // confirm → POST /api/quiz
+    clickOption(1, "b"); // one-tap answer → POST /api/quiz
     const body = JSON.parse(fetchCalls("/api/quiz")[0][1].body);
     expect(body.session_id).toBe("s-1");
   });
@@ -902,7 +1103,6 @@ describe("quiz.js – resume", () => {
     setupDOM({ userId: "u1" });
 
     clickOption(0, "a");
-    clickAction();
     await flushAsyncWork();
 
     const firstBody = JSON.parse(fetchCalls("/api/quiz")[0][1].body);
@@ -939,7 +1139,6 @@ describe("quiz.js – resume", () => {
   it("restores an acknowledged correct answer without rescoring or reposting it", async () => {
     setupDOM({ userId: "u1" });
     clickOption(0, "a");
-    clickAction();
     await flushAsyncWork();
 
     expect(fetchCalls("/api/quiz")).toHaveLength(1);
@@ -961,7 +1160,6 @@ describe("quiz.js – resume", () => {
     });
 
     clickOption(1, "b");
-    clickAction();
     await flushAsyncWork();
     clickAction();
 
@@ -973,7 +1171,6 @@ describe("quiz.js – resume", () => {
   it("restores an acknowledged wrong answer without reposting or changing score", async () => {
     setupDOM({ userId: "u1" });
     clickOption(0, "b");
-    clickAction();
     await flushAsyncWork();
 
     expect(fetchCalls("/api/quiz")).toHaveLength(1);
@@ -998,11 +1195,9 @@ describe("quiz.js – resume", () => {
   it("clears the key on completion and still posts progress", async () => {
     setupDOM({ userId: "u1" });
     clickOption(0, "a");
-    clickAction();
     await flushAsyncWork();
     clickAction();
     clickOption(1, "b");
-    clickAction();
     await flushAsyncWork();
     clickAction(); // advance past the last slide → completion
     expect(localStorage.getItem(KEY)).toBeNull();
@@ -1015,7 +1210,6 @@ describe("quiz.js – resume", () => {
     setupDOM({ userId: "u1", quizMode: "retry" });
     expect(slideDisplay(0)).toBe("flex");
     clickOption(0, "a");
-    clickAction();
     await flushAsyncWork();
     clickAction(); // advance — must not touch storage
     expect(localStorage.getItem(KEY)).toBe(seeded);
@@ -1034,26 +1228,21 @@ describe("quiz.js – resume", () => {
     setupDOM({ userId: "u1", quizMode: "retry" });
 
     clickOption(0, "a");
-    clickAction();
     await flushAsyncWork();
 
     expect(localStorage.getItem(KEY)).toBe(seeded);
     setupDOM({ userId: "u1", quizMode: "retry" });
     expect(scoreText()).toBe("0");
     expect(actionButton().disabled).toBe(true);
-    expect(actionButton().textContent).toBe("צדקתי?");
+    expect(actionButton().textContent).toBe("לשאלה הבאה");
   });
 });
 
 describe("quiz.js – skip answered", () => {
   const KEY = "quiz-resume:v1:u1:t1";
 
-  function slideDisplay(index: number) {
-    return (document.querySelectorAll(".quiz-slide")[index] as HTMLElement).style.display;
-  }
-
   beforeEach(() => {
-    localStorage.clear();
+    resetTestState();
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) })
@@ -1061,7 +1250,7 @@ describe("quiz.js – skip answered", () => {
   });
 
   afterEach(() => {
-    vi.unstubAllGlobals();
+    restoreTestState();
   });
 
   it("starts at the first unanswered question on a fresh session", () => {

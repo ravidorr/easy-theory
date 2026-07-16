@@ -228,8 +228,15 @@ export default async function TopicQuizPage({
             className={`btn-primary${total === 0 ? ` ${styles.hidden}` : ""}`}
             disabled
           >
-            {t("answerBtn")}
+            {t("nextBtn")}
           </button>
+
+          <p
+            id="quiz-auto-advance-hint"
+            className={`${styles.hidden} ${styles.autoAdvanceHint}`}
+          >
+            {t("autoAdvanceHint")}
+          </p>
         </div>
 
         <div id="quiz-final" className={`${styles.hidden} ${styles.quizFinal}`}>

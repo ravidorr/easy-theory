@@ -1,4 +1,4 @@
-/** Quiz interactivity: option selection, confirmation, instant feedback, progress, final screen. */
+/** Quiz interactivity: one-tap answers, instant feedback, auto-advance, progress, final screen. */
 (function () {
   const t = window.__t || {};
   const tf = window.__tf || function(s, v) { return s.replace(/\{(\w+)\}/g, function(_, k) { return v[k] ?? _; }); };
@@ -10,6 +10,22 @@
   if (total === 0) return;
   // Matches the common upper bound for mobile double-tap recognition.
   const TOUCH_DOUBLE_TAP_SUPPRESSION_MS = 300;
+  // Matches the 900ms reward-float animation so the slide changes right as
+  // the +10 float finishes.
+  const AUTO_ADVANCE_DELAY_MS = 900;
+  const AUTO_ADVANCE_HINT_KEY = "quiz-auto-advance-hint-seen";
+
+  // Auto-advance to the next question after a correct answer: an explicit
+  // cookie choice (More page toggle) wins; otherwise reduced-motion users
+  // keep the manual flow.
+  const autoAdvanceEnabled = (function () {
+    const match = document.cookie.match(/(?:^|;\s*)quiz-auto-advance=([^;]*)/);
+    if (match) return match[1] !== "off";
+    return !(
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    );
+  })();
 
   // Resume state is persisted per user + topic so a reload continues the same
   // run, including an unacknowledged submission. Retry sessions are throwaway
@@ -116,6 +132,7 @@
   const finalScreen = document.getElementById("quiz-final");
   const finalScore = document.getElementById("final-score");
   const footer = document.getElementById("quiz-footer");
+  const autoAdvanceHint = document.getElementById("quiz-auto-advance-hint");
 
   function parseAnsweredIds() {
     try {
@@ -181,6 +198,10 @@
   let actionActivationIsTouch = false;
   let touchAdvanceSuppressed = false;
   let submissionGeneration = 0;
+  let autoAdvanceTimer = null;
+  let autoAdvanceArmed = false;
+  let autoAdvanceElapsed = false;
+  let advanceRequested = false;
 
   function setActionAvailable(available) {
     if (actionBtn) {
@@ -203,6 +224,52 @@
       touchAdvanceSuppressed = false;
       setActionAvailable(actionIsAvailableForPersistenceState());
     }, TOUCH_DOUBLE_TAP_SUPPRESSION_MS);
+  }
+
+  function disarmAutoAdvance() {
+    if (autoAdvanceTimer !== null) {
+      window.clearTimeout(autoAdvanceTimer);
+      autoAdvanceTimer = null;
+    }
+    autoAdvanceArmed = false;
+    autoAdvanceElapsed = false;
+    advanceRequested = false;
+  }
+
+  // Advances only when the countdown elapsed (or the user asked to skip) AND
+  // the submission is persisted, so auto-advance never bypasses the
+  // no-advance-on-unsaved-answers guarantee.
+  function maybeAutoAdvance() {
+    if (!autoAdvanceArmed) return;
+    if (answerPersistence !== "succeeded") return;
+    if (!autoAdvanceElapsed && !advanceRequested) return;
+    handleAdvance();
+  }
+
+  function armAutoAdvance() {
+    autoAdvanceArmed = true;
+    autoAdvanceTimer = window.setTimeout(function () {
+      autoAdvanceTimer = null;
+      autoAdvanceElapsed = true;
+      maybeAutoAdvance();
+    }, AUTO_ADVANCE_DELAY_MS);
+  }
+
+  // The hint that auto-advance can be turned off shows once per browser
+  // session, on the first question only.
+  function maybeShowAutoAdvanceHint() {
+    if (!autoAdvanceHint || !autoAdvanceEnabled) return;
+    try {
+      if (sessionStorage.getItem(AUTO_ADVANCE_HINT_KEY)) return;
+      sessionStorage.setItem(AUTO_ADVANCE_HINT_KEY, "1");
+    } catch {
+      return;
+    }
+    autoAdvanceHint.style.display = "block";
+  }
+
+  function hideAutoAdvanceHint() {
+    if (autoAdvanceHint) autoAdvanceHint.style.display = "none";
   }
 
   function persistResume() {
@@ -340,9 +407,10 @@
     confirmed = false;
     answerPersistence = "idle";
     answerFeedback = "";
+    disarmAutoAdvance();
     if (actionBtn) {
       actionBtn.disabled = true;
-      actionBtn.textContent = t.answerBtn || "צדקתי?";
+      actionBtn.textContent = t.nextBtn || "לשאלה הבאה";
     }
     if (rewardMessage) rewardMessage.textContent = "";
   }
@@ -363,6 +431,8 @@
     option.appendChild(sr);
   }
 
+  // One-tap flow: tapping an option is the answer. Feedback and submission
+  // start immediately; there is no separate confirm step.
   function handleOptionClick(e) {
     if (confirmed) return;
     const btn = e.currentTarget;
@@ -378,7 +448,7 @@
     btn.setAttribute("aria-pressed", "true");
     selectedOption = btn.dataset.option;
 
-    setActionAvailable(true);
+    handleConfirm(slide);
   }
 
   function showAnswerFeedback(slide, awardReward) {
@@ -416,6 +486,8 @@
       const suffix = signNum ? tf(t.rewardSignSuffix || ' (תמרור {number})', { number: signNum }) : "";
       rewardMessage.textContent = (t.rewardWrongPrefix || "בחרת ב־") + badge + suffix + (t.rewardWrongSuffix || " - לא נורא, ננסה שוב בפעם הבאה.");
     }
+
+    return isCorrect;
   }
 
   function submissionErrorMessage(data) {
@@ -428,6 +500,7 @@
 
   function showRetryableSubmissionFailure(message) {
     answerPersistence = "failed";
+    disarmAutoAdvance();
     if (rewardMessage) rewardMessage.textContent = message;
     if (actionBtn) {
       actionBtn.textContent = t.retryAnswerBtn || "לנסות שוב";
@@ -437,6 +510,7 @@
 
   function showPermanentSubmissionFailure(message) {
     answerPersistence = "blocked";
+    disarmAutoAdvance();
     pendingSubmission = null;
     acknowledgedSubmission = null;
     clearResume();
@@ -451,8 +525,14 @@
     if (answerPersistence === "pending") return;
     answerPersistence = "pending";
     if (actionBtn) {
-      actionBtn.textContent = t.savingAnswer || "שומרים...";
-      actionBtn.disabled = true;
+      if (autoAdvanceArmed) {
+        // During the auto-advance countdown the button is a skip hatch.
+        actionBtn.textContent = t.nextBtn || "לשאלה הבאה";
+        setActionAvailable(true);
+      } else {
+        actionBtn.textContent = t.savingAnswer || "שומרים...";
+        actionBtn.disabled = true;
+      }
     }
 
     const questionId = slide.dataset.questionId;
@@ -532,10 +612,16 @@
         medalQueue.push.apply(medalQueue, data.medals_earned);
         showNextMedal();
       }
+      // A medal modal or topic-completed message needs the user's attention;
+      // never auto-advance past it.
+      if ((data.medals_earned && data.medals_earned.length) || data.topic_completed) {
+        disarmAutoAdvance();
+      }
       if (actionBtn) {
         actionBtn.textContent = t.nextBtn || "לשאלה הבאה";
         setActionAvailable(true);
       }
+      maybeAutoAdvance();
     }).catch(function () {
       if (generation !== submissionGeneration) return;
       showRetryableSubmissionFailure(
@@ -547,8 +633,10 @@
   function handleConfirm(slide) {
     confirmed = true;
     lockOptions(slide);
-    showAnswerFeedback(slide, true);
+    const isCorrect = showAnswerFeedback(slide, true);
     answerFeedback = rewardMessage ? rewardMessage.textContent : "";
+    // Wrong answers never auto-advance: the explanation stays until a tap.
+    if (isCorrect && autoAdvanceEnabled) armAutoAdvance();
     submitAnswer(slide);
   }
 
@@ -595,6 +683,8 @@
 
   function handleAdvance() {
     if (answerPersistence !== "succeeded") return;
+    disarmAutoAdvance();
+    hideAutoAdvanceHint();
     acknowledgedSubmission = null;
     currentIndex++;
     if (currentIndex >= total) {
@@ -652,16 +742,17 @@
 
       const slide = slides[currentIndex];
       if (!slide) return;
-      if (!confirmed && selectedOption) {
-        if (isTouchActivation) {
-          suppressTouchActivation();
-        }
-        handleConfirm(slide);
-      } else if (answerPersistence === "failed") {
+      if (answerPersistence === "failed") {
         if (isTouchActivation) {
           suppressTouchActivation();
         }
         submitAnswer(slide);
+      } else if (answerPersistence === "pending" && autoAdvanceArmed) {
+        // Skip requested while the submission is still in flight: advance as
+        // soon as it persists.
+        advanceRequested = true;
+        actionBtn.textContent = t.savingAnswer || "שומרים...";
+        actionBtn.disabled = true;
       } else if (answerPersistence === "succeeded" && event.detail <= 1) {
         handleAdvance();
       } else if (answerPersistence === "blocked") {
@@ -677,5 +768,6 @@
   } else {
     showSlide(currentIndex);
     restoreSubmissionState();
+    maybeShowAutoAdvanceHint();
   }
 })();
