@@ -21,7 +21,12 @@ import {
   completionSummary,
   levelForPoints,
 } from "@/lib/gamification";
-import { computeReadiness, findWeakestTopics, READINESS_MAX_ATTEMPTS } from "@/lib/readiness";
+import {
+  computeReadiness,
+  findStrongestTopics,
+  findWeakestTopics,
+  READINESS_MAX_ATTEMPTS,
+} from "@/lib/readiness";
 import {
   buildGreetingContext,
   dayWindow,
@@ -144,16 +149,6 @@ export default async function HomePage() {
     ]);
     resumePoint = findResumePoint(topicQuestions, answeredIds);
   }
-  const focusTopic = selectFocusTopic(weakTopics, lastStudied?.topic_id ?? null);
-  const personalLines = buildGreetingContext({
-    resume:
-      resumePoint && lastStudied
-        ? { ...resumePoint, topicId: lastStudied.topic_id }
-        : null,
-    yesterday: yesterdayAccuracy,
-    focusTopicId: focusTopic?.topic_id ?? null,
-    now,
-  });
 
   // Overall theory progress across the listed topics: sums the same maps the
   // topic cards use, so no extra queries are needed.
@@ -162,6 +157,24 @@ export default async function HomePage() {
     questionCounts,
     answeredMap
   );
+
+  const focusTopic = selectFocusTopic(weakTopics, lastStudied?.topic_id ?? null);
+  const masteredTopic = findStrongestTopics(topicAccuracy)[0] ?? null;
+  const personalLines = buildGreetingContext({
+    resume:
+      resumePoint && lastStudied
+        ? { ...resumePoint, topicId: lastStudied.topic_id }
+        : null,
+    yesterday: yesterdayAccuracy,
+    focusTopicId: focusTopic?.topic_id ?? null,
+    masteredTopicId: masteredTopic?.topic_id ?? null,
+    remaining: {
+      count: completion.remainingQuestions,
+      percent: completion.percent,
+    },
+    readinessLevel: readiness.level,
+    now,
+  });
 
   const nextMedal = nextMedalTarget(stats.streak_days);
   const daysToNextMedal = nextMedal !== null ? nextMedal - stats.streak_days : null;
@@ -233,6 +246,26 @@ export default async function HomePage() {
                     </span>
                   );
                 }
+                if (line.kind === "examReady") {
+                  return (
+                    <Link
+                      key={line.kind}
+                      href="/exam"
+                      className={styles.personalLineLink}
+                    >
+                      {t("examReadyLine")}
+                    </Link>
+                  );
+                }
+                if (line.kind === "remaining") {
+                  return (
+                    <span key={line.kind} className={styles.personalLine}>
+                      {line.count === 1
+                        ? t("remainingQuestionsLineOne")
+                        : t("remainingQuestionsLine", { count: line.count })}
+                    </span>
+                  );
+                }
                 const topic = topicsById.get(line.topicId);
                 if (!topic) return null;
                 if (line.kind === "resume") {
@@ -251,11 +284,21 @@ export default async function HomePage() {
                     </Link>
                   );
                 }
-                return (
-                  <span key={line.kind} className={styles.personalLine}>
-                    {t("focusTopicLine", { topic: getTopicName(topic) })}
-                  </span>
-                );
+                if (line.kind === "mastered") {
+                  return (
+                    <span key={line.kind} className={styles.personalLine}>
+                      {t("masteredTopicLine", { topic: getTopicName(topic) })}
+                    </span>
+                  );
+                }
+                if (line.kind === "focus") {
+                  return (
+                    <span key={line.kind} className={styles.personalLine}>
+                      {t("focusTopicLine", { topic: getTopicName(topic) })}
+                    </span>
+                  );
+                }
+                return null;
               })}
             </div>
           )}

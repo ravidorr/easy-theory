@@ -190,53 +190,49 @@ describe("selectNextTopic", () => {
 
 describe("buildGreetingContext", () => {
   const now = new Date("2026-07-15T10:00:00Z");
+  const empty = {
+    resume: null,
+    yesterday: null,
+    focusTopicId: null,
+    masteredTopicId: null,
+    remaining: null,
+    readinessLevel: null,
+    now,
+  };
 
   it("returns nothing for a brand-new user", () => {
-    expect(
-      buildGreetingContext({
-        resume: null,
-        yesterday: null,
-        focusTopicId: null,
-        now,
-      })
-    ).toEqual([]);
+    expect(buildGreetingContext(empty)).toEqual([]);
   });
 
   it("hides yesterday's accuracy when there was no activity", () => {
     expect(
-      buildGreetingContext({
-        resume: null,
-        yesterday: { correct: 0, total: 0 },
-        focusTopicId: null,
-        now,
-      })
+      buildGreetingContext({ ...empty, yesterday: { correct: 0, total: 0 } })
     ).toEqual([]);
   });
 
   it("marks yesterday as good exactly at the 80% boundary", () => {
     const [line] = buildGreetingContext({
-      resume: null,
+      ...empty,
       yesterday: { correct: 8, total: 10 },
-      focusTopicId: null,
-      now,
     });
     expect(line).toEqual({ kind: "yesterday", percent: 80, good: true });
 
     const [lowLine] = buildGreetingContext({
-      resume: null,
+      ...empty,
       yesterday: { correct: 7, total: 10 },
-      focusTopicId: null,
-      now,
     });
     expect(lowLine).toEqual({ kind: "yesterday", percent: 70, good: false });
   });
 
   it("puts the resume line first and caps output at two lines", () => {
     const lines = buildGreetingContext({
+      ...empty,
       resume: { topicId: "t1", questionNumber: 142, remaining: 12 },
       yesterday: { correct: 9, total: 10 },
       focusTopicId: "t2",
-      now,
+      masteredTopicId: "t3",
+      remaining: { count: 84, percent: 93 },
+      readinessLevel: "high",
     });
     expect(lines).toHaveLength(2);
     expect(lines[0]).toEqual({
@@ -245,11 +241,14 @@ describe("buildGreetingContext", () => {
       questionNumber: 142,
       minutes: 8,
     });
-    expect(["yesterday", "focus"]).toContain(lines[1].kind);
+    expect(["examReady", "yesterday", "focus", "mastered", "remaining"]).toContain(
+      lines[1].kind
+    );
   });
 
   it("rotates the second slot between consecutive Jerusalem days", () => {
     const input = {
+      ...empty,
       resume: { topicId: "t1", questionNumber: 5, remaining: 3 },
       yesterday: { correct: 9, total: 10 },
       focusTopicId: "t2",
@@ -265,22 +264,81 @@ describe("buildGreetingContext", () => {
     expect(day1[1].kind).not.toBe(day2[1].kind);
   });
 
+  it("cycles through the full coach pool across consecutive days", () => {
+    const input = {
+      ...empty,
+      yesterday: { correct: 9, total: 10 },
+      focusTopicId: "t2",
+      masteredTopicId: "t3",
+      remaining: { count: 84, percent: 93 },
+      readinessLevel: "high" as const,
+    };
+    const kinds = new Set<string>();
+    for (let day = 0; day < 5; day++) {
+      const lines = buildGreetingContext({
+        ...input,
+        now: new Date(Date.UTC(2026, 6, 15 + day, 10)),
+      });
+      expect(lines).toHaveLength(2);
+      lines.forEach((line) => kinds.add(line.kind));
+    }
+    expect([...kinds].sort()).toEqual([
+      "examReady",
+      "focus",
+      "mastered",
+      "remaining",
+      "yesterday",
+    ]);
+  });
+
   it("drops a focus line that points at the resume topic", () => {
     const lines = buildGreetingContext({
+      ...empty,
       resume: { topicId: "t1", questionNumber: 5, remaining: 3 },
-      yesterday: null,
       focusTopicId: "t1",
-      now,
     });
     expect(lines.map((line) => line.kind)).toEqual(["resume"]);
   });
 
+  it("drops a mastered line that points at the resume topic", () => {
+    const lines = buildGreetingContext({
+      ...empty,
+      resume: { topicId: "t1", questionNumber: 5, remaining: 3 },
+      masteredTopicId: "t1",
+    });
+    expect(lines.map((line) => line.kind)).toEqual(["resume"]);
+  });
+
+  it("shows the mastered line for a topic other than the resume one", () => {
+    const lines = buildGreetingContext({ ...empty, masteredTopicId: "t3" });
+    expect(lines).toEqual([{ kind: "mastered", topicId: "t3" }]);
+  });
+
+  it("shows the exam-ready line only at high readiness", () => {
+    expect(buildGreetingContext({ ...empty, readinessLevel: "high" })).toEqual([
+      { kind: "examReady" },
+    ]);
+    expect(buildGreetingContext({ ...empty, readinessLevel: "medium" })).toEqual([]);
+    expect(buildGreetingContext({ ...empty, readinessLevel: "low" })).toEqual([]);
+  });
+
+  it("shows the remaining line only past the halfway mark and above zero", () => {
+    expect(
+      buildGreetingContext({ ...empty, remaining: { count: 84, percent: 50 } })
+    ).toEqual([{ kind: "remaining", count: 84 }]);
+    expect(
+      buildGreetingContext({ ...empty, remaining: { count: 84, percent: 49 } })
+    ).toEqual([]);
+    expect(
+      buildGreetingContext({ ...empty, remaining: { count: 0, percent: 100 } })
+    ).toEqual([]);
+  });
+
   it("shows both rotating lines when there is nothing to resume", () => {
     const lines = buildGreetingContext({
-      resume: null,
+      ...empty,
       yesterday: { correct: 5, total: 10 },
       focusTopicId: "t2",
-      now,
     });
     expect(lines.map((line) => line.kind).sort()).toEqual([
       "focus",

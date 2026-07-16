@@ -75,10 +75,15 @@ export const WEAK_TOPIC_MIN_ANSWERS = 5;
 /** At or above this accuracy a topic counts as mastered, not weak. */
 export const WEAK_TOPIC_MAX_ACCURACY = 0.85;
 
-export function findWeakestTopics(
+/** Shared core of the weak/strong pickers: topics with enough answers,
+ *  filtered by the mastery bar and ranked by accuracy in the given
+ *  direction (ties: more answers first, then topic_id). */
+function rankTopicsByAccuracy(
   rows: TopicAccuracy[],
-  limit = 3
+  limit: number,
+  mastered: boolean
 ): WeakTopic[] {
+  const direction = mastered ? -1 : 1;
   return rows
     .filter((row) => row.total >= WEAK_TOPIC_MIN_ANSWERS)
     .map((row) => ({
@@ -86,12 +91,28 @@ export function findWeakestTopics(
       accuracy: row.correct / row.total,
       total: row.total,
     }))
-    .filter((row) => row.accuracy < WEAK_TOPIC_MAX_ACCURACY)
+    .filter((row) => (row.accuracy >= WEAK_TOPIC_MAX_ACCURACY) === mastered)
     .sort(
       (a, b) =>
-        a.accuracy - b.accuracy ||
+        direction * (a.accuracy - b.accuracy) ||
         b.total - a.total ||
         a.topic_id.localeCompare(b.topic_id)
     )
     .slice(0, limit);
+}
+
+export function findWeakestTopics(
+  rows: TopicAccuracy[],
+  limit = 3
+): WeakTopic[] {
+  return rankTopicsByAccuracy(rows, limit, false);
+}
+
+/** Exact inverse of findWeakestTopics: topics with enough answers whose
+ *  accuracy clears the mastery bar, strongest first. */
+export function findStrongestTopics(
+  rows: TopicAccuracy[],
+  limit = 3
+): WeakTopic[] {
+  return rankTopicsByAccuracy(rows, limit, true);
 }

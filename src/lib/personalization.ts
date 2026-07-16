@@ -1,5 +1,5 @@
 import type { QuestionRef, TopicProgress, WindowAccuracy } from "./db";
-import type { WeakTopic } from "./readiness";
+import type { ReadinessLevel, WeakTopic } from "./readiness";
 
 /** Matches the streak day-boundary logic in the submit_quiz_answer RPC. */
 export const APP_TIME_ZONE = "Asia/Jerusalem";
@@ -160,20 +160,32 @@ export function selectFocusTopic(
 export type PersonalizedLine =
   | { kind: "resume"; topicId: string; questionNumber: number; minutes: number }
   | { kind: "yesterday"; percent: number; good: boolean }
-  | { kind: "focus"; topicId: string };
+  | { kind: "focus"; topicId: string }
+  | { kind: "mastered"; topicId: string }
+  | { kind: "remaining"; count: number }
+  | { kind: "examReady" };
 
 const MAX_GREETING_LINES = 2;
+
+/** Below this overall coverage, "only N questions left" reads as a mountain,
+ *  not a finish line, so the line stays hidden. */
+export const REMAINING_LINE_MIN_PERCENT = 50;
 
 /**
  * Chooses up to two personalized greeting lines. The resume line always leads
  * when available; the remaining slot rotates daily (by APP_TIME_ZONE day
- * index) between yesterday's accuracy and the focus-topic suggestion, so the
- * homepage reads differently between visits without being random.
+ * index) through the coach lines that apply - exam readiness, yesterday's
+ * accuracy, the focus-topic suggestion, a mastered-topic celebration, and the
+ * questions-left countdown - so the homepage reads differently between visits
+ * without being random.
  */
 export function buildGreetingContext(input: {
   resume: (ResumePoint & { topicId: string }) | null;
   yesterday: WindowAccuracy | null;
   focusTopicId: string | null;
+  masteredTopicId: string | null;
+  remaining: { count: number; percent: number } | null;
+  readinessLevel: ReadinessLevel | null;
   now: Date;
 }): PersonalizedLine[] {
   const lines: PersonalizedLine[] = [];
@@ -188,6 +200,9 @@ export function buildGreetingContext(input: {
   }
 
   const rotating: PersonalizedLine[] = [];
+  if (input.readinessLevel === "high") {
+    rotating.push({ kind: "examReady" });
+  }
   if (input.yesterday && input.yesterday.total > 0) {
     const accuracy = input.yesterday.correct / input.yesterday.total;
     rotating.push({
@@ -196,10 +211,23 @@ export function buildGreetingContext(input: {
       good: accuracy >= GOOD_ACCURACY_THRESHOLD,
     });
   }
-  // A focus line pointing at the topic the resume line already links to would
-  // just repeat it.
-  if (input.focusTopicId && input.focusTopicId !== input.resume?.topicId) {
-    rotating.push({ kind: "focus", topicId: input.focusTopicId });
+  // A focus or mastered line pointing at the topic the resume line already
+  // links to would just repeat it.
+  const topicLines = [
+    { kind: "focus", topicId: input.focusTopicId },
+    { kind: "mastered", topicId: input.masteredTopicId },
+  ] as const;
+  for (const { kind, topicId } of topicLines) {
+    if (topicId && topicId !== input.resume?.topicId) {
+      rotating.push({ kind, topicId });
+    }
+  }
+  if (
+    input.remaining &&
+    input.remaining.count > 0 &&
+    input.remaining.percent >= REMAINING_LINE_MIN_PERCENT
+  ) {
+    rotating.push({ kind: "remaining", count: input.remaining.count });
   }
 
   // Rotate by the zone's wall-date day number so the greeting reads

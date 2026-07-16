@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.153] — 2026-07-17
+
+### Changed
+- Coach-style messaging: the personalized greeting rotation grows from two rotating line kinds to five, so the homepage talks like a coach tracking your path to the exam instead of a theory website. New lines: a mastered-topic celebration ("{topic} כבר בשליטה מלאה. כל הכבוד!" for topics at ≥85% accuracy over ≥5 answers, picked by the new `findStrongestTopics` — the exact inverse of `findWeakestTopics`, both now sharing one `rankTopicsByAccuracy` core in `readiness.ts`), a remaining-questions countdown ("רק עוד {count} שאלות וכיסינו את כל החומר. כמעט שם!", singular variant included, shown only from 50% overall coverage via `REMAINING_LINE_MIN_PERCENT` so it reads as a finish line rather than a mountain), and an exam-ready verdict at high mock-exam readiness that links straight to the simulation. Tone pass on existing copy: the topics-section remaining count now reads "עוד {count} שאלות וסיימנו את כל החומר", the weak-topics header becomes "נושאים שנחזק יחד", and the high-readiness chip "מוכנות גבוהה - ממשיכים ככה!" (deliberately not repeating the greeting's "זה הזמן" call to action). The greeting render is now exhaustive per line kind (unknown kinds render nothing instead of falling through to focus copy), and the focus/mastered lines share one resume-topic dedup rule. The TODO's "improved X% this week" claim is intentionally excluded: quiz responses are upserted one row per question, so no honest week-over-week trend exists until the daily-goal submissions-source item lands. All new/changed keys in he + ar, gender-agnostic forms. (TODO: coach-style messaging)
+
+---
+
 ## [0.3.152] — 2026-07-17
 
 ### Added

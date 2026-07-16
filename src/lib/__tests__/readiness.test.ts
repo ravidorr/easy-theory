@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   computeReadiness,
+  findStrongestTopics,
   findWeakestTopics,
   READINESS_MAX_ATTEMPTS,
   WEAK_TOPIC_MIN_ANSWERS,
@@ -17,6 +18,10 @@ function attempt(score: number, created_at: string): ExamAttempt {
     duration_seconds: 1800,
     created_at,
   };
+}
+
+function row(topic_id: string, correct: number, total: number): TopicAccuracy {
+  return { topic_id, correct, total };
 }
 
 describe("computeReadiness", () => {
@@ -108,10 +113,6 @@ describe("computeReadiness", () => {
 });
 
 describe("findWeakestTopics", () => {
-  function row(topic_id: string, correct: number, total: number): TopicAccuracy {
-    return { topic_id, correct, total };
-  }
-
   it("returns [] for empty input", () => {
     expect(findWeakestTopics([])).toEqual([]);
   });
@@ -152,5 +153,68 @@ describe("findWeakestTopics", () => {
     ];
     expect(findWeakestTopics(rows)).toHaveLength(3);
     expect(findWeakestTopics(rows, 2).map((r) => r.topic_id)).toEqual(["t1", "t2"]);
+  });
+});
+
+describe("findStrongestTopics", () => {
+  it("returns [] for empty input", () => {
+    expect(findStrongestTopics([])).toEqual([]);
+  });
+
+  it(`ignores topics with fewer than ${WEAK_TOPIC_MIN_ANSWERS} answers`, () => {
+    expect(findStrongestTopics([row("t1", 4, 4)])).toEqual([]);
+  });
+
+  it("includes a topic exactly at the 0.85 mastery boundary", () => {
+    expect(findStrongestTopics([row("t1", 17, 20)])).toEqual([
+      { topic_id: "t1", accuracy: 0.85, total: 20 },
+    ]);
+  });
+
+  it("ignores weak topics (accuracy below 0.85)", () => {
+    expect(findStrongestTopics([row("t1", 16, 20), row("t2", 5, 10)])).toEqual([]);
+  });
+
+  it("sorts by accuracy descending", () => {
+    const result = findStrongestTopics([
+      row("t1", 9, 10),
+      row("t2", 10, 10),
+      row("t3", 17, 20),
+    ]);
+    expect(result.map((r) => r.topic_id)).toEqual(["t2", "t1", "t3"]);
+    expect(result[0]).toEqual({ topic_id: "t2", accuracy: 1, total: 10 });
+  });
+
+  it("breaks accuracy ties by more answers first, then topic_id", () => {
+    const result = findStrongestTopics([
+      row("tb", 9, 10),
+      row("ta", 9, 10),
+      row("tc", 18, 20),
+    ]);
+    expect(result.map((r) => r.topic_id)).toEqual(["tc", "ta", "tb"]);
+  });
+
+  it("respects the limit", () => {
+    const rows = [
+      row("t1", 10, 10),
+      row("t2", 19, 20),
+      row("t3", 18, 20),
+      row("t4", 17, 20),
+    ];
+    expect(findStrongestTopics(rows)).toHaveLength(3);
+    expect(findStrongestTopics(rows, 2).map((r) => r.topic_id)).toEqual(["t1", "t2"]);
+  });
+
+  it("is disjoint from findWeakestTopics on the same rows", () => {
+    const rows = [
+      row("t1", 17, 20),
+      row("t2", 16, 20),
+      row("t3", 3, 4),
+      row("t4", 20, 20),
+    ];
+    const strong = findStrongestTopics(rows).map((r) => r.topic_id);
+    const weak = findWeakestTopics(rows).map((r) => r.topic_id);
+    expect(strong.filter((id) => weak.includes(id))).toEqual([]);
+    expect([...strong, ...weak].sort()).toEqual(["t1", "t2", "t4"]);
   });
 });
