@@ -82,7 +82,16 @@ export default async function HomePage() {
     topics.find((t) => !progressMap[t.id] || progressMap[t.id].status === "not_started") ??
     null;
 
-  const completedCount = progressRows.filter((p) => p.status === "completed").length;
+  // Overall theory progress across the listed topics: sums the same maps the
+  // topic cards use, so no extra queries are needed.
+  const totalQuestions = topics.reduce((sum, topic) => sum + (questionCounts[topic.id] ?? 0), 0);
+  const answeredQuestions = topics.reduce((sum, topic) => sum + (answeredMap[topic.id] ?? 0), 0);
+  // Floor, not round: the bar must not show 100% while questions remain.
+  const overallPct =
+    totalQuestions > 0
+      ? Math.min(100, Math.floor((answeredQuestions / totalQuestions) * 100))
+      : 0;
+  const remainingQuestions = Math.max(totalQuestions - answeredQuestions, 0);
 
   const nextMedal = nextMedalTarget(stats.streak_days);
   const daysToNextMedal = nextMedal !== null ? nextMedal - stats.streak_days : null;
@@ -281,8 +290,29 @@ export default async function HomePage() {
           <div className={styles.topicsHeader}>
             <h2>{t("topicsHeader")}</h2>
             <span className={styles.topicsCount}>
-              {completedCount} / {topics.length}
+              {t("topicsPercent", { percent: overallPct })}
             </span>
+          </div>
+
+          <div className={styles.overallProgress}>
+            <div className={styles.progressTrack}>
+              <div className={styles.progressFill} style={{ width: `${overallPct}%` }} />
+            </div>
+            <div className={styles.overallMeta}>
+              <span>
+                {t("topicsAnsweredOverall", {
+                  answered: answeredQuestions,
+                  total: totalQuestions,
+                })}
+              </span>
+              <span>
+                {remainingQuestions === 0
+                  ? t("topicsAllAnswered")
+                  : remainingQuestions === 1
+                  ? t("topicsRemainingOne")
+                  : t("topicsRemaining", { count: remainingQuestions })}
+              </span>
+            </div>
           </div>
 
           {topics.map((topic) => {
@@ -315,7 +345,11 @@ export default async function HomePage() {
                         {done
                           ? t("topicCompleted")
                           : answered > 0
-                          ? t("topicAnsweredCount", { answered, total: totalQ })
+                          ? t("topicAnsweredCountPct", {
+                              answered,
+                              total: totalQ,
+                              percent: coveragePct,
+                            })
                           : t("topicNotStarted")}
                       </span>
                     </div>

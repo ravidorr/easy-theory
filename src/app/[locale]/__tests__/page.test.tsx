@@ -165,13 +165,93 @@ describe("HomePage", () => {
     expect(screen.queryByText("todayBadge")).not.toBeInTheDocument();
   });
 
-  it("shows correct completed count badge", async () => {
-    mockGetProgress.mockResolvedValue([
-      { topic_id: "t1", status: "completed", best_score: 100 },
-    ] as never);
+  it("shows zeroed overall progress when nothing was answered", async () => {
+    vi.mocked(getTranslations).mockResolvedValue(((
+      key: string,
+      values?: Record<string, unknown>
+    ) => (values ? `${key}|${JSON.stringify(values)}` : key)) as never);
     const jsx = await HomePage();
     render(jsx);
-    expect(screen.getByText(/1 \/ 2/)).toBeInTheDocument();
+    expect(screen.getByText('topicsPercent|{"percent":0}')).toBeInTheDocument();
+    expect(
+      screen.getByText('topicsAnsweredOverall|{"answered":0,"total":30}')
+    ).toBeInTheDocument();
+    expect(screen.getByText('topicsRemaining|{"count":30}')).toBeInTheDocument();
+  });
+
+  it("shows the overall answered count, percent, and remaining questions", async () => {
+    vi.mocked(getTranslations).mockResolvedValue(((
+      key: string,
+      values?: Record<string, unknown>
+    ) => (values ? `${key}|${JSON.stringify(values)}` : key)) as never);
+    mockGetTopicAccuracy.mockResolvedValue([
+      { topic_id: "t1", correct: 3, total: 5 },
+      { topic_id: "t2", correct: 2, total: 4 },
+    ]);
+    const jsx = await HomePage();
+    render(jsx);
+    // 9 answered of 30 → 30%, 21 remaining.
+    expect(screen.getByText('topicsPercent|{"percent":30}')).toBeInTheDocument();
+    expect(
+      screen.getByText('topicsAnsweredOverall|{"answered":9,"total":30}')
+    ).toBeInTheDocument();
+    expect(screen.getByText('topicsRemaining|{"count":21}')).toBeInTheDocument();
+    expect(screen.queryByText(/topicsAllAnswered/)).not.toBeInTheDocument();
+  });
+
+  it("swaps the remaining count for a completion message at 100%", async () => {
+    mockGetTopicAccuracy.mockResolvedValue([
+      { topic_id: "t1", correct: 18, total: 20 },
+      { topic_id: "t2", correct: 9, total: 10 },
+    ]);
+    const jsx = await HomePage();
+    render(jsx);
+    expect(screen.getByText("topicsAllAnswered")).toBeInTheDocument();
+    expect(screen.queryByText("topicsRemaining")).not.toBeInTheDocument();
+  });
+
+  it("drives the overall progress bar width from answered/total questions", async () => {
+    mockGetTopicAccuracy.mockResolvedValue([
+      { topic_id: "t1", correct: 3, total: 5 },
+    ]);
+    const jsx = await HomePage();
+    const { container } = render(jsx);
+    // 5 answered of 30 overall → floored to 16%; the t1 card bar is 25% (5 of 20).
+    const widths = [...container.querySelectorAll("div")].map((d) => d.style.width);
+    expect(widths).toContain("16%");
+    expect(widths).toContain("25%");
+  });
+
+  it("floors the overall percent and uses the singular string for one remaining question", async () => {
+    vi.mocked(getTranslations).mockResolvedValue(((
+      key: string,
+      values?: Record<string, unknown>
+    ) => (values ? `${key}|${JSON.stringify(values)}` : key)) as never);
+    mockGetTopicAccuracy.mockResolvedValue([
+      { topic_id: "t1", correct: 18, total: 20 },
+      { topic_id: "t2", correct: 8, total: 9 },
+    ]);
+    const jsx = await HomePage();
+    render(jsx);
+    // 29 of 30 → 96.67%, floored to 96 so the bar never reads 100% early.
+    expect(screen.getByText('topicsPercent|{"percent":96}')).toBeInTheDocument();
+    expect(screen.getByText("topicsRemainingOne")).toBeInTheDocument();
+    expect(screen.queryByText(/topicsRemaining\|/)).not.toBeInTheDocument();
+    expect(screen.queryByText("topicsAllAnswered")).not.toBeInTheDocument();
+  });
+
+  it("ignores question counts for topics that are not listed", async () => {
+    vi.mocked(getTranslations).mockResolvedValue(((
+      key: string,
+      values?: Record<string, unknown>
+    ) => (values ? `${key}|${JSON.stringify(values)}` : key)) as never);
+    mockGetTopics.mockResolvedValue([TOPIC_A] as never);
+    const jsx = await HomePage();
+    render(jsx);
+    // Only t1 (20 questions) is listed; t2's 10 must not inflate the total.
+    expect(
+      screen.getByText('topicsAnsweredOverall|{"answered":0,"total":20}')
+    ).toBeInTheDocument();
   });
 
   it("calculates step 1 when nothing was answered", async () => {
@@ -261,14 +341,20 @@ describe("HomePage", () => {
     expect(screen.getByText("לימוד תמרורים")).toBeInTheDocument();
   });
 
-  it("shows the answered-count badge once questions were answered", async () => {
+  it("shows the answered-count badge with percent once questions were answered", async () => {
+    vi.mocked(getTranslations).mockResolvedValue(((
+      key: string,
+      values?: Record<string, unknown>
+    ) => (values ? `${key}|${JSON.stringify(values)}` : key)) as never);
     mockGetProgress.mockResolvedValue([
       { topic_id: "t1", status: "in_progress", best_score: 50 },
     ] as never);
     mockGetTopicAccuracy.mockResolvedValue([{ topic_id: "t1", correct: 4, total: 5 }]);
     const jsx = await HomePage();
     render(jsx);
-    expect(screen.getByText("topicAnsweredCount")).toBeInTheDocument();
+    expect(
+      screen.getByText('topicAnsweredCountPct|{"answered":5,"total":20,"percent":25}')
+    ).toBeInTheDocument();
   });
 
   it("keeps topicNotStarted when in_progress but nothing was answered yet", async () => {
@@ -278,7 +364,7 @@ describe("HomePage", () => {
     const jsx = await HomePage();
     render(jsx);
     expect(screen.getAllByText("topicNotStarted")).toHaveLength(2);
-    expect(screen.queryByText("topicAnsweredCount")).not.toBeInTheDocument();
+    expect(screen.queryByText("topicAnsweredCountPct")).not.toBeInTheDocument();
   });
 
   it("uses the answered/total coverage for the in-progress bar width", async () => {
