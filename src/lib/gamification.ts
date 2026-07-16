@@ -67,17 +67,22 @@ export function completionSummary(
     totalQuestions += questionCounts[id] ?? 0;
     answeredQuestions += answeredCounts[id] ?? 0;
   }
-  // Floor, not round: the bar must not show 100% while questions remain.
-  const percent =
-    totalQuestions > 0
-      ? Math.min(100, Math.floor((answeredQuestions / totalQuestions) * 100))
-      : 0;
+  const percent = coveragePercent(answeredQuestions, totalQuestions);
   return {
     totalQuestions,
     answeredQuestions,
     remainingQuestions: Math.max(totalQuestions - answeredQuestions, 0),
     percent,
   };
+}
+
+/**
+ * Share of answered questions as a whole percent. Floor, not round: a bar or
+ * label must not show 100% while questions remain. Shared by the overall
+ * completion summary and the per-topic cards so they can never disagree.
+ */
+export function coveragePercent(answered: number, total: number): number {
+  return total > 0 ? Math.min(100, Math.floor((answered / total) * 100)) : 0;
 }
 
 /**

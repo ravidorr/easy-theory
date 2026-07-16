@@ -329,6 +329,40 @@
   line-height: var(--line-body);
 }
 
+.topicMetaRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.topicChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--type-caption-size);
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+  padding: 2px 8px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+}
+
+.topicChipEasy {
+  background: var(--success-soft);
+  color: var(--success-text);
+}
+
+.topicChipMedium {
+  background: var(--gold-soft);
+  color: var(--gold-text);
+}
+
+.topicChipHard {
+  background: var(--danger-soft);
+  color: var(--danger-text);
+}
+
 .noUnderline {
   text-decoration: none;
 }

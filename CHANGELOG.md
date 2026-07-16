@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.152] — 2026-07-17
+
+### Added
+- More informative topic cards: every homepage topic card gains a meta row of small pill chips between the description and the progress bar — a color-coded difficulty chip (easy/medium/hard from a code-side editorial map in the new `src/lib/topic-card.ts`; a seed-driven test guarantees every slug in `seeds/topics.sql` has an entry), a remaining-time chip (timer icon, minutes under an hour and rounded hours from there, at the shared `PRACTICE_QUESTIONS_PER_MINUTE` pace), and a remaining-points chip (star icon, `remaining questions × POINTS_PER_CORRECT`; the Arabic string uses an ICU plural so 3-10 counts read "نقاط"). Completed topics hide the time/points chips (nothing left to earn) and upgrade their status to "✓ הושלם · {percent}%" with the best score. All card math moved into a pure, unit-tested `buildTopicCardMeta` helper, and the per-topic coverage percent now uses the same floor-not-round rule as the overall summary via a shared `coveragePercent` helper in `gamification.ts` — a card can no longer read 100% while questions remain. New `Home` keys (topicCompletedScore, topicDifficulty*, topicDuration*, topicPointsRemaining) in he + ar. (TODO: more informative topic cards)
+
+---
+
 ## [0.3.151] — 2026-07-17
 
 ### Added

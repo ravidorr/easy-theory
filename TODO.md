@@ -1,6 +1,5 @@
 # TODO
 
-- **More informative topic cards.** Every card currently has the identical image/title/status/description layout. Add difficulty, estimated duration, per-topic progress, XP reward, and completion percent so each card is informative at a glance.
 - **Coach-style messaging.** Reframe copy so the app feels like a coach helping you pass, not a theory website: "You've mastered warning signs", "You're struggling with right-of-way", "Only 84 questions left", "You've improved 12% this week", "You're exam-ready".
 - **Upgrade the daily mission card.** Lean into the Duolingo feel: progress ring, XP reward, estimated time, and a completion animation.
 - **Stronger streak/medal motivation copy.** "3 more days to the next medal" is emotionally weak. Create urgency: "You're on fire. Only 3 days until Silver. Don't lose your streak."

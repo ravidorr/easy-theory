@@ -29,11 +29,18 @@ import {
   pickLastStudiedInProgressTopic,
   selectFocusTopic,
 } from "@/lib/personalization";
+import { buildTopicCardMeta, type TopicDifficulty } from "@/lib/topic-card";
 import { TabBar } from "@/components/TabBar";
 import { Icon } from "@/components/Icon";
 import { getTranslations, getLocale } from "next-intl/server";
 import { localizedRecordField } from "@/lib/content-locale";
 import styles from "./page.module.css";
+
+const DIFFICULTY_CHIP: Record<TopicDifficulty, { labelKey: string; className: string }> = {
+  easy: { labelKey: "topicDifficultyEasy", className: "topicChipEasy" },
+  medium: { labelKey: "topicDifficultyMedium", className: "topicChipMedium" },
+  hard: { labelKey: "topicDifficultyHard", className: "topicChipHard" },
+};
 
 function PathProgress({ total = 5, current = 1 }: { total?: number; current?: number }) {
   const items = [];
@@ -486,14 +493,12 @@ export default async function HomePage() {
           </div>
 
           {topics.map((topic) => {
-            const prog = progressMap[topic.id];
-            const done = prog?.status === "completed";
-            const answered = answeredMap[topic.id] ?? 0;
-            const totalQ = questionCounts[topic.id] ?? 0;
-            const coveragePct = totalQ > 0 ? Math.round((answered / totalQ) * 100) : 0;
-            // Completed topics keep showing the quiz score; in-progress ones
-            // show coverage so the card moves with every answered question.
-            const pct = done ? prog?.best_score ?? 0 : coveragePct;
+            const meta = buildTopicCardMeta({
+              slug: topic.slug,
+              totalQuestions: questionCounts[topic.id] ?? 0,
+              answeredQuestions: answeredMap[topic.id] ?? 0,
+              progress: progressMap[topic.id],
+            });
             const localizedTopicName = getTopicName(topic);
             const localizedTopicDesc = getTopicDescription(topic);
             return (
@@ -511,14 +516,16 @@ export default async function HomePage() {
                   <div className={styles.topicBody}>
                     <div className={styles.topicTitleRow}>
                       <span className={styles.topicName}>{localizedTopicName}</span>
-                      <span className={`${styles.topicStatus} ${done ? styles.topicStatusDone : ""}`}>
-                        {done
-                          ? t("topicCompleted")
-                          : answered > 0
+                      <span className={`${styles.topicStatus} ${meta.done ? styles.topicStatusDone : ""}`}>
+                        {meta.done
+                          ? meta.bestScore != null
+                            ? t("topicCompletedScore", { percent: meta.bestScore })
+                            : t("topicCompleted")
+                          : meta.answered > 0
                           ? t("topicAnsweredCountPct", {
-                              answered,
-                              total: totalQ,
-                              percent: coveragePct,
+                              answered: meta.answered,
+                              total: meta.total,
+                              percent: meta.coveragePct,
                             })
                           : t("topicNotStarted")}
                       </span>
@@ -526,10 +533,35 @@ export default async function HomePage() {
                     {localizedTopicDesc && (
                       <span className={styles.topicDesc}>{localizedTopicDesc}</span>
                     )}
+                    {(meta.difficulty || meta.remainingPoints > 0) && (
+                      <div className={styles.topicMetaRow}>
+                        {meta.difficulty && (
+                          <span
+                            className={`${styles.topicChip} ${styles[DIFFICULTY_CHIP[meta.difficulty].className]}`}
+                          >
+                            {t(DIFFICULTY_CHIP[meta.difficulty].labelKey)}
+                          </span>
+                        )}
+                        {meta.duration && (
+                          <span className={styles.topicChip}>
+                            <Icon name="timer" size={12} />
+                            {meta.duration.unit === "hours"
+                              ? t("topicDurationHours", { hours: meta.duration.value })
+                              : t("topicDurationMinutes", { minutes: meta.duration.value })}
+                          </span>
+                        )}
+                        {meta.remainingPoints > 0 && (
+                          <span className={styles.topicChip}>
+                            <Icon name="star" size={12} />
+                            {t("topicPointsRemaining", { points: meta.remainingPoints })}
+                          </span>
+                        )}
+                      </div>
+                    )}
                     <div className={styles.progressTrack}>
                       <div
-                        className={`${styles.progressFill} ${done ? styles.progressFillDone : ""}`}
-                        style={{ width: `${pct}%` }}
+                        className={`${styles.progressFill} ${meta.done ? styles.progressFillDone : ""}`}
+                        style={{ width: `${meta.barPct}%` }}
                       />
                     </div>
                   </div>
