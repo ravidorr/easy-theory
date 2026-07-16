@@ -6,6 +6,7 @@ All notable changes to ClearRoad (דרך ברורה) are documented here.
 
 ### Added
 - TODO.md now holds a prioritized action list distilled from an external UX review (quiz flow speed, richer progress visualization, personalized homepage, gamification, microinteractions, and polish items)
+- TODO.md: findings from an exploratory app session (2026-07-16): replace native JavaScript dialogs with an in-app modal component, plus nine bugs covering the home mission dead-end, Hebrew feedback on the Arabic locale, a missing question image, the unpaginated mistakes review, non-tiered exam result copy, hardcoded emoji, review-mode leftover chrome, the schedule save redirect, and nested interactive elements on the exam intro
 - Topic quiz skip-answered on fresh sessions: server-known answered question IDs are passed to `quiz.js`, which starts at the first unanswered slide (global counter matches dashboard progress); same-browser reload still resumes via `localStorage`; all-answered topics show the final screen with home + review links (fixes #117)
 
 ### Changed
