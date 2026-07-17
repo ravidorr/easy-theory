@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.160] — 2026-07-17
+
+### Changed
+- Completed topics on the homepage now get a distinct card treatment instead of only a text change. The topic card carries a `data-complete` attribute when `topic_progress.status` is `completed` (the same idiom the daily-mission card already uses), and all completed styling hangs off that one attribute in `page.module.css`: a `--success` border on the card, a `--success-soft` tint behind the topic icon, the status label upgraded from plain green text to a success pill (`--success-soft`/`--success-text`, pill radius — the difficulty-chip recipe), and the progress bar's green fill, which previously came from a separate `progressFillDone` ternary in the JSX. The `✓` glyph baked into the `topicCompleted`/`topicCompletedScore` strings in both locales was replaced by a rendered `<Icon name="check" />` inside the pill — decorative (`aria-hidden`), with the localized "הושלם"/"مكتمل" text still carrying the meaning, and one less literal glyph in the translation JSONs. The now-redundant `topicStatusDone` class was removed, `progressFillDone` stays for the daily-goal tile which still uses it, and the weak-topics cards are untouched (a green "completed" treatment would undercut that section's purpose; routing completed-but-weak topics is a separate TODO). Review hardening: the pre-existing mission-card tests asserted on a bare `[data-complete]` selector that would now also match completed topic cards, so they assert on the mission card element directly; new tests pin the attribute plus check icon on a completed card and their absence on an in-progress one. (TODO: distinct visual treatment for completed topics)
+
+---
+
 ## [0.3.159] — 2026-07-17
 
 ### Changed
