@@ -55,8 +55,8 @@ export default async function ExamPage() {
         </ul>
       </div>
 
-      <Link href="/exam/run" className={styles.startLink}>
-        <button className={`btn-primary ${styles.startBtn}`}>{t("startBtn")}</button>
+      <Link href="/exam/run" className="btn-primary">
+        {t("startBtn")}
       </Link>
 
       <div className={styles.historyCard}>

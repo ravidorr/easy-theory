@@ -72,15 +72,6 @@
   line-height: var(--line-body);
 }
 
-.startLink {
-  text-decoration: none;
-  display: block;
-}
-
-.startBtn {
-  width: 100%;
-}
-
 .historyEmpty {
   margin: 0;
   font-size: var(--type-body-size);
