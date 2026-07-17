@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { GET } from "../route";
 import { createAdminClient } from "@/lib/supabase";
 import { getUsersScheduledForDay, getPushSubscriptionsForUsers } from "@/lib/db";
+import { reportError } from "@/lib/monitoring";
 import heMessages from "../../../../../../messages/he.json";
 import arMessages from "../../../../../../messages/ar.json";
 
@@ -14,6 +15,7 @@ vi.mock("@/lib/db", () => ({
   getUsersScheduledForDay: vi.fn(),
   getPushSubscriptionsForUsers: vi.fn(),
 }));
+vi.mock("@/lib/monitoring", () => ({ reportError: vi.fn() }));
 vi.mock("web-push", () => ({
   default: {
     setVapidDetails: vi.fn(),
@@ -172,10 +174,12 @@ describe("GET /api/cron/notify", () => {
     expect(body).toEqual({ sent: 1 });
   });
 
-  it("deletes expired push subscription and does not count as sent", async () => {
+  it("deletes expired push subscription (410) and does not count as sent", async () => {
     mockGetSchedules.mockResolvedValue([SCHEDULE]);
     mockGetPushSubs.mockResolvedValue([PUSH_SUB]);
-    mockSendNotification.mockRejectedValueOnce(new Error("410 Gone"));
+    mockSendNotification.mockRejectedValueOnce(
+      Object.assign(new Error("410 Gone"), { statusCode: 410 })
+    );
 
     const admin = makeAdminClient();
     mockCreateAdminClient.mockReturnValue(admin as never);
@@ -184,6 +188,48 @@ describe("GET /api/cron/notify", () => {
     const body = await res.json();
 
     expect(admin.from).toHaveBeenCalledWith("user_push_subscriptions");
+    expect(reportError).not.toHaveBeenCalled();
+    expect(body).toEqual({ sent: 0 });
+  });
+
+  it("deletes a gone push subscription (404) as well", async () => {
+    mockGetSchedules.mockResolvedValue([SCHEDULE]);
+    mockGetPushSubs.mockResolvedValue([PUSH_SUB]);
+    mockSendNotification.mockRejectedValueOnce(
+      Object.assign(new Error("404 Not Found"), { statusCode: 404 })
+    );
+
+    const admin = makeAdminClient();
+    mockCreateAdminClient.mockReturnValue(admin as never);
+
+    const res = await GET(makeRequest());
+    const body = await res.json();
+
+    expect(admin.from).toHaveBeenCalledWith("user_push_subscriptions");
+    expect(body).toEqual({ sent: 0 });
+  });
+
+  it("reports unexpected push failures and keeps the subscription", async () => {
+    mockGetSchedules.mockResolvedValue([SCHEDULE]);
+    mockGetPushSubs.mockResolvedValue([PUSH_SUB]);
+    const pushError = Object.assign(new Error("500 Internal Server Error"), {
+      statusCode: 500,
+    });
+    mockSendNotification.mockRejectedValueOnce(pushError);
+
+    const admin = makeAdminClient();
+    mockCreateAdminClient.mockReturnValue(admin as never);
+
+    const res = await GET(makeRequest());
+    const body = await res.json();
+
+    expect(admin.from).not.toHaveBeenCalled();
+    expect(reportError).toHaveBeenCalledWith(
+      "notify",
+      "push send failed",
+      pushError,
+      { userId: SCHEDULE.user_id, statusCode: 500 }
+    );
     expect(body).toEqual({ sent: 0 });
   });
 

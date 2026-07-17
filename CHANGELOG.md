@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.161] — 2026-07-17
+
+### Added
+- Production error tracking via GlitchTip (a Sentry-API-compatible tracker with a 1,000-events/month free tier), wired through the official `@sentry/nextjs` SDK pointed at a `NEXT_PUBLIC_GLITCHTIP_DSN`. The SDK initialises in `src/instrumentation.ts` (server, plus `onRequestError` for unhandled route/render errors) and `src/instrumentation-client.ts` (browser — whose global onerror/onunhandledrejection handlers give net-new coverage of the vanilla `public/js/*` scripts, which previously reported nothing), errors-only (`tracesSampleRate: 0`, no replay) and hard-disabled outside production or without a DSN, so dev/QA/CI stay silent; `.env.qa.example` pins the variable empty to block env leak-through. A new `reportError(area, message, error, context)` helper in `src/lib/monitoring.ts` replaces the fifteen bare `console.error` calls across the twelve API route handlers — keeping the exact `[area] message:` console format so Vercel logs are unchanged — while forwarding the error to GlitchTip tagged by area, wrapping non-Error values with their extracted `.message` as the `cause` chain (the quiz route's 8-char correlation `ref` rides along as context, pairing network-tab refs with tracker events). Two silent failure paths now report instead of swallowing: the cron push sender no longer deletes a subscription on *any* send failure — only 404/410 (expired) are deleted, anything else is reported with the push endpoint deliberately withheld (capability URL) — and the `[locale]` error boundary captures to the tracker alongside its existing console log. A previously missing root `global-error.tsx` boundary is added for crashes above the `[locale]` layout, rendering the shared `Error.*` strings from both `messages/he.json` and `messages/ar.json` (locale is unknown at that layer) with self-contained CSS-module styling since the design tokens may not be loaded. New tests cover the helper's format/wrapping/tagging, both instrumentation entries' enabled/disabled matrix, the global boundary, and the cron 404/410-vs-report branch; build-level wiring was verified by confirming a placeholder DSN lands in both the client chunk and server build.
+
+---
+
 ## [0.3.160] — 2026-07-17
 
 ### Changed

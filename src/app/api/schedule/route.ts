@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getApiTranslator, getRequestLocale, parseJsonBody } from "@/lib/api";
+import { reportError } from "@/lib/monitoring";
 
 export async function GET(request: Request) {
   const t = getApiTranslator(request);
@@ -64,7 +65,7 @@ export async function PUT(request: Request) {
   });
 
   if (error) {
-    console.error("[schedule] replace failed:", error);
+    reportError("schedule", "replace failed", error);
     return NextResponse.json({ error: t("scheduleUpdateFailed") }, { status: 500 });
   }
 

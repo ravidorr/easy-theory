@@ -4,6 +4,7 @@ import webpush from "web-push";
 import { createAdminClient } from "@/lib/supabase";
 import { getUsersScheduledForDay, getPushSubscriptionsForUsers } from "@/lib/db";
 import { getNotifyTranslator } from "@/lib/api";
+import { reportError } from "@/lib/monitoring";
 import { APP_TIME_ZONE } from "@/lib/personalization";
 
 const APP_URL = "https://easy-theory-omega.vercel.app";
@@ -75,13 +76,23 @@ export async function GET(request: Request) {
             })
           );
           sent++;
-        } catch {
-          // Subscription expired — remove it
-          await admin
-            .from("user_push_subscriptions")
-            .delete()
-            .eq("user_id", s.user_id)
-            .eq("endpoint", pushSub.endpoint);
+        } catch (err) {
+          const statusCode = (err as { statusCode?: number }).statusCode;
+          if (statusCode === 404 || statusCode === 410) {
+            // Subscription expired — remove it
+            await admin
+              .from("user_push_subscriptions")
+              .delete()
+              .eq("user_id", s.user_id)
+              .eq("endpoint", pushSub.endpoint);
+          } else {
+            // Endpoint deliberately omitted from context: it is a
+            // capability URL and must not leave our infrastructure.
+            reportError("notify", "push send failed", err, {
+              userId: s.user_id,
+              statusCode,
+            });
+          }
         }
         return;
       }

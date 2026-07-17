@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase";
 import { getApiTranslator, parseJsonBody } from "@/lib/api";
 import { upsertSrsCard } from "@/lib/db";
+import { reportError } from "@/lib/monitoring";
 import { INITIAL_SRS_STATE, reviewCard } from "@/lib/srs";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -113,7 +114,7 @@ export async function POST(request: Request) {
     // context under it, so a failed request seen in the browser's network
     // tab can be matched to this exact server log entry.
     const ref = crypto.randomUUID().slice(0, 8);
-    console.error("[quiz] transactional submission failed:", {
+    reportError("quiz", "transactional submission failed", error, {
       ref,
       userId: user.id,
       questionId: question_id,
@@ -146,7 +147,7 @@ export async function POST(request: Request) {
     try {
       await updateQuestionSrs(supabase, user.id, question_id, data.is_correct);
     } catch (srsError) {
-      console.error("[quiz] SRS update failed:", srsError);
+      reportError("quiz", "SRS update failed", srsError);
     }
   }
 

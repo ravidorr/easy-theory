@@ -4,6 +4,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { EXAM_QUESTION_COUNT, EXAM_PASS_MARK, scoreExam } from "@/lib/exam";
 import type { ExamAnswer } from "@/lib/exam";
 import { getApiTranslator, parseJsonBody } from "@/lib/api";
+import { reportError } from "@/lib/monitoring";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const OPTION_RE = /^[a-d]$/;
@@ -75,7 +76,7 @@ export async function POST(request: Request) {
   });
 
   if (insertError) {
-    console.error("[exam] attempt insert failed:", insertError);
+    reportError("exam", "attempt insert failed", insertError);
     return NextResponse.json({ error: t("examSaveFailed") }, { status: 500 });
   }
 
