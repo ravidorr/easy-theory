@@ -63,6 +63,11 @@ const mockGetWindowAccuracy = vi.mocked(getQuizAccuracyForWindow);
 const TOPIC_A = { id: "t1", slug: "signs", name_he: "תמרורים", icon: null };
 const TOPIC_B = { id: "t2", slug: "priority", name_he: "זכות קדימה", icon: null };
 
+// Translation mock that encodes ICU values as `key|{json}` so assertions can
+// pin the interpolated numbers.
+const valuesT = ((key: string, values?: Record<string, unknown>) =>
+  values ? `${key}|${JSON.stringify(values)}` : key) as never;
+
 function makeClient(user: { id: string } | null = { id: "u1" }) {
   return { auth: { getUser: vi.fn().mockResolvedValue({ data: { user } }) } };
 }
@@ -115,9 +120,6 @@ describe("HomePage", () => {
   });
 
   describe("stats strip", () => {
-    const valuesT = ((key: string, values?: Record<string, unknown>) =>
-      values ? `${key}|${JSON.stringify(values)}` : key) as never;
-
     it("derives the level and points-to-next from star points", async () => {
       vi.mocked(getTranslations).mockResolvedValue(valuesT);
       // 150 points: level 2 spans 120-360, so 210 points remain.
@@ -241,14 +243,81 @@ describe("HomePage", () => {
     expect(screen.queryByText("todayBadge")).not.toBeInTheDocument();
   });
 
+  describe("daily mission card", () => {
+    function missionCard() {
+      const card = screen.getByText("todayBadge").parentElement;
+      if (!card) throw new Error("mission card not found");
+      return card;
+    }
+
+    beforeEach(() => {
+      vi.mocked(getTranslations).mockResolvedValue(valuesT);
+      mockGetProgress.mockResolvedValue([
+        { topic_id: "t1", status: "in_progress", best_score: 50 },
+      ] as never);
+      // 8 of t1's 20 questions answered: 40% coverage, 12 remaining.
+      mockGetTopicAccuracy.mockResolvedValue([{ topic_id: "t1", correct: 6, total: 8 }]);
+    });
+
+    it("renders a progress ring with the mission topic's coverage percent", async () => {
+      const jsx = await HomePage();
+      render(jsx);
+      const ring = screen.getByRole("progressbar");
+      expect(ring).toHaveAttribute("aria-valuenow", "40");
+      expect(ring).toHaveAttribute("aria-valuemin", "0");
+      expect(ring).toHaveAttribute("aria-valuemax", "100");
+      expect(ring).toHaveAttribute("aria-label", "missionProgressLabel");
+      expect(within(missionCard()).getByText('topicsPercent|{"percent":40}')).toBeInTheDocument();
+    });
+
+    it("shows estimated-time and points-reward chips for the remaining questions", async () => {
+      const jsx = await HomePage();
+      render(jsx);
+      const card = within(missionCard());
+      // 12 remaining questions at 1.5/minute is 8 minutes and 120 points.
+      expect(card.getByText('topicDurationMinutes|{"minutes":8}')).toBeInTheDocument();
+      expect(card.getByText('missionXpReward|{"points":120}')).toBeInTheDocument();
+      expect(card.queryByText("missionCompleteLabel")).not.toBeInTheDocument();
+    });
+
+    it("does not mark the card complete while questions remain", async () => {
+      const jsx = await HomePage();
+      const { container } = render(jsx);
+      expect(container.querySelector("[data-complete]")).toBeNull();
+    });
+
+    it("omits the chip row and the ring sweep for a topic with no questions", async () => {
+      mockGetQuestionCounts.mockResolvedValue({ t1: 0, t2: 10 });
+      mockGetTopicAccuracy.mockResolvedValue([]);
+      const jsx = await HomePage();
+      render(jsx);
+      expect(missionCard().querySelector('[class*="topicMetaRow"]')).toBeNull();
+      const ring = screen.getByRole("progressbar");
+      expect(ring).toHaveAttribute("aria-valuenow", "0");
+      expect(ring).toHaveAttribute("data-empty", "true");
+    });
+
+    it("marks the card complete when every question is answered", async () => {
+      mockGetTopicAccuracy.mockResolvedValue([{ topic_id: "t1", correct: 15, total: 20 }]);
+      const jsx = await HomePage();
+      const { container } = render(jsx);
+      expect(container.querySelector("[data-complete]")).toBeTruthy();
+      const ring = screen.getByRole("progressbar");
+      expect(ring).toHaveAttribute("aria-valuenow", "100");
+      const card = within(missionCard());
+      expect(card.getByText("missionCompleteLabel")).toBeInTheDocument();
+      expect(card.getByText("✓")).toBeInTheDocument();
+      expect(card.queryByText(/missionXpReward/)).not.toBeInTheDocument();
+      expect(card.queryByText(/topicDurationMinutes/)).not.toBeInTheDocument();
+    });
+  });
+
   it("shows zeroed overall progress when nothing was answered", async () => {
-    vi.mocked(getTranslations).mockResolvedValue(((
-      key: string,
-      values?: Record<string, unknown>
-    ) => (values ? `${key}|${JSON.stringify(values)}` : key)) as never);
+    vi.mocked(getTranslations).mockResolvedValue(valuesT);
     const jsx = await HomePage();
     render(jsx);
-    expect(screen.getByText('topicsPercent|{"percent":0}')).toBeInTheDocument();
+    // Once in the overall-progress header and once in the mission ring.
+    expect(screen.getAllByText('topicsPercent|{"percent":0}')).toHaveLength(2);
     expect(
       screen.getByText('topicsAnsweredOverall|{"answered":0,"total":30}')
     ).toBeInTheDocument();
@@ -256,10 +325,7 @@ describe("HomePage", () => {
   });
 
   it("shows the overall answered count, percent, and remaining questions", async () => {
-    vi.mocked(getTranslations).mockResolvedValue(((
-      key: string,
-      values?: Record<string, unknown>
-    ) => (values ? `${key}|${JSON.stringify(values)}` : key)) as never);
+    vi.mocked(getTranslations).mockResolvedValue(valuesT);
     mockGetTopicAccuracy.mockResolvedValue([
       { topic_id: "t1", correct: 3, total: 5 },
       { topic_id: "t2", correct: 2, total: 4 },
@@ -299,10 +365,7 @@ describe("HomePage", () => {
   });
 
   it("floors the overall percent and uses the singular string for one remaining question", async () => {
-    vi.mocked(getTranslations).mockResolvedValue(((
-      key: string,
-      values?: Record<string, unknown>
-    ) => (values ? `${key}|${JSON.stringify(values)}` : key)) as never);
+    vi.mocked(getTranslations).mockResolvedValue(valuesT);
     mockGetTopicAccuracy.mockResolvedValue([
       { topic_id: "t1", correct: 18, total: 20 },
       { topic_id: "t2", correct: 8, total: 9 },
@@ -317,10 +380,7 @@ describe("HomePage", () => {
   });
 
   it("ignores question counts for topics that are not listed", async () => {
-    vi.mocked(getTranslations).mockResolvedValue(((
-      key: string,
-      values?: Record<string, unknown>
-    ) => (values ? `${key}|${JSON.stringify(values)}` : key)) as never);
+    vi.mocked(getTranslations).mockResolvedValue(valuesT);
     mockGetTopics.mockResolvedValue([TOPIC_A] as never);
     const jsx = await HomePage();
     render(jsx);
@@ -328,13 +388,6 @@ describe("HomePage", () => {
     expect(
       screen.getByText('topicsAnsweredOverall|{"answered":0,"total":20}')
     ).toBeInTheDocument();
-  });
-
-  it("calculates step 1 when nothing was answered", async () => {
-    mockGetProgress.mockResolvedValue([]);
-    const jsx = await HomePage();
-    const { container } = render(jsx);
-    expect(container.querySelector("[data-active]")).toBeTruthy();
   });
 
   it("shows streakZero greeting when streak_days is 0", async () => {
@@ -349,50 +402,6 @@ describe("HomePage", () => {
     const jsx = await HomePage();
     render(jsx);
     expect(screen.getByText("streakOne")).toBeInTheDocument();
-  });
-
-  it("calculates step 6 when all questions were answered", async () => {
-    mockGetProgress.mockResolvedValue([
-      { topic_id: "t1", status: "in_progress", best_score: 100 },
-    ] as never);
-    mockGetTopicAccuracy.mockResolvedValue([{ topic_id: "t1", correct: 20, total: 20 }]);
-    const jsx = await HomePage();
-    const { container } = render(jsx);
-    expect(container.querySelector("[data-active]")).toBeNull();
-    expect(screen.getAllByText("✓")).toHaveLength(5);
-  });
-
-  it("calculates step 4 when 70% of questions were answered", async () => {
-    mockGetProgress.mockResolvedValue([
-      { topic_id: "t1", status: "in_progress", best_score: 0 },
-    ] as never);
-    mockGetTopicAccuracy.mockResolvedValue([{ topic_id: "t1", correct: 14, total: 14 }]);
-    const jsx = await HomePage();
-    const { container } = render(jsx);
-    expect(container.querySelector("[data-active]")).toBeTruthy();
-    expect(screen.getAllByText("✓")).toHaveLength(3);
-  });
-
-  it("calculates step 2 when 20% of questions were answered", async () => {
-    mockGetProgress.mockResolvedValue([
-      { topic_id: "t1", status: "in_progress", best_score: 0 },
-    ] as never);
-    mockGetTopicAccuracy.mockResolvedValue([{ topic_id: "t1", correct: 4, total: 4 }]);
-    const jsx = await HomePage();
-    const { container } = render(jsx);
-    expect(container.querySelector("[data-active]")).toBeTruthy();
-    expect(screen.getAllByText("✓")).toHaveLength(1);
-  });
-
-  it("calculates step 3 when 50% of questions were answered", async () => {
-    mockGetProgress.mockResolvedValue([
-      { topic_id: "t1", status: "in_progress", best_score: 0 },
-    ] as never);
-    mockGetTopicAccuracy.mockResolvedValue([{ topic_id: "t1", correct: 10, total: 10 }]);
-    const jsx = await HomePage();
-    const { container } = render(jsx);
-    expect(container.querySelector("[data-active]")).toBeTruthy();
-    expect(screen.getAllByText("✓")).toHaveLength(2);
   });
 
   it("renders icon image when topic has an icon", async () => {
@@ -418,10 +427,7 @@ describe("HomePage", () => {
   });
 
   it("shows the answered-count badge with percent once questions were answered", async () => {
-    vi.mocked(getTranslations).mockResolvedValue(((
-      key: string,
-      values?: Record<string, unknown>
-    ) => (values ? `${key}|${JSON.stringify(values)}` : key)) as never);
+    vi.mocked(getTranslations).mockResolvedValue(valuesT);
     mockGetProgress.mockResolvedValue([
       { topic_id: "t1", status: "in_progress", best_score: 50 },
     ] as never);
@@ -457,10 +463,7 @@ describe("HomePage", () => {
   });
 
   it("keeps best_score for the bar and label when completed", async () => {
-    vi.mocked(getTranslations).mockResolvedValue(((
-      key: string,
-      values?: Record<string, unknown>
-    ) => (values ? `${key}|${JSON.stringify(values)}` : key)) as never);
+    vi.mocked(getTranslations).mockResolvedValue(valuesT);
     mockGetTopics.mockResolvedValue([TOPIC_A] as never);
     mockGetProgress.mockResolvedValue([
       { topic_id: "t1", status: "completed", best_score: 85 },
@@ -492,22 +495,21 @@ describe("HomePage", () => {
     expect(screen.getByText("topicDifficultyEasy")).toBeInTheDocument();
     expect(screen.queryByText("topicDifficultyMedium")).not.toBeInTheDocument();
     expect(screen.queryByText("topicDifficultyHard")).not.toBeInTheDocument();
-    // 20 and 10 remaining questions both estimate under an hour.
-    expect(screen.getAllByText("topicDurationMinutes")).toHaveLength(2);
+    // 20 and 10 remaining questions both estimate under an hour; the mission
+    // card repeats the duration chip for its topic.
+    expect(screen.getAllByText("topicDurationMinutes")).toHaveLength(3);
     expect(screen.getAllByText("topicPointsRemaining")).toHaveLength(2);
   });
 
   it("formats the duration chip values from the remaining questions", async () => {
-    vi.mocked(getTranslations).mockResolvedValue(((
-      key: string,
-      values?: Record<string, unknown>
-    ) => (values ? `${key}|${JSON.stringify(values)}` : key)) as never);
+    vi.mocked(getTranslations).mockResolvedValue(valuesT);
     mockGetTopics.mockResolvedValue([TOPIC_A] as never);
     mockGetQuestionCounts.mockResolvedValue({ t1: 501 });
     mockGetTopicAccuracy.mockResolvedValue([{ topic_id: "t1", correct: 1, total: 1 }]);
     const jsx = await HomePage();
     render(jsx);
-    expect(screen.getByText('topicDurationHours|{"hours":6}')).toBeInTheDocument();
+    // Once on the topic card and once on the mission card for the same topic.
+    expect(screen.getAllByText('topicDurationHours|{"hours":6}')).toHaveLength(2);
     expect(screen.getByText('topicPointsRemaining|{"points":5000}')).toBeInTheDocument();
   });
 
@@ -525,10 +527,7 @@ describe("HomePage", () => {
   });
 
   it("passes the topic question count to the daily task description", async () => {
-    vi.mocked(getTranslations).mockResolvedValue(((
-      key: string,
-      values?: Record<string, unknown>
-    ) => (values ? `${key}|${JSON.stringify(values)}` : key)) as never);
+    vi.mocked(getTranslations).mockResolvedValue(valuesT);
     const jsx = await HomePage();
     render(jsx);
     expect(screen.getByText('todayTaskDesc|{"count":20}')).toBeInTheDocument();
@@ -660,9 +659,6 @@ describe("HomePage", () => {
   });
 
   describe("personalized greeting", () => {
-    const valuesT = ((key: string, values?: Record<string, unknown>) =>
-      values ? `${key}|${JSON.stringify(values)}` : key) as never;
-
     it("renders no personal lines for a brand-new user", async () => {
       const jsx = await HomePage();
       render(jsx);
