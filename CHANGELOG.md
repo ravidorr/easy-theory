@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.154] — 2026-07-17
+
+### Changed
+- Duolingo-style daily mission card: the homepage "המשימה להיום" card swaps its five-step-node track (`PathProgress`, now deleted) for an animated SVG progress ring that fills to the topic's coverage percent on load (mirrored `scaleX(-1) rotate(-90deg)` so the sweep starts at 12 o'clock and runs counter-clockwise, matching the app's RTL reading direction; non-overshooting `--ease-out` so the dashoffset can't dip negative and notch the ring at 100%; skipped entirely at 0% where it would be a visual no-op) with the percent in the center and a proper `role="progressbar"` for screen readers. Below the topic name, the card gains an estimated-time chip (shared new `DurationChip`, also adopted by the topic cards so the two can't drift) and a points-reward chip ("מחכות לך {points} נק׳", star icon, ICU plural in Arabic). When every question in the mission topic is answered, the card celebrates: the ring turns success-green with a checkmark and a spring scale-pop timed to land as the fill completes, the chips give way to "המשימה הושלמה!", and both animations respect `prefers-reduced-motion`. The chip row is omitted entirely for a zero-question topic instead of rendering empty, mission math reuses `buildTopicCardMeta` (floor-not-round coverage, clamped counts) instead of its own rounding, and the homepage test file's eleven copies of the translations mock collapse into one. New `Home` keys (missionProgressLabel, missionXpReward, missionCompleteLabel) in he + ar. (TODO: upgrade the daily mission card)
+
+---
+
 ## [0.3.153] — 2026-07-17
 
 ### Changed

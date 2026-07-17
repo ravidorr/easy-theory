@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { unstable_noStore as noStore } from "next/cache";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -34,7 +35,7 @@ import {
   pickLastStudiedInProgressTopic,
   selectFocusTopic,
 } from "@/lib/personalization";
-import { buildTopicCardMeta, type TopicDifficulty } from "@/lib/topic-card";
+import { buildTopicCardMeta, type TopicDifficulty, type TopicDuration } from "@/lib/topic-card";
 import { TabBar } from "@/components/TabBar";
 import { Icon } from "@/components/Icon";
 import { getTranslations, getLocale } from "next-intl/server";
@@ -47,30 +48,58 @@ const DIFFICULTY_CHIP: Record<TopicDifficulty, { labelKey: string; className: st
   hard: { labelKey: "topicDifficultyHard", className: "topicChipHard" },
 };
 
-function PathProgress({ total = 5, current = 1 }: { total?: number; current?: number }) {
-  const items = [];
-  for (let i = 1; i <= total; i++) {
-    const done = i < current;
-    const active = i === current;
-    items.push(
-      <span
-        key={`s${i}`}
-        className={`${styles.stepNode} ${done ? styles.stepNodeDone : ""} ${active ? styles.stepNodeActive : ""}`}
-        data-active={active || undefined}
-      >
-        {done ? "✓" : i}
+const MISSION_RING_RADIUS = 30;
+const MISSION_RING_CIRC = 2 * Math.PI * MISSION_RING_RADIUS;
+
+function MissionRing({
+  pct,
+  complete,
+  label,
+  percentText,
+}: {
+  pct: number;
+  complete: boolean;
+  label: string;
+  percentText: string;
+}) {
+  return (
+    <div
+      className={styles.missionRing}
+      role="progressbar"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={pct}
+      aria-label={label}
+      data-empty={pct === 0 || undefined}
+      style={
+        {
+          "--ring-circ": `${MISSION_RING_CIRC}px`,
+          "--ring-offset": `${MISSION_RING_CIRC * (1 - pct / 100)}px`,
+        } as CSSProperties
+      }
+    >
+      <svg className={styles.missionRingSvg} viewBox="0 0 72 72" aria-hidden="true" focusable="false">
+        <circle className={styles.missionRingTrack} cx="36" cy="36" r={MISSION_RING_RADIUS} />
+        <circle className={styles.missionRingFill} cx="36" cy="36" r={MISSION_RING_RADIUS} />
+      </svg>
+      <span className={styles.missionRingValue} aria-hidden="true">
+        {complete ? "✓" : percentText}
       </span>
-    );
-    if (i < total) {
-      items.push(
-        <span
-          key={`c${i}`}
-          className={`${styles.connector} ${i < current ? styles.connectorDone : ""}`}
-        />
-      );
-    }
-  }
-  return <div className={styles.pathProgress}>{items}</div>;
+    </div>
+  );
+}
+
+type HomeTranslator = Awaited<ReturnType<typeof getTranslations<"Home">>>;
+
+function DurationChip({ t, duration }: { t: HomeTranslator; duration: TopicDuration }) {
+  return (
+    <span className={styles.topicChip}>
+      <Icon name="timer" size={12} />
+      {duration.unit === "hours"
+        ? t("topicDurationHours", { hours: duration.value })
+        : t("topicDurationMinutes", { minutes: duration.value })}
+    </span>
+  );
 }
 
 export default async function HomePage() {
@@ -136,6 +165,16 @@ export default async function HomePage() {
     topics.find((t) => progressMap[t.id]?.status === "in_progress") ??
     topics.find((t) => !progressMap[t.id] || progressMap[t.id].status === "not_started") ??
     null;
+  const missionMeta = todayTopic
+    ? buildTopicCardMeta({
+        slug: todayTopic.slug,
+        totalQuestions: questionCounts[todayTopic.id] ?? 0,
+        answeredQuestions: answeredMap[todayTopic.id] ?? 0,
+        progress: progressMap[todayTopic.id],
+      })
+    : null;
+  const missionPct = missionMeta ? (missionMeta.done ? 100 : missionMeta.coveragePct) : 0;
+  const missionComplete = missionPct >= 100;
 
   // Resume point in the last-studied topic. Only this fetch depends on the
   // main round; it is skipped entirely when nothing is in progress. The
@@ -375,27 +414,44 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {todayTopic ? (
-          <div className={styles.todayCard}>
+        {todayTopic && missionMeta ? (
+          <div className={styles.todayCard} data-complete={missionComplete || undefined}>
             <span className={styles.todayBadge}>{t("todayBadge")}</span>
-            <div className={styles.todayTaskInfo}>
-              <h2>{getTopicName(todayTopic)}</h2>
-              <span className={styles.todayTaskDesc}>
-                {t("todayTaskDesc", { count: questionCounts[todayTopic.id] ?? 0 })}
-              </span>
+            <div className={styles.missionRow}>
+              <MissionRing
+                pct={missionPct}
+                complete={missionComplete}
+                label={t("missionProgressLabel")}
+                percentText={t("topicsPercent", { percent: missionPct })}
+              />
+              <div className={styles.todayTaskInfo}>
+                <h2>{getTopicName(todayTopic)}</h2>
+                <span className={styles.todayTaskDesc}>
+                  {t("todayTaskDesc", { count: missionMeta.total })}
+                </span>
+                {missionComplete || missionMeta.duration ? (
+                  <div className={styles.topicMetaRow}>
+                    {missionComplete ? (
+                      <span className={styles.missionCompleteLabel}>
+                        {t("missionCompleteLabel")}
+                      </span>
+                    ) : (
+                      <>
+                        {missionMeta.duration ? (
+                          <DurationChip t={t} duration={missionMeta.duration} />
+                        ) : null}
+                        {missionMeta.remainingPoints > 0 ? (
+                          <span className={`${styles.topicChip} ${styles.missionXpChip}`}>
+                            <Icon name="star" size={12} />
+                            {t("missionXpReward", { points: missionMeta.remainingPoints })}
+                          </span>
+                        ) : null}
+                      </>
+                    )}
+                  </div>
+                ) : null}
+              </div>
             </div>
-            {(() => {
-              const totalQ = questionCounts[todayTopic.id] ?? 0;
-              const answered = answeredMap[todayTopic.id] ?? 0;
-              const pct =
-                progressMap[todayTopic.id]?.status === "completed"
-                  ? 100
-                  : totalQ > 0
-                  ? Math.round((answered / totalQ) * 100)
-                  : 0;
-              const current = pct >= 100 ? 6 : pct >= 67 ? 4 : pct >= 34 ? 3 : pct >= 1 ? 2 : 1;
-              return <PathProgress total={5} current={current} />;
-            })()}
             <Link href={`/topics/${todayTopic.slug}`} className="btn-primary">
               {t("startBtn")}
             </Link>
@@ -585,14 +641,7 @@ export default async function HomePage() {
                             {t(DIFFICULTY_CHIP[meta.difficulty].labelKey)}
                           </span>
                         )}
-                        {meta.duration && (
-                          <span className={styles.topicChip}>
-                            <Icon name="timer" size={12} />
-                            {meta.duration.unit === "hours"
-                              ? t("topicDurationHours", { hours: meta.duration.value })
-                              : t("topicDurationMinutes", { minutes: meta.duration.value })}
-                          </span>
-                        )}
+                        {meta.duration && <DurationChip t={t} duration={meta.duration} />}
                         {meta.remainingPoints > 0 && (
                           <span className={styles.topicChip}>
                             <Icon name="star" size={12} />
