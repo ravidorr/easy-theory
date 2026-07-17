@@ -64,6 +64,16 @@ describe("locale messages", () => {
     }
   });
 
+  it("keeps levelToNext a plain {points} substitution in both locales", () => {
+    // stats-pills.js re-renders this string client-side with the simple
+    // window.__tf interpolator, which cannot evaluate ICU plural/select.
+    for (const messages of [he, ar]) {
+      expect(messages.Home.levelToNext).toContain("{points}");
+      expect(messages.Home.levelToNext).not.toContain("plural");
+      expect(messages.Home.levelToNext).not.toContain("select");
+    }
+  });
+
   it("defines a medal name for every streak milestone in both locales", () => {
     for (const messages of [he, ar]) {
       const home = messages.Home as Record<string, string>;

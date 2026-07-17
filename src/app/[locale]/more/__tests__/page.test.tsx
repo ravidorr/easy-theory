@@ -162,6 +162,10 @@ describe("MorePage", () => {
       const { container } = render(jsx);
       expect(container.querySelectorAll('[data-stat="streak"]')).toHaveLength(1);
       expect(container.querySelectorAll('[data-stat="points"]')).toHaveLength(1);
+      const levelCell = container.querySelector("[data-level-unit]")!;
+      // 60 = LEVEL_CURVE_UNIT; the script recomputes the level curve from it.
+      expect(levelCell.getAttribute("data-level-unit")).toBe("60");
+      expect(levelCell.querySelector('[data-stat="level"]')).not.toBeNull();
     });
 
     it("shows accuracy, answered count, and floored completion from responses", async () => {

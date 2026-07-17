@@ -9,8 +9,11 @@ export const QUESTIONS_ACHIEVEMENT_TARGET = 100;
 
 // Tied to the points scale so rebalancing POINTS_PER_CORRECT keeps the same
 // level pacing: with 6 first-correct answers per curve unit, the full
-// 1,273-question bank spans roughly 15 levels.
-const LEVEL_CURVE_UNIT = 6 * POINTS_PER_CORRECT;
+// 1,273-question bank spans roughly 15 levels. Exported so pages can hand the
+// unit to public/js/stats-pills.js via a data attribute. The curve *formula*
+// is mirrored in that script (it cannot import TS); a parity test in
+// stats-pills-script.test.ts fails if the two implementations drift.
+export const LEVEL_CURVE_UNIT = 6 * POINTS_PER_CORRECT;
 
 /**
  * Cumulative star points needed to reach a level. Quadratic so early levels

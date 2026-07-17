@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.159] — 2026-07-17
+
+### Changed
+- The dashboard counters now animate instead of snapping, and the level tile can no longer go stale after a quiz. `public/js/stats-pills.js` — the script that applies quiz-earned stats to the home/More pills from `sessionStorage["clearroad:stats"]` — gains a from→to adaptation of quiz.js's `countUp` (same 700ms cubic ease-out), so streak and points ease from the server-rendered value to the new total rather than flashing; reduced-motion users, browsers without rAF, and hidden tabs get the final value synchronously instead (the hidden-tab case matters because the cache is cleared on the same pass, so a write deferred to a suspended rAF frame would be lost — a regression the review caught in the first cut). The script also re-derives the whole level tile from the new points: the level value (now `data-stat="level"` on both pages), the progress bar (`data-stat="level-fill"`, animated by a width transition scoped to that attribute so the other home-page bars keep their instant width, disabled under reduced motion), and the points-to-next caption, formatted through the locale layout's shared `window.__tf` interpolator from an ICU template riding in a `data-template` attribute (`t.raw("levelToNext")` — single-sourced from `Home.levelToNext` rather than duplicated into the JS.* map). The level math mirrors `levelForPoints` with the curve unit passed via `data-level-unit={LEVEL_CURVE_UNIT}` (newly exported); because the formula itself cannot be imported into a standalone script, a parity test drives the script's DOM output across the curve and compares it against the TS original, and a messages test pins `levelToNext` to a plain `{points}` substitution in both locales (the client interpolator cannot evaluate ICU plurals). The daily-goal tile is deliberately untouched: it derives from questions answered today, not points, so the points sync never staled it. Verified live in the QA environment on `/he`, `/ar`, and `/he/more`, including an 82-frame eased count-up and a level-crossing sync (3080→3400 points: level 7→8, bar 67%→4%, caption re-rendered in both locales). (TODO: animate counters; level tile can go stale after the post-quiz stats sync)
+
+---
+
 ## [0.3.158] — 2026-07-17
 
 ### Fixed

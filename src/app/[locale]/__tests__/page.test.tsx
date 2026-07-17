@@ -45,7 +45,11 @@ vi.mock("@/components/TabBar", () => ({
   TabBar: () => React.createElement("div", { "data-testid": "tabbar" }),
 }));
 vi.mock("next-intl/server", () => ({
-  getTranslations: vi.fn().mockResolvedValue((key: string) => key),
+  getTranslations: vi
+    .fn()
+    .mockResolvedValue(
+      Object.assign((key: string) => key, { raw: (key: string) => `raw:${key}` })
+    ),
   getLocale: vi.fn().mockResolvedValue("he"),
 }));
 
@@ -64,9 +68,19 @@ const TOPIC_A = { id: "t1", slug: "signs", name_he: "תמרורים", icon: null
 const TOPIC_B = { id: "t2", slug: "priority", name_he: "זכות קדימה", icon: null };
 
 // Translation mock that encodes ICU values as `key|{json}` so assertions can
-// pin the interpolated numbers.
-const valuesT = ((key: string, values?: Record<string, unknown>) =>
-  values ? `${key}|${JSON.stringify(values)}` : key) as never;
+// pin the interpolated numbers. `raw` mirrors next-intl's t.raw, which the
+// page uses to expose the ICU template to stats-pills.js.
+const valuesT = Object.assign(
+  (key: string, values?: Record<string, unknown>) =>
+    values ? `${key}|${JSON.stringify(values)}` : key,
+  { raw: (key: string) => `raw:${key}` }
+) as never;
+
+// Namespace-key passthrough with the same `raw` shape, for tests that only
+// assert on keys.
+const keyT = Object.assign((key: string) => key, {
+  raw: (key: string) => `raw:${key}`,
+}) as never;
 
 function makeClient(user: { id: string } | null = { id: "u1" }) {
   return { auth: { getUser: vi.fn().mockResolvedValue({ data: { user } }) } };
@@ -85,7 +99,7 @@ describe("HomePage", () => {
     mockGetQuestionNumbers.mockResolvedValue([]);
     mockGetAnsweredIds.mockResolvedValue(new Set());
     mockGetWindowAccuracy.mockResolvedValue({ correct: 0, total: 0 });
-    vi.mocked(getTranslations).mockResolvedValue(((key: string) => key) as never);
+    vi.mocked(getTranslations).mockResolvedValue(keyT);
     vi.mocked(getLocale).mockResolvedValue("he");
   });
 
@@ -117,6 +131,20 @@ describe("HomePage", () => {
     const { container } = render(jsx);
     expect(container.querySelectorAll('[data-stat="streak"]')).toHaveLength(1);
     expect(container.querySelectorAll('[data-stat="points"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-stat="level"]')).toHaveLength(1);
+  });
+
+  it("exposes the level tile hooks the pill-sync script re-derives from", async () => {
+    const jsx = await HomePage();
+    const { container } = render(jsx);
+    const tile = container.querySelector("[data-level-unit]")!;
+    // 60 = LEVEL_CURVE_UNIT; the script recomputes the level curve from it.
+    expect(tile.getAttribute("data-level-unit")).toBe("60");
+    expect(tile.querySelector('[data-stat="level"]')).not.toBeNull();
+    expect(tile.querySelector('[data-stat="level-fill"]')).not.toBeNull();
+    expect(
+      tile.querySelector('[data-stat="level-caption"]')?.getAttribute("data-template")
+    ).toBe("raw:levelToNext");
   });
 
   describe("stats strip", () => {

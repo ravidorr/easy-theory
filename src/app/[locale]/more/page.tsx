@@ -18,6 +18,7 @@ import {
 import {
   deriveAchievements,
   completionSummary,
+  LEVEL_CURVE_UNIT,
   levelForPoints,
   overallAccuracy,
   type AchievementSlug,
@@ -138,11 +139,11 @@ export default async function MorePage() {
             <span className={styles.statValue} data-stat="points">{stats.star_points}</span>
             <span className={styles.statLabel}>{t("statPoints")}</span>
           </div>
-          <div className={styles.statCell}>
+          <div className={styles.statCell} data-level-unit={LEVEL_CURVE_UNIT}>
             <span className={`${styles.statIcon} ${styles.statIconLevel}`}>
               <Icon name="gem" size={18} />
             </span>
-            <span className={styles.statValue}>{levelInfo.level}</span>
+            <span className={styles.statValue} data-stat="level">{levelInfo.level}</span>
             <span className={styles.statLabel}>{t("statLevel")}</span>
           </div>
           <div className={styles.statCell}>

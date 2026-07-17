@@ -1,6 +1,5 @@
 # TODO
 
-- **Animate counters** (XP, points, streak) whenever their values change.
 - **Distinct visual treatment for completed topics** instead of simply changing text.
 - **Hover/press states everywhere.** Every button should feel pressable and respond to motion.
 - **Skeleton loaders** instead of content flashes while data loads.
@@ -20,6 +19,5 @@
 - **Exam answer-review mode keeps leftover exam chrome:** the frozen countdown timer and the "נענו X מתוך 30" footer remain visible while reviewing answers.
 - **Saving the schedule redirects to Home instead of back to More** (where the user came from), with no success confirmation.
 - **Invalid nested interactive elements on the exam intro:** the start CTA is a `<button>` nested inside an `<a>` (`/exam` page), which is ambiguous for screen readers.
-- **Level tile can go stale after the post-quiz stats sync:** `public/js/stats-pills.js` patches the streak/points values from sessionStorage, but the homepage/More level tile (number, progress bar, points-to-next caption) and the daily-goal tile are server-derived from the same points and are not re-derived client-side, so a level-crossing quiz can briefly show new points beside a stale level. Fold the fix into the "Animate counters" work, which reworks this sync path.
 - **Daily goal counts distinct questions, not answers given today:** `user_quiz_responses` is upserted one row per question, so re-answering questions already answered today never advances the homepage daily goal (drilling one topic repeatedly stalls at its question count), and re-answering old questions pulls them into today. Needs a submissions-count source (write-path or schema change).
 - **Persist derived achievements to `user_medals`:** the More-page achievements (first topic, 100 questions, all topics, exam pass) are recomputed per render, so they carry no earned date and all-topics can un-earn itself if the topic bank grows. Record earn events in `user_medals` (open TEXT slug) and add the quiz.js-style celebration.

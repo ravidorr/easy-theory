@@ -19,6 +19,7 @@ import {
 import { nextMedalTarget } from "@/lib/quiz";
 import {
   DAILY_GOAL_QUESTIONS,
+  LEVEL_CURVE_UNIT,
   completionSummary,
   levelForPoints,
 } from "@/lib/gamification";
@@ -390,16 +391,26 @@ export default async function HomePage() {
             </span>
             <span className={styles.statTileLabel}>{t("statsPointsLabel")}</span>
           </div>
-          <div className={styles.statTile}>
+          <div className={styles.statTile} data-level-unit={LEVEL_CURVE_UNIT}>
             <span className={`${styles.statTileIcon} ${styles.statTileIconLevel}`}>
               <Icon name="gem" size={18} />
             </span>
-            <span className={styles.statTileValue}>{levelInfo.level}</span>
+            <span className={styles.statTileValue} data-stat="level">
+              {levelInfo.level}
+            </span>
             <span className={styles.statTileLabel}>{t("statsLevelLabel")}</span>
             <div className={`${styles.progressTrack} ${styles.statTileTrack}`}>
-              <div className={styles.progressFill} style={{ width: `${levelPct}%` }} />
+              <div
+                className={styles.progressFill}
+                data-stat="level-fill"
+                style={{ width: `${levelPct}%` }}
+              />
             </div>
-            <span className={styles.statTileCaption}>
+            <span
+              className={styles.statTileCaption}
+              data-stat="level-caption"
+              data-template={t.raw("levelToNext")}
+            >
               {t("levelToNext", {
                 points: levelInfo.pointsForNextLevel - levelInfo.pointsIntoLevel,
               })}

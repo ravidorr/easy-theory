@@ -319,6 +319,13 @@
   background: var(--primary);
 }
 
+/* Scoped to the level bar (the only fill stats-pills.js rewrites) so the
+   other home-page bars keep their instant width. 700ms matches the script's
+   count-up so the bar and the numbers land together after the sync. */
+.progressFill[data-stat="level-fill"] {
+  transition: width 700ms var(--ease-out, ease-out);
+}
+
 .progressFillDone {
   background: var(--success);
 }
@@ -474,6 +481,10 @@
   .missionRingFill,
   .todayCard[data-complete] .missionRing {
     animation: none;
+  }
+
+  .progressFill[data-stat="level-fill"] {
+    transition: none;
   }
 }
 
