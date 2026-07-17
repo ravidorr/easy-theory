@@ -65,7 +65,7 @@
     }
     if (remaining <= 0) {
       stopTimer();
-      submit(true);
+      void submit(true);
     }
   }
 
@@ -155,6 +155,9 @@
   }
 
   function showResults(data, auto) {
+    // A confirm dialog may still be open if the timer auto-submitted while
+    // the user was deliberating; it is moot once results are on screen.
+    if (window.modal && window.modal.dismissAll) window.modal.dismissAll();
     decorateSlides(data.results || []);
     slides.forEach(function (s) { s.style.display = "none"; });
     if (footer) footer.style.display = "none";
@@ -176,14 +179,18 @@
     }
   }
 
-  function submit(auto) {
+  async function submit(auto) {
     if (submitting || submitted) return;
     if (!auto && answeredCount() < total) {
       const unanswered = total - answeredCount();
       const message = tf(t.examConfirmUnanswered || "יש {count} שאלות שלא נענו. להגיש בכל זאת?", {
         count: unanswered,
       });
-      if (!window.confirm(message)) return;
+      const confirmed = window.modal
+        ? await window.modal.confirm({ message: message })
+        : window.confirm(message);
+      // Re-check: a second submit (or the timer) may have fired while the dialog was open.
+      if (!confirmed || submitting || submitted) return;
     }
 
     submitting = true;
@@ -248,7 +255,7 @@
 
   if (submitBtn) {
     submitBtn.addEventListener("click", function () {
-      submit(false);
+      void submit(false);
     });
   }
 

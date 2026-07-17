@@ -57,6 +57,16 @@ function stubPushHelpers(): PushHelpersStub {
   return helpers;
 }
 
+function stubModal() {
+  const modal = {
+    confirm: vi.fn().mockResolvedValue(true),
+    alert: vi.fn().mockResolvedValue(undefined),
+    dismissAll: vi.fn(),
+  };
+  vi.stubGlobal("modal", modal);
+  return modal;
+}
+
 describe("schedule.js – save failure handling", () => {
   beforeEach(() => {
     vi.unstubAllGlobals();
@@ -78,8 +88,8 @@ describe("schedule.js – save failure handling", () => {
     expect(btn.textContent).toBe("שומרים...");
   });
 
-  it("restores button text and re-enables after a non-OK response", async () => {
-    const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
+  it("restores button text, re-enables, and shows a modal alert after a non-OK response", async () => {
+    const modal = stubModal();
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({ ok: false })
@@ -91,11 +101,25 @@ describe("schedule.js – save failure handling", () => {
     const btn = document.getElementById("save-schedule-btn") as HTMLButtonElement;
     expect(btn.disabled).toBe(false);
     expect(btn.textContent).toBe("שמרי");
-    expect(alertSpy).toHaveBeenCalledWith("שגיאה בשמירה, אפשר לנסות שוב.");
-    alertSpy.mockRestore();
+    // Refocused before the alert so the modal restores focus to it on dismiss.
+    expect(document.activeElement).toBe(btn);
+    expect(modal.alert).toHaveBeenCalledWith({ message: "שגיאה בשמירה, אפשר לנסות שוב." });
   });
 
   it("restores button text and re-enables after a network failure", async () => {
+    const modal = stubModal();
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("network")));
+
+    clickSave();
+    await new Promise((r) => setTimeout(r, 0));
+
+    const btn = document.getElementById("save-schedule-btn") as HTMLButtonElement;
+    expect(btn.disabled).toBe(false);
+    expect(btn.textContent).toBe("שמרי");
+    expect(modal.alert).toHaveBeenCalledWith({ message: "שגיאה בשמירה, אפשר לנסות שוב." });
+  });
+
+  it("falls back to window.alert on save failure when modal.js is not loaded", async () => {
     const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("network")));
 
@@ -193,7 +217,19 @@ describe("schedule.js – successful save", () => {
     delete (window as unknown as { pushHelpers?: PushHelpersStub }).pushHelpers;
   });
 
-  it("alerts and skips the request when no days are selected", () => {
+  it("shows a modal alert and skips the request when no days are selected", () => {
+    const modal = stubModal();
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    dayBtn(0).click();
+    clickSave();
+
+    expect(modal.alert).toHaveBeenCalledWith({ message: "יש לבחור לפחות יום אחד ללמוד." });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("falls back to window.alert when no days are selected and modal.js is not loaded", () => {
     const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);

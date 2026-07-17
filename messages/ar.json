@@ -438,6 +438,10 @@
     },
     "Bookmark": {
       "bookmarkSaveError": "خطأ في الحفظ، نحاول مجدداً؟"
+    },
+    "Modal": {
+      "modalConfirmBtn": "حسناً",
+      "modalCancelBtn": "إلغاء"
     }
   }
 }

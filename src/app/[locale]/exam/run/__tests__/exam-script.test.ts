@@ -98,6 +98,16 @@ async function flushPromises() {
   await Promise.resolve();
 }
 
+function stubModal(confirmResult = false) {
+  const modal = {
+    confirm: vi.fn().mockResolvedValue(confirmResult),
+    alert: vi.fn().mockResolvedValue(undefined),
+    dismissAll: vi.fn(),
+  };
+  vi.stubGlobal("modal", modal);
+  return modal;
+}
+
 describe("exam.js – answering and navigation", () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -199,7 +209,27 @@ describe("exam.js – submit", () => {
     expect(typeof body.duration_seconds).toBe("number");
   });
 
-  it("asks for confirmation when submitting with unanswered questions", async () => {
+  it("asks for confirmation via the modal when submitting with unanswered questions", async () => {
+    const fetchMock = mockFetch();
+    const modal = stubModal(false);
+    setupDOM();
+    clickOption(0, "a");
+    nextBtn().click();
+    nextBtn().click();
+    submitBtn().click();
+    await flushPromises();
+
+    expect(modal.confirm).toHaveBeenCalledTimes(1);
+    expect(modal.confirm).toHaveBeenCalledWith({ message: expect.stringContaining("2") });
+    expect(fetchMock).not.toHaveBeenCalled();
+
+    modal.confirm.mockResolvedValue(true);
+    submitBtn().click();
+    await flushPromises();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("falls back to window.confirm when modal.js is not loaded", async () => {
     const fetchMock = mockFetch();
     const confirmMock = vi.fn().mockReturnValue(false);
     vi.stubGlobal("confirm", confirmMock);
@@ -215,6 +245,35 @@ describe("exam.js – submit", () => {
 
     confirmMock.mockReturnValue(true);
     submitBtn().click();
+    await flushPromises();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not double-submit when confirming after the timer already submitted", async () => {
+    const fetchMock = mockFetch();
+    let resolveConfirm: (value: boolean) => void = () => {};
+    const modal = {
+      confirm: vi.fn().mockReturnValue(
+        new Promise<boolean>((resolve) => {
+          resolveConfirm = resolve;
+        })
+      ),
+      alert: vi.fn().mockResolvedValue(undefined),
+      dismissAll: vi.fn(),
+    };
+    vi.stubGlobal("modal", modal);
+    setupDOM({ durationSeconds: 3 });
+    clickOption(0, "a");
+    submitBtn().click();
+
+    // Time runs out while the confirm dialog is still open.
+    vi.advanceTimersByTime(3000);
+    await flushPromises();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    // The stale confirm dialog is closed when the results render.
+    expect(modal.dismissAll).toHaveBeenCalled();
+
+    resolveConfirm(true);
     await flushPromises();
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
@@ -332,6 +391,7 @@ describe("exam.js – timer", () => {
     const fetchMock = mockFetch(passResponse({ score: 1, passed: false }));
     const confirmMock = vi.fn();
     vi.stubGlobal("confirm", confirmMock);
+    const modal = stubModal();
     setupDOM({ durationSeconds: 3 });
     clickOption(0, "a");
 
@@ -339,6 +399,7 @@ describe("exam.js – timer", () => {
     await flushPromises();
 
     expect(confirmMock).not.toHaveBeenCalled();
+    expect(modal.confirm).not.toHaveBeenCalled();
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const body = JSON.parse(fetchMock.mock.calls[0][1].body);
     expect(body.answers).toEqual([{ question_id: "q1", selected_option: "a" }]);

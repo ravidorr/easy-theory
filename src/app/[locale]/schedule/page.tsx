@@ -123,6 +123,7 @@ export default async function SchedulePage() {
         </div>
       </main>
 
+      <Script src="/js/modal.js" strategy="afterInteractive" />
       <Script src="/js/push.js" strategy="afterInteractive" />
       <Script src="/js/schedule.js" strategy="afterInteractive" />
     </>

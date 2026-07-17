@@ -333,37 +333,26 @@
 
   function buildMedalModal(meta) {
     const scrim = document.createElement('div');
-    Object.assign(scrim.style, {
-      position: 'fixed', inset: '0', zIndex: '100',
-      background: 'rgba(24,32,60,0.45)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px',
-    });
+    scrim.className = 'modal-scrim';
 
     const card = document.createElement('div');
+    card.className = 'modal-card';
     card.setAttribute('role', 'dialog');
     card.setAttribute('aria-modal', 'true');
     card.setAttribute('aria-label', t.medalModalLabel || 'מדליה חדשה');
-    Object.assign(card.style, {
-      background: 'var(--surface)', borderRadius: 'var(--radius-2xl)',
-      boxShadow: 'var(--shadow-pop)', padding: '32px 28px 24px',
-      width: '100%', maxWidth: '320px', boxSizing: 'border-box',
-      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px',
-      textAlign: 'center', fontFamily: 'var(--font-ui)',
-      animation: 'medal-pop var(--dur-med) var(--ease-spring)',
-    });
 
     card.innerHTML =
-      '<div style="display:inline-flex;flex-direction:column;align-items:center;gap:8px;">' +
-        '<div style="width:76px;height:76px;border-radius:50%;background:var(--gold-soft);color:var(--gold-text);border:3px solid var(--gold);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-card);">' +
+      '<div class="medal-modal-figure">' +
+        '<div class="medal-modal-badge">' +
           '<svg width="32" height="32" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1.5c.4 2.2 3.1 3.4 3.9 5.8.9 2.7-.8 6-3.9 6s-4.8-3.3-3.9-6c.4-1.3 1.4-2.2 2.2-3.2.8-1 1.5-1.7 1.7-2.6z"/><circle cx="8" cy="10.6" r="2.1" fill="var(--gold-soft)" opacity="0.85"/></svg>' +
         '</div>' +
-        '<span style="font-size:var(--type-caption-size);font-weight:600;color:var(--gold-text);">' + meta.label + '</span>' +
+        '<span class="medal-modal-label">' + meta.label + '</span>' +
       '</div>' +
-      '<div style="display:flex;flex-direction:column;gap:4px;">' +
-        '<h2 style="margin:0;font-size:var(--type-h2-size);font-weight:var(--type-h2-weight);color:var(--text);">' + (t.medalModalTitle || 'מדליה חדשה!') + '</h2>' +
-        '<span style="font-size:var(--type-small-size);color:var(--text-muted);line-height:var(--line-body);">' + meta.description + '</span>' +
+      '<div class="modal-text">' +
+        '<h2 class="modal-title">' + (t.medalModalTitle || 'מדליה חדשה!') + '</h2>' +
+        '<span class="modal-message">' + meta.description + '</span>' +
       '</div>' +
-      '<button style="font-family:var(--font-ui);font-weight:700;font-size:15.5px;min-height:var(--hit-min);padding:10px 22px;width:100%;border-radius:var(--radius-lg);border:1px solid transparent;cursor:pointer;background:var(--primary);color:var(--text-on-primary);box-shadow:var(--shadow-press);">' + (t.medalModalBtn || 'מעולה, נמשיך!') + '</button>';
+      '<button type="button" class="btn-primary">' + (t.medalModalBtn || 'מעולה, נמשיך!') + '</button>';
 
     function dismiss() {
       document.body.removeChild(scrim);

@@ -32,6 +32,12 @@
     return "/" + locale;
   }
 
+  function showAlert(message) {
+    if (window.modal) return window.modal.alert({ message: message });
+    alert(message);
+    return Promise.resolve();
+  }
+
   function updateSummary() {
     if (daysLabel) {
       daysLabel.textContent = selectedDays.size > 0
@@ -95,7 +101,7 @@
 
   saveBtn.addEventListener("click", async function () {
     if (selectedDays.size === 0) {
-      alert(t.needDay || "יש לבחור לפחות יום אחד ללמוד.");
+      await showAlert(t.needDay || "יש לבחור לפחות יום אחד ללמוד.");
       return;
     }
 
@@ -125,9 +131,12 @@
         window.location.href = scheduleHomePath();
       }, 800);
     } catch {
-      alert(t.saveError || "שגיאה בשמירה, אפשר לנסות שוב.");
+      // Re-enable and refocus before the alert (disabling blurred the button),
+      // so dismissing the modal returns focus to the save button for a retry.
       saveBtn.disabled = false;
       saveBtn.textContent = originalSaveBtnText;
+      saveBtn.focus();
+      await showAlert(t.saveError || "שגיאה בשמירה, אפשר לנסות שוב.");
     }
   });
 })();

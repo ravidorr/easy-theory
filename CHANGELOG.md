@@ -3,6 +3,13 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.170] — 2026-07-18
+
+### Changed
+- Replaced the native `window.confirm`/`alert` dialogs with an app-styled, accessible modal. A new `public/js/modal.js` exposes Promise-returning `window.modal.confirm`/`window.modal.alert` helpers that build a `role="dialog"` card (`aria-modal`, `aria-label`/`aria-labelledby`, Tab/Shift+Tab focus trap, Escape and backdrop dismissal, focus restore to the opener) styled by new global `.modal-scrim`/`.modal-card`/`.modal-text`/`.modal-title`/`.modal-message`/`.modal-actions` classes in `globals.css` (global because module CSS cannot reach vanilla-JS-built DOM); buttons reuse the existing `btn-primary`/`btn-secondary`. The exam submit confirmation (`exam.js` `submit()` is now async and awaits the confirm, re-checking the submit guards after the await so a timer expiry during an open dialog cannot double-submit) and both schedule alerts (`needDay`, `saveError` — the save button now re-enables before the error alert so focus restore lands on it) go through the new modal, keeping a native-dialog fallback if `modal.js` has not loaded. `buildMedalModal` in `quiz.js` was refactored onto the same classes plus `.medal-modal-figure`/`.medal-modal-badge`/`.medal-modal-label`, removing its inline styles. New `JS.Modal` namespace (`modalConfirmBtn`, `modalCancelBtn`) in he + ar, flattened into `window.__t` by the locale layout; `modal.js` loads via `<Script>` on the exam-run and schedule pages. New `modal-script.test.ts` covers resolution values, dismissal paths, aria wiring, focus trap, and focus restore; the exam/schedule script tests now stub `window.modal` with explicit native-fallback cases kept. (TODO: replace native JavaScript dialogs with a modal component)
+
+---
+
 ## [0.3.169] — 2026-07-17
 
 ### Changed

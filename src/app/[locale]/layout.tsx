@@ -59,19 +59,18 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   // Flatten JS translations for vanilla JS files
+  const js = (messages as Record<string, unknown>).JS as Record<
+    string,
+    Record<string, string>
+  >;
   const jsT = {
-    ...((messages as Record<string, unknown>).JS as Record<string, Record<string, string>>)
-      .Auth,
-    ...((messages as Record<string, unknown>).JS as Record<string, Record<string, string>>)
-      .Quiz,
-    ...((messages as Record<string, unknown>).JS as Record<string, Record<string, string>>)
-      .Schedule,
-    ...((messages as Record<string, unknown>).JS as Record<string, Record<string, string>>)
-      .Flashcard,
-    ...((messages as Record<string, unknown>).JS as Record<string, Record<string, string>>)
-      .Exam,
-    ...((messages as Record<string, unknown>).JS as Record<string, Record<string, string>>)
-      .Bookmark,
+    ...js.Auth,
+    ...js.Quiz,
+    ...js.Schedule,
+    ...js.Flashcard,
+    ...js.Exam,
+    ...js.Bookmark,
+    ...js.Modal,
   };
 
   return (

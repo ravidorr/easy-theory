@@ -438,6 +438,10 @@
     },
     "Bookmark": {
       "bookmarkSaveError": "שגיאה בשמירה, שננסה שוב?"
+    },
+    "Modal": {
+      "modalConfirmBtn": "אישור",
+      "modalCancelBtn": "ביטול"
     }
   }
 }
