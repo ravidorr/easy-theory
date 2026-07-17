@@ -246,7 +246,6 @@
   flex-shrink: 0;
   display: inline-block;
   cursor: pointer;
-  transition: background 150ms;
 }
 
 .toggleOn {
@@ -281,4 +280,10 @@
   background: transparent;
   color: var(--danger-text);
   align-self: center;
+}
+
+@media (hover: hover) {
+  .logoutBtn:hover {
+    background: var(--danger-soft);
+  }
 }

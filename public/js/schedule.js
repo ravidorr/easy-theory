@@ -50,24 +50,15 @@
       const btn = e.target.closest(".day-btn");
       if (!btn) return;
       const day = parseInt(btn.dataset.day, 10);
+      // Selected styling lives in CSS keyed on [data-selected="true"].
       if (selectedDays.has(day)) {
         selectedDays.delete(day);
         btn.dataset.selected = "false";
         btn.setAttribute("aria-pressed", "false");
-        btn.style.background = "var(--surface)";
-        btn.style.color = "var(--text-muted)";
-        btn.style.border = "1px solid var(--border-strong)";
-        btn.style.fontWeight = "600";
-        btn.style.boxShadow = "none";
       } else {
         selectedDays.add(day);
         btn.dataset.selected = "true";
         btn.setAttribute("aria-pressed", "true");
-        btn.style.background = "var(--primary)";
-        btn.style.color = "#fff";
-        btn.style.border = "1px solid transparent";
-        btn.style.fontWeight = "700";
-        btn.style.boxShadow = "var(--shadow-card)";
       }
       updateSummary();
     });
@@ -82,11 +73,6 @@
         const active = b === btn;
         b.dataset.selected = active ? "true" : "false";
         b.setAttribute("aria-pressed", active ? "true" : "false");
-        b.style.background = active ? "var(--primary)" : "var(--surface)";
-        b.style.color = active ? "#fff" : "var(--text-muted)";
-        b.style.border = active ? "1px solid transparent" : "1px solid var(--border-strong)";
-        b.style.fontWeight = active ? "700" : "600";
-        b.style.boxShadow = active ? "var(--shadow-card)" : "none";
       });
       updateSummary();
     });

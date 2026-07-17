@@ -153,8 +153,14 @@
   text-decoration: none;
 }
 
-.personalLineLink:hover {
-  text-decoration: underline;
+@media (hover: hover) {
+  .personalLineLink:hover {
+    text-decoration: underline;
+  }
+}
+
+.personalLineLink:active {
+  color: var(--primary);
 }
 
 .todayCard {

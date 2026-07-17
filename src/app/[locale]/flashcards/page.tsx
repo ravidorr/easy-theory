@@ -130,7 +130,7 @@ export default async function FlashcardsPage() {
     <>
       <main className={styles.page}>
         <div className={styles.topBar}>
-          <Link href="/" className={styles.backBtn} aria-label={t("backLabel")}>
+          <Link href="/" className={`icon-btn ${styles.backBtn}`} aria-label={t("backLabel")}>
             →
           </Link>
           <div className={styles.topBarBody}>
@@ -171,7 +171,7 @@ export default async function FlashcardsPage() {
           <button id="fc-no" className={`btn-secondary ${styles.btnSecondaryFlex}`}>
             {t("btnNo")}
           </button>
-          <button id="fc-yes" className={styles.btnYes}>
+          <button id="fc-yes" className={`pressable ${styles.btnYes}`}>
             {t("btnYes")}
           </button>
         </div>

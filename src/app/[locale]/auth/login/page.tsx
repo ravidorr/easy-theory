@@ -107,7 +107,7 @@ export default async function LoginPage({
               <br />
               {t("sentHintBrowser")}
             </p>
-            <button id="resend-btn" className={styles.resendBtn}>
+            <button id="resend-btn" className={`pressable ${styles.resendBtn}`}>
               {t("resendBtn")}
             </button>
             <span

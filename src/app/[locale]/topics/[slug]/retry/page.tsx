@@ -179,7 +179,7 @@ export default async function RetryMistakesPage({
         className={styles.page}
       >
         <div className={styles.topBar}>
-          <Link href={`/topics/${slug}/review`} className={styles.closeBtn} aria-label={tQuiz("closeLabel")}>
+          <Link href={`/topics/${slug}/review`} className={`icon-btn ${styles.closeBtn}`} aria-label={tQuiz("closeLabel")}>
             ✕
           </Link>
           <div className={styles.progressTrack}>

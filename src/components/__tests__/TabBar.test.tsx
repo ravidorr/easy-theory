@@ -50,6 +50,13 @@ describe("TabBar", () => {
     expect(pills).toHaveLength(tabs.length);
   });
 
+  it("gives every tab the shared press-feedback class", async () => {
+    render(await TabBar({ active: "home" }));
+    for (const { label } of tabs) {
+      expect(screen.getByText(label).closest("a")).toHaveClass("pressable");
+    }
+  });
+
   it("marks only the active tab with aria-current", async () => {
     render(await TabBar({ active: "videos" }));
     expect(screen.getByText("סרטונים").closest("a")).toHaveAttribute("aria-current", "page");

@@ -95,10 +95,15 @@ body {
   width: 100%;
   text-align: right;
   font-family: var(--font-ui);
-  transition: border-color 120ms, background 120ms;
+  transition: border-color 120ms, background 120ms, transform var(--dur-fast) var(--ease-out);
 }
 
-.quiz-option:hover { border-color: var(--primary); }
+@media (hover: hover) {
+  .quiz-option:hover { border-color: var(--primary); }
+}
+
+/* Element-qualified: the review page renders inert divs with this class. */
+button.quiz-option:active { transform: scale(0.985); }
 
 .quiz-option[data-state="selected"] {
   border-color: var(--primary);
@@ -193,10 +198,14 @@ body {
   justify-content: center;
   cursor: pointer;
   color: var(--text-muted);
-  transition: color 120ms;
+  transition: color 120ms, transform var(--dur-fast) var(--ease-spring);
 }
 
-.bookmark-toggle:hover { color: var(--primary); }
+@media (hover: hover) {
+  .bookmark-toggle:hover { color: var(--primary); }
+}
+
+.bookmark-toggle:active { transform: scale(0.85); }
 
 .bookmark-toggle[aria-pressed="true"] {
   color: var(--primary);
@@ -231,7 +240,9 @@ body {
   width: 100%;
 }
 
-.btn-primary:hover { background: var(--primary-hover); }
+@media (hover: hover) {
+  .btn-primary:hover { background: var(--primary-hover); }
+}
 
 .btn-primary:active {
   transform: translateY(2px);
@@ -274,10 +285,17 @@ body {
   justify-content: center;
   background: var(--surface);
   color: var(--text);
-  transition: background 120ms;
+  transition: background 120ms, transform 80ms;
 }
 
-.btn-secondary:hover { background: var(--surface-2); }
+@media (hover: hover) {
+  .btn-secondary:hover { background: var(--surface-2); }
+}
+
+.btn-secondary:active {
+  transform: translateY(1px) scale(0.98);
+  background: var(--surface-3);
+}
 
 a.btn-primary,
 a.btn-secondary {
@@ -295,4 +313,79 @@ a.btn-secondary {
   clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
+}
+
+/* ── Interaction utilities ───────────────────────────────────────
+   Shared hover/press feedback. Added to elements alongside their
+   module class, e.g. className={`icon-btn ${styles.closeBtn}`}.
+   Do not apply to elements whose base rule sets `transform`, and do
+   not re-declare `transition` in the module rule: module CSS is
+   emitted after globals, so the shorthand would replace this one
+   (including the reduced-motion override below). */
+.pressable,
+.pressable-card,
+.pressable-row,
+.icon-btn {
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+/* Spring easing on the press scale only; colors keep the plain ease-out. */
+.icon-btn {
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-spring);
+}
+
+.pressable:active { transform: scale(0.96); }
+
+.icon-btn:active { transform: scale(0.9); }
+
+.pressable-card:active {
+  transform: translateY(1px) scale(0.99);
+  box-shadow: var(--shadow-card);
+}
+
+.pressable-row:active { background: var(--surface-3); }
+
+@media (hover: hover) {
+  .icon-btn:hover {
+    background: var(--surface-2);
+    color: var(--text);
+  }
+
+  .pressable-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-pop);
+  }
+
+  .pressable-row:hover { background: var(--surface-2); }
+}
+
+/* Press feedback stays under reduced motion (a discrete state change,
+   not decorative motion), but it snaps instead of easing and the
+   card hover lift is removed. */
+@media (prefers-reduced-motion: reduce) {
+  .pressable,
+  .pressable-card,
+  .pressable-row,
+  .icon-btn,
+  .btn-primary,
+  .btn-secondary,
+  .quiz-option,
+  .bookmark-toggle {
+    transition-duration: 0.01ms;
+  }
+
+  .pressable-card:hover {
+    transform: none;
+    box-shadow: var(--shadow-card);
+  }
 }

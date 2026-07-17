@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.161] — 2026-07-17
+
+### Changed
+- Every interactive element now has hover and press feedback. Four shared utility classes in `globals.css` carry the treatments, added alongside the existing module class in JSX (the `btn-primary ${styles.x}` idiom): `pressable` (scale 0.96 press) for pills, toggles, tab items, and segment options; `icon-btn` (surface tint on hover, springy scale 0.9 press — the spring easing is scoped to `transform` only, since applied to the whole shorthand it made colors overshoot) for the circular back/close buttons; `pressable-card` (2px hover lift to `--shadow-pop`, press settles back to `--shadow-card`) for the clickable cards on home, videos, resources, credits, and next-topic; and `pressable-row` (surface tint) for the More-page nav rows. `btn-secondary` gained the press it was missing, and `quiz-option`/`bookmark-toggle` gained presses to match their existing hovers — the quiz press is element-qualified (`button.quiz-option`) so the review page's inert result divs don't depress. All hover rules, new and pre-existing, are wrapped in `@media (hover: hover)` so touch devices never get sticky hover (`:active` is the touch feedback), and one reduced-motion block collapses the transition durations while keeping the discrete press states; module rules deliberately do not re-declare `transition`, because the module shorthand would silently shadow the utility's and defeat that block (the review caught exactly this in five modules). The schedule day/duration pickers needed the deepest fix: `schedule.js` painted selection with inline styles that permanently beat any hover rule after the first click, so selection styling moved to CSS keyed on the `data-selected` attribute the script already maintains, the inline writes were deleted, and the server-side `btnDaySelected`/`btnDurationActive` ternary classes became redundant and were removed. Smaller review catches: the resend-OTP hover is gated on `:not(:disabled)` (auth.js disables it mid-request), the flashcards Yes button hovers via a `color-mix` darkening instead of a layer-promoting `filter: brightness()`, and the review scope toggle hovers to `--surface-3` because its track is already `--surface-2`. Verified live in the QA environment on `/he` and `/ar` (RTL transforms are Y-axis/uniform-scale only), including hover-after-interaction on the schedule pickers and reduced-motion emulation. (TODO: hover/press states everywhere)
+
+---
+
 ## [0.3.160] — 2026-07-17
 
 ### Changed

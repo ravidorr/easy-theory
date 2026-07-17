@@ -20,7 +20,7 @@ export default async function CreditsPage() {
   return (
     <main className={styles.page}>
       <div className={styles.topBar}>
-        <Link href="/more" className={styles.backBtn} aria-label={t("backLabel")}>→</Link>
+        <Link href="/more" className={`icon-btn ${styles.backBtn}`} aria-label={t("backLabel")}>→</Link>
         <div className={styles.titleCol}>
           <h1>{t("pageTitle")}</h1>
           <span className={styles.subtitle}>{t("subtitle")}</span>
@@ -34,7 +34,7 @@ export default async function CreditsPage() {
           href="https://www.gov.il/he/departments/dynamiccollectors/theoryexamhe_data"
           target="_blank"
           rel="noopener noreferrer"
-          className={styles.resourceLink}
+          className={`pressable-card ${styles.resourceLink}`}
         >
           <div className={`${styles.iconWrap} ${styles.iconWrapPrimary}`}>?</div>
           <div className={styles.resourceBody}>
@@ -48,7 +48,7 @@ export default async function CreditsPage() {
           href="https://www.gov.il/he/pages/tamrurim_7924_01_18"
           target="_blank"
           rel="noopener noreferrer"
-          className={styles.resourceLink}
+          className={`pressable-card ${styles.resourceLink}`}
         >
           <div className={`${styles.iconWrap} ${styles.iconWrapNeutral}`}>
             <SignImage src="/signs/sign-301.png" size="xs" />
@@ -64,7 +64,7 @@ export default async function CreditsPage() {
           href="https://commons.wikimedia.org/wiki/Road_signs_in_Israel"
           target="_blank"
           rel="noopener noreferrer"
-          className={styles.resourceLink}
+          className={`pressable-card ${styles.resourceLink}`}
         >
           <div className={`${styles.iconWrap} ${styles.iconWrapMuted}`}>W</div>
           <div className={styles.resourceBody}>
@@ -82,7 +82,7 @@ export default async function CreditsPage() {
           href="https://nextjs.org"
           target="_blank"
           rel="noopener noreferrer"
-          className={styles.resourceLink}
+          className={`pressable-card ${styles.resourceLink}`}
         >
           <div className={`${styles.iconWrap} ${styles.iconWrapPrimary}`}>N</div>
           <div className={styles.resourceBody}>
@@ -96,7 +96,7 @@ export default async function CreditsPage() {
           href="https://supabase.com"
           target="_blank"
           rel="noopener noreferrer"
-          className={styles.resourceLink}
+          className={`pressable-card ${styles.resourceLink}`}
         >
           <div className={`${styles.iconWrap} ${styles.iconWrapSuccess}`}>S</div>
           <div className={styles.resourceBody}>
@@ -110,7 +110,7 @@ export default async function CreditsPage() {
           href="https://deepmind.google/technologies/gemini/"
           target="_blank"
           rel="noopener noreferrer"
-          className={styles.resourceLink}
+          className={`pressable-card ${styles.resourceLink}`}
         >
           <div className={`${styles.iconWrap} ${styles.iconWrapMuted}`}>G</div>
           <div className={styles.resourceBody}>
@@ -124,7 +124,7 @@ export default async function CreditsPage() {
           href="https://fonts.google.com/specimen/Rubik"
           target="_blank"
           rel="noopener noreferrer"
-          className={styles.resourceLink}
+          className={`pressable-card ${styles.resourceLink}`}
         >
           <div className={`${styles.iconWrap} ${styles.iconWrapMuted}`}>R</div>
           <div className={styles.resourceBody}>

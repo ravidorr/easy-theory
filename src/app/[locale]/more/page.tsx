@@ -174,7 +174,7 @@ export default async function MorePage() {
         </div>
 
         <div className={styles.navCard}>
-          <Link href="/exam" className={`${styles.navRow} ${styles.navRowBordered}`}>
+          <Link href="/exam" className={`pressable-row ${styles.navRow} ${styles.navRowBordered}`}>
             <span className={styles.navIcon}>
               <Icon name="timer" size={20} />
             </span>
@@ -182,7 +182,7 @@ export default async function MorePage() {
             <Icon name="chevron-left" size={18} className={styles.navChevron} />
           </Link>
 
-          <Link href="/schedule" className={`${styles.navRow} ${styles.navRowBordered}`}>
+          <Link href="/schedule" className={`pressable-row ${styles.navRow} ${styles.navRowBordered}`}>
             <span className={styles.navIcon}>
               <Icon name="calendar" size={20} />
             </span>
@@ -190,7 +190,7 @@ export default async function MorePage() {
             <Icon name="chevron-left" size={18} className={styles.navChevron} />
           </Link>
 
-          <Link href="/bookmarks" className={`${styles.navRow} ${styles.navRowBordered}`}>
+          <Link href="/bookmarks" className={`pressable-row ${styles.navRow} ${styles.navRowBordered}`}>
             <span className={styles.navIcon}>
               <Icon name="bookmark" size={20} />
             </span>
@@ -198,7 +198,7 @@ export default async function MorePage() {
             <Icon name="chevron-left" size={18} className={styles.navChevron} />
           </Link>
 
-          <Link href="/credits" className={styles.navRow}>
+          <Link href="/credits" className={`pressable-row ${styles.navRow}`}>
             <span className={styles.navIcon}>
               <Icon name="heart" size={20} />
             </span>
@@ -236,7 +236,7 @@ export default async function MorePage() {
               id="dark-mode-toggle"
               role="switch"
               aria-checked={isDark ? "true" : "false"}
-              className={`${styles.toggle} ${isDark ? styles.toggleOn : ""}`}
+              className={`pressable ${styles.toggle} ${isDark ? styles.toggleOn : ""}`}
             >
               <span className={`${styles.toggleThumb} ${isDark ? styles.toggleThumbOn : ""}`} />
             </span>
@@ -251,7 +251,7 @@ export default async function MorePage() {
               id="auto-advance-toggle"
               role="switch"
               aria-checked={autoAdvanceOn ? "true" : "false"}
-              className={`${styles.toggle} ${autoAdvanceOn ? styles.toggleOn : ""}`}
+              className={`pressable ${styles.toggle} ${autoAdvanceOn ? styles.toggleOn : ""}`}
             >
               <span
                 className={`${styles.toggleThumb} ${autoAdvanceOn ? styles.toggleThumbOn : ""}`}
@@ -268,7 +268,7 @@ export default async function MorePage() {
           </div>
         </div>
 
-        <button id="logout-btn" className={styles.logoutBtn}>
+        <button id="logout-btn" className={`pressable ${styles.logoutBtn}`}>
           {t("logoutBtn")}
         </button>
       </main>

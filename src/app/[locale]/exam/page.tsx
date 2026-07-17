@@ -38,7 +38,7 @@ export default async function ExamPage() {
   return (
     <main className={styles.page}>
       <div className={styles.topBar}>
-        <Link href="/" className={styles.closeBtn} aria-label={t("closeLabel")}>
+        <Link href="/" className={`icon-btn ${styles.closeBtn}`} aria-label={t("closeLabel")}>
           ✕
         </Link>
       </div>

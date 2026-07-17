@@ -50,7 +50,7 @@ export async function TabBar({ active }: { active: ActiveTab }) {
             key={tab.key}
             href={tab.href}
             aria-current={isActive ? "page" : undefined}
-            className={styles.navItem}
+            className={`pressable ${styles.navItem}`}
           >
             <span className={styles.iconPill}>{tab.icon}</span>
             <span className={styles.navLabel}>{tab.label}</span>

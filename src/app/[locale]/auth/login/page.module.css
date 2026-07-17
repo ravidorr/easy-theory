@@ -178,6 +178,13 @@
   color: var(--text-muted);
 }
 
+@media (hover: hover) {
+  .resendBtn:not(:disabled):hover {
+    background: var(--surface-2);
+    color: var(--text);
+  }
+}
+
 .resendMsg {
   font-size: var(--type-small-size);
 }

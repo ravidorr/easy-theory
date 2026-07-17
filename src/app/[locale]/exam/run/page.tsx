@@ -157,7 +157,7 @@ export default async function ExamRunPage() {
         className={styles.page}
       >
         <div className={styles.topBar}>
-          <Link href="/exam" className={styles.closeBtn} aria-label={t("closeLabel")}>
+          <Link href="/exam" className={`icon-btn ${styles.closeBtn}`} aria-label={t("closeLabel")}>
             ✕
           </Link>
           <div className={styles.progressTrack}>

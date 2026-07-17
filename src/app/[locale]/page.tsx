@@ -268,7 +268,7 @@ export default async function HomePage() {
 
   const examCta = (
     <Link href="/exam" className={styles.noUnderline}>
-      <div className={styles.examCta}>
+      <div className={`pressable-card ${styles.examCta}`}>
         <span className={styles.examCtaIcon}>
           <Icon name="timer" size={22} />
         </span>
@@ -564,7 +564,7 @@ export default async function HomePage() {
                   href={`/topics/${topic.slug}`}
                   className={styles.noUnderline}
                 >
-                  <div className={styles.topicLink}>
+                  <div className={`pressable-card ${styles.topicLink}`}>
                     {topic.icon && (
                       <div className={styles.topicIconWrap}>
                         <Image src={topic.icon} alt="" width={34} height={34} className={styles.topicIconImg} />
@@ -636,7 +636,7 @@ export default async function HomePage() {
                 href={`/topics/${topic.slug}`}
                 className={styles.noUnderline}
               >
-                <div className={styles.topicLink} data-complete={meta.done || undefined}>
+                <div className={`pressable-card ${styles.topicLink}`} data-complete={meta.done || undefined}>
                   {topic.icon && (
                     <div className={styles.topicIconWrap}>
                       <Image src={topic.icon} alt="" width={34} height={34} className={styles.topicIconImg} />

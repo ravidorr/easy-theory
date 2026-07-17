@@ -202,7 +202,7 @@ export default async function ReviewPage({
   return (
     <main className={styles.page}>
       <div className={styles.topBar}>
-        <Link href={`/topics/${slug}`} className={styles.closeBtn} aria-label={tQuiz("closeLabel")}>
+        <Link href={`/topics/${slug}`} className={`icon-btn ${styles.closeBtn}`} aria-label={tQuiz("closeLabel")}>
           ✕
         </Link>
         <h1>{t("topBarTitle")}</h1>
@@ -211,7 +211,7 @@ export default async function ReviewPage({
       <div className={styles.scopeToggle} role="group" aria-label={t("scopeLabel")}>
         <Link
           href={`/topics/${slug}/review`}
-          className={styles.scopeOption}
+          className={`pressable ${styles.scopeOption}`}
           data-active={scope === "lastSession" || undefined}
           aria-current={scope === "lastSession" ? "page" : undefined}
         >
@@ -219,7 +219,7 @@ export default async function ReviewPage({
         </Link>
         <Link
           href={`/topics/${slug}/review?scope=all`}
-          className={styles.scopeOption}
+          className={`pressable ${styles.scopeOption}`}
           data-active={scope === "all" || undefined}
           aria-current={scope === "all" ? "page" : undefined}
         >
