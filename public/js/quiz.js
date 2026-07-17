@@ -542,7 +542,7 @@
       const badge = wrongBtn?.querySelector(".quiz-option-badge")?.textContent?.trim() || "";
       const signNum = wrongBtn?.querySelector("span:not(.quiz-option-badge):not(.quiz-option-explanation) span")?.textContent?.trim() || "";
       const suffix = signNum ? tf(t.rewardSignSuffix || ' (תמרור {number})', { number: signNum }) : "";
-      rewardMessage.textContent = (t.rewardWrongPrefix || "בחרת ב־") + badge + suffix + (t.rewardWrongSuffix || " - לא נורא, ננסה שוב בפעם הבאה.");
+      rewardMessage.textContent = (t.rewardWrongPrefix || "בחרנו ב־") + badge + suffix + (t.rewardWrongSuffix || " - לא נורא, ננסה שוב בפעם הבאה.");
     }
 
     return isCorrect;
@@ -553,7 +553,7 @@
       typeof data.error === "string" &&
       data.error.trim().length > 0
       ? data.error
-      : t.saveAnswerError || "לא הצלחנו לשמור את התשובה. אפשר לנסות שוב.";
+      : t.saveAnswerError || "לא הצלחנו לשמור את התשובה. ננסה שוב.";
   }
 
   function setSubmissionErrorState() {
@@ -584,7 +584,7 @@
     setSubmissionErrorState();
     if (rewardMessage) rewardMessage.textContent = message;
     if (actionBtn) {
-      actionBtn.textContent = t.restartQuizBtn || "התחלה מחדש";
+      actionBtn.textContent = t.restartQuizBtn || "נתחיל מחדש";
       setActionAvailable(true);
     }
   }
@@ -628,7 +628,7 @@
     ) {
       if (!submissionSessionKey) {
         showPermanentSubmissionFailure(
-          t.saveAnswerError || "לא הצלחנו לשמור את התשובה. אפשר לנסות שוב."
+          t.saveAnswerError || "לא הצלחנו לשמור את התשובה. ננסה שוב."
         );
         return;
       }
@@ -652,7 +652,7 @@
     } catch {
       if (!scheduleAutoRetry(slide)) {
         showRetryableSubmissionFailure(
-          t.saveAnswerError || "לא הצלחנו לשמור את התשובה. אפשר לנסות שוב."
+          t.saveAnswerError || "לא הצלחנו לשמור את התשובה. ננסה שוב."
         );
       }
       return;
@@ -692,7 +692,7 @@
       const acknowledged = pendingSubmission;
       if (rewardMessage) rewardMessage.textContent = answerFeedback;
       if (data.topic_completed && rewardMessage) {
-        rewardMessage.textContent = t.rewardTopicDone || "כל הכבוד! סיימת את כל הנושא!";
+        rewardMessage.textContent = t.rewardTopicDone || "כל הכבוד! סיימנו את כל הנושא!";
       }
       pendingSubmission = null;
       acknowledgedSubmission = {
@@ -721,7 +721,7 @@
       if (generation !== submissionGeneration) return;
       if (scheduleAutoRetry(slide)) return;
       showRetryableSubmissionFailure(
-        t.saveAnswerError || "לא הצלחנו לשמור את התשובה. אפשר לנסות שוב."
+        t.saveAnswerError || "לא הצלחנו לשמור את התשובה. ננסה שוב."
       );
     });
   }
@@ -757,10 +757,10 @@
       answerPersistence = "failed";
       setSubmissionErrorState();
       if (rewardMessage) {
-        rewardMessage.textContent = t.saveAnswerError || "לא הצלחנו לשמור את התשובה. אפשר לנסות שוב.";
+        rewardMessage.textContent = t.saveAnswerError || "לא הצלחנו לשמור את התשובה. ננסה שוב.";
       }
       if (actionBtn) {
-        actionBtn.textContent = t.retryAnswerBtn || "לנסות שוב";
+        actionBtn.textContent = t.retryAnswerBtn || "ננסה שוב";
         setActionAvailable(true);
       }
     } else {

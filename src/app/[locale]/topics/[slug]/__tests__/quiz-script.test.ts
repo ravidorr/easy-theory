@@ -208,9 +208,9 @@ describe("quiz.js – rejected answer persistence", () => {
       }
     ).__t = {
       savingAnswer: "שומרים...",
-      saveAnswerError: "לא הצלחנו לשמור את התשובה. אפשר לנסות שוב.",
-      retryAnswerBtn: "לנסות שוב",
-      restartQuizBtn: "התחלה מחדש",
+      saveAnswerError: "לא הצלחנו לשמור את התשובה. ננסה שוב.",
+      retryAnswerBtn: "ננסה שוב",
+      restartQuizBtn: "נתחיל מחדש",
     };
   });
 
@@ -257,7 +257,7 @@ describe("quiz.js – rejected answer persistence", () => {
     await flushAsyncWork();
 
     expect(messageText()).toBe("שמירת התשובה נכשלה");
-    expect(actionButton().textContent).toBe("לנסות שוב");
+    expect(actionButton().textContent).toBe("ננסה שוב");
     expect(actionButton().disabled).toBe(false);
 
     clickAction();
@@ -287,7 +287,7 @@ describe("quiz.js – rejected answer persistence", () => {
       await flushAsyncWork();
 
       expect(messageText()).toBe("שגיאת API מקומית");
-      expect(actionButton().textContent).toBe("התחלה מחדש");
+      expect(actionButton().textContent).toBe("נתחיל מחדש");
       expect(actionButton().disabled).toBe(false);
       expect(localStorage.getItem("quiz-resume:v1:u1:t1")).toBeNull();
       expect(fetchCalls("/api/quiz")).toHaveLength(1);
@@ -305,7 +305,7 @@ describe("quiz.js – rejected answer persistence", () => {
     await flushAsyncWork();
 
     expect(messageText()).toBe("לא מחוברת");
-    expect(actionButton().textContent).toBe("התחלה מחדש");
+    expect(actionButton().textContent).toBe("נתחיל מחדש");
     expect(localStorage.getItem("quiz-resume:v1:u1:t1")).toBeNull();
     expect(fetchCalls("/api/quiz")).toHaveLength(1);
   });
@@ -326,7 +326,7 @@ describe("quiz.js – rejected answer persistence", () => {
       await flushAsyncWork();
 
       expect(messageText()).toBe("שגיאה זמנית מקומית");
-      expect(actionButton().textContent).toBe("לנסות שוב");
+      expect(actionButton().textContent).toBe("ננסה שוב");
 
       clickAction();
       await flushAsyncWork();
@@ -374,7 +374,7 @@ describe("quiz.js – rejected answer persistence", () => {
     await flushAsyncWork();
 
     expect(rewardMessageEl().dataset.state).toBe("error");
-    expect(actionButton().textContent).toBe("התחלה מחדש");
+    expect(actionButton().textContent).toBe("נתחיל מחדש");
   });
 
   it("silently retries once when the submission is still in flight server-side", async () => {
@@ -433,7 +433,7 @@ describe("quiz.js – rejected answer persistence", () => {
     expect(fetchCalls("/api/quiz")).toHaveLength(2);
     expect(messageText()).toBe("התשובה עדיין נשמרת");
     expect(rewardMessageEl().dataset.state).toBe("error");
-    expect(actionButton().textContent).toBe("לנסות שוב");
+    expect(actionButton().textContent).toBe("ננסה שוב");
 
     // The retry budget is spent: no further silent attempts.
     vi.advanceTimersByTime(AUTO_RETRY_DELAY_MS * 2);
@@ -442,8 +442,8 @@ describe("quiz.js – rejected answer persistence", () => {
   });
 
   it.each([
-    [400, "התחלה מחדש"],
-    [500, "לנסות שוב"],
+    [400, "נתחיל מחדש"],
+    [500, "ננסה שוב"],
   ])(
     "falls back safely when a %i error body is malformed",
     async (status, expectedAction) => {
@@ -462,7 +462,7 @@ describe("quiz.js – rejected answer persistence", () => {
       clickOption(0, "a");
       await flushAsyncWork();
 
-      expect(messageText()).toBe("לא הצלחנו לשמור את התשובה. אפשר לנסות שוב.");
+      expect(messageText()).toBe("לא הצלחנו לשמור את התשובה. ננסה שוב.");
       expect(actionButton().textContent).toBe(expectedAction);
       if (status === 400) {
         expect(localStorage.getItem("quiz-resume:v1:u1:t1")).toBeNull();
@@ -496,7 +496,7 @@ describe("quiz.js – rejected answer persistence", () => {
     vi.advanceTimersByTime(AUTO_RETRY_DELAY_MS);
     await flushAsyncWork();
 
-    expect(messageText()).toBe("כל הכבוד! סיימת את כל הנושא!");
+    expect(messageText()).toBe("כל הכבוד! סיימנו את כל הנושא!");
     expect(document.querySelector('[role="dialog"]')).not.toBeNull();
     expect(scoreText()).toBe("10");
     expect(fetchCalls("/api/quiz")[1][1].body).toBe(
@@ -536,14 +536,14 @@ describe("quiz.js – rejected answer persistence", () => {
 
     // The first failure retries silently; the failure UI only appears
     // after the auto-retry also fails.
-    expect(actionButton().textContent).not.toBe("לנסות שוב");
+    expect(actionButton().textContent).not.toBe("ננסה שוב");
     vi.advanceTimersByTime(AUTO_RETRY_DELAY_MS);
     await flushAsyncWork();
 
     expect(fetchCalls("/api/quiz")).toHaveLength(2);
-    expect(messageText()).toBe("לא הצלחנו לשמור את התשובה. אפשר לנסות שוב.");
+    expect(messageText()).toBe("לא הצלחנו לשמור את התשובה. ננסה שוב.");
     expect(rewardMessageEl().dataset.state).toBe("error");
-    expect(actionButton().textContent).toBe("לנסות שוב");
+    expect(actionButton().textContent).toBe("ננסה שוב");
     expect(actionButton().disabled).toBe(false);
     expect(slideDisplay(0)).toBe("flex");
   });
@@ -770,7 +770,7 @@ describe("quiz.js – auto-advance", () => {
     vi.advanceTimersByTime(AUTO_ADVANCE_DELAY_MS);
 
     expect(slideDisplay(0)).toBe("flex");
-    expect(messageText()).toBe("כל הכבוד! סיימת את כל הנושא!");
+    expect(messageText()).toBe("כל הכבוד! סיימנו את כל הנושא!");
   });
 
   it("shows the final screen and posts progress when the last question auto-advances", async () => {
@@ -967,7 +967,7 @@ describe("quiz.js – reward score and feedback", () => {
   it("keeps the score and shows the wrong-answer message on a wrong answer", () => {
     clickOption(0, "b");
     expect(scoreText()).toBe("0");
-    expect(messageText()).toContain("בחרת ב־");
+    expect(messageText()).toContain("בחרנו ב־");
     expect(floatEl().hasAttribute("data-animate")).toBe(false);
   });
 
@@ -1055,7 +1055,7 @@ describe("quiz.js – reward score and feedback", () => {
     vi.advanceTimersByTime(TOUCH_DOUBLE_TAP_SUPPRESSION_MS);
 
     expect(actionButton().disabled).toBe(false);
-    expect(actionButton().textContent).toBe("לנסות שוב");
+    expect(actionButton().textContent).toBe("ננסה שוב");
   });
 
   it("uses the touchstart fallback to suppress Safari-style double taps on retry", async () => {
@@ -1376,7 +1376,7 @@ describe("quiz.js – resume", () => {
     setupDOM({ userId: "u1" });
 
     expect(scoreText()).toBe("10");
-    expect(actionButton().textContent).toBe("לנסות שוב");
+    expect(actionButton().textContent).toBe("ננסה שוב");
     expect(actionButton().disabled).toBe(false);
     clickAction();
     await flushAsyncWork();
@@ -1432,7 +1432,7 @@ describe("quiz.js – resume", () => {
     setupDOM({ userId: "u1" });
 
     expect(scoreText()).toBe("0");
-    expect(messageText()).toContain("בחרת ב־");
+    expect(messageText()).toContain("בחרנו ב־");
     expect(actionButton().textContent).toBe("לשאלה הבאה");
     expect(actionButton().disabled).toBe(false);
     expect(fetchCalls("/api/quiz")).toHaveLength(1);
@@ -1534,7 +1534,7 @@ describe("quiz.js – skip answered", () => {
     setupDOM({ userId: "u1", answeredIds: ["q1"] });
     expect(slideDisplay(0)).toBe("flex");
     expect(slideDisplay(1)).toBe("none");
-    expect(actionButton().textContent).toBe("לנסות שוב");
+    expect(actionButton().textContent).toBe("ננסה שוב");
   });
 
   it("bumps a stale resume forward when the saved slide was already answered", () => {
