@@ -3,6 +3,13 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.169] — 2026-07-17
+
+### Changed
+- Replaced every emoji and check/cross glyph hardcoded in the UI with SVG icons, closing out the no-emoji sweep the lint plugin misses (it never visits JSXText and skips the check/cross dingbats). Three icons were added to `src/components/Icon.tsx` (`close`, `warning`, `target`; app-side only — `design-system/icons.svg` is a verbatim export and was not touched): the quiz completion party-popper is now a gold `trophy` (`src/app/[locale]/topics/[slug]/page.tsx`), the retry completion bullseye a gold `target`, the empty mistakes-review party-popper a green `check`, the error boundary warning sign an inline warning svg (inlined rather than importing Icon so the client error chunk does not ship the whole icon map), the homepage mission-ring check glyph a `check` icon, and the six top-bar cross-glyph close buttons a `close` icon (16px on the 32px exam-intro button, 20px on the 44px buttons). Stripped the check glyph from `Flashcards.btnYes` (the button renders a check icon instead) and `Auth.resendSuccess` (plus its hardcoded fallback in `public/js/auth.js`), and the calendar emoji from `Schedule.emailSubject`, in both `messages/he.json` and `messages/ar.json`. Stale `.finalEmoji`/`.emptyEmoji`/`.emoji` classes were renamed to icon names and dead glyph `font-size` rules removed. (TODO: emoji hardcoded in the UI despite the no-emoji policy)
+
+---
+
 ## [0.3.168] — 2026-07-17
 
 ### Fixed

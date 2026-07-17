@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import Script from "next/script";
 import { SignImage } from "@/components/SignImage";
+import { Icon } from "@/components/Icon";
 import { createClient } from "@/lib/supabase";
 import { getSigns, getSignSrsCards } from "@/lib/db";
 import type { Sign, SrsCard } from "@/lib/db";
@@ -173,6 +174,7 @@ export default async function FlashcardsPage() {
           </button>
           <button id="fc-yes" className={`pressable ${styles.btnYes}`}>
             {t("btnYes")}
+            <Icon name="check" size={16} />
           </button>
         </div>
         <span className={styles.footerNote}>{t("footerNote")}</span>

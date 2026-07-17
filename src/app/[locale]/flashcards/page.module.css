@@ -90,6 +90,7 @@
 
 .btnYes {
   flex: 1;
+  gap: 6px;
   font-family: var(--font-ui);
   font-weight: 700;
   font-size: 15.5px;

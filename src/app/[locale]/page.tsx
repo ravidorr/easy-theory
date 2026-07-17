@@ -90,7 +90,7 @@ function MissionRing({
         <circle className={styles.missionRingFill} cx="36" cy="36" r={MISSION_RING_RADIUS} />
       </svg>
       <span className={styles.missionRingValue} aria-hidden="true">
-        {complete ? "✓" : percentText}
+        {complete ? <Icon name="check" size={20} /> : percentText}
       </span>
     </div>
   );

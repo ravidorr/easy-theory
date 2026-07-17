@@ -203,7 +203,7 @@ export default async function ReviewPage({
     <main className={styles.page}>
       <div className={styles.topBar}>
         <Link href={`/topics/${slug}`} className={`icon-btn ${styles.closeBtn}`} aria-label={tQuiz("closeLabel")}>
-          ✕
+          <Icon name="close" size={20} />
         </Link>
         <h1>{t("topBarTitle")}</h1>
       </div>
@@ -229,7 +229,7 @@ export default async function ReviewPage({
 
       {localizedMistakes.length === 0 ? (
         <div className={styles.emptyState}>
-          <span className={styles.emptyEmoji}>🎉</span>
+          <Icon name="check" size={48} className={styles.emptyIcon} />
           <p className={styles.emptyHint}>
             {hasOlderMistakes ? t("emptyHintLastSession") : t("emptyHint")}
           </p>

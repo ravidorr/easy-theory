@@ -156,7 +156,7 @@ export default async function BookmarksPage() {
     <main className={styles.page}>
       <div className={styles.topBar}>
         <Link href="/more" className={`icon-btn ${styles.closeBtn}`} aria-label={tQuiz("closeLabel")}>
-          ✕
+          <Icon name="close" size={20} />
         </Link>
         <h1>{t("topBarTitle")}</h1>
       </div>

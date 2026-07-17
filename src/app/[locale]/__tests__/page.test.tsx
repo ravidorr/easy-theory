@@ -465,7 +465,9 @@ describe("HomePage", () => {
       expect(ring).toHaveAttribute("aria-valuenow", "100");
       const card = within(missionCard());
       expect(card.getByText("missionCompleteLabel")).toBeInTheDocument();
-      expect(card.getByText("✓")).toBeInTheDocument();
+      expect(
+        missionCard().querySelector('[class*="missionRingValue"] svg')
+      ).not.toBeNull();
       expect(card.queryByText(/missionXpReward/)).not.toBeInTheDocument();
       expect(card.queryByText(/topicDurationMinutes/)).not.toBeInTheDocument();
     });
