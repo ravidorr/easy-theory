@@ -3,6 +3,13 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.164] — 2026-07-17
+
+### Changed
+- `TODO.md` rewritten from a flat wish-list into a pre-planned execution document: every one of the 16 items now records its verified root cause, exact file/line references, and a concrete implementation approach, so each item's execution workspace can start with zero re-discovery. A preamble captures the architecture facts the items rely on (vanilla-JS translation injection via `window.__t`, migration numbering, the he+ar string rule), and a closing section gives a suggested execution order with the cross-item conflict hotspots (`messages/*.json`, homepage `page.tsx`, `public/js/*`, migration numbers). Notable corrections over the old list: the Arabic-feedback bug is re-diagnosed as locale-unscoped resume persistence rather than Hebrew fallbacks (the fallbacks never fire on /ar — the rendered Hebrew string is persisted under a locale-unscoped resume key and re-injected verbatim), the sign-126 item gains a second affected question (q369) plus a render-heuristic fix, and stale line references were corrected against the current tree.
+
+---
+
 ## [0.3.163] — 2026-07-17
 
 ### Changed
