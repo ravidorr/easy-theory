@@ -3,6 +3,13 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.166] — 2026-07-17
+
+### Changed
+- Increased the vertical gap between homepage sections from 20px to 24px (`.page` flex gap in `src/app/[locale]/page.module.css`) so the stats strip, today's mission, topics, and readiness cards breathe more; the 96px bottom padding that clears the fixed TabBar is unchanged. (TODO: increase vertical spacing between homepage sections)
+
+---
+
 ## [0.3.165] — 2026-07-17
 
 ### Added
