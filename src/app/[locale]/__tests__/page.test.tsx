@@ -202,6 +202,97 @@ describe("HomePage", () => {
     expect(screen.getByText("examCtaDesc")).toBeInTheDocument();
   });
 
+  describe("exam CTA placement", () => {
+    function precedes(first: Element, second: Element) {
+      return Boolean(
+        first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING
+      );
+    }
+
+    // The examReady greeting line also links to /exam, so the card is pinned
+    // by its title rather than by href.
+    function examCard() {
+      const card = screen.getByText("examCtaTitle").closest("a");
+      expect(card).toHaveAttribute("href", "/exam");
+      return card as Element;
+    }
+
+    it("keeps the exam CTA below the readiness card under 50% completion", async () => {
+      // Defaults: nothing answered of 30 questions → 0% completion.
+      const jsx = await HomePage();
+      render(jsx);
+      expect(precedes(screen.getByText("readinessTitle"), examCard())).toBe(true);
+    });
+
+    it("surfaces the exam CTA above the daily mission at 50% completion or more", async () => {
+      // 15 answered of 30 questions → exactly 50%, the surfacing boundary.
+      mockGetTopicAccuracy.mockResolvedValue([
+        { topic_id: "t1", correct: 10, total: 15 },
+      ]);
+      mockGetProgress.mockResolvedValue([
+        { topic_id: "t1", status: "in_progress", best_score: 50 },
+      ] as never);
+      const jsx = await HomePage();
+      render(jsx);
+      expect(precedes(examCard(), screen.getByText("todayBadge"))).toBe(true);
+      expect(precedes(examCard(), screen.getByText("readinessTitle"))).toBe(true);
+    });
+
+    it("keeps the exam CTA in its lower slot just under the threshold", async () => {
+      // 14 answered of 30 questions → 46%, still below the 50% threshold.
+      mockGetTopicAccuracy.mockResolvedValue([
+        { topic_id: "t1", correct: 9, total: 14 },
+      ]);
+      const jsx = await HomePage();
+      render(jsx);
+      expect(precedes(screen.getByText("readinessTitle"), examCard())).toBe(true);
+    });
+
+    it("surfaces the exam CTA above the empty-state card when no mission remains", async () => {
+      // All topics completed, 15 of 30 answered → 50%, no mission card.
+      mockGetProgress.mockResolvedValue([
+        { topic_id: "t1", status: "completed", best_score: 100 },
+        { topic_id: "t2", status: "completed", best_score: 100 },
+      ] as never);
+      mockGetTopicAccuracy.mockResolvedValue([
+        { topic_id: "t1", correct: 10, total: 15 },
+      ]);
+      const jsx = await HomePage();
+      render(jsx);
+      expect(screen.queryByText("todayBadge")).not.toBeInTheDocument();
+      expect(precedes(examCard(), screen.getByText("emptyStateTitle"))).toBe(true);
+    });
+
+    it("drops the exam-ready greeting line while the exam CTA is surfaced early", async () => {
+      // Two near-perfect attempts → high readiness; 15 of 30 answered → 50%.
+      mockGetExamAttempts.mockResolvedValue([
+        {
+          id: "e1",
+          score: 30,
+          total: 30,
+          passed: true,
+          duration_seconds: 1800,
+          created_at: "2026-07-03",
+        },
+        {
+          id: "e2",
+          score: 29,
+          total: 30,
+          passed: true,
+          duration_seconds: 1800,
+          created_at: "2026-07-02",
+        },
+      ] as never);
+      mockGetTopicAccuracy.mockResolvedValue([
+        { topic_id: "t1", correct: 10, total: 15 },
+      ]);
+      const jsx = await HomePage();
+      const { container } = render(jsx);
+      expect(screen.queryByText("examReadyLine")).not.toBeInTheDocument();
+      expect(container.querySelectorAll('a[href="/exam"]')).toHaveLength(1);
+    });
+  });
+
   it("shows today's task card when there is an in_progress topic", async () => {
     mockGetProgress.mockResolvedValue([
       { topic_id: "t2", status: "in_progress", best_score: 50 },

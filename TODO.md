@@ -1,6 +1,5 @@
 # TODO
 
-- **Surface the exam card earlier.** Once a user completes roughly 50% of the material, move the exam card much higher on the homepage so people don't forget it exists.
 - **Stronger bottom-nav active state.** The current page should be impossible to miss; right now, it feels like five equal buttons, and the icons do all the work.
 - **Animate counters** (XP, points, streak) whenever their values change.
 - **Distinct visual treatment for completed topics** instead of simply changing text.

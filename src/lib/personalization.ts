@@ -186,6 +186,9 @@ export function buildGreetingContext(input: {
   masteredTopicId: string | null;
   remaining: { count: number; percent: number } | null;
   readinessLevel: ReadinessLevel | null;
+  /** When the exam card is surfaced just below the greeting, the exam-ready
+   *  line would duplicate it, so it yields its rotation slot. */
+  examCardSurfaced?: boolean;
   now: Date;
 }): PersonalizedLine[] {
   const lines: PersonalizedLine[] = [];
@@ -200,7 +203,7 @@ export function buildGreetingContext(input: {
   }
 
   const rotating: PersonalizedLine[] = [];
-  if (input.readinessLevel === "high") {
+  if (input.readinessLevel === "high" && !input.examCardSurfaced) {
     rotating.push({ kind: "examReady" });
   }
   if (input.yesterday && input.yesterday.total > 0) {

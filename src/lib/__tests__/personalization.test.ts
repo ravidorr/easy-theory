@@ -322,6 +322,16 @@ describe("buildGreetingContext", () => {
     expect(buildGreetingContext({ ...empty, readinessLevel: "low" })).toEqual([]);
   });
 
+  it("drops the exam-ready line when the exam card is surfaced by the greeting", () => {
+    expect(
+      buildGreetingContext({
+        ...empty,
+        readinessLevel: "high",
+        examCardSurfaced: true,
+      })
+    ).toEqual([]);
+  });
+
   it("shows the remaining line only past the halfway mark and above zero", () => {
     expect(
       buildGreetingContext({ ...empty, remaining: { count: 84, percent: 50 } })
