@@ -1,6 +1,6 @@
 #!/bin/sh
-# Require every commit to include a CHANGELOG.md update and a package.json version bump.
-# Also run all linters.
+# Run all linters on every commit. The CHANGELOG.md + version-bump
+# requirement is enforced once per PR by .husky/pre-push, not per commit.
 
 pnpm lint || exit 1
 pnpm lint:css || exit 1
@@ -8,33 +8,6 @@ pnpm lint:html || exit 1
 pnpm lint:md || exit 1
 
 STAGED=$(git diff --cached --name-only)
-
-if ! echo "$STAGED" | grep -qx "CHANGELOG.md"; then
-  echo ""
-  echo "  pre-commit: CHANGELOG.md must be updated."
-  echo "  Add your change under [Unreleased] and stage the file."
-  echo ""
-  exit 1
-fi
-
-if ! echo "$STAGED" | grep -qx "package.json"; then
-  echo ""
-  echo "  pre-commit: package.json version must be bumped."
-  echo "  Update the version field (semver) and stage the file."
-  echo ""
-  exit 1
-fi
-
-HEAD_VERSION=$(git show HEAD:package.json 2>/dev/null | grep '"version"' | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1 || true)
-STAGED_VERSION=$(git show :package.json 2>/dev/null | grep '"version"' | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1 || true)
-
-if [ -n "$HEAD_VERSION" ] && [ "$HEAD_VERSION" = "$STAGED_VERSION" ]; then
-  echo ""
-  echo "  pre-commit: version in package.json was not bumped (still $STAGED_VERSION)."
-  echo "  Increment following semver: patch (bug fix), minor (new feature), major (breaking)."
-  echo ""
-  exit 1
-fi
 
 # If route files changed and crawler files are not staged, ask whether they need updating.
 ROUTE_CHANGES=$(echo "$STAGED" | grep -E "^app/.*(page|route)\.(ts|tsx)$" || true)

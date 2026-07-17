@@ -1,6 +1,14 @@
 # Changelog
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
+One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
+
+## [0.3.163] — 2026-07-17
+
+### Changed
+- The version-bump and CHANGELOG requirement moved from per commit to per PR. The pre-commit hook now only runs the linters (plus the crawler-files prompt); a new pre-push hook checks each pushed branch as a whole against `origin/main` and rejects the push unless the branch both touches `CHANGELOG.md` and carries a `package.json` version different from main's — so review-fix commits no longer need the soft-reset-and-recommit dance to fold into a release commit. The pre-push check skips branch deletions and pushes of `main` itself, and passes on any bump (it compares versions for inequality, not order, so two in-flight PRs with different numbers both push cleanly; the merge-time renumber flow is unchanged). `CONTRIBUTING.md`'s "Pre-commit hook" section is rewritten as "Git hooks" documenting the per-PR rule, and this file's preamble states it. This entry is numbered 0.3.163 on the assumption that the GlitchTip PR (0.3.162) merges first.
+
+---
 
 ## [0.3.162] — 2026-07-17
 
