@@ -8,6 +8,7 @@ const quizScript = readFileSync(
 );
 const TOUCH_DOUBLE_TAP_SUPPRESSION_MS = 300;
 const AUTO_ADVANCE_DELAY_MS = 900;
+const AUTO_RETRY_DELAY_MS = 1200;
 const FINAL_EXIT_MS = 240;
 const COUNT_UP_MS = 700;
 
@@ -152,12 +153,20 @@ function actionButton() {
   return document.getElementById("quiz-next") as HTMLButtonElement;
 }
 
-function errorResponse(status: number, error: string) {
+function errorResponse(
+  status: number,
+  error: string,
+  extra: Record<string, unknown> = {}
+) {
   return {
     ok: false,
     status,
-    json: async () => ({ error }),
+    json: async () => ({ error, ...extra }),
   };
+}
+
+function rewardMessageEl() {
+  return document.getElementById("reward-message") as HTMLElement;
 }
 
 function fetchCalls(url: string) {
@@ -327,6 +336,111 @@ describe("quiz.js – rejected answer persistence", () => {
     }
   );
 
+  it("marks the failure message as an error and clears it after a successful retry", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(
+          errorResponse(500, "שמירת התשובה נכשלה", {
+            code: "SUBMISSION_FAILED",
+            ref: "ab12cd34",
+          })
+        )
+        .mockResolvedValueOnce({ ok: true, json: async () => ({}) })
+    );
+    setupDOM();
+
+    clickOption(0, "a");
+    await flushAsyncWork();
+
+    expect(rewardMessageEl().dataset.state).toBe("error");
+
+    clickAction();
+    await flushAsyncWork();
+
+    expect(rewardMessageEl().dataset.state).toBeUndefined();
+    expect(actionButton().textContent).toBe("לשאלה הבאה");
+  });
+
+  it("marks a permanent failure message as an error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(errorResponse(400, "פרמטרים שגויים"))
+    );
+    setupDOM({ userId: "u1" });
+
+    clickOption(0, "a");
+    await flushAsyncWork();
+
+    expect(rewardMessageEl().dataset.state).toBe("error");
+    expect(actionButton().textContent).toBe("התחלה מחדש");
+  });
+
+  it("silently retries once when the submission is still in flight server-side", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(
+          errorResponse(503, "התשובה עדיין נשמרת", {
+            code: "SUBMISSION_IN_FLIGHT",
+            ref: "ab12cd34",
+          })
+        )
+        .mockResolvedValueOnce({ ok: true, json: async () => ({}) })
+    );
+    setupDOM();
+
+    // A wrong answer keeps the auto-advance countdown out of the picture.
+    clickOption(0, "b");
+    await flushAsyncWork();
+
+    // No failure UI while the silent retry is pending.
+    expect(fetchCalls("/api/quiz")).toHaveLength(1);
+    expect(rewardMessageEl().dataset.state).toBeUndefined();
+    expect(actionButton().textContent).toBe("שומרים...");
+    expect(actionButton().disabled).toBe(true);
+
+    vi.advanceTimersByTime(AUTO_RETRY_DELAY_MS);
+    await flushAsyncWork();
+
+    expect(fetchCalls("/api/quiz")).toHaveLength(2);
+    expect(fetchCalls("/api/quiz")[1][1].body).toBe(
+      fetchCalls("/api/quiz")[0][1].body
+    );
+    expect(rewardMessageEl().dataset.state).toBeUndefined();
+    expect(actionButton().textContent).toBe("לשאלה הבאה");
+    expect(actionButton().disabled).toBe(false);
+  });
+
+  it("surfaces the failure UI when the in-flight retry fails again", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        errorResponse(503, "התשובה עדיין נשמרת", {
+          code: "SUBMISSION_IN_FLIGHT",
+        })
+      )
+    );
+    setupDOM();
+
+    clickOption(0, "b");
+    await flushAsyncWork();
+    vi.advanceTimersByTime(AUTO_RETRY_DELAY_MS);
+    await flushAsyncWork();
+
+    expect(fetchCalls("/api/quiz")).toHaveLength(2);
+    expect(messageText()).toBe("התשובה עדיין נשמרת");
+    expect(rewardMessageEl().dataset.state).toBe("error");
+    expect(actionButton().textContent).toBe("לנסות שוב");
+
+    // The retry budget is spent: no further silent attempts.
+    vi.advanceTimersByTime(AUTO_RETRY_DELAY_MS * 2);
+    await flushAsyncWork();
+    expect(fetchCalls("/api/quiz")).toHaveLength(2);
+  });
+
   it.each([
     [400, "התחלה מחדש"],
     [500, "לנסות שוב"],
@@ -378,7 +492,8 @@ describe("quiz.js – rejected answer persistence", () => {
 
     clickOption(0, "a");
     await flushAsyncWork();
-    clickAction();
+    // The lost response triggers the single silent auto-retry.
+    vi.advanceTimersByTime(AUTO_RETRY_DELAY_MS);
     await flushAsyncWork();
 
     expect(messageText()).toBe("כל הכבוד! סיימת את כל הנושא!");
@@ -412,14 +527,22 @@ describe("quiz.js – rejected answer persistence", () => {
     });
   });
 
-  it("shows a retry action after a network failure", async () => {
+  it("shows a retry action after a network failure once the silent retry fails too", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
     setupDOM();
 
     clickOption(0, "a");
     await flushAsyncWork();
 
+    // The first failure retries silently; the failure UI only appears
+    // after the auto-retry also fails.
+    expect(actionButton().textContent).not.toBe("לנסות שוב");
+    vi.advanceTimersByTime(AUTO_RETRY_DELAY_MS);
+    await flushAsyncWork();
+
+    expect(fetchCalls("/api/quiz")).toHaveLength(2);
     expect(messageText()).toBe("לא הצלחנו לשמור את התשובה. אפשר לנסות שוב.");
+    expect(rewardMessageEl().dataset.state).toBe("error");
     expect(actionButton().textContent).toBe("לנסות שוב");
     expect(actionButton().disabled).toBe(false);
     expect(slideDisplay(0)).toBe("flex");

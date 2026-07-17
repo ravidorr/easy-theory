@@ -17,6 +17,9 @@
   // Matches the quiz-slide-exit animation (240ms in page.module.css) so the
   // final screen appears right as the last card finishes sliding away.
   const FINAL_EXIT_MS = 240;
+  // One silent retry for transient failures (network blip, submission still
+  // in flight server-side) before surfacing the failure UI.
+  const AUTO_RETRY_DELAY_MS = 1200;
   const COUNT_UP_MS = 700;
 
   const prefersReducedMotion =
@@ -204,6 +207,7 @@
   let actionActivationIsTouch = false;
   let touchAdvanceSuppressed = false;
   let submissionGeneration = 0;
+  let autoRetryUsed = false;
   let autoAdvanceTimer = null;
   let autoAdvanceArmed = false;
   let autoAdvanceElapsed = false;
@@ -562,9 +566,18 @@
       : t.saveAnswerError || "לא הצלחנו לשמור את התשובה. אפשר לנסות שוב.";
   }
 
+  function setSubmissionErrorState() {
+    if (rewardMessage) rewardMessage.dataset.state = "error";
+  }
+
+  function clearSubmissionErrorState() {
+    if (rewardMessage) delete rewardMessage.dataset.state;
+  }
+
   function showRetryableSubmissionFailure(message) {
     answerPersistence = "failed";
     disarmAutoAdvance();
+    setSubmissionErrorState();
     if (rewardMessage) rewardMessage.textContent = message;
     if (actionBtn) {
       actionBtn.textContent = t.retryAnswerBtn || "לנסות שוב";
@@ -578,6 +591,7 @@
     pendingSubmission = null;
     acknowledgedSubmission = null;
     clearResume();
+    setSubmissionErrorState();
     if (rewardMessage) rewardMessage.textContent = message;
     if (actionBtn) {
       actionBtn.textContent = t.restartQuizBtn || "התחלה מחדש";
@@ -585,8 +599,24 @@
     }
   }
 
-  function submitAnswer(slide) {
-    if (answerPersistence === "pending") return;
+  // One transparent retry per user-initiated attempt, keeping the "saving"
+  // button state. Returns false when the retry budget is spent so the caller
+  // falls through to the visible failure UI.
+  function scheduleAutoRetry(slide) {
+    if (autoRetryUsed) return false;
+    autoRetryUsed = true;
+    const generation = submissionGeneration;
+    window.setTimeout(function () {
+      if (generation !== submissionGeneration) return;
+      submitAnswer(slide, true);
+    }, AUTO_RETRY_DELAY_MS);
+    return true;
+  }
+
+  function submitAnswer(slide, isAutoRetry) {
+    if (!isAutoRetry && answerPersistence === "pending") return;
+    if (!isAutoRetry) autoRetryUsed = false;
+    clearSubmissionErrorState();
     answerPersistence = "pending";
     if (actionBtn) {
       if (autoAdvanceArmed) {
@@ -630,9 +660,11 @@
         body: JSON.stringify({ question_id: questionId, selected_option: selectedOption, topic_id: topicId, session_id: sessionId, idempotency_key: idempotencyKey }),
       });
     } catch {
-      showRetryableSubmissionFailure(
-        t.saveAnswerError || "לא הצלחנו לשמור את התשובה. אפשר לנסות שוב."
-      );
+      if (!scheduleAutoRetry(slide)) {
+        showRetryableSubmissionFailure(
+          t.saveAnswerError || "לא הצלחנו לשמור את התשובה. אפשר לנסות שוב."
+        );
+      }
       return;
     }
 
@@ -647,6 +679,14 @@
           : Promise.resolve({});
       return errorBody.then(function (data) {
         const message = submissionErrorMessage(data);
+        const code = data && typeof data.code === "string" ? data.code : "";
+        // The server saw a concurrent identical submission still in flight;
+        // a moment later the stored result replays, so retry silently once.
+        if (code === "SUBMISSION_IN_FLIGHT") {
+          if (scheduleAutoRetry(slide)) return null;
+          showRetryableSubmissionFailure(message);
+          return null;
+        }
         if (res.status === 429 || res.status >= 500) {
           showRetryableSubmissionFailure(message);
         } else {
@@ -658,6 +698,7 @@
       if (generation !== submissionGeneration) return;
       if (data === null) return;
       answerPersistence = "succeeded";
+      clearSubmissionErrorState();
       const acknowledged = pendingSubmission;
       if (rewardMessage) rewardMessage.textContent = answerFeedback;
       if (data.topic_completed && rewardMessage) {
@@ -688,6 +729,7 @@
       maybeAutoAdvance();
     }).catch(function () {
       if (generation !== submissionGeneration) return;
+      if (scheduleAutoRetry(slide)) return;
       showRetryableSubmissionFailure(
         t.saveAnswerError || "לא הצלחנו לשמור את התשובה. אפשר לנסות שוב."
       );
@@ -723,6 +765,7 @@
 
     if (pendingSubmission) {
       answerPersistence = "failed";
+      setSubmissionErrorState();
       if (rewardMessage) {
         rewardMessage.textContent = t.saveAnswerError || "לא הצלחנו לשמור את התשובה. אפשר לנסות שוב.";
       }
@@ -749,6 +792,7 @@
     if (answerPersistence !== "succeeded") return;
     if (currentIndex >= total) return;
     disarmAutoAdvance();
+    clearSubmissionErrorState();
     hideAutoAdvanceHint();
     acknowledgedSubmission = null;
     currentIndex++;

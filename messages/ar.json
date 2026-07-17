@@ -324,6 +324,7 @@
     "progressSaveFailed": "فشل حفظ التقدّم",
     "examSaveFailed": "فشل حفظ الامتحان",
     "answerSaveFailed": "فشل حفظ الإجابة",
+    "answerSaveInFlight": "لا تزال الإجابة قيد الحفظ، يمكن المحاولة مجدداً بعد لحظة",
     "srsSaveFailed": "فشل حفظ المراجعة",
     "questionNotFound": "السؤال غير موجود",
     "topicNotFound": "الموضوع غير موجود",

@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.158] — 2026-07-17
+
+### Fixed
+- Quiz answer-save failures are no longer a dead end with an unexplained "שמירת התשובה נכשלה". The `/api/quiz` route now maps every known `submit_quiz_answer` exception to a proper status plus a machine-readable `code` (added `not_authenticated` → 401 and `invalid_quiz_submission` → 400 to the four already mapped), and gives the previously unmapped `idempotency_result_missing` race its own retryable 503 `SUBMISSION_IN_FLIGHT` with a new `Api.answerSaveInFlight` message (he + ar). Opaque 500/503 responses carry an 8-char correlation `ref` that is also embedded in a structured `console.error` (user, question, idempotency key, raw Postgres message/code/details/hint), so a failure captured in the browser's network tab can be matched to the exact Vercel log line — previously the real cause was swallowed into one generic string. Client-side, quiz.js styles the failure message as an actual error (`data-state="error"` on `#reward-message`, `--danger-text` + bold, cleared on retry/success/advance) instead of muted grey text, and adds a single silent auto-retry (1.2s, budget of one per user action) for network failures and the 503 in-flight race, keeping the "שומרים..." state so transient blips recover unnoticed; persistent 500s still surface the retry button immediately and 429s are never auto-retried, preserving the no-advance-on-unsaved-answers guarantee. Route tests now pin the full error table, ref format, and structured log; quiz-script tests cover the error styling lifecycle, the single auto-retry, and the spent retry budget.
+
+---
+
 ## [0.3.157] — 2026-07-17
 
 ### Changed
