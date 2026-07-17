@@ -28,6 +28,21 @@
   color: var(--primary-soft-text);
 }
 
+.iconPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  padding-inline: var(--space-4);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+
+.navItem[aria-current="page"] .iconPill {
+  background: var(--primary-soft);
+}
+
 .navLabel {
   font-size: var(--type-caption-size);
   font-weight: 600;

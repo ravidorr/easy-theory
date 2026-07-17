@@ -1,6 +1,5 @@
 # TODO
 
-- **Stronger bottom-nav active state.** The current page should be impossible to miss; right now, it feels like five equal buttons, and the icons do all the work.
 - **Animate counters** (XP, points, streak) whenever their values change.
 - **Distinct visual treatment for completed topics** instead of simply changing text.
 - **Hover/press states everywhere.** Every button should feel pressable and respond to motion.
