@@ -400,7 +400,8 @@
   }
 
   // Eases a counter from 0 to its final value. Kept in this IIFE because the
-  // public/js scripts share no modules; lift out when other counters animate.
+  // public/js scripts share no modules; stats-pills.js carries a from-to
+  // adaptation of it for the dashboard counters.
   // The initial render is synchronous so the value is never blank when rAF
   // frames are suspended (hidden tab).
   function countUp(to, durationMs, render) {
