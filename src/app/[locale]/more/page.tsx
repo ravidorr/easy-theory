@@ -107,7 +107,7 @@ export default async function MorePage() {
         label,
         icon,
         earned,
-        dateText: earned ? fmtDate(earnedDateMap[slug]) : "-",
+        dateText: earned ? fmtDate(earnedDateMap[slug]) : t("medalLockedLabel"),
       };
     }),
     ...achievements.map(({ slug, earned }) => ({
@@ -115,7 +115,7 @@ export default async function MorePage() {
       label: ACHIEVEMENT_META[slug].label,
       icon: ACHIEVEMENT_META[slug].icon,
       earned,
-      dateText: earned ? t("achEarnedLabel") : "-",
+      dateText: earned ? t("achEarnedLabel") : t("medalLockedLabel"),
     })),
   ];
 
@@ -150,8 +150,16 @@ export default async function MorePage() {
             <span className={`${styles.statIcon} ${styles.statIconNeutral}`}>
               <Icon name="check" size={18} />
             </span>
-            <span className={styles.statValue}>
-              {accuracy === null ? "-" : t("statAccuracyValue", { percent: accuracy })}
+            <span
+              className={
+                accuracy === null
+                  ? `${styles.statValue} ${styles.statValueEmpty}`
+                  : styles.statValue
+              }
+            >
+              {accuracy === null
+                ? t("statAccuracyEmpty")
+                : t("statAccuracyValue", { percent: accuracy })}
             </span>
             <span className={styles.statLabel}>{t("statAccuracy")}</span>
           </div>

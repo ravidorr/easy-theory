@@ -69,6 +69,20 @@
   line-height: 1;
 }
 
+/* Contextual empty text in the value slot; min-height matches the numeric
+   value height so grid rows stay aligned, and longer translations wrap
+   instead of overflowing the narrow cell. */
+.statValueEmpty {
+  font-size: var(--type-caption-size);
+  font-weight: 600;
+  color: var(--text-muted);
+  line-height: 1.3;
+  min-height: 22px;
+  display: flex;
+  align-items: center;
+  text-align: center;
+}
+
 .statLabel {
   font-size: var(--type-caption-size);
   color: var(--text-faint);
