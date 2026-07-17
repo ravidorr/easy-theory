@@ -324,6 +324,7 @@
     "progressSaveFailed": "שמירת ההתקדמות נכשלה",
     "examSaveFailed": "שמירת המבחן נכשלה",
     "answerSaveFailed": "שמירת התשובה נכשלה",
+    "answerSaveInFlight": "התשובה עדיין נשמרת, אפשר לנסות שוב עוד רגע",
     "srsSaveFailed": "שמירת החזרה נכשלה",
     "questionNotFound": "שאלה לא נמצאה",
     "topicNotFound": "נושא לא נמצא",

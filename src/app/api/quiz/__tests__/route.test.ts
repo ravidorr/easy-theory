@@ -89,6 +89,7 @@ describe("POST /api/quiz", () => {
     expect(response.status).toBe(401);
     expect(await response.json()).toEqual({
       error: heMessages.Api.notAuthenticated,
+      code: "NOT_AUTHENTICATED",
     });
     expect(client.rpc).not.toHaveBeenCalled();
   });
@@ -105,6 +106,7 @@ describe("POST /api/quiz", () => {
     expect(response.status).toBe(429);
     expect(await response.json()).toEqual({
       error: heMessages.Api.tooManyRequests,
+      code: "RATE_LIMITED",
     });
     expect(client.rpc).toHaveBeenCalledWith(
       "submit_quiz_answer",
@@ -125,6 +127,7 @@ describe("POST /api/quiz", () => {
     expect(response.status).toBe(400);
     expect(await response.json()).toEqual({
       error: heMessages.Api.missingParams,
+      code: "INVALID_REQUEST",
     });
     expect(client.rpc).not.toHaveBeenCalled();
   });
@@ -145,6 +148,7 @@ describe("POST /api/quiz", () => {
     expect(response.status).toBe(400);
     expect(await response.json()).toEqual({
       error: heMessages.Api.missingParams,
+      code: "INVALID_REQUEST",
     });
     expect(client.rpc).not.toHaveBeenCalled();
   });
@@ -216,17 +220,47 @@ describe("POST /api/quiz", () => {
   });
 
   it.each([
-    ["question_not_found", 404, heMessages.Api.questionNotFound],
-    ["idempotency_key_conflict", 409, heMessages.Api.invalidParams],
-    ["topic_question_mismatch", 400, heMessages.Api.invalidParams],
-  ])("maps %s to status %i", async (message, status, localizedError) => {
+    ["not_authenticated", 401, "NOT_AUTHENTICATED", heMessages.Api.notAuthenticated],
+    ["invalid_quiz_submission", 400, "INVALID_SUBMISSION", heMessages.Api.invalidParams],
+    ["question_not_found", 404, "QUESTION_NOT_FOUND", heMessages.Api.questionNotFound],
+    ["idempotency_key_conflict", 409, "IDEMPOTENCY_CONFLICT", heMessages.Api.invalidParams],
+    ["topic_question_mismatch", 400, "TOPIC_MISMATCH", heMessages.Api.invalidParams],
+    ["rate_limited", 429, "RATE_LIMITED", heMessages.Api.tooManyRequests],
+  ])("maps %s to status %i with code %s", async (message, status, code, localizedError) => {
     const client = buildClient({ result: null, error: { message } });
     mockCreateClient.mockResolvedValue(client as never);
 
     const response = await POST(makeRequest(defaultBody));
 
     expect(response.status).toBe(status);
-    expect(await response.json()).toEqual({ error: localizedError });
+    expect(await response.json()).toEqual({ error: localizedError, code });
+  });
+
+  it("returns 503 with a correlation ref when the stored result is still in flight", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const client = buildClient({
+      result: null,
+      error: { message: "idempotency_result_missing" },
+    });
+    mockCreateClient.mockResolvedValue(client as never);
+
+    const response = await POST(makeRequest(defaultBody));
+
+    expect(response.status).toBe(503);
+    const body = await response.json();
+    expect(body).toEqual({
+      error: heMessages.Api.answerSaveInFlight,
+      code: "SUBMISSION_IN_FLIGHT",
+      ref: expect.stringMatching(/^[0-9a-f]{8}$/),
+    });
+    expect(errorSpy).toHaveBeenCalledWith(
+      "[quiz] transactional submission failed:",
+      expect.objectContaining({
+        ref: body.ref,
+        pg: expect.objectContaining({ message: "idempotency_result_missing" }),
+      })
+    );
+    errorSpy.mockRestore();
   });
 
   it("localizes transactional errors from the locale cookie", async () => {
@@ -243,6 +277,7 @@ describe("POST /api/quiz", () => {
     expect(response.status).toBe(429);
     expect(await response.json()).toEqual({
       error: arMessages.Api.tooManyRequests,
+      code: "RATE_LIMITED",
     });
   });
 
@@ -306,7 +341,7 @@ describe("POST /api/quiz", () => {
     errorSpy.mockRestore();
   });
 
-  it("returns 500 when the transactional submission fails", async () => {
+  it("returns 500 with a correlation ref when the transactional submission fails", async () => {
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const client = buildClient({
       result: null,
@@ -317,12 +352,23 @@ describe("POST /api/quiz", () => {
     const response = await POST(makeRequest(defaultBody));
 
     expect(response.status).toBe(500);
-    expect(await response.json()).toEqual({
+    const body = await response.json();
+    expect(body).toEqual({
       error: heMessages.Api.answerSaveFailed,
+      code: "SUBMISSION_FAILED",
+      ref: expect.stringMatching(/^[0-9a-f]{8}$/),
     });
     expect(errorSpy).toHaveBeenCalledWith(
       "[quiz] transactional submission failed:",
-      expect.objectContaining({ message: "submission failed" })
+      expect.objectContaining({
+        ref: body.ref,
+        userId: USER_ID,
+        questionId: QUESTION_ID,
+        topicId: TOPIC_ID,
+        sessionId: SESSION_ID,
+        idempotencyKey: IDEMPOTENCY_KEY,
+        pg: expect.objectContaining({ message: "submission failed" }),
+      })
     );
     errorSpy.mockRestore();
   });

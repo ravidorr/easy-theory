@@ -28,6 +28,21 @@ async function updateQuestionSrs(
   await upsertSrsCard(supabase, userId, { question_id: questionId }, review);
 }
 
+// Known submit_quiz_answer exceptions, mapped to a status plus a
+// machine-readable code the client can branch on (uppercase convention
+// shared with JS.Auth codes). Anything unmapped is an opaque failure.
+const RPC_ERROR_RESPONSES: Record<
+  string,
+  { status: number; code: string; messageKey: "notAuthenticated" | "invalidParams" | "questionNotFound" | "tooManyRequests" }
+> = {
+  not_authenticated: { status: 401, code: "NOT_AUTHENTICATED", messageKey: "notAuthenticated" },
+  invalid_quiz_submission: { status: 400, code: "INVALID_SUBMISSION", messageKey: "invalidParams" },
+  question_not_found: { status: 404, code: "QUESTION_NOT_FOUND", messageKey: "questionNotFound" },
+  topic_question_mismatch: { status: 400, code: "TOPIC_MISMATCH", messageKey: "invalidParams" },
+  idempotency_key_conflict: { status: 409, code: "IDEMPOTENCY_CONFLICT", messageKey: "invalidParams" },
+  rate_limited: { status: 429, code: "RATE_LIMITED", messageKey: "tooManyRequests" },
+};
+
 export async function POST(request: Request) {
   const t = getApiTranslator(request);
   const supabase = await createClient();
@@ -36,12 +51,18 @@ export async function POST(request: Request) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json({ error: t("notAuthenticated") }, { status: 401 });
+    return NextResponse.json(
+      { error: t("notAuthenticated"), code: "NOT_AUTHENTICATED" },
+      { status: 401 }
+    );
   }
 
   const body = await parseJsonBody(request);
   if (!body) {
-    return NextResponse.json({ error: t("missingParams") }, { status: 400 });
+    return NextResponse.json(
+      { error: t("missingParams"), code: "INVALID_REQUEST" },
+      { status: 400 }
+    );
   }
   const {
     question_id,
@@ -63,7 +84,10 @@ export async function POST(request: Request) {
     idempotency_key.length < 1 ||
     idempotency_key.length > 200
   ) {
-    return NextResponse.json({ error: t("missingParams") }, { status: 400 });
+    return NextResponse.json(
+      { error: t("missingParams"), code: "INVALID_REQUEST" },
+      { status: 400 }
+    );
   }
 
   const sessionId = typeof session_id === "string" && UUID_RE.test(session_id) ? session_id : null;
@@ -78,23 +102,44 @@ export async function POST(request: Request) {
   });
 
   if (error) {
-    if (error.message === "question_not_found") {
-      return NextResponse.json({ error: t("questionNotFound") }, { status: 404 });
-    }
-    if (error.message === "idempotency_key_conflict") {
-      return NextResponse.json({ error: t("invalidParams") }, { status: 409 });
-    }
-    if (error.message === "topic_question_mismatch") {
-      return NextResponse.json({ error: t("invalidParams") }, { status: 400 });
-    }
-    if (error.message === "rate_limited") {
+    const known = RPC_ERROR_RESPONSES[error.message];
+    if (known) {
       return NextResponse.json(
-        { error: t("tooManyRequests") },
-        { status: 429 }
+        { error: t(known.messageKey), code: known.code },
+        { status: known.status }
       );
     }
-    console.error("[quiz] transactional submission failed:", error);
-    return NextResponse.json({ error: t("answerSaveFailed") }, { status: 500 });
+    // Opaque failure: return a short correlation ref and log the full
+    // context under it, so a failed request seen in the browser's network
+    // tab can be matched to this exact server log entry.
+    const ref = crypto.randomUUID().slice(0, 8);
+    console.error("[quiz] transactional submission failed:", {
+      ref,
+      userId: user.id,
+      questionId: question_id,
+      topicId,
+      sessionId,
+      idempotencyKey: idempotency_key,
+      pg: {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+      },
+    });
+    if (error.message === "idempotency_result_missing") {
+      // A committed claim with no stored result should be unreachable via
+      // the RPC alone (claim and result commit atomically) — logged above
+      // as an anomaly, but transient and retryable from the client's view.
+      return NextResponse.json(
+        { error: t("answerSaveInFlight"), code: "SUBMISSION_IN_FLIGHT", ref },
+        { status: 503 }
+      );
+    }
+    return NextResponse.json(
+      { error: t("answerSaveFailed"), code: "SUBMISSION_FAILED", ref },
+      { status: 500 }
+    );
   }
 
   if (typeof data?.is_correct === "boolean") {

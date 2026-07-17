@@ -230,6 +230,11 @@
   color: var(--text-muted);
 }
 
+.rewardMsg[data-state="error"] {
+  color: var(--danger-text);
+  font-weight: 600;
+}
+
 .autoAdvanceHint {
   margin: 0;
   text-align: center;
