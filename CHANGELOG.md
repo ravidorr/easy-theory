@@ -3,6 +3,13 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.168] — 2026-07-17
+
+### Fixed
+- Removed the invalid nested `<button>` inside the `<Link>` on the exam intro page (`src/app/[locale]/exam/page.tsx`): the start CTA is now the Link itself styled with the global `btn-primary` class, matching the homepage pattern, so keyboard users get one tab stop instead of two for a single action. The now-redundant `.startLink`/`.startBtn` module rules were deleted (base `.btn-primary` already provides `width: 100%` and `a.btn-primary` drops the underline), and the exam page test now asserts the start link carries `btn-primary`, renders the label, and contains no nested button. (TODO: invalid nested interactive elements on the exam intro)
+
+---
+
 ## [0.3.167] — 2026-07-17
 
 ### Added

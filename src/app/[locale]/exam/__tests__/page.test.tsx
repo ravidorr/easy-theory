@@ -54,7 +54,11 @@ describe("ExamPage", () => {
   it("renders rules and a start link to /exam/run", async () => {
     const jsx = await ExamPage();
     const { container } = render(jsx);
-    expect(container.querySelector('a[href="/exam/run"]')).toBeTruthy();
+    const startLink = container.querySelector('a[href="/exam/run"]');
+    expect(startLink).toBeTruthy();
+    expect(startLink?.classList.contains("btn-primary")).toBe(true);
+    expect(startLink?.textContent).toBe("startBtn");
+    expect(startLink?.querySelector("button")).toBeNull();
     expect(screen.getByText("rulesTitle")).toBeInTheDocument();
     expect(screen.getByText("ruleQuestions")).toBeInTheDocument();
     expect(screen.getByText("ruleTime")).toBeInTheDocument();

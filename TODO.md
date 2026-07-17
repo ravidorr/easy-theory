@@ -41,21 +41,18 @@ Architecture facts every item relies on:
 10. **Saving the schedule redirects to Home instead of back to More, with no confirmation.**
     `schedule.js:124-126` redirects to home after 800ms; the user arrives from More (`more/page.tsx:185`) and the page's own back button targets `/more` (`schedule/page.tsx:32`). Fix: redirect to `"/" + window.__locale + "/more"` and add a success confirmation - reuse item 2 by adding a small toast helper to `modal.js` + global CSS (no toast exists today; `--success*` tokens are already defined). Sequence after item 2.
 
-11. **Invalid nested interactive elements on the exam intro.**
-    `exam/page.tsx:58-60`: `<button>` inside `<Link>`. Drop the button and style the Link directly with `btn-primary`, same pattern as `page.tsx:496`. Trivial.
-
-12. **Daily goal counts distinct questions, not answers given today.**
+11. **Daily goal counts distinct questions, not answers given today.**
     Confirmed: `user_quiz_responses` has `UNIQUE(user_id, question_id)`; RPC `submit_quiz_answer` (`010:240-286`) updates `answered_at = NOW()` on re-answer. Read path is `getQuizAccuracyForWindow` (`db.ts:639-661`, its own comment admits the bug) feeding `answeredToday` at `page.tsx:232`. The existing `quiz_answer_submissions` ledger is 24h-pruned and REVOKEd, so it is not a read source. Fix: migration `016` adding an append-only `quiz_answer_events(user_id, question_id, is_correct, answered_at)` written inside the RPC, plus a `db.ts` count helper over today's Jerusalem window (`dayWindow`, `personalization.ts:76`); switch the homepage daily goal to it (accuracy displays can stay distinct-question-based). Note: QA DB schema changes need a human in the Supabase SQL editor.
 
-13. **Persist derived achievements to `user_medals`.**
+12. **Persist derived achievements to `user_medals`.**
     Schema is ready (`schema.sql:47-53`: open TEXT slug, UNIQUE, own-insert RLS). Today only streak medals are written (RPC `010:337-349`); the four derived achievements come from `deriveAchievements` (`gamification.ts:124-144`; the comment at `:117-122` already names this follow-up) on each More render. Fix: app-layer check-and-insert in `/api/quiz` (and `/api/exam` for exam-pass) after the RPC - compute derived achievements, insert newly earned slugs, and append them to the response's `medals_earned` so the existing celebration pipeline fires (`quiz.js:717-719` into `medalQueue` and `buildMedalModal`). Extend `MEDAL_META` (`quiz.js:324+`) and add the four slugs' strings to he + ar. The More page then reads earned dates from `user_medals` instead of recomputing (fixes all-topics un-earning).
 
 ## Execution order (minimizes cross-item conflicts)
 
-1. Isolated/trivial first: 11 (nested interactive), 8 (emoji).
+1. Isolated/trivial first: 8 (emoji).
 2. Foundation: 2 (modal component), then 10 (schedule redirect + toast).
 3. Independent features: 4 (locale persistence), 9 (review chrome), 7 (tiered copy), 6 (pagination), 3 (mission picker), 5 (sign-126 + migration).
-4. Schema-heavy: 12 (daily goal, migration 016+), 13 (medals).
+4. Schema-heavy: 11 (daily goal, migration 016+), 12 (medals).
 5. Copy pass (1) LAST - it rewrites strings every other item adds.
 
-Conflict hotspots when workspaces overlap: `messages/*.json` (most items), `src/app/[locale]/page.tsx` (3), `public/js/quiz.js` (1, 4, 13), `public/js/exam.js` (2, 7, 9), migration numbering (5, 12, 13 - renumber right before push).
+Conflict hotspots when workspaces overlap: `messages/*.json` (most items), `src/app/[locale]/page.tsx` (3), `public/js/quiz.js` (1, 4, 12), `public/js/exam.js` (2, 7, 9), migration numbering (5, 11, 12 - renumber right before push).
