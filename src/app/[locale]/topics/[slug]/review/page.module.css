@@ -200,6 +200,13 @@
   text-decoration: none;
 }
 
+@media (hover: hover) {
+  .scopeOption:not([data-active]):hover {
+    color: var(--text);
+    background: var(--surface-3);
+  }
+}
+
 .scopeOption[data-active] {
   background: var(--surface);
   color: var(--text);

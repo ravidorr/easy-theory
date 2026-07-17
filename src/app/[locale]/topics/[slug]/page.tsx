@@ -188,7 +188,7 @@ export default async function TopicQuizPage({
         className={styles.page}
       >
         <div className={styles.topBar}>
-          <a href={`/${locale}`} className={styles.closeBtn} aria-label={t("closeLabel")}>
+          <a href={`/${locale}`} className={`icon-btn ${styles.closeBtn}`} aria-label={t("closeLabel")}>
             ✕
           </a>
           <div className={styles.progressTrack}>
@@ -267,7 +267,7 @@ export default async function TopicQuizPage({
             <Link
               href={`/topics/${nextTopic.slug}`}
               id="quiz-next-topic"
-              className={styles.nextTopicCard}
+              className={`pressable-card ${styles.nextTopicCard}`}
             >
               <span className={styles.nextTopicLabel}>{t("nextTopicLabel")}</span>
               <span className={styles.nextTopicName}>

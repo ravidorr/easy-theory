@@ -39,6 +39,12 @@
   transition: background-color var(--dur-fast) var(--ease-out);
 }
 
+@media (hover: hover) {
+  .navItem:not([aria-current="page"]):hover .iconPill {
+    background: var(--surface-2);
+  }
+}
+
 .navItem[aria-current="page"] .iconPill {
   background: var(--primary-soft);
 }

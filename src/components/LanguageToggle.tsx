@@ -17,7 +17,7 @@ export function LanguageToggle() {
   return (
     <button
       onClick={toggle}
-      className={styles.toggle}
+      className={`pressable ${styles.toggle}`}
       aria-label={locale === "he" ? "Switch to Arabic" : "Switch to Hebrew"}
     >
       {locale === "he" ? "العربية" : "עברית"}

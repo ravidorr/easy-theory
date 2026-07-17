@@ -103,7 +103,12 @@
   justify-content: center;
   background: var(--success);
   color: #fff;
-  transition: background 120ms;
+}
+
+@media (hover: hover) {
+  .btnYes:hover {
+    background: color-mix(in oklab, var(--success) 90%, black);
+  }
 }
 
 .btnSecondaryFlex {

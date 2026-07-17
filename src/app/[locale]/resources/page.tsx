@@ -52,7 +52,7 @@ export default async function ResourcesPage() {
                 href={resource.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={styles.resourceLink}
+                className={`pressable-card ${styles.resourceLink}`}
               >
                 <div className={`${styles.iconWrap} ${iconWrapVariants[resource.icon_variant]}`}>
                   {resource.icon_type === "sign" ? (

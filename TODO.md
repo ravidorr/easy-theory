@@ -1,6 +1,5 @@
 # TODO
 
-- **Hover/press states everywhere.** Every button should feel pressable and respond to motion.
 - **Skeleton loaders** instead of content flashes while data loads.
 - **Increase vertical spacing between homepage sections** slightly; the page feels a little dense.
 - **Contextual empty states** instead of just showing zeros.

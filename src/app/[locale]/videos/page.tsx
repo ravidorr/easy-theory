@@ -44,7 +44,7 @@ export default async function VideosPage() {
               href={`https://www.youtube.com/watch?v=${featured.youtube_id}`}
               target="_blank"
               rel="noopener noreferrer"
-              className={styles.featuredLink}
+              className={`pressable-card ${styles.featuredLink}`}
             >
               <div className={styles.thumbnailFeatured}>
                 <Image
@@ -80,7 +80,7 @@ export default async function VideosPage() {
               href={`https://www.youtube.com/watch?v=${video.youtube_id}`}
               target="_blank"
               rel="noopener noreferrer"
-              className={styles.rowLink}
+              className={`pressable-card ${styles.rowLink}`}
             >
               <div className={styles.thumbnailRow}>
                 <Image
@@ -115,7 +115,7 @@ export default async function VideosPage() {
               href={`https://www.youtube.com/watch?v=${video.youtube_id}`}
               target="_blank"
               rel="noopener noreferrer"
-              className={styles.rowLink}
+              className={`pressable-card ${styles.rowLink}`}
             >
               <div className={styles.thumbnailRow}>
                 <Image

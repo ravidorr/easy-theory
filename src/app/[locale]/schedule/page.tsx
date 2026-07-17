@@ -29,7 +29,7 @@ export default async function SchedulePage() {
     <>
       <main className={styles.page}>
         <div className={styles.topBar}>
-          <Link href="/more" className={styles.backBtn} aria-label={t("backLabel")}>
+          <Link href="/more" className={`icon-btn ${styles.backBtn}`} aria-label={t("backLabel")}>
             →
           </Link>
           <div className={styles.titleCol}>
@@ -46,7 +46,7 @@ export default async function SchedulePage() {
               return (
                 <button
                   key={i}
-                  className={`day-btn ${styles.btnDay} ${selected ? styles.btnDaySelected : ""}`}
+                  className={`day-btn pressable ${styles.btnDay}`}
                   data-day={i}
                   data-selected={selected ? "true" : "false"}
                   aria-pressed={selected}
@@ -82,7 +82,7 @@ export default async function SchedulePage() {
                 return (
                   <button
                     key={d}
-                    className={`duration-btn ${styles.btnDuration} ${active ? styles.btnDurationActive : ""}`}
+                    className={`duration-btn pressable ${styles.btnDuration}`}
                     data-duration={d}
                     data-selected={active ? "true" : "false"}
                     aria-pressed={active}
@@ -100,7 +100,7 @@ export default async function SchedulePage() {
               role="switch"
               aria-checked={notify ? "true" : "false"}
               data-on={notify ? "true" : "false"}
-              className={`${styles.toggle} ${notify ? styles.toggleOn : ""}`}
+              className={`pressable ${styles.toggle} ${notify ? styles.toggleOn : ""}`}
             >
               <span className={`${styles.toggleThumb} ${notify ? styles.toggleThumbOn : ""}`} />
             </span>

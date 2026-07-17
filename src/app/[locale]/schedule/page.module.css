@@ -86,10 +86,16 @@
   background: var(--surface);
   color: var(--text-muted);
   box-shadow: none;
-  transition: background 120ms, color 120ms, border-color 120ms;
 }
 
-.btnDaySelected {
+@media (hover: hover) {
+  .btnDay:not([data-selected="true"]):hover {
+    border-color: var(--primary);
+    color: var(--text);
+  }
+}
+
+.btnDay[data-selected="true"] {
   border-color: transparent;
   font-weight: 700;
   background: var(--primary);
@@ -157,10 +163,16 @@
   background: var(--surface);
   color: var(--text-muted);
   box-shadow: none;
-  transition: background 120ms;
 }
 
-.btnDurationActive {
+@media (hover: hover) {
+  .btnDuration:not([data-selected="true"]):hover {
+    border-color: var(--primary);
+    color: var(--text);
+  }
+}
+
+.btnDuration[data-selected="true"] {
   border-color: transparent;
   font-weight: 700;
   background: var(--primary);
@@ -185,7 +197,6 @@
   flex-shrink: 0;
   display: inline-block;
   cursor: pointer;
-  transition: background 150ms;
 }
 
 .toggleOn {
