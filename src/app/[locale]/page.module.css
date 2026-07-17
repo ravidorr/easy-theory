@@ -257,6 +257,10 @@
   gap: 14px;
 }
 
+.topicLink[data-complete] {
+  border-color: var(--success);
+}
+
 .topicIconWrap {
   width: 52px;
   height: 52px;
@@ -266,6 +270,10 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+
+.topicLink[data-complete] .topicIconWrap {
+  background: var(--success-soft);
 }
 
 .topicIconImg {
@@ -302,7 +310,14 @@
   flex-shrink: 0;
 }
 
-.topicStatusDone {
+.topicLink[data-complete] .topicStatus {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--success-soft);
   color: var(--success-text);
 }
 
@@ -324,6 +339,10 @@
    count-up so the bar and the numbers land together after the sync. */
 .progressFill[data-stat="level-fill"] {
   transition: width 700ms var(--ease-out, ease-out);
+}
+
+.topicLink[data-complete] .progressFill {
+  background: var(--success);
 }
 
 .progressFillDone {

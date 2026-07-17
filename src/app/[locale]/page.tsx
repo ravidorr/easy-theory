@@ -636,7 +636,7 @@ export default async function HomePage() {
                 href={`/topics/${topic.slug}`}
                 className={styles.noUnderline}
               >
-                <div className={styles.topicLink}>
+                <div className={styles.topicLink} data-complete={meta.done || undefined}>
                   {topic.icon && (
                     <div className={styles.topicIconWrap}>
                       <Image src={topic.icon} alt="" width={34} height={34} className={styles.topicIconImg} />
@@ -645,7 +645,8 @@ export default async function HomePage() {
                   <div className={styles.topicBody}>
                     <div className={styles.topicTitleRow}>
                       <span className={styles.topicName}>{localizedTopicName}</span>
-                      <span className={`${styles.topicStatus} ${meta.done ? styles.topicStatusDone : ""}`}>
+                      <span className={styles.topicStatus}>
+                        {meta.done && <Icon name="check" size={12} />}
                         {meta.done
                           ? meta.bestScore != null
                             ? t("topicCompletedScore", { percent: meta.bestScore })
@@ -682,7 +683,7 @@ export default async function HomePage() {
                     )}
                     <div className={styles.progressTrack}>
                       <div
-                        className={`${styles.progressFill} ${meta.done ? styles.progressFillDone : ""}`}
+                        className={styles.progressFill}
                         style={{ width: `${meta.barPct}%` }}
                       />
                     </div>

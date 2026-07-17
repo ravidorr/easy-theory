@@ -401,8 +401,8 @@ describe("HomePage", () => {
 
     it("does not mark the card complete while questions remain", async () => {
       const jsx = await HomePage();
-      const { container } = render(jsx);
-      expect(container.querySelector("[data-complete]")).toBeNull();
+      render(jsx);
+      expect(missionCard()).not.toHaveAttribute("data-complete");
     });
 
     it("omits the chip row and the ring sweep for a topic with no questions", async () => {
@@ -419,8 +419,8 @@ describe("HomePage", () => {
     it("marks the card complete when every question is answered", async () => {
       mockGetTopicAccuracy.mockResolvedValue([{ topic_id: "t1", correct: 15, total: 20 }]);
       const jsx = await HomePage();
-      const { container } = render(jsx);
-      expect(container.querySelector("[data-complete]")).toBeTruthy();
+      render(jsx);
+      expect(missionCard()).toHaveAttribute("data-complete");
       const ring = screen.getByRole("progressbar");
       expect(ring).toHaveAttribute("aria-valuenow", "100");
       const card = within(missionCard());
@@ -579,6 +579,9 @@ describe("HomePage", () => {
     const widths = [...container.querySelectorAll("div")].map((d) => d.style.width);
     expect(widths).toContain("25%"); // 5 answered of 20, not best_score 90
     expect(widths).not.toContain("90%");
+    expect(
+      container.querySelector('a[href^="/topics/"] div[data-complete]')
+    ).toBeNull();
   });
 
   it("keeps best_score for the bar and label when completed", async () => {
@@ -593,6 +596,11 @@ describe("HomePage", () => {
     expect(screen.getByText('topicCompletedScore|{"percent":85}')).toBeInTheDocument();
     const widths = [...container.querySelectorAll("div")].map((d) => d.style.width);
     expect(widths).toContain("85%");
+    // Completed cards get the distinct visual treatment: the data-complete
+    // card marker and a rendered check icon in the status pill.
+    const card = container.querySelector('a[href="/topics/signs"] div[data-complete]');
+    expect(card).not.toBeNull();
+    expect(card!.querySelector("svg")).not.toBeNull();
   });
 
   it("falls back to plain topicCompleted when best_score is null", async () => {

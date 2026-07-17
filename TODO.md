@@ -1,6 +1,5 @@
 # TODO
 
-- **Distinct visual treatment for completed topics** instead of simply changing text.
 - **Hover/press states everywhere.** Every button should feel pressable and respond to motion.
 - **Skeleton loaders** instead of content flashes while data loads.
 - **Increase vertical spacing between homepage sections** slightly; the page feels a little dense.
