@@ -51,6 +51,12 @@ const DIFFICULTY_CHIP: Record<TopicDifficulty, { labelKey: string; className: st
 const MISSION_RING_RADIUS = 30;
 const MISSION_RING_CIRC = 2 * Math.PI * MISSION_RING_RADIUS;
 
+// Past this coverage the mock exam is the next meaningful step, so the exam
+// card jumps above the daily mission instead of hiding below the fold. Kept
+// in sync by value with REMAINING_LINE_MIN_PERCENT (personalization.ts) but
+// tunable on its own: one gates greeting copy, this one gates card order.
+const EXAM_CARD_EARLY_MIN_PERCENT = 50;
+
 function MissionRing({
   pct,
   complete,
@@ -196,6 +202,7 @@ export default async function HomePage() {
     questionCounts,
     answeredMap
   );
+  const surfaceExamCardEarly = completion.percent >= EXAM_CARD_EARLY_MIN_PERCENT;
 
   const focusTopic = selectFocusTopic(weakTopics, lastStudied?.topic_id ?? null);
   const masteredTopic = findStrongestTopics(topicAccuracy)[0] ?? null;
@@ -212,6 +219,7 @@ export default async function HomePage() {
       percent: completion.percent,
     },
     readinessLevel: readiness.level,
+    examCardSurfaced: surfaceExamCardEarly,
     now,
   });
 
@@ -256,6 +264,21 @@ export default async function HomePage() {
       "description_ar"
     );
   }
+
+  const examCta = (
+    <Link href="/exam" className={styles.noUnderline}>
+      <div className={styles.examCta}>
+        <span className={styles.examCtaIcon}>
+          <Icon name="timer" size={22} />
+        </span>
+        <div className={styles.examCtaBody}>
+          <span className={styles.examCtaTitle}>{t("examCtaTitle")}</span>
+          <span className={styles.examCtaDesc}>{t("examCtaDesc")}</span>
+        </div>
+        <Icon name="chevron-left" size={18} />
+      </div>
+    </Link>
+  );
 
   return (
     <>
@@ -419,6 +442,8 @@ export default async function HomePage() {
           </div>
         </section>
 
+        {surfaceExamCardEarly && examCta}
+
         {todayTopic && missionMeta ? (
           <div className={styles.todayCard} data-complete={missionComplete || undefined}>
             <span className={styles.todayBadge}>{t("todayBadge")}</span>
@@ -512,18 +537,7 @@ export default async function HomePage() {
           )}
         </div>
 
-        <Link href="/exam" className={styles.noUnderline}>
-          <div className={styles.examCta}>
-            <span className={styles.examCtaIcon}>
-              <Icon name="timer" size={22} />
-            </span>
-            <div className={styles.examCtaBody}>
-              <span className={styles.examCtaTitle}>{t("examCtaTitle")}</span>
-              <span className={styles.examCtaDesc}>{t("examCtaDesc")}</span>
-            </div>
-            <Icon name="chevron-left" size={18} />
-          </div>
-        </Link>
+        {!surfaceExamCardEarly && examCta}
 
         {weakTopics.length > 0 && (
           <div className={styles.topicsSection}>

@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.156] — 2026-07-17
+
+### Changed
+- The exam card surfaces earlier for users past the halfway mark: once overall coverage reaches 50% (`EXAM_CARD_EARLY_MIN_PERCENT`, deliberately the same value as the greeting's `REMAINING_LINE_MIN_PERCENT` but an independent knob), the mock-exam CTA jumps from its old sixth slot — below the readiness card, easy to forget — to directly under the stats strip, above the daily mission, becoming the first full card on the page; below 50% nothing moves. The card itself is unchanged (same markup, strings, and icons — the JSX is hoisted into one `examCta` variable rendered in exactly one of the two slots, so no i18n work). To avoid stacking two adjacent `/exam` calls-to-action for the exact audience this targets, `buildGreetingContext` gains an `examCardSurfaced` flag that drops the exam-ready greeting line from the rotation while the card sits right below the greeting — its slot goes to another coach line instead. New homepage tests pin the DOM order on both sides of the boundary (15/30 surfaces, 14/30 does not), the empty-state branch (all topics completed, no mission card), and the greeting suppression, selecting the card by its title rather than the ambiguous `a[href="/exam"]` that also matches the greeting link. (TODO: surface the exam card earlier)
+
+---
+
 ## [0.3.155] — 2026-07-17
 
 ### Changed
