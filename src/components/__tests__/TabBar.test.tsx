@@ -44,6 +44,12 @@ describe("TabBar", () => {
     }
   });
 
+  it("wraps every tab icon in an icon pill", async () => {
+    const { container } = render(await TabBar({ active: "home" }));
+    const pills = container.querySelectorAll("a > span:first-child > svg");
+    expect(pills).toHaveLength(tabs.length);
+  });
+
   it("marks only the active tab with aria-current", async () => {
     render(await TabBar({ active: "videos" }));
     expect(screen.getByText("סרטונים").closest("a")).toHaveAttribute("aria-current", "page");

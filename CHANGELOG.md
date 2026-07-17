@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.157] — 2026-07-17
+
+### Changed
+- Stronger bottom-nav active state: the current tab is now unmissable instead of blending into five equal buttons. Each tab icon in `TabBar` is wrapped in a pill-shaped span (`.iconPill`, 28px tall, `--radius-pill`, `--space-4` inline padding), and on the active tab — still selected purely via the existing `aria-current="page"` attribute, so no page or test wiring changed — the pill fills with `--primary-soft` behind the icon, the Material-bottom-nav treatment already precedented by the app's soft-selected surfaces (`.quiz-option[data-state="selected"]`). The plan's original `--primary-deep` active text color was dropped during implementation because that token goes *darker* in dark theme (oklch 0.45 on a dark surface) and would have regressed contrast; the active color stays `--primary-soft-text`, the token explicitly paired with `--primary-soft` backgrounds in both themes. A background-color transition (`--dur-fast`/`--ease-out`) is included for the case where the App Router reuses the nav DOM across navigations. Verified in the QA environment in both themes at mobile width: active pill clearly visible on `/` and `/more`, RTL intact, and the ~1px nav-height growth is absorbed by the 44px `--hit-min` clamp and pages' 96px bottom reserve. A new TabBar test pins the pill wrapper structure (`a > span:first-child > svg` × 5). (TODO: stronger bottom-nav active state)
+
+---
+
 ## [0.3.156] — 2026-07-17
 
 ### Changed
