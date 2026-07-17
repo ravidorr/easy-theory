@@ -25,9 +25,29 @@ export default function LocaleError({
 
   return (
     <main className={styles.wrap}>
-      <span className={styles.emoji} aria-hidden="true">
-        ⚠️
-      </span>
+      {/* Inline svg (not the Icon component): this client error boundary is
+          bundled into every page's JS, and importing Icon would ship the whole
+          icon map on the happy path. Keep in sync with Icon's "warning". */}
+      <svg
+        width={48}
+        height={48}
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+        focusable="false"
+        className={styles.icon}
+      >
+        <g
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M10.3 3.9 1.9 18a2 2 0 0 0 1.7 3h16.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" />
+          <path d="M12 9v4" />
+          <path d="M12 17h.01" />
+        </g>
+      </svg>
       <div className={styles.textBlock}>
         <h1 className={styles.headline}>{t("headline")}</h1>
         <p className={styles.support}>{t("support")}</p>

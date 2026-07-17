@@ -177,7 +177,7 @@
     "backLabel": "رجوع",
     "signBadge": "إشارة {number}",
     "btnNo": "لم أعرف",
-    "btnYes": "عرفت ✓",
+    "btnYes": "عرفت",
     "footerNote": "البطاقات التي وضعت عليها \"لم أعرف\" ستظهر أولاً في المرة القادمة.",
     "dueToday": "{count} بطاقات للمراجعة اليوم"
   },
@@ -347,7 +347,7 @@
   "Notify": {
     "pushTitle": "جدولك الدراسي لليوم",
     "pushBody": "درس في الساعة {time} - {duration} دقيقة",
-    "emailSubject": "📅 جدولك الدراسي لليوم",
+    "emailSubject": "جدولك الدراسي لليوم",
     "emailGreeting": "مرحباً!",
     "emailScheduleHeader": "إليك جدولك الدراسي لليوم:",
     "emailLesson": "درس في الساعة {time} - {duration} دقيقة",
@@ -373,7 +373,7 @@
       "linkError": "خطأ في إرسال الرابط، نحاول مجدداً؟",
       "networkError": "خطأ في الشبكة، نحاول مجدداً؟",
       "rateLimitError": "محاولات كثيرة جداً، نحاول مجدداً بعد 15 دقيقة",
-      "resendSuccess": "✓ أُعيد الإرسال!",
+      "resendSuccess": "أُعيد الإرسال!",
       "EMAIL_MISSING": "يجب إدخال عنوان البريد الإلكتروني.",
       "EMAIL_INVALID": "عنوان البريد الإلكتروني غير صالح.",
       "RATE_LIMITED": "محاولات كثيرة جداً، نحاول مجدداً بعد 15 دقيقة؟",

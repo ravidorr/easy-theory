@@ -180,7 +180,7 @@ export default async function RetryMistakesPage({
       >
         <div className={styles.topBar}>
           <Link href={`/topics/${slug}/review`} className={`icon-btn ${styles.closeBtn}`} aria-label={tQuiz("closeLabel")}>
-            ✕
+            <Icon name="close" size={20} />
           </Link>
           <div className={styles.progressTrack}>
             <div
@@ -222,7 +222,7 @@ export default async function RetryMistakesPage({
         </div>
 
         <div id="quiz-final" className={`${styles.hidden} ${styles.quizFinal}`} tabIndex={-1}>
-          <span className={styles.finalEmoji}>🎯</span>
+          <Icon name="target" size={48} className={styles.finalIcon} />
           <h2>{tRetry("finalTitle")}</h2>
           <span className={styles.finalScore}>
             <span id="final-score"></span>

@@ -189,7 +189,7 @@ export default async function TopicQuizPage({
       >
         <div className={styles.topBar}>
           <a href={`/${locale}`} className={`icon-btn ${styles.closeBtn}`} aria-label={t("closeLabel")}>
-            ✕
+            <Icon name="close" size={20} />
           </a>
           <div className={styles.progressTrack}>
             <div
@@ -253,7 +253,7 @@ export default async function TopicQuizPage({
               <i key={i} className={styles.confettiPiece} />
             ))}
           </span>
-          <span className={styles.finalEmoji}>🎉</span>
+          <Icon name="trophy" size={48} className={styles.finalIcon} />
           <h2>{t("finalTitle")}</h2>
           <span className={styles.finalScore}>
             <span id="final-score"></span>

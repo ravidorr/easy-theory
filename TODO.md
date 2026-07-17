@@ -32,27 +32,23 @@ Architecture facts every item relies on:
 7. **Exam result copy does not scale with the score.**
     `exam.js:163-167` picks the pass/fail title; the `/api/exam` response already carries `score`, `total`, `pass_mark`. Add tiered fail keys to `JS.Exam` (near-miss / mid / far, chosen by distance from `pass_mark`) in he + ar and select the tier in `showResults`. "לא נורא, כמעט שם." (`messages/he.json:426`, key `JS.Exam.examFailTitle`) becomes the near-miss tier only.
 
-8. **Emoji hardcoded in the UI despite the no-emoji policy.**
-    Corrected refs: `topics/[slug]/page.tsx:256` (`finalEmoji` party-popper) and `review/page.tsx:232` (`emptyEmoji`). Both server-rendered - replace with an `Icon` (`src/components/Icon.tsx`) or a small inline SVG; the confetti next to the first one is already CSS. Sweep the check/cross glyph exceptions while there.
-
-9. **Exam answer-review mode keeps leftover exam chrome.**
+8. **Exam answer-review mode keeps leftover exam chrome.**
     The `reviewBtn` handler (`exam.js:255-261`) re-shows `#exam-footer` (which contains `#exam-answered`) and leaves the frozen `#exam-timer` (`exam/run/page.tsx:170-176`) visible. Fix in exam.js: entering review hides the timer and answered counter and shows a review-mode indicator plus a back-to-results affordance. Strings to `JS.Exam` (he + ar); styles in `exam/run/page.module.css` (server markup can pre-render the hidden review bar).
 
-10. **Saving the schedule redirects to Home instead of back to More, with no confirmation.**
+9. **Saving the schedule redirects to Home instead of back to More, with no confirmation.**
     `schedule.js:124-126` redirects to home after 800ms; the user arrives from More (`more/page.tsx:185`) and the page's own back button targets `/more` (`schedule/page.tsx:32`). Fix: redirect to `"/" + window.__locale + "/more"` and add a success confirmation - reuse item 2 by adding a small toast helper to `modal.js` + global CSS (no toast exists today; `--success*` tokens are already defined). Sequence after item 2.
 
-11. **Daily goal counts distinct questions, not answers given today.**
+10. **Daily goal counts distinct questions, not answers given today.**
     Confirmed: `user_quiz_responses` has `UNIQUE(user_id, question_id)`; RPC `submit_quiz_answer` (`010:240-286`) updates `answered_at = NOW()` on re-answer. Read path is `getQuizAccuracyForWindow` (`db.ts:639-661`, its own comment admits the bug) feeding `answeredToday` at `page.tsx:232`. The existing `quiz_answer_submissions` ledger is 24h-pruned and REVOKEd, so it is not a read source. Fix: migration `016` adding an append-only `quiz_answer_events(user_id, question_id, is_correct, answered_at)` written inside the RPC, plus a `db.ts` count helper over today's Jerusalem window (`dayWindow`, `personalization.ts:76`); switch the homepage daily goal to it (accuracy displays can stay distinct-question-based). Note: QA DB schema changes need a human in the Supabase SQL editor.
 
-12. **Persist derived achievements to `user_medals`.**
+11. **Persist derived achievements to `user_medals`.**
     Schema is ready (`schema.sql:47-53`: open TEXT slug, UNIQUE, own-insert RLS). Today only streak medals are written (RPC `010:337-349`); the four derived achievements come from `deriveAchievements` (`gamification.ts:124-144`; the comment at `:117-122` already names this follow-up) on each More render. Fix: app-layer check-and-insert in `/api/quiz` (and `/api/exam` for exam-pass) after the RPC - compute derived achievements, insert newly earned slugs, and append them to the response's `medals_earned` so the existing celebration pipeline fires (`quiz.js:717-719` into `medalQueue` and `buildMedalModal`). Extend `MEDAL_META` (`quiz.js:324+`) and add the four slugs' strings to he + ar. The More page then reads earned dates from `user_medals` instead of recomputing (fixes all-topics un-earning).
 
 ## Execution order (minimizes cross-item conflicts)
 
-1. Isolated/trivial first: 8 (emoji).
-2. Foundation: 2 (modal component), then 10 (schedule redirect + toast).
-3. Independent features: 4 (locale persistence), 9 (review chrome), 7 (tiered copy), 6 (pagination), 3 (mission picker), 5 (sign-126 + migration).
-4. Schema-heavy: 11 (daily goal, migration 016+), 12 (medals).
-5. Copy pass (1) LAST - it rewrites strings every other item adds.
+1. Foundation: 2 (modal component), then 9 (schedule redirect + toast).
+2. Independent features: 4 (locale persistence), 8 (review chrome), 7 (tiered copy), 6 (pagination), 3 (mission picker), 5 (sign-126 + migration).
+3. Schema-heavy: 10 (daily goal, migration 016+), 11 (medals).
+4. Copy pass (1) LAST - it rewrites strings every other item adds.
 
-Conflict hotspots when workspaces overlap: `messages/*.json` (most items), `src/app/[locale]/page.tsx` (3), `public/js/quiz.js` (1, 4, 12), `public/js/exam.js` (2, 7, 9), migration numbering (5, 11, 12 - renumber right before push).
+Conflict hotspots when workspaces overlap: `messages/*.json` (most items), `src/app/[locale]/page.tsx` (3), `public/js/quiz.js` (1, 4, 11), `public/js/exam.js` (2, 7, 8), migration numbering (5, 10, 11 - renumber right before push).

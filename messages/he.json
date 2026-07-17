@@ -177,7 +177,7 @@
     "backLabel": "חזרה",
     "signBadge": "תמרור {number}",
     "btnNo": "עוד לא",
-    "btnYes": "ידעתי ✓",
+    "btnYes": "ידעתי",
     "footerNote": "כרטיסים שסימנת \"עוד לא\" יופיעו ראשונים בפעם הבאה.",
     "dueToday": "{count} כרטיסים לחזרה היום"
   },
@@ -347,7 +347,7 @@
   "Notify": {
     "pushTitle": "לוח הלימודים שלך להיום",
     "pushBody": "שיעור בשעה {time} - {duration} דקות",
-    "emailSubject": "📅 לוח הלימודים שלך להיום",
+    "emailSubject": "לוח הלימודים שלך להיום",
     "emailGreeting": "שלום!",
     "emailScheduleHeader": "הנה לוח הלימודים שלך להיום:",
     "emailLesson": "שיעור בשעה {time} - {duration} דקות",
@@ -373,7 +373,7 @@
       "linkError": "שגיאה בשליחת הקישור, שננסה שוב?",
       "networkError": "שגיאת רשת, שננסה שוב?",
       "rateLimitError": "יותר מדי ניסיונות, שננסה שוב בעוד 15 דקות",
-      "resendSuccess": "✓ נשלח שוב!",
+      "resendSuccess": "נשלח שוב!",
       "EMAIL_MISSING": "יש להזין כתובת מייל.",
       "EMAIL_INVALID": "כתובת המייל אינה תקינה.",
       "RATE_LIMITED": "יותר מדי ניסיונות, שננסה שוב בעוד 15 דקות?",

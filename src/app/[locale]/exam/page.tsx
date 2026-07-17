@@ -8,6 +8,7 @@ import {
   EXAM_PASS_MARK,
 } from "@/lib/exam";
 import { getTranslations, getLocale } from "next-intl/server";
+import { Icon } from "@/components/Icon";
 import styles from "./page.module.css";
 
 export default async function ExamPage() {
@@ -39,7 +40,7 @@ export default async function ExamPage() {
     <main className={styles.page}>
       <div className={styles.topBar}>
         <Link href="/" className={`icon-btn ${styles.closeBtn}`} aria-label={t("closeLabel")}>
-          ✕
+          <Icon name="close" size={16} />
         </Link>
       </div>
 

@@ -479,7 +479,6 @@
 
 .todayCard[data-complete] .missionRingValue {
   color: var(--success-text);
-  font-size: 20px;
 }
 
 /* The pop lands just before the ring fill finishes so the two read as one

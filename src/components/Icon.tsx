@@ -1,6 +1,8 @@
 import type { ReactElement } from "react";
 
-// Icon data mirrors design-system/icons.svg — update both when adding icons.
+// Most icon data mirrors design-system/icons.svg (a verbatim design export —
+// never hand-edit it). Icons that exist only here (bookmark, close, warning,
+// target) are app-side additions awaiting a design-source export.
 const stroke = {
   fill: "none",
   stroke: "currentColor",
@@ -163,6 +165,30 @@ const ICONS = {
   check: {
     viewBox: "0 0 24 24",
     content: <path d="M20 6 9 17l-5-5" {...stroke} strokeWidth={2.5} />,
+  },
+  close: {
+    viewBox: "0 0 24 24",
+    content: <path d="M18 6 6 18M6 6l12 12" {...stroke} />,
+  },
+  warning: {
+    viewBox: "0 0 24 24",
+    content: (
+      <g {...stroke}>
+        <path d="M10.3 3.9 1.9 18a2 2 0 0 0 1.7 3h16.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" />
+        <path d="M12 9v4" />
+        <path d="M12 17h.01" />
+      </g>
+    ),
+  },
+  target: {
+    viewBox: "0 0 24 24",
+    content: (
+      <g {...stroke}>
+        <circle cx="12" cy="12" r="10" />
+        <circle cx="12" cy="12" r="6" />
+        <circle cx="12" cy="12" r="2" fill="currentColor" stroke="none" />
+      </g>
+    ),
   },
   bookmark: {
     viewBox: "0 0 24 24",

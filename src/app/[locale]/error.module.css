@@ -10,9 +10,8 @@
   background: var(--bg);
 }
 
-.emoji {
-  font-size: 56px;
-  line-height: 1;
+.icon {
+  color: var(--danger);
 }
 
 .textBlock {

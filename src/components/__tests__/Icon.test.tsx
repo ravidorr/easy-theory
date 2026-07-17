@@ -44,6 +44,15 @@ describe("Icon", () => {
     }
   });
 
+  it("renders the close, warning, and target icons as 24x24 stroke icons", () => {
+    for (const name of ["close", "warning", "target"] as const) {
+      const { container } = render(<Icon name={name} />);
+      const svg = container.querySelector("svg");
+      expect(svg).toHaveAttribute("viewBox", "0 0 24 24");
+      expect(svg!.querySelector("[stroke='currentColor']")).not.toBeNull();
+    }
+  });
+
   it("renders nothing for an unknown name", () => {
     const { container } = render(<Icon name={"nope" as IconName} />);
     expect(container.firstChild).toBeNull();

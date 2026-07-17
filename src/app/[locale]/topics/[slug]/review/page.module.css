@@ -30,7 +30,6 @@
   border: 1px solid var(--border-strong);
   background: var(--surface);
   color: var(--text-muted);
-  font-size: 18px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -132,8 +131,8 @@
   text-align: center;
 }
 
-.emptyEmoji {
-  font-size: 48px;
+.emptyIcon {
+  color: var(--success-text);
 }
 
 .emptyHint {

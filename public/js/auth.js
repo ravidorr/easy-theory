@@ -121,7 +121,7 @@
         }
 
         resendBtn.textContent = originalResendText;
-        showResendMsg(t.resendSuccess || "✓ נשלח שוב!", false);
+        showResendMsg(t.resendSuccess || "נשלח שוב!", false);
         setTimeout(function () {
           hideResendMsg();
           resendBtn.disabled = false;
