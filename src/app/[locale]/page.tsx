@@ -235,6 +235,15 @@ export default async function HomePage() {
     return t("greetingEvening");
   }
 
+  function medalNudgeText() {
+    if (nextMedal === null || daysToNextMedal === null) return null;
+    if (stats.streak_days === 0)
+      return t("daysToMedalStart", { count: daysToNextMedal });
+    const medal = t(`medalName${nextMedal}`);
+    if (daysToNextMedal === 1) return t("daysToMedalOne", { medal });
+    return t("daysToMedalMany", { count: daysToNextMedal, medal });
+  }
+
   function getTopicName(topic: { name_he: string; name_ar?: string | null }) {
     return localizedRecordField(locale, topic as Record<string, unknown>, "name_he", "name_ar");
   }
@@ -265,11 +274,7 @@ export default async function HomePage() {
               : t("streakMany", { count: stats.streak_days })}
           </span>
           {daysToNextMedal !== null ? (
-            <span className={styles.medalNudge}>
-              {daysToNextMedal === 1
-                ? t("daysToMedalOne")
-                : t("daysToMedalMany", { count: daysToNextMedal })}
-            </span>
+            <span className={styles.medalNudge}>{medalNudgeText()}</span>
           ) : stats.streak_days >= 30 ? (
             <span className={styles.medalNudge}>{t("allMedals")}</span>
           ) : null}

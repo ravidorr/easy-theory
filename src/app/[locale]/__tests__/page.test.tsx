@@ -556,6 +556,23 @@ describe("HomePage", () => {
     expect(screen.getByText("daysToMedalOne")).toBeInTheDocument();
   });
 
+  it("shows activation nudge without loss aversion when streak_days is 0", async () => {
+    mockGetStats.mockResolvedValue({ streak_days: 0, star_points: 0 } as never);
+    const jsx = await HomePage();
+    render(jsx);
+    expect(screen.getByText("daysToMedalStart")).toBeInTheDocument();
+  });
+
+  it("threads the next medal name into the nudge", async () => {
+    vi.mocked(getTranslations).mockResolvedValue(valuesT);
+    // streak=7 → next milestone is 14 → medalName14
+    const jsx = await HomePage();
+    render(jsx);
+    expect(
+      screen.getByText('daysToMedalMany|{"count":7,"medal":"medalName14"}')
+    ).toBeInTheDocument();
+  });
+
   describe("readiness card", () => {
     function examAttempt(score: number, created_at: string) {
       return {
