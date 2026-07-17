@@ -1,0 +1,138 @@
+/* Placeholder shapes composed by the per-route loading screens while the
+   server component streams. An opacity pulse rather than a gradient sweep:
+   a sweep is directional (would need RTL flipping) and repaints; opacity
+   composites and reads the same over the light and dark --surface-2. */
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.skeleton {
+  display: block;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  animation: skeleton-pulse 1.6s ease-in-out infinite;
+}
+
+/* Shape variants */
+.line {
+  height: 14px;
+  width: 100%;
+}
+
+.lineLg {
+  height: 22px;
+  width: 100%;
+}
+
+.pill {
+  height: 28px;
+  width: 110px;
+  flex-shrink: 0;
+  border-radius: var(--radius-pill);
+}
+
+.block {
+  height: 52px;
+  width: 100%;
+  border-radius: var(--radius-lg);
+}
+
+.circle {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+.bar {
+  height: 8px;
+  width: 100%;
+  border-radius: var(--radius-pill);
+}
+
+.image {
+  height: 200px;
+  width: 100%;
+  border-radius: var(--radius-lg);
+}
+
+/* Width utilities (declared after the variants so they win the tie) */
+.w25 {
+  width: 25%;
+}
+
+.w40 {
+  width: 40%;
+}
+
+.w60 {
+  width: 60%;
+}
+
+.w80 {
+  width: 80%;
+}
+
+/* Fixed square sizes for circles and icon blocks (36px square needs no
+   class: it is the .circle default) */
+.s40 {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.s52 {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+}
+
+.s72 {
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+}
+
+/* Horizontal grouping for icon-plus-text placeholder rows. Fluid shapes
+   (lines, bars, blocks) share the leftover space; fixed shapes keep their
+   size via their own flex-shrink. */
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* Vertical grouping for stacked text lines beside a fixed shape. */
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 0;
+}
+
+/* Card-shaped container for grouped placeholders. Deliberately never
+   pressable: it only mimics the resting look of the app's cards. */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}

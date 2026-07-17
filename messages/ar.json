@@ -11,6 +11,9 @@
     "links": "روابط",
     "more": "المزيد"
   },
+  "Loading": {
+    "label": "جار تحميل المحتوى"
+  },
   "Home": {
     "wordmark": "طريق واضح",
     "greetingMorning": "صباح الخير",
