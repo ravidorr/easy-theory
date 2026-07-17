@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import he from "../../../messages/he.json";
 import ar from "../../../messages/ar.json";
+import { STREAK_MILESTONES } from "@/lib/quiz";
 
 function flattenKeys(obj: Record<string, unknown>, prefix = ""): string[] {
   return Object.entries(obj).flatMap(([key, value]) => {
@@ -51,6 +52,24 @@ describe("locale messages", () => {
       expect(messages.Home.remainingQuestionsLine).toContain("{count}");
       expect(messages.Home.remainingQuestionsLineOne).toBeTruthy();
       expect(messages.Home.examReadyLine).toBeTruthy();
+    }
+  });
+
+  it("keeps the ICU placeholders of the medal nudge strings in both locales", () => {
+    for (const messages of [he, ar]) {
+      expect(messages.Home.daysToMedalOne).toContain("{medal}");
+      expect(messages.Home.daysToMedalMany).toContain("{count, plural,");
+      expect(messages.Home.daysToMedalMany).toContain("{medal}");
+      expect(messages.Home.daysToMedalStart).toContain("{count}");
+    }
+  });
+
+  it("defines a medal name for every streak milestone in both locales", () => {
+    for (const messages of [he, ar]) {
+      const home = messages.Home as Record<string, string>;
+      for (const milestone of STREAK_MILESTONES) {
+        expect(home[`medalName${milestone}`]).toBeTruthy();
+      }
     }
   });
 });

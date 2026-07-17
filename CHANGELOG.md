@@ -2,6 +2,13 @@
 
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 
+## [0.3.155] — 2026-07-17
+
+### Changed
+- Stronger streak/medal motivation copy: the homepage medal nudge stops mumbling "עוד 3 ימים למדליה הבאה" and starts coaching. The streak line at 2+ days now celebrates ("{count} ימים ברצף. אש!"), and the nudge names the actual medal at stake via four new short medal names (medalName3/7/14/30: "מדליית שלושת הימים" through "מדליית החודש" — the TODO's "Silver" adapted to the app's real day-count milestones) with urgency framing: "רק עוד 3 ימים למדליית השבוע. שומרים על הרצף!". The TODO's literal "Don't lose your streak" loss-aversion tail was deliberately softened to the positive "שומרים על הרצף!" because CONTRIBUTING.md's Hebrew-copy rule forbids pressure framing. At streak 0 a new daysToMedalStart key uses activation framing instead ("מתחילים היום!") since there is no streak to keep yet. The rewrite also fixes number agreement the old plain-substitution strings got wrong: daysToMedalMany is now an ICU plural in both locales, so Hebrew renders the dual "יומיים" instead of "2 ימים" and Arabic picks the right form per count ("يومان" / "3 أيام" / "11 يومًا"). In page.tsx the nudge selection moves into a medalNudgeText() helper (mirroring timeGreeting()), and a new messages test derives the required medalName keys from STREAK_MILESTONES itself, so adding a milestone without its medal name fails CI instead of shipping a raw "Home.medalName60" to users. All keys in he + ar. (TODO: stronger streak/medal motivation copy)
+
+---
+
 ## [0.3.154] — 2026-07-17
 
 ### Changed
