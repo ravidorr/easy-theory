@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getApiTranslator, parseJsonBody } from "@/lib/api";
+import { reportError } from "@/lib/monitoring";
 
 export async function POST(request: Request) {
   const t = getApiTranslator(request);
@@ -48,7 +49,7 @@ export async function POST(request: Request) {
       })
       .eq("id", existing.id);
     if (error) {
-      console.error("[progress] update failed:", error);
+      reportError("progress", "update failed", error);
       return NextResponse.json({ error: t("progressSaveFailed") }, { status: 500 });
     }
   } else {
@@ -60,7 +61,7 @@ export async function POST(request: Request) {
       best_score: safeScore,
     });
     if (error) {
-      console.error("[progress] insert failed:", error);
+      reportError("progress", "insert failed", error);
       return NextResponse.json({ error: t("progressSaveFailed") }, { status: 500 });
     }
   }

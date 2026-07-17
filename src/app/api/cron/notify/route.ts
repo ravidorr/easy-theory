@@ -4,6 +4,7 @@ import webpush from "web-push";
 import { createAdminClient } from "@/lib/supabase";
 import { getUsersScheduledForDay, getPushSubscriptionsForUsers } from "@/lib/db";
 import { getNotifyTranslator } from "@/lib/api";
+import { reportError } from "@/lib/monitoring";
 import { APP_TIME_ZONE } from "@/lib/personalization";
 
 const APP_URL = "https://easy-theory-omega.vercel.app";
@@ -75,13 +76,30 @@ export async function GET(request: Request) {
             })
           );
           sent++;
-        } catch {
-          // Subscription expired — remove it
-          await admin
-            .from("user_push_subscriptions")
-            .delete()
-            .eq("user_id", s.user_id)
-            .eq("endpoint", pushSub.endpoint);
+        } catch (err) {
+          const statusCode = (err as { statusCode?: number }).statusCode;
+          if (statusCode === 404 || statusCode === 410) {
+            // Subscription expired — remove it
+            await admin
+              .from("user_push_subscriptions")
+              .delete()
+              .eq("user_id", s.user_id)
+              .eq("endpoint", pushSub.endpoint);
+          } else {
+            // WebPushError carries the subscription endpoint (a capability
+            // URL) plus the push service's response headers/body as own
+            // properties, which the SDK would serialize into the event —
+            // report a stripped copy so none of that leaves our
+            // infrastructure.
+            const sanitized = new Error(
+              err instanceof Error ? err.message : String(err)
+            );
+            sanitized.name = err instanceof Error ? err.name : "PushSendError";
+            reportError("notify", "push send failed", sanitized, {
+              userId: s.user_id,
+              statusCode,
+            });
+          }
         }
         return;
       }

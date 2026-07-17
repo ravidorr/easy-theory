@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getApiTranslator, parseJsonBody } from "@/lib/api";
+import { reportError } from "@/lib/monitoring";
 
 // Idempotent "set state" rather than a toggle, so retries and double-taps
 // can't flip a bookmark to the wrong state.
@@ -43,7 +44,7 @@ export async function PUT(request: Request) {
       if (error.code === "23503") {
         return NextResponse.json({ error: t("questionNotFound") }, { status: 404 });
       }
-      console.error("[bookmarks] upsert failed:", error);
+      reportError("bookmarks", "upsert failed", error);
       return NextResponse.json({ error: t("bookmarkUpdateFailed") }, { status: 500 });
     }
   } else {
@@ -53,7 +54,7 @@ export async function PUT(request: Request) {
       .eq("user_id", user.id)
       .eq("question_id", question_id);
     if (error) {
-      console.error("[bookmarks] delete failed:", error);
+      reportError("bookmarks", "delete failed", error);
       return NextResponse.json({ error: t("bookmarkUpdateFailed") }, { status: 500 });
     }
   }

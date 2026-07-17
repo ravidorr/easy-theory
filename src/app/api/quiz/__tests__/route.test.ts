@@ -255,6 +255,7 @@ describe("POST /api/quiz", () => {
     });
     expect(errorSpy).toHaveBeenCalledWith(
       "[quiz] transactional submission failed:",
+      expect.objectContaining({ message: "idempotency_result_missing" }),
       expect.objectContaining({
         ref: body.ref,
         pg: expect.objectContaining({ message: "idempotency_result_missing" }),
@@ -360,6 +361,7 @@ describe("POST /api/quiz", () => {
     });
     expect(errorSpy).toHaveBeenCalledWith(
       "[quiz] transactional submission failed:",
+      expect.objectContaining({ message: "submission failed" }),
       expect.objectContaining({
         ref: body.ref,
         userId: USER_ID,

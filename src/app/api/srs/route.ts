@@ -4,6 +4,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { getApiTranslator, parseJsonBody } from "@/lib/api";
 import { upsertSrsCard } from "@/lib/db";
 import { INITIAL_SRS_STATE, reviewCard } from "@/lib/srs";
+import { reportError } from "@/lib/monitoring";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const FOREIGN_KEY_VIOLATION = "23503";
@@ -40,7 +41,7 @@ export async function POST(request: Request) {
     .eq("sign_id", sign_id)
     .maybeSingle();
   if (selectError) {
-    console.error("[srs] select failed:", selectError);
+    reportError("srs", "select failed", selectError);
     return NextResponse.json({ error: t("srsSaveFailed") }, { status: 500 });
   }
 
@@ -52,7 +53,7 @@ export async function POST(request: Request) {
     if (code === FOREIGN_KEY_VIOLATION) {
       return NextResponse.json({ error: t("invalidParams") }, { status: 400 });
     }
-    console.error("[srs] upsert failed:", err);
+    reportError("srs", "upsert failed", err);
     return NextResponse.json({ error: t("srsSaveFailed") }, { status: 500 });
   }
 
