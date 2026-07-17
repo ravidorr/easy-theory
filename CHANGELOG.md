@@ -3,6 +3,13 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.165] — 2026-07-17
+
+### Added
+- Route transitions now paint an instant skeleton screen instead of stalling on the old page: every data-backed route under `[locale]` gains a `loading.tsx` (13 files — home, topic quiz, mistakes review, exam intro, exam run, videos, flashcards, resources, more, bookmarks, schedule, credits, and auth/login), composed from a new `Skeleton` primitive (`src/components/Skeleton.tsx` + CSS module) with shape variants (line, pill, block, circle, bar, image), fixed-size utilities, and Row/Col/Card/IconCard grouping helpers. The placeholders animate with an opacity pulse rather than a directional shimmer (RTL-safe, theme-safe via `--surface-2`, compositor-only, disabled under `prefers-reduced-motion`, module-scoped keyframe per the `page.module.css` precedent), each screen imports its own route's `page.module.css` containers so the skeleton geometry matches the loaded page, the four tab routes render the real `TabBar` with the correct active tab (loading files receive no params; next-intl resolves the locale from the proxy-forwarded header), and screen readers hear only a localized "loading" label (`Loading.label` in he + ar) via a `role="status"` element inside an `aria-busy` main with every placeholder `aria-hidden`. Review catches folded in: `auth/login` got its own chrome-free skeleton because the root home-shaped fallback (with an authenticated tab bar) was the closest boundary for the logout landing page; the home fallback's two `getTranslations` calls were parallelized; a dead `wFull` size token, an `s36` class duplicating the `circle` default, unused `className` props on the grouping helpers, and a byte-identical resources/credits section block (now the shared `SkeletonIconCard`) were removed. Verified live in the QA environment on `/he` and `/ar`, light and dark, including the a11y wiring (`role="status"` announcing the localized label during navigation). (TODO: skeleton loaders instead of content flashes while data loads)
+
+---
+
 ## [0.3.164] — 2026-07-17
 
 ### Changed

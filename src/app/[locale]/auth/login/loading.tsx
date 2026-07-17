@@ -1,0 +1,25 @@
+import { getTranslations } from "next-intl/server";
+import {
+  Skeleton,
+  SkeletonCard,
+  SkeletonScreen,
+} from "@/components/Skeleton";
+import styles from "./page.module.css";
+
+export default async function Loading() {
+  const t = await getTranslations("Loading");
+
+  return (
+    <SkeletonScreen label={t("label")} className={styles.page}>
+      <Skeleton variant="lineLg" size="w40" />
+      <Skeleton variant="lineLg" size="w80" />
+      <Skeleton size="w60" />
+      <SkeletonCard>
+        <Skeleton size="w40" />
+        <Skeleton size="w80" />
+        <Skeleton variant="block" />
+        <Skeleton variant="block" />
+      </SkeletonCard>
+    </SkeletonScreen>
+  );
+}
