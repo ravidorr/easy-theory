@@ -3,6 +3,13 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.167] — 2026-07-17
+
+### Added
+- Contextual empty states instead of bare zeros and dashes for new (and lapsed) users. The homepage stats strip keeps its four tiles and live `data-stat` hooks but gains encouraging captions in the existing `.statTileCaption` style: the streak tile when `streak_days` is 0, the points tile when `star_points` is 0, and the daily-goal tile shows a first-steps line (`Home.dailyGoalFirst`) instead of "20 more questions" when the user has never answered anything (named `neverAnswered` gate: lifetime + today counts both zero). `public/js/stats-pills.js` removes a tile's `data-zero-note` caption when a cached-navigation sync counts that stat above zero, so a fresh streak never sits beside a stale "start your first" nudge. On the More page, unearned medal/achievement date slots swap "-" for a locked label (`More.medalLockedLabel`) and the null-accuracy cell swaps "-" for `More.statAccuracyEmpty`, styled by a new `.statValueEmpty` modifier that keeps the stat-grid rows aligned (min-height matching the numeric value, wrap-safe for longer translations). Five new keys in he + ar. Review catches folded in: the empty-accuracy strings were shortened to fit the narrow three-column cell without wrapping, the accuracy cell renders one span with a conditional class instead of two duplicated branches, and the daily-goal caption logic moved out of a four-branch inline JSX ternary into a precomputed `dailyGoalCaption`. (TODO: contextual empty states instead of just showing zeros)
+
+---
+
 ## [0.3.166] — 2026-07-17
 
 ### Changed

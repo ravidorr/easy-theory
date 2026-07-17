@@ -108,23 +108,24 @@ describe("MorePage", () => {
     expect(row?.textContent).toContain("navBookmarks");
   });
 
-  it("shows '-' for all medals when none are earned", async () => {
+  it("shows the locked label for all medals when none are earned", async () => {
     mockGetMedals.mockResolvedValue([]);
     const jsx = await MorePage();
     render(jsx);
-    // 4 milestone dates + 4 achievement date slots + the empty accuracy stat.
-    const dashes = screen.getAllByText("-");
-    expect(dashes).toHaveLength(9);
+    // 4 milestone dates + 4 achievement date slots.
+    expect(screen.getAllByText("medalLockedLabel")).toHaveLength(8);
+    // The empty accuracy stat gets contextual copy instead of a dash.
+    expect(screen.getByText("statAccuracyEmpty")).toBeInTheDocument();
+    expect(screen.queryByText("-")).not.toBeInTheDocument();
   });
 
-  it("shows a formatted date instead of '-' for earned medals", async () => {
+  it("shows a formatted date instead of the locked label for earned medals", async () => {
     mockGetMedals.mockResolvedValue([
       { medal_slug: "streak-3", earned_at: "2026-01-15T10:00:00Z" },
     ] as never);
     const jsx = await MorePage();
     render(jsx);
-    const dashes = screen.getAllByText("-");
-    expect(dashes).toHaveLength(8);
+    expect(screen.getAllByText("medalLockedLabel")).toHaveLength(7);
   });
 
   it("renders the four milestone medals plus four derived achievements", async () => {
@@ -180,6 +181,7 @@ describe("MorePage", () => {
       expect(screen.getByText('statAccuracyValue|{"percent":56}')).toBeInTheDocument();
       expect(screen.getByText("9")).toBeInTheDocument();
       expect(screen.getByText('statCompletionValue|{"percent":30}')).toBeInTheDocument();
+      expect(screen.queryByText("statAccuracyEmpty")).not.toBeInTheDocument();
     });
 
     it("derives the level from star points", async () => {
@@ -236,9 +238,9 @@ describe("MorePage", () => {
       const jsx = await MorePage();
       render(jsx);
       expect(screen.getByText("achExamPass").className).toContain("medalLabelEarned");
-      // The date slot swaps the not-earned dash for the earned label.
+      // The date slot swaps the locked label for the earned label.
       expect(screen.getByText("achEarnedLabel")).toBeInTheDocument();
-      expect(screen.getAllByText("-")).toHaveLength(8);
+      expect(screen.getAllByText("medalLockedLabel")).toHaveLength(7);
     });
 
     it("leaves all achievements locked for a fresh account", async () => {
@@ -301,7 +303,7 @@ describe("MorePage", () => {
     ] as never);
     const jsx = await MorePage();
     render(jsx);
-    expect(screen.getAllByText("-")).toHaveLength(8);
+    expect(screen.getAllByText("medalLockedLabel")).toHaveLength(7);
   });
 
   it("renders light mode toggle when theme is light", async () => {

@@ -197,6 +197,46 @@ describe("HomePage", () => {
       expect(widths).toContain("100%");
       expect(widths.every((w) => !w || parseInt(w, 10) <= 100)).toBe(true);
     });
+
+    it("shows contextual empty captions for a brand-new user", async () => {
+      mockGetStats.mockResolvedValue({ streak_days: 0, star_points: 0 } as never);
+      const jsx = await HomePage();
+      const { container } = render(jsx);
+      expect(screen.getByText("statsStreakEmpty")).toBeInTheDocument();
+      expect(screen.getByText("statsPointsEmpty")).toBeInTheDocument();
+      expect(screen.getByText("dailyGoalFirst")).toBeInTheDocument();
+      expect(screen.queryByText(/dailyGoalRemaining/)).not.toBeInTheDocument();
+      // The captions ride beside the live values; the pill-sync hooks stay unique.
+      expect(container.querySelectorAll('[data-stat="streak"]')).toHaveLength(1);
+      expect(container.querySelectorAll('[data-stat="points"]')).toHaveLength(1);
+      expect(
+        container.querySelector('[data-zero-note="streak"]')?.textContent
+      ).toBe("statsStreakEmpty");
+      expect(
+        container.querySelector('[data-zero-note="points"]')?.textContent
+      ).toBe("statsPointsEmpty");
+    });
+
+    it("hides the empty captions once the user has activity", async () => {
+      mockGetWindowAccuracy.mockResolvedValue({ correct: 5, total: 12 });
+      const jsx = await HomePage();
+      render(jsx);
+      expect(screen.queryByText("statsStreakEmpty")).not.toBeInTheDocument();
+      expect(screen.queryByText("statsPointsEmpty")).not.toBeInTheDocument();
+      expect(screen.queryByText("dailyGoalFirst")).not.toBeInTheDocument();
+    });
+
+    it("shows only the streak caption for a lapsed user with points", async () => {
+      mockGetStats.mockResolvedValue({ streak_days: 0, star_points: 150 } as never);
+      mockGetTopicAccuracy.mockResolvedValue([
+        { topic_id: "t1", correct: 8, total: 10 },
+      ]);
+      const jsx = await HomePage();
+      render(jsx);
+      expect(screen.getByText("statsStreakEmpty")).toBeInTheDocument();
+      expect(screen.queryByText("statsPointsEmpty")).not.toBeInTheDocument();
+      expect(screen.queryByText("dailyGoalFirst")).not.toBeInTheDocument();
+    });
   });
 
   it("renders the today-card CTA as a link styled as a button, without a nested button", async () => {

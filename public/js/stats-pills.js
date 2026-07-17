@@ -51,6 +51,13 @@
     document.querySelectorAll('[data-stat="' + name + '"]').forEach(function (el) {
       animateValue(el, to);
     });
+    // The server renders a "start your first..." caption beside a zero stat;
+    // drop it when a cached-navigation sync moves the stat above zero.
+    if (to > 0) {
+      document.querySelectorAll('[data-zero-note="' + name + '"]').forEach(function (el) {
+        el.remove();
+      });
+    }
   }
 
   // Mirrors levelForPoints in src/lib/gamification.ts, where

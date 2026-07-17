@@ -236,6 +236,16 @@ export default async function HomePage() {
     Math.round((answeredToday / DAILY_GOAL_QUESTIONS) * 100)
   );
   const dailyGoalRemaining = Math.max(DAILY_GOAL_QUESTIONS - answeredToday, 0);
+  // Both counts come from separate queries, so check them together rather
+  // than assuming the lifetime total implies today's.
+  const neverAnswered = completion.answeredQuestions === 0 && answeredToday === 0;
+  const dailyGoalCaption = dailyGoalDone
+    ? t("dailyGoalDone")
+    : neverAnswered
+    ? t("dailyGoalFirst")
+    : dailyGoalRemaining === 1
+    ? t("dailyGoalRemainingOne")
+    : t("dailyGoalRemaining", { count: dailyGoalRemaining });
 
   function timeGreeting() {
     const h = new Date().getHours();
@@ -381,6 +391,11 @@ export default async function HomePage() {
               {stats.streak_days}
             </span>
             <span className={styles.statTileLabel}>{t("statsStreakLabel")}</span>
+            {stats.streak_days === 0 && (
+              <span className={styles.statTileCaption} data-zero-note="streak">
+                {t("statsStreakEmpty")}
+              </span>
+            )}
           </div>
           <div className={styles.statTile}>
             <span className={`${styles.statTileIcon} ${styles.statTileIconPoints}`}>
@@ -390,6 +405,11 @@ export default async function HomePage() {
               {stats.star_points}
             </span>
             <span className={styles.statTileLabel}>{t("statsPointsLabel")}</span>
+            {stats.star_points === 0 && (
+              <span className={styles.statTileCaption} data-zero-note="points">
+                {t("statsPointsEmpty")}
+              </span>
+            )}
           </div>
           <div className={styles.statTile} data-level-unit={LEVEL_CURVE_UNIT}>
             <span className={`${styles.statTileIcon} ${styles.statTileIconLevel}`}>
@@ -444,11 +464,7 @@ export default async function HomePage() {
                 dailyGoalDone ? styles.statTileCaptionDone : ""
               }`}
             >
-              {dailyGoalDone
-                ? t("dailyGoalDone")
-                : dailyGoalRemaining === 1
-                ? t("dailyGoalRemainingOne")
-                : t("dailyGoalRemaining", { count: dailyGoalRemaining })}
+              {dailyGoalCaption}
             </span>
           </div>
         </section>

@@ -109,6 +109,26 @@ describe("stats-pills.js", () => {
     expect(points.map((el) => el.textContent)).toEqual(["70", "70"]);
   });
 
+  it("removes zero-state captions when a stat syncs above zero", () => {
+    document.body.innerHTML = `
+      <span data-stat="streak">0</span>
+      <span data-zero-note="streak">start a streak</span>
+      <span data-stat="points">0</span>
+      <span data-zero-note="points">earn points</span>
+    `;
+    sessionStorage.setItem(
+      "clearroad:stats",
+      JSON.stringify({ streak_days: 1, star_points: 0 })
+    );
+
+    eval(statsPillsScript);
+    settle();
+
+    expect(document.querySelector('[data-zero-note="streak"]')).toBeNull();
+    // Points stayed at zero, so its caption is still accurate.
+    expect(document.querySelector('[data-zero-note="points"]')).not.toBeNull();
+  });
+
   it("skips stats that are missing or not numbers", () => {
     sessionStorage.setItem(
       "clearroad:stats",
