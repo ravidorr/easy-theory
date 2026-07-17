@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import * as Sentry from "@sentry/nextjs";
 import styles from "./error.module.css";
 
 // Segment-level error boundary for everything under [locale]. Data helpers
@@ -19,6 +20,7 @@ export default function LocaleError({
 
   useEffect(() => {
     console.error(error);
+    Sentry.captureException(error);
   }, [error]);
 
   return (

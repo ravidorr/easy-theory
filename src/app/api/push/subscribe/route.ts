@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getApiTranslator, parseJsonBody } from "@/lib/api";
+import { reportError } from "@/lib/monitoring";
 
 export async function POST(request: Request) {
   const t = getApiTranslator(request);
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
   );
 
   if (error) {
-    console.error("[push] subscription upsert failed:", error);
+    reportError("push", "subscription upsert failed", error);
     return NextResponse.json({ error: t("pushSubscribeFailed") }, { status: 500 });
   }
   return NextResponse.json({ ok: true });
@@ -59,7 +60,7 @@ export async function DELETE(request: Request) {
     .eq("user_id", user.id);
 
   if (error) {
-    console.error("[push] subscription delete failed:", error);
+    reportError("push", "subscription delete failed", error);
     return NextResponse.json({ error: t("pushUnsubscribeFailed") }, { status: 500 });
   }
   return NextResponse.json({ ok: true });

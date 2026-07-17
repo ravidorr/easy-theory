@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase";
 import { getApiTranslator } from "@/lib/api";
+import { reportError } from "@/lib/monitoring";
 
 export async function GET(
   request: Request,
@@ -27,7 +28,7 @@ export async function GET(
     .order("question_number");
 
   if (error) {
-    console.error("[topics] questions query failed:", error);
+    reportError("topics", "questions query failed", error);
     return NextResponse.json({ error: t("questionsLoadFailed") }, { status: 500 });
   }
 
