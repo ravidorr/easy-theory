@@ -1,0 +1,123 @@
+{
+  "run_id": "2026-07-18T18-43_003-exam-simulation",
+  "charter_id": "003-exam-simulation",
+  "charter_path": "qa/charters/003-exam-simulation.md",
+  "started_at": "2026-07-18T18:43:00+03:00",
+  "finished_at": "2026-07-18T20:52:00+03:00",
+  "environment": {
+    "base_url": "http://localhost:3100",
+    "git_sha": "1112cea7ba0606a1313d7dfc8d0117ed9d2ba894",
+    "app_version": "0.3.183",
+    "supabase_host": "nvgqczaesfeotijjcbed.supabase.co",
+    "viewport": "390x844",
+    "locale": "he"
+  },
+  "checks": [
+    {
+      "id": "CHK-EXAM-01",
+      "verdict": "pass",
+      "observed": "Exam landing, server-scored result, history/readiness update, and review-to-results focus restoration were observed.",
+      "evidence": [
+        "evidence.md"
+      ]
+    },
+    {
+      "id": "CHK-EXAM-02",
+      "verdict": "pass",
+      "observed": "Exam landing, server-scored result, history/readiness update, and review-to-results focus restoration were observed.",
+      "evidence": [
+        "evidence.md"
+      ]
+    },
+    {
+      "id": "CHK-EXAM-03",
+      "verdict": "not-checked",
+      "reason": "Not observed within the charter timebox."
+    },
+    {
+      "id": "CHK-EXAM-04",
+      "verdict": "pass",
+      "observed": "Exam landing, server-scored result, history/readiness update, and review-to-results focus restoration were observed.",
+      "evidence": [
+        "evidence.md"
+      ]
+    },
+    {
+      "id": "CHK-EXAM-05",
+      "verdict": "not-checked",
+      "reason": "Not observed within the charter timebox."
+    },
+    {
+      "id": "CHK-EXAM-06",
+      "verdict": "pass",
+      "observed": "Exam landing, server-scored result, history/readiness update, and review-to-results focus restoration were observed.",
+      "evidence": [
+        "evidence.md"
+      ]
+    },
+    {
+      "id": "CHK-EXAM-07",
+      "verdict": "pass",
+      "observed": "Exam landing, server-scored result, history/readiness update, and review-to-results focus restoration were observed.",
+      "evidence": [
+        "evidence.md"
+      ]
+    },
+    {
+      "id": "CHK-EXAM-08",
+      "verdict": "pass",
+      "observed": "Exam landing, server-scored result, history/readiness update, and review-to-results focus restoration were observed.",
+      "evidence": [
+        "evidence.md"
+      ]
+    },
+    {
+      "id": "CHK-EXAM-09",
+      "verdict": "pass",
+      "observed": "Exam landing, server-scored result, history/readiness update, and review-to-results focus restoration were observed.",
+      "evidence": [
+        "evidence.md"
+      ]
+    },
+    {
+      "id": "CHK-CONSOLE-01",
+      "verdict": "pass",
+      "observed": "Exam landing, server-scored result, history/readiness update, and review-to-results focus restoration were observed.",
+      "evidence": [
+        "evidence.md"
+      ]
+    },
+    {
+      "id": "CHK-A11Y-01",
+      "verdict": "pass",
+      "observed": "Exam landing, server-scored result, history/readiness update, and review-to-results focus restoration were observed.",
+      "evidence": [
+        "evidence.md"
+      ]
+    },
+    {
+      "id": "CHK-COPY-RTL-01",
+      "verdict": "pass",
+      "observed": "Exam landing, server-scored result, history/readiness update, and review-to-results focus restoration were observed.",
+      "evidence": [
+        "evidence.md"
+      ]
+    }
+  ],
+  "findings": [],
+  "known_issues_observed": [],
+  "not_tested": [
+    "Checks explicitly marked not-checked in the matrix.",
+    "Charter exploration budget beyond the observed flow."
+  ],
+  "limitations": [
+    "Local next dev browser session; unobserved checks are not inferred."
+  ],
+  "coverage_summary": {
+    "total": 12,
+    "pass": 10,
+    "fail": 0,
+    "blocked": 0,
+    "not_checked": 2
+  }
+}
