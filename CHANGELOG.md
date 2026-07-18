@@ -7,7 +7,7 @@ One version bump and one entry per PR (enforced by the pre-push hook); individua
 
 ### Fixed
 
-- Quiz resume state is now scoped by locale as well as user and topic, preventing Hebrew feedback from appearing on Arabic pages. Acknowledged answers persist structured correctness and topic-completion state instead of rendered copy, so restored correct, wrong, and completion feedback is rebuilt from the active locale. Existing retry, scoring, idempotency, and auto-advance behavior remains unchanged; focused tests cover key isolation, the storage contract, and all restored feedback variants. `exam.js` and `schedule.js` were audited and do not persist rendered strings. (TODO: Hebrew feedback rendered on the Arabic locale)
+- Quiz resume state is now scoped by locale as well as user and topic, preventing Hebrew feedback from appearing on Arabic pages. Acknowledged answers persist structured correctness and topic-completion state instead of rendered copy, so restored correct, wrong, and completion feedback is rebuilt from the active locale. Existing locale-free state is migrated once when needed, stripped of rendered copy, and removed only after the locale-scoped write succeeds; upgrade coverage completes the remaining question and verifies 100% progress. Existing retry, scoring, idempotency, and auto-advance behavior remains unchanged; focused tests cover key isolation, the storage contract, and all restored feedback variants. `exam.js` and `schedule.js` were audited and do not persist rendered strings. (TODO: Hebrew feedback rendered on the Arabic locale)
 
 ## [0.3.173] — 2026-07-18
 

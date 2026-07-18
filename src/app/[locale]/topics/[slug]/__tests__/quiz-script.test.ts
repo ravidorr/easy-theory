@@ -181,6 +181,10 @@ function resumeKey(locale = "he", userId = "u1", topicId = "t1") {
   return `quiz-resume:v1:${locale}:${userId}:${topicId}`;
 }
 
+function legacyResumeKey(userId = "u1", topicId = "t1") {
+  return `quiz-resume:v1:${userId}:${topicId}`;
+}
+
 async function flushAsyncWork() {
   await Promise.resolve();
   await Promise.resolve();
@@ -1463,6 +1467,104 @@ describe("quiz.js – resume", () => {
 
     expect(localStorage.getItem(resumeKey("he"))).toEqual(expect.any(String));
     expect(localStorage.getItem(resumeKey("ar"))).toEqual(expect.any(String));
+  });
+
+  it("migrates legacy state and preserves a 100% result after the remaining question", async () => {
+    localStorage.setItem(
+      legacyResumeKey(),
+      JSON.stringify({
+        i: 0,
+        score: 1,
+        points: 10,
+        sessionId: "legacy-session",
+        total: 2,
+        acknowledgedSubmission: {
+          questionId: "q1",
+          selectedOption: "a",
+          idempotencyKey: "legacy-session:q1",
+          feedbackMessage: "legacy rendered feedback",
+        },
+      })
+    );
+
+    setupDOM({ userId: "u1" });
+
+    const migrated = JSON.parse(localStorage.getItem(KEY)!);
+    expect(migrated.acknowledgedSubmission).toEqual({
+      questionId: "q1",
+      selectedOption: "a",
+      isCorrect: true,
+      idempotencyKey: "legacy-session:q1",
+      topicCompleted: false,
+    });
+    expect(migrated.acknowledgedSubmission).not.toHaveProperty(
+      "feedbackMessage"
+    );
+    expect(localStorage.getItem(legacyResumeKey())).toBeNull();
+
+    clickAction();
+    clickOption(1, "b");
+    await flushAsyncWork();
+    clickAction();
+
+    const progressBody = JSON.parse(fetchCalls("/api/progress")[0][1].body);
+    expect(progressBody).toMatchObject({ score: 100, status: "completed" });
+    expect(fetchCalls("/api/quiz")).toHaveLength(1);
+  });
+
+  it("recognizes a legacy topic-complete message and localizes it on restore", () => {
+    (window as unknown as { __t: Record<string, string> }).__t = {
+      rewardCorrect: "إجابة صحيحة",
+      rewardTopicDone: "أكملنا الموضوع",
+    };
+    localStorage.setItem(
+      legacyResumeKey(),
+      JSON.stringify({
+        i: 0,
+        score: 1,
+        points: 10,
+        sessionId: "legacy-session",
+        total: 2,
+        acknowledgedSubmission: {
+          questionId: "q1",
+          selectedOption: "a",
+          idempotencyKey: "legacy-session:q1",
+          feedbackMessage: "כל הכבוד! סיימנו את כל הנושא!",
+        },
+      })
+    );
+
+    setupDOM({ locale: "ar", userId: "u1" });
+
+    const migrated = JSON.parse(localStorage.getItem(resumeKey("ar"))!);
+    expect(migrated.acknowledgedSubmission.topicCompleted).toBe(true);
+    expect(messageText()).toBe("أكملنا الموضوع");
+    expect(localStorage.getItem(legacyResumeKey())).toBeNull();
+  });
+
+  it("keeps the legacy key when writing the locale key fails", () => {
+    const legacy = JSON.stringify({
+      i: 1,
+      score: 1,
+      points: 10,
+      sessionId: "legacy-session",
+      total: 2,
+    });
+    localStorage.setItem(legacyResumeKey(), legacy);
+    const originalSetItem = Storage.prototype.setItem;
+    vi.spyOn(Storage.prototype, "setItem").mockImplementation(function (
+      key,
+      value
+    ) {
+      if (key === KEY) throw new DOMException("Quota exceeded");
+      return originalSetItem.call(this, key, value);
+    });
+
+    setupDOM({ userId: "u1" });
+
+    expect(localStorage.getItem(legacyResumeKey())).toBe(legacy);
+    expect(localStorage.getItem(KEY)).toBeNull();
+    expect(slideDisplay(1)).toBe("flex");
   });
 
   it("re-renders restored correct feedback from the current locale strings", async () => {

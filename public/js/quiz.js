@@ -42,25 +42,86 @@
     typeof window.__locale === "string" && window.__locale.length > 0
       ? window.__locale
       : "he";
+  const legacyStorageKey =
+    container.dataset.quizMode === "retry"
+      ? null
+      : "quiz-resume:v1:" + (container.dataset.userId || "anon") + ":" + (container.dataset.topicId || "topic");
   const storageKey =
     container.dataset.quizMode === "retry"
       ? null
       : "quiz-resume:v1:" + locale + ":" + (container.dataset.userId || "anon") + ":" + (container.dataset.topicId || "topic");
 
+  let legacyMigrationWritten = false;
+
+  function migrateLegacySubmission(submission, acknowledged) {
+    if (!submission || typeof submission !== "object") return null;
+    const slide = Array.from(container.querySelectorAll(".quiz-slide")).find(
+      function (candidate) {
+        return candidate.dataset.questionId === submission.questionId;
+      }
+    );
+    const migrated = {
+      questionId: submission.questionId,
+      selectedOption: submission.selectedOption,
+      isCorrect:
+        Boolean(slide) && submission.selectedOption === slide.dataset.correct,
+      idempotencyKey: submission.idempotencyKey,
+    };
+    if (acknowledged) {
+      const topicDoneMessage = t.rewardTopicDone || "כל הכבוד! סיימנו את כל הנושא!";
+      migrated.topicCompleted =
+        typeof submission.feedbackMessage === "string" &&
+        (submission.feedbackMessage === topicDoneMessage ||
+          submission.feedbackMessage === "כל הכבוד! סיימנו את כל הנושא!");
+    }
+    return migrated;
+  }
+
+  function migrateLegacyResume(state) {
+    if (!state || typeof state !== "object") return null;
+    return {
+      i: state.i,
+      score: state.score,
+      points: state.points,
+      sessionId: state.sessionId,
+      total: state.total,
+      pendingSubmission: migrateLegacySubmission(
+        state.pendingSubmission,
+        false
+      ),
+      acknowledgedSubmission: migrateLegacySubmission(
+        state.acknowledgedSubmission,
+        true
+      ),
+      savedAt: state.savedAt,
+    };
+  }
+
   function readResume() {
     if (!storageKey) return null;
     try {
-      return JSON.parse(window.localStorage.getItem(storageKey));
+      const localeState = window.localStorage.getItem(storageKey);
+      if (localeState !== null) return JSON.parse(localeState);
+      if (!legacyStorageKey) return null;
+      const legacyState = window.localStorage.getItem(legacyStorageKey);
+      if (legacyState === null) return null;
+      const migrated = migrateLegacyResume(JSON.parse(legacyState));
+      if (!migrated) return null;
+      legacyMigrationWritten = saveResume(migrated);
+      return migrated;
     } catch {
       return null;
     }
   }
 
   function saveResume(state) {
-    if (!storageKey) return;
+    if (!storageKey) return false;
     try {
       window.localStorage.setItem(storageKey, JSON.stringify(state));
-    } catch {}
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   function clearResume() {
@@ -99,6 +160,11 @@
       s.total === total &&
       (s.i > 0 || hasValidPending || hasValidAcknowledged)
     ) {
+      if (legacyMigrationWritten && legacyStorageKey) {
+        try {
+          window.localStorage.removeItem(legacyStorageKey);
+        } catch {}
+      }
       return s;
     }
     if (s) clearResume();
