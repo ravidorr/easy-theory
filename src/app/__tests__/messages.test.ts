@@ -30,6 +30,13 @@ describe("locale messages", () => {
     expect(ar.Home.todayTaskDesc).toContain("{count}");
   });
 
+  it("defines review-mission copy in both locales", () => {
+    for (const messages of [he, ar]) {
+      expect(messages.Home.todayReviewTaskDesc).toBeTruthy();
+      expect(messages.Home.missionReviewBtn).toBeTruthy();
+    }
+  });
+
   it("keeps the ICU placeholders of the topic answered-count label in both locales", () => {
     for (const messages of [he, ar]) {
       expect(messages.Home.topicAnsweredCountPct).toContain("{answered}");

@@ -3,6 +3,12 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.173] — 2026-07-18
+
+### Fixed
+
+- Today's Mission no longer sends learners back into a fully answered low-scoring topic. The shared next-topic selector now accepts an eligibility filter, and Home excludes topics without unanswered questions before prioritizing in-progress then untouched work. Once every topic has been answered, a weak topic becomes a review mission with localized Hebrew and Arabic guidance and a direct `/topics/[slug]/review` CTA, where the existing flow exposes retry only when it is applicable. Focused helper, Home-page, and message-contract tests cover the skipped topic, review fallback, completion treatment, empty state, and both locale keys. (TODO: Today's mission dead-ends on a completed topic)
+
 ## [0.3.172] — 2026-07-18
 
 ### Fixed
