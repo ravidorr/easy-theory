@@ -9,6 +9,7 @@ import { hasLocale } from "next-intl";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
+import { LocaleRuntimeData } from "@/components/LocaleRuntimeData";
 import "@/app/globals.css";
 
 const rubik = Rubik({
@@ -84,19 +85,9 @@ export default async function LocaleLayout({
         {vapidPublicKey && (
           <meta name="vapid-public-key" content={vapidPublicKey} />
         )}
-        <script
-          dangerouslySetInnerHTML={{
-            __html:
-              '(function(){var t=document.documentElement.dataset.theme||"dark";var c=t==="light"?"#f5f7fc":"#131829";var m=document.querySelector(\'meta[name="theme-color"]\');if(m){m.setAttribute("content",c);}else{var n=document.createElement("meta");n.setAttribute("name","theme-color");n.setAttribute("content",c);document.head.appendChild(n);}})();',
-          }}
-        />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `window.__locale=${JSON.stringify(currentLocale)};window.__t=${JSON.stringify(jsT)};window.__tf=function(s,v){return s.replace(/\\{(\\w+)\\}/g,function(_,k){return v[k]??_;});};`,
-          }}
-        />
       </head>
       <body>
+        <LocaleRuntimeData locale={currentLocale} translations={jsT} theme={theme} />
         <NextIntlClientProvider messages={messages}>
           {children}
         </NextIntlClientProvider>

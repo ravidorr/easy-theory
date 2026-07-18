@@ -5,6 +5,8 @@ import LocaleLayout, { generateViewport } from "../layout";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 
+const mockLocaleRuntimeData = vi.hoisted(() => vi.fn());
+
 vi.mock("next/font/google", () => ({
   Rubik: vi.fn().mockReturnValue({ variable: "--font-rubik", className: "rubik" }),
 }));
@@ -47,6 +49,13 @@ vi.mock("next-intl/server", () => ({
 
 vi.mock("@/i18n/routing", () => ({
   routing: { locales: ["he", "ar"], defaultLocale: "he" },
+}));
+
+vi.mock("@/components/LocaleRuntimeData", () => ({
+  LocaleRuntimeData: (props: unknown) => {
+    mockLocaleRuntimeData(props);
+    return null;
+  },
 }));
 
 vi.mock("@vercel/analytics/next", () => ({ Analytics: () => null }));
@@ -95,13 +104,17 @@ describe("LocaleLayout", () => {
     }
   });
 
-  it("injects window.__locale and window.__t into the inline script", async () => {
+  it("passes locale, JS translations, and theme to the client runtime", async () => {
     const jsx = await LocaleLayout(layoutProps("he"));
-    const html = renderToStaticMarkup(jsx);
-    expect(html).toContain("window.__locale");
-    expect(html).toContain("window.__t");
-    expect(html).toContain('"he"');
-    expect(html).toContain("bookmarkSaveError");
+    renderToStaticMarkup(jsx);
+    expect(mockLocaleRuntimeData).toHaveBeenCalledTimes(1);
+    expect(mockLocaleRuntimeData.mock.calls[0][0]).toMatchObject({
+      locale: "he",
+      theme: "dark",
+      translations: expect.objectContaining({
+        bookmarkSaveError: "שגיאה בשמירה",
+      }),
+    });
   });
 
   it("defaults to dark theme when no theme cookie", async () => {
