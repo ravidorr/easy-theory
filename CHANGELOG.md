@@ -3,6 +3,14 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.175] — 2026-07-18
+
+### Fixed
+
+- Question images now remain visible when they show a sign referenced by the prompt, while images that duplicate a numeric answer option stay hidden. The shared rule is used by practice, exam, bookmarks, retry, and mistakes review. Seed data and migration 016 correct all 16 audited questions whose image previously pointed at an answer sign, including questions 369 and 370.
+
+---
+
 ## [0.3.174] — 2026-07-18
 
 ### Fixed

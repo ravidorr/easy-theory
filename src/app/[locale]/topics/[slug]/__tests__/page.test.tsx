@@ -231,7 +231,7 @@ describe("TopicQuizPage", () => {
     expect(container.querySelector("img[src='/signs/sign-101.png']")).toBeTruthy();
   });
 
-  it("skips question image when image_url is a sign path and all options are sign numbers", async () => {
+  it("renders a prompt sign when all numeric options have different numbers", async () => {
     const q = {
       ...QUESTION,
       image_url: "/signs/sign-999.png",
@@ -243,10 +243,10 @@ describe("TopicQuizPage", () => {
     mockGetQuestions.mockResolvedValue([q] as never);
     const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "he" }) });
     const { container } = render(jsx);
-    expect(container.querySelector("img[src='/signs/sign-999.png']")).toBeNull();
+    expect(container.querySelector("img[src='/signs/sign-999.png']")).toBeTruthy();
   });
 
-  it("skips question image when image_url is a sign path and one option is non-numeric text", async () => {
+  it("renders a prompt sign when mixed options have different numbers", async () => {
     const q = {
       ...QUESTION,
       image_url: "/signs/sign-999.png",
@@ -258,7 +258,24 @@ describe("TopicQuizPage", () => {
     mockGetQuestions.mockResolvedValue([q] as never);
     const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "he" }) });
     const { container } = render(jsx);
-    expect(container.querySelector("img[src='/signs/sign-999.png']")).toBeNull();
+    expect(container.querySelector("img[src='/signs/sign-999.png']")).toBeTruthy();
+  });
+
+  it("suppresses a question sign when its number is an answer option", async () => {
+    const q = {
+      ...QUESTION,
+      image_url: "/signs/sign-101.png",
+      option_a: "101",
+      option_b: "102",
+      option_c: "103",
+      option_d: "104",
+    };
+    mockGetQuestions.mockResolvedValue([q] as never);
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "he" }) });
+    const { container } = render(jsx);
+    const matchingImages = container.querySelectorAll("img[src='/signs/sign-101.png']");
+    expect(matchingImages).toHaveLength(1);
+    expect(matchingImages[0].closest(".quiz-option")).toBeTruthy();
   });
 
   it("renders sign image for digit option when sign file exists", async () => {

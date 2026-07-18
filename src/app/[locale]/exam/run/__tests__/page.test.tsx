@@ -133,12 +133,15 @@ describe("ExamRunPage", () => {
       { ...makeQuestion(2), image_url: "/questions/3012.jpg" },
       // Sign question (sign image + numeric option) → no question image, option rendered as sign.
       { ...makeQuestion(3), image_url: "/signs/sign-101.png", option_a: "101" },
+      // Prompt sign does not match the numeric answer option → question image remains visible.
+      { ...makeQuestion(4), image_url: "/signs/sign-126.png", option_a: "123" },
     ] as never);
     const jsx = await ExamRunPage();
     const { container } = render(jsx);
     expect(container.querySelector('img[src="/placeholder.svg"]')).toBeTruthy();
     expect(container.querySelector('img[src="/questions/3012.jpg"]')).toBeTruthy();
     expect(container.querySelector('img[src="/signs/sign-101.png"]')).toBeTruthy();
+    expect(container.querySelector('img[src="/signs/sign-126.png"]')).toBeTruthy();
   });
 
   it("gives question and option images alt text without revealing the answer", async () => {
