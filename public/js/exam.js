@@ -164,9 +164,16 @@
     if (resultScreen) resultScreen.style.display = "flex";
     container.setAttribute("data-passed", data.passed ? "true" : "false");
     if (resultTitle) {
-      resultTitle.textContent = data.passed
-        ? (t.examPassTitle || "עברנו!")
-        : (t.examFailTitle || "לא נורא, כמעט שם.");
+      if (data.passed) {
+        resultTitle.textContent = t.examPassTitle || "עברנו!";
+      } else {
+        const scoreGap = data.pass_mark - data.score;
+        resultTitle.textContent = scoreGap <= 2
+          ? (t.examFailNearTitle || t.examFailTitle || "לא נורא, כמעט שם.")
+          : scoreGap <= 5
+            ? (t.examFailMidTitle || "יש לנו בסיס טוב, נתרגל עוד קצת.")
+            : (t.examFailFarTitle || "נתחיל לתרגל, ונשתפר עם הזמן.");
+      }
     }
     if (resultScore) {
       let text = tf(t.examResultScore || "{score} מתוך {total} נכון (ציון עובר: {passMark})", {

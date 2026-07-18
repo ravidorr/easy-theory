@@ -3,6 +3,14 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.177] — 2026-07-18
+
+### Fixed
+
+- Exam result titles now reflect the gap to the passing score: near misses, mid-range misses, and larger gaps receive distinct localized encouragement in Hebrew and Arabic. The legacy near-miss key remains available while stale service-worker scripts roll over.
+
+---
+
 ## [0.3.176] — 2026-07-18
 
 ### Fixed
