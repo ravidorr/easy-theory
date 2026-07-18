@@ -425,6 +425,7 @@ describe("exam.js – submit", () => {
     expect(slide(0).style.display).toBe("none");
     expect(document.getElementById("exam-footer")!.style.display).toBe("none");
     expect(document.getElementById("exam-review-bar")!.hidden).toBe(true);
+    expect(document.getElementById("exam-timer")!.hidden).toBe(false);
   });
 });
 

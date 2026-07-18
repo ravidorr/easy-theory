@@ -284,6 +284,7 @@
       slides.forEach(function (slide) { slide.style.display = "none"; });
       if (reviewBar) reviewBar.hidden = true;
       if (footer) footer.style.display = "none";
+      if (timerEl) timerEl.hidden = false;
       if (resultScreen) resultScreen.style.display = "flex";
     });
   }
