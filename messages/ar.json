@@ -444,7 +444,9 @@
       "examFailFarTitle": "لنبدأ بالتدرّب، وسنتحسن مع الوقت.",
       "examResultScore": "{score} من {total} صحيح (علامة النجاح: {passMark})",
       "examTimeUp": "انتهى الوقت، تم تسليم الامتحان.",
-      "examSubmitError": "خطأ في الإرسال، نحاول مرة أخرى؟"
+      "examSubmitError": "خطأ في الإرسال، نحاول مرة أخرى؟",
+      "examReviewMode": "مراجعة الإجابات",
+      "examBackToResults": "العودة إلى النتائج"
     },
     "Bookmark": {
       "bookmarkSaveError": "خطأ في الحفظ، نحاول مجدداً؟"

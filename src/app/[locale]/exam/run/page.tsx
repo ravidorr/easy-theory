@@ -140,6 +140,7 @@ export default async function ExamRunPage() {
 
   const locale = await getLocale();
   const t = await getTranslations("Exam");
+  const tJs = await getTranslations("JS.Exam");
   const tQuiz = await getTranslations("Quiz");
 
   const questions = await getRandomExamQuestions(supabase, EXAM_QUESTION_COUNT);
@@ -213,6 +214,13 @@ export default async function ExamRunPage() {
             disabled={total === 0}
           >
             {t("submitBtn")}
+          </button>
+        </div>
+
+        <div id="exam-review-bar" className={styles.reviewBar} hidden>
+          <span className={styles.reviewLabel}>{tJs("examReviewMode")}</span>
+          <button id="exam-back-to-results" className="btn-secondary" type="button">
+            {tJs("examBackToResults")}
           </button>
         </div>
 

@@ -125,6 +125,14 @@ describe("ExamRunPage", () => {
     expect(container.querySelector('a[href="/exam"]')).toBeTruthy();
   });
 
+  it("server-renders the hidden review bar", async () => {
+    const jsx = await ExamRunPage();
+    const { container } = render(jsx);
+    const reviewBar = container.querySelector("#exam-review-bar");
+    expect(reviewBar).toHaveAttribute("hidden");
+    expect(container.querySelector("#exam-back-to-results")).toBeTruthy();
+  });
+
   it("resolves question and option images like the practice quiz", async () => {
     mockGetQuestions.mockResolvedValue([
       // Missing question photo → placeholder, rendered as a wide <img>.
