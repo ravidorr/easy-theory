@@ -3,6 +3,14 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.180] — 2026-07-18
+
+### Added
+
+- Add database-alignment tooling: read-only `pnpm db:compare` detects production and QA drift in the PostgREST-visible schema, RPC signatures, and shared reference content, while `pnpm db:sync-reference` safely previews or applies production reference content to QA with backups, no user-row synchronization, and dependency-ordered table phases. Migration 018 repairs legacy `REAL` SRS ease columns as `DOUBLE PRECISION`. Required-check workflows run the live comparison from trusted `main` code and enforce append-only sequential migrations.
+
+---
+
 ## [0.3.179] — 2026-07-18
 
 ### Fixed

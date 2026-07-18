@@ -82,7 +82,31 @@ token was already used or expired — mint a fresh one.
 Both `qa:dev` and `qa:mint` refuse to run if `.env.qa` is missing, if `QA_ENV=1` is not
 set, or if the Supabase URL matches the one in `.env.local` (production).
 
-## 6. Resetting the test user (optional)
+## 6. Compare production and QA databases
+
+Run the read-only alignment check whenever a migration or content update is applied:
+
+```bash
+pnpm db:compare
+```
+
+The command uses `.env.local` for production and `.env.qa` for QA. It compares the
+PostgREST-visible tables, columns, defaults, types, and RPC signatures, then compares
+shared reference content by stable keys. It never compares user-owned rows and makes
+only `GET` requests. Exit code `0` means aligned, `1` means drift was found, and `2`
+means the check could not run.
+
+This is an API-level check. PostgreSQL indexes, triggers, grants, constraints, and RLS
+policy definitions require direct database connections and are not compared.
+
+To preview production reference-content changes for QA, run
+`pnpm db:sync-reference`. Apply the displayed inserts and updates with
+`pnpm db:sync-reference --apply`; the apply mode first writes a gitignored backup under
+`.context/`, never writes production, and refuses to delete QA-only rows. Use
+`pnpm db:sync-reference --backup` before schema reconciliation to back up the affected
+QA content and both projects' `user_srs_cards` rows.
+
+## 7. Resetting the test user (optional)
 
 To start a run from a clean slate, wipe the test user's data in the SQL editor:
 

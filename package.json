@@ -1,6 +1,6 @@
 {
   "name": "clear-road",
-  "version": "0.3.179",
+  "version": "0.3.180",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -17,6 +17,8 @@
     "prepare": "husky",
     "generate-explanations": "tsx --env-file=.env.local scripts/generate_explanations.ts",
     "translate-arabic": "tsx --env-file=.env.local scripts/translate_arabic.ts",
+    "db:compare": "tsx scripts/compare-databases.ts",
+    "db:sync-reference": "tsx scripts/sync-reference-data.ts",
     "qa:dev": "scripts/qa/qa-dev.sh",
     "qa:mint": "tsx --env-file=.env.qa scripts/qa/mint-session.ts",
     "qa:validate-report": "tsx scripts/qa/validate-report.ts",
