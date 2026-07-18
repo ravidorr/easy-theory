@@ -23,7 +23,7 @@ function slideHTML(index: number) {
   `;
 }
 
-function setupDOM({ total = 3, durationSeconds = 2400 } = {}) {
+function setupDOM({ total = 3, durationSeconds = 2400, translations = {} } = {}) {
   document.body.innerHTML = `
     <main id="exam-container" data-total="${total}" data-duration-seconds="${durationSeconds}" data-pass-mark="26">
       <div id="exam-progress-fill"></div>
@@ -44,6 +44,7 @@ function setupDOM({ total = 3, durationSeconds = 2400 } = {}) {
       </div>
     </main>
   `;
+  vi.stubGlobal("__t", translations);
   eval(examScript);
 }
 
@@ -96,6 +97,17 @@ async function flushPromises() {
   await Promise.resolve();
   await Promise.resolve();
   await Promise.resolve();
+}
+
+async function submitForResultTitle(response: object, translations = {}) {
+  mockFetch(response);
+  setupDOM({ translations });
+  clickOption(0, "a");
+  clickOption(1, "b");
+  clickOption(2, "c");
+  submitBtn().click();
+  await flushPromises();
+  return document.getElementById("exam-result-title")!.textContent;
 }
 
 function stubModal(confirmResult = false) {
@@ -314,6 +326,41 @@ describe("exam.js – submit", () => {
     expect(q2Options[0].querySelector(".quiz-option-sr")).toBeNull();
     // The chosen option stays aria-pressed after decoration.
     expect(q2Options[1].getAttribute("aria-pressed")).toBe("true");
+  });
+
+  it("keeps the pass title for passing scores", async () => {
+    await expect(
+      submitForResultTitle(passResponse({ score: 26, total: 30, pass_mark: 26 }))
+    ).resolves.toBe("עברנו!");
+  });
+
+  it("uses near-miss copy one or two points below the pass mark", async () => {
+    const translations = { examFailNearTitle: "near" };
+    await expect(
+      submitForResultTitle(passResponse({ score: 25, total: 30, passed: false, pass_mark: 26 }), translations)
+    ).resolves.toBe("near");
+    await expect(
+      submitForResultTitle(passResponse({ score: 24, total: 30, passed: false, pass_mark: 26 }), translations)
+    ).resolves.toBe("near");
+  });
+
+  it("uses mid-range copy three through five points below the pass mark", async () => {
+    const translations = { examFailMidTitle: "mid" };
+    await expect(
+      submitForResultTitle(passResponse({ score: 23, total: 30, passed: false, pass_mark: 26 }), translations)
+    ).resolves.toBe("mid");
+    await expect(
+      submitForResultTitle(passResponse({ score: 21, total: 30, passed: false, pass_mark: 26 }), translations)
+    ).resolves.toBe("mid");
+  });
+
+  it("uses far-miss copy six or more points below the pass mark", async () => {
+    await expect(
+      submitForResultTitle(
+        passResponse({ score: 20, total: 30, passed: false, pass_mark: 26 }),
+        { examFailFarTitle: "far" }
+      )
+    ).resolves.toBe("far");
   });
 
   it("shows an error and allows retry when the POST fails", async () => {
