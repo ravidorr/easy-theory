@@ -1,22 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "../route";
 import { createClient } from "@/lib/supabase";
-import { getTopicProgress, getTopics, insertUserMedals } from "@/lib/db";
 import arMessages from "../../../../../messages/ar.json";
 import heMessages from "../../../../../messages/he.json";
 
 vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
-vi.mock("@/lib/db", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@/lib/db")>()),
-  getTopicProgress: vi.fn(),
-  getTopics: vi.fn(),
-  insertUserMedals: vi.fn(),
-}));
 
 const mockCreateClient = vi.mocked(createClient);
-const mockGetTopicProgress = vi.mocked(getTopicProgress);
-const mockGetTopics = vi.mocked(getTopics);
-const mockInsertUserMedals = vi.mocked(insertUserMedals);
 
 const QUESTION_ID = "11111111-1111-4111-8111-111111111111";
 const TOPIC_ID = "22222222-2222-4222-8222-222222222222";
@@ -88,9 +78,6 @@ function buildClient({
 describe("POST /api/quiz", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetTopicProgress.mockResolvedValue([]);
-    mockGetTopics.mockResolvedValue([]);
-    mockInsertUserMedals.mockResolvedValue([]);
   });
 
   it("returns 401 when not authenticated", async () => {
@@ -355,46 +342,22 @@ describe("POST /api/quiz", () => {
     errorSpy.mockRestore();
   });
 
-  it("returns RPC-earned questions-100 and newly persisted topic achievements", async () => {
+  it("returns every medal earned by the transactional RPC", async () => {
     const client = buildClient({
       result: {
         ...storedResult,
-        medals_earned: ["streak-3", "questions-100"],
+        medals_earned: ["streak-3", "questions-100", "first-topic", "all-topics"],
         topic_completed: true,
       },
     });
     mockCreateClient.mockResolvedValue(client as never);
-    mockGetTopics.mockResolvedValue([{ id: TOPIC_ID }] as never);
-    mockGetTopicProgress.mockResolvedValue([{ topic_id: TOPIC_ID, status: "completed" }] as never);
-    mockInsertUserMedals.mockResolvedValue(["first-topic", "all-topics"]);
 
     const response = await POST(makeRequest(defaultBody));
 
-    expect(await response.json()).toMatchObject({
+    expect(await response.json()).toEqual({
+      ...storedResult,
       medals_earned: ["streak-3", "questions-100", "first-topic", "all-topics"],
     });
-    expect(mockInsertUserMedals).toHaveBeenCalledWith(
-      client,
-      USER_ID,
-      expect.arrayContaining(["first-topic", "all-topics"])
-    );
-  });
-
-  it("keeps the accepted quiz result when achievement persistence fails", async () => {
-    const client = buildClient();
-    mockCreateClient.mockResolvedValue(client as never);
-    mockInsertUserMedals.mockRejectedValue(new Error("boom"));
-    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-
-    const response = await POST(makeRequest(defaultBody));
-
-    expect(response.status).toBe(200);
-    expect(await response.json()).toEqual(storedResult);
-    expect(errorSpy).toHaveBeenCalledWith(
-      "[quiz] achievement persistence failed:",
-      expect.any(Error)
-    );
-    errorSpy.mockRestore();
   });
 
   it("returns 500 with a correlation ref when the transactional submission fails", async () => {

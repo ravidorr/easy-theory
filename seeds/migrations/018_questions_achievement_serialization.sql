@@ -1,5 +1,5 @@
--- Keep the 100-question achievement in the serialized submission path. The
--- API cannot safely infer an exact crossing after two submissions commit.
+-- Keep quiz-derived achievements in the serialized submission path. The API
+-- cannot safely infer a threshold or all-topics crossing after commits race.
 
 ALTER FUNCTION public.submit_quiz_answer(TEXT, UUID, TEXT, UUID, UUID)
   RENAME TO submit_quiz_answer_internal;
@@ -20,7 +20,10 @@ DECLARE
   v_response_existed BOOLEAN := FALSE;
   v_result JSONB;
   v_answer_count INT;
+  v_topic_count INT;
+  v_completed_topic_count INT;
   v_medal_slug TEXT;
+  v_result_changed BOOLEAN := FALSE;
 BEGIN
   IF v_user_id IS NULL THEN
     RAISE EXCEPTION 'not_authenticated';
@@ -67,12 +70,62 @@ BEGIN
           COALESCE(v_result -> 'medals_earned', '[]'::JSONB)
             || jsonb_build_array(v_medal_slug)
         );
-        UPDATE public.quiz_answer_submissions
-        SET result = v_result
-        WHERE user_id = v_user_id
-          AND idempotency_key = p_idempotency_key;
+        v_result_changed := TRUE;
       END IF;
     END IF;
+  END IF;
+
+  -- A topic-completion result is emitted only when this submission completed
+  -- that topic. The user lock makes the final two topic completions observe
+  -- one another, so all-topics is awarded by the latter transaction.
+  IF COALESCE((v_result ->> 'topic_completed')::BOOLEAN, FALSE) THEN
+    v_medal_slug := NULL;
+    INSERT INTO public.user_medals (user_id, medal_slug)
+    VALUES (v_user_id, 'first-topic')
+    ON CONFLICT (user_id, medal_slug) DO NOTHING
+    RETURNING medal_slug INTO v_medal_slug;
+
+    IF v_medal_slug IS NOT NULL THEN
+      v_result := jsonb_set(
+        v_result,
+        '{medals_earned}',
+        COALESCE(v_result -> 'medals_earned', '[]'::JSONB)
+          || jsonb_build_array(v_medal_slug)
+      );
+      v_result_changed := TRUE;
+    END IF;
+
+    SELECT COUNT(*) INTO v_topic_count FROM public.topics;
+    SELECT COUNT(*)
+    INTO v_completed_topic_count
+    FROM public.user_topic_progress
+    WHERE user_id = v_user_id
+      AND status = 'completed';
+
+    IF v_topic_count > 0 AND v_completed_topic_count >= v_topic_count THEN
+      v_medal_slug := NULL;
+      INSERT INTO public.user_medals (user_id, medal_slug)
+      VALUES (v_user_id, 'all-topics')
+      ON CONFLICT (user_id, medal_slug) DO NOTHING
+      RETURNING medal_slug INTO v_medal_slug;
+
+      IF v_medal_slug IS NOT NULL THEN
+        v_result := jsonb_set(
+          v_result,
+          '{medals_earned}',
+          COALESCE(v_result -> 'medals_earned', '[]'::JSONB)
+            || jsonb_build_array(v_medal_slug)
+        );
+        v_result_changed := TRUE;
+      END IF;
+    END IF;
+  END IF;
+
+  IF v_result_changed THEN
+    UPDATE public.quiz_answer_submissions
+    SET result = v_result
+    WHERE user_id = v_user_id
+      AND idempotency_key = p_idempotency_key;
   END IF;
 
   RETURN v_result;
