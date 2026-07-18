@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import {
   applyPlan,
+  buildPlansFromRows,
   buildTablePlan,
   collectQaBackupData,
   type SyncOperation,
@@ -58,6 +59,51 @@ describe("reference data sync planning", () => {
       question_number: 1,
       question_he: "Question",
     });
+  });
+
+  it("allocates one QA topic ID for a new topic and its questions", async () => {
+    const allocatedTopicId = "00000000-0000-4000-8000-000000000001";
+    const plans = buildPlansFromRows(
+      new Map([
+        ["topics", [{ id: "prod-new", slug: "new-topic", name_he: "New topic" }]],
+        [
+          "questions",
+          [
+            {
+              id: "prod-question",
+              topic_id: "prod-new",
+              question_number: 1,
+              question_he: "Question",
+            },
+          ],
+        ],
+      ]),
+      new Map([
+        ["topics", []],
+        ["questions", []],
+      ]),
+      () => allocatedTopicId
+    );
+
+    const topicInsert = plans.find((plan) => plan.table === "topics")!.inserts[0];
+    const questionInsert = plans.find((plan) => plan.table === "questions")!.inserts[0];
+    expect(topicInsert.payload.id).toBe(allocatedTopicId);
+    expect(questionInsert.payload.topic_id).toBe(allocatedTopicId);
+
+    const applied: SyncOperation[] = [];
+    await applyPlan(
+      {
+        label: "QA",
+        url: "https://qa.example.test",
+        serviceRoleKey: "qa-secret",
+      },
+      plans,
+      async (operation) => {
+        applied.push(operation);
+      }
+    );
+
+    expect(applied.indexOf(topicInsert)).toBeLessThan(applied.indexOf(questionInsert));
   });
 
   it("identifies QA-only rows instead of planning destructive deletion", () => {

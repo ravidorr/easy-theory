@@ -1,4 +1,5 @@
 import { mkdirSync, writeFileSync } from "node:fs";
+import { randomUUID } from "node:crypto";
 import { pathToFileURL } from "node:url";
 import { createClient } from "@supabase/supabase-js";
 import {
@@ -78,7 +79,11 @@ function indexRows(table: ReferenceTable, rows: Row[]): Map<string | number, Row
   return result;
 }
 
-function topicMaps(productionTopics: Row[], qaTopics: Row[]) {
+function topicMaps(
+  productionTopics: Row[],
+  qaTopics: Row[],
+  allocateTopicId: () => string = randomUUID
+) {
   const productionSlugById = new Map<string, string>();
   const qaIdBySlug = new Map<string, string>();
   for (const topic of productionTopics) {
@@ -89,6 +94,11 @@ function topicMaps(productionTopics: Row[], qaTopics: Row[]) {
   for (const topic of qaTopics) {
     if (typeof topic.id === "string" && typeof topic.slug === "string") {
       qaIdBySlug.set(topic.slug, topic.id);
+    }
+  }
+  for (const topic of productionTopics) {
+    if (typeof topic.slug === "string" && !qaIdBySlug.has(topic.slug)) {
+      qaIdBySlug.set(topic.slug, allocateTopicId());
     }
   }
   return { productionSlugById, qaIdBySlug };
@@ -118,15 +128,21 @@ export function buildTablePlan(
   productionRows: Row[],
   qaRows: Row[],
   productionTopics: Row[],
-  qaTopics: Row[]
+  qaTopics: Row[],
+  sharedTopicMaps = topicMaps(table === "topics" ? productionRows : productionTopics, qaTopics)
 ): TableSyncPlan {
   const production = indexRows(table, productionRows);
   const qa = indexRows(table, qaRows);
-  const { productionSlugById, qaIdBySlug } = topicMaps(productionTopics, qaTopics);
+  const { productionSlugById, qaIdBySlug } = sharedTopicMaps;
   const inserts: SyncOperation[] = [];
   const updates: SyncOperation[] = [];
   for (const [key, productionRow] of production) {
-    const payload = targetPayload(table, productionRow, productionSlugById, qaIdBySlug);
+    let payload = targetPayload(table, productionRow, productionSlugById, qaIdBySlug);
+    if (table === "topics" && !qa.has(key)) {
+      const qaTopicId = qaIdBySlug.get(String(key));
+      if (!qaTopicId) throw new Error(`topics row ${String(key)} has no allocated QA ID`);
+      payload = { id: qaTopicId, ...payload };
+    }
     const operation: SyncOperation = {
       table,
       keyField: KEY_FIELDS[table],
@@ -179,15 +195,25 @@ export async function buildSyncPlan(
 ): Promise<TableSyncPlan[]> {
   validateDistinctProjects(production, qa);
   const { productionRows, qaRows } = await fetchReferenceRows(production, qa);
+  return buildPlansFromRows(productionRows, qaRows);
+}
+
+export function buildPlansFromRows(
+  productionRows: Map<ReferenceTable, Row[]>,
+  qaRows: Map<ReferenceTable, Row[]>,
+  allocateTopicId: () => string = randomUUID
+): TableSyncPlan[] {
   const productionTopics = productionRows.get("topics") ?? [];
   const qaTopics = qaRows.get("topics") ?? [];
+  const sharedTopicMaps = topicMaps(productionTopics, qaTopics, allocateTopicId);
   return TABLES.map((table) =>
     buildTablePlan(
       table,
       productionRows.get(table) ?? [],
       qaRows.get(table) ?? [],
       productionTopics,
-      qaTopics
+      qaTopics,
+      sharedTopicMaps
     )
   );
 }
