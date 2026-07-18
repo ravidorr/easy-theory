@@ -728,7 +728,9 @@
       persistResume();
       persistLatestStats(data);
       if (data.medals_earned && data.medals_earned.length && window.medalCelebration) {
-        window.medalCelebration.show(data.medals_earned);
+        window.medalCelebration.show(data.medals_earned, {
+          fallbackFocus: actionBtn,
+        });
       }
       // A medal modal or topic-completed message needs the user's attention;
       // never auto-advance past it.

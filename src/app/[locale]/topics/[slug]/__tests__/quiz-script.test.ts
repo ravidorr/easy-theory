@@ -770,6 +770,26 @@ describe("quiz.js – auto-advance", () => {
     expect(document.querySelector('[role="dialog"]')).not.toBeNull();
   });
 
+  it("restores focus to Next after dismissing an earned medal", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ medals_earned: ["streak-3"] }),
+      })
+    );
+    setupDOM();
+
+    clickOption(0, "a");
+    await flushAsyncWork();
+    expect(actionButton().disabled).toBe(false);
+
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    expect(document.activeElement).toBe(actionButton());
+  });
+
   it("does not auto-advance past the topic-completed message", async () => {
     vi.stubGlobal(
       "fetch",
