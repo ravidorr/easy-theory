@@ -192,15 +192,26 @@ export async function buildSyncPlan(
   );
 }
 
-async function backupAffectedData(
-  production: DatabaseConfig,
-  qa: DatabaseConfig
-): Promise<string> {
-  const [productionSrs, qaSrs, ...qaReferenceRows] = await Promise.all([
-    fetchAllRows(production, "user_srs_cards"),
-    fetchAllRows(qa, "user_srs_cards"),
-    ...TABLES.map((table) => fetchAllRows(qa, table)),
+export async function collectQaBackupData(
+  qa: DatabaseConfig,
+  fetchImpl: typeof fetch = fetch
+) {
+  const [qaSrs, ...qaReferenceRows] = await Promise.all([
+    fetchAllRows(qa, "user_srs_cards", fetchImpl),
+    ...TABLES.map((table) => fetchAllRows(qa, table, fetchImpl)),
   ]);
+  return {
+    qa: {
+      user_srs_cards: qaSrs,
+      referenceData: Object.fromEntries(
+        TABLES.map((table, index) => [table, qaReferenceRows[index]])
+      ),
+    },
+  };
+}
+
+async function backupAffectedData(qa: DatabaseConfig): Promise<string> {
+  const backupData = await collectQaBackupData(qa);
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
   const path = `.context/database-alignment-backup-${timestamp}.json`;
   mkdirSync(".context", { recursive: true });
@@ -209,13 +220,7 @@ async function backupAffectedData(
     JSON.stringify(
       {
         createdAt: new Date().toISOString(),
-        production: { user_srs_cards: productionSrs },
-        qa: {
-          user_srs_cards: qaSrs,
-          referenceData: Object.fromEntries(
-            TABLES.map((table, index) => [table, qaReferenceRows[index]])
-          ),
-        },
+        ...backupData,
       },
       null,
       2
@@ -304,7 +309,7 @@ export async function main(): Promise<void> {
     }
     const { production, qa } = loadConfigs();
     if (args.has("--backup")) {
-      console.log(`Database alignment backup: ${await backupAffectedData(production, qa)}`);
+      console.log(`Database alignment backup: ${await backupAffectedData(qa)}`);
       return;
     }
     const plans = await buildSyncPlan(production, qa);
@@ -313,7 +318,7 @@ export async function main(): Promise<void> {
       console.log("Dry run only. Pass --apply to write these changes to QA.");
       return;
     }
-    const backupPath = await backupAffectedData(production, qa);
+    const backupPath = await backupAffectedData(qa);
     console.log(`Backup created: ${backupPath}`);
     await applyPlan(qa, plans);
     console.log("Reference data sync applied to QA.");

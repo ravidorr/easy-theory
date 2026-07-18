@@ -7,7 +7,7 @@ One version bump and one entry per PR (enforced by the pre-push hook); individua
 
 ### Added
 
-- Add database-alignment tooling: read-only `pnpm db:compare` detects production and QA drift in the PostgREST-visible schema, RPC signatures, and shared reference content, while `pnpm db:sync-reference` safely previews or applies production reference content to QA with backups, no user-row synchronization, and dependency-ordered table phases. Migration 018 repairs legacy `REAL` SRS ease columns as `DOUBLE PRECISION`. Required-check workflows run the live comparison from trusted `main` code and enforce append-only sequential migrations.
+- Add database-alignment tooling: read-only `pnpm db:compare` detects production and QA drift in the PostgREST-visible schema, RPC signatures, and shared reference content, while `pnpm db:sync-reference` safely previews or applies production reference content to QA with QA-only backups, no user-row synchronization, and dependency-ordered table phases. Migration 018 repairs legacy `REAL` SRS ease columns as `DOUBLE PRECISION`. Required-check workflows run the live comparison from trusted `main` code and enforce append-only sequential migrations.
 
 ---
 

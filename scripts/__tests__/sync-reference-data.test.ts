@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import {
   applyPlan,
   buildTablePlan,
+  collectQaBackupData,
   type SyncOperation,
   type TableSyncPlan,
 } from "../sync-reference-data";
@@ -114,6 +115,43 @@ describe("reference data sync planning", () => {
     await applying;
 
     expect(started).toEqual(["topics", "questions"]);
+  });
+
+  it("collects backups exclusively from QA", async () => {
+    const requestedUrls: string[] = [];
+    const mock = vi.fn(async (input: string | URL | Request) => {
+      const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+      requestedUrls.push(url);
+      return new Response("[]", {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }) as typeof fetch;
+
+    const backup = await collectQaBackupData(
+      {
+        label: "QA",
+        url: "https://qa.example.test",
+        serviceRoleKey: "qa-secret",
+      },
+      mock
+    );
+
+    expect(requestedUrls).toHaveLength(6);
+    expect(requestedUrls.every((url) => url.startsWith("https://qa.example.test/"))).toBe(true);
+    expect(backup).toEqual({
+      qa: {
+        user_srs_cards: [],
+        referenceData: {
+          topics: [],
+          signs: [],
+          videos: [],
+          resources: [],
+          questions: [],
+        },
+      },
+    });
+    expect(backup).not.toHaveProperty("production");
   });
 });
 

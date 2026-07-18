@@ -104,7 +104,8 @@ To preview production reference-content changes for QA, run
 `pnpm db:sync-reference --apply`; the apply mode first writes a gitignored backup under
 `.context/`, never writes production, and refuses to delete QA-only rows. Use
 `pnpm db:sync-reference --backup` before schema reconciliation to back up the affected
-QA content and both projects' `user_srs_cards` rows.
+QA reference content and QA `user_srs_cards` rows. Production user rows are never
+downloaded by the sync tooling.
 
 ## 7. Resetting the test user (optional)
 
