@@ -391,6 +391,43 @@ describe("HomePage", () => {
     expect(screen.getByText("todayBadge")).toBeInTheDocument();
   });
 
+  it("skips a fully answered in-progress topic for an unanswered topic", async () => {
+    mockGetProgress.mockResolvedValue([
+      { topic_id: "t1", status: "in_progress", best_score: 25 },
+      { topic_id: "t2", status: "in_progress", best_score: 0 },
+    ] as never);
+    mockGetTopicAccuracy.mockResolvedValue([
+      { topic_id: "t1", correct: 5, total: 20 },
+    ]);
+    const jsx = await HomePage();
+    render(jsx);
+    const card = screen.getByText("todayBadge").parentElement!;
+    expect(within(card).getByRole("link", { name: "startBtn" })).toHaveAttribute(
+      "href",
+      "/topics/priority"
+    );
+  });
+
+  it("falls back to reviewing a fully answered weak topic", async () => {
+    vi.mocked(getTranslations).mockResolvedValue(valuesT);
+    mockGetProgress.mockResolvedValue([
+      { topic_id: "t1", status: "in_progress", best_score: 25 },
+      { topic_id: "t2", status: "completed", best_score: 100 },
+    ] as never);
+    mockGetTopicAccuracy.mockResolvedValue([
+      { topic_id: "t1", correct: 5, total: 20 },
+      { topic_id: "t2", correct: 10, total: 10 },
+    ]);
+    const jsx = await HomePage();
+    render(jsx);
+    const card = screen.getByText("todayBadge").parentElement!;
+    expect(within(card).getByText("todayReviewTaskDesc")).toBeInTheDocument();
+    expect(
+      within(card).getByRole("link", { name: "missionReviewBtn" })
+    ).toHaveAttribute("href", "/topics/signs/review");
+    expect(within(card).queryByText(/todayTaskDesc/)).not.toBeInTheDocument();
+  });
+
   it("shows schedule prompt when all topics are completed", async () => {
     mockGetProgress.mockResolvedValue([
       { topic_id: "t1", status: "completed", best_score: 100 },
@@ -445,19 +482,24 @@ describe("HomePage", () => {
       expect(missionCard()).not.toHaveAttribute("data-complete");
     });
 
-    it("omits the chip row and the ring sweep for a topic with no questions", async () => {
-      mockGetQuestionCounts.mockResolvedValue({ t1: 0, t2: 10 });
+    it("shows the empty state when no topic has questions left", async () => {
+      mockGetQuestionCounts.mockResolvedValue({ t1: 0, t2: 0 });
       mockGetTopicAccuracy.mockResolvedValue([]);
       const jsx = await HomePage();
       render(jsx);
-      expect(missionCard().querySelector('[class*="topicMetaRow"]')).toBeNull();
-      const ring = screen.getByRole("progressbar");
-      expect(ring).toHaveAttribute("aria-valuenow", "0");
-      expect(ring).toHaveAttribute("data-empty", "true");
+      expect(screen.queryByText("todayBadge")).not.toBeInTheDocument();
+      expect(screen.getByText("emptyStateTitle")).toBeInTheDocument();
     });
 
-    it("marks the card complete when every question is answered", async () => {
-      mockGetTopicAccuracy.mockResolvedValue([{ topic_id: "t1", correct: 15, total: 20 }]);
+    it("keeps completion treatment on a fully answered review mission", async () => {
+      mockGetTopicAccuracy.mockResolvedValue([
+        { topic_id: "t1", correct: 15, total: 20 },
+        { topic_id: "t2", correct: 10, total: 10 },
+      ]);
+      mockGetProgress.mockResolvedValue([
+        { topic_id: "t1", status: "in_progress", best_score: 75 },
+        { topic_id: "t2", status: "completed", best_score: 100 },
+      ] as never);
       const jsx = await HomePage();
       render(jsx);
       expect(missionCard()).toHaveAttribute("data-complete");
@@ -470,6 +512,7 @@ describe("HomePage", () => {
       ).not.toBeNull();
       expect(card.queryByText(/missionXpReward/)).not.toBeInTheDocument();
       expect(card.queryByText(/topicDurationMinutes/)).not.toBeInTheDocument();
+      expect(card.getByText("todayReviewTaskDesc")).toBeInTheDocument();
     });
   });
 

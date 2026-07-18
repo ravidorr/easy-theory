@@ -35,6 +35,7 @@ import {
   findResumePoint,
   pickLastStudiedInProgressTopic,
   selectFocusTopic,
+  selectNextTopic,
 } from "@/lib/personalization";
 import { buildTopicCardMeta, type TopicDifficulty, type TopicDuration } from "@/lib/topic-card";
 import { TabBar } from "@/components/TabBar";
@@ -168,16 +169,25 @@ export default async function HomePage() {
     return topic ? [{ ...weak, topic }] : [];
   });
 
-  const todayTopic =
-    topics.find((t) => progressMap[t.id]?.status === "in_progress") ??
-    topics.find((t) => !progressMap[t.id] || progressMap[t.id].status === "not_started") ??
-    null;
-  const missionMeta = todayTopic
+  const hasUnansweredQuestions = (topic: { id: string }) =>
+    (answeredMap[topic.id] ?? 0) < (questionCounts[topic.id] ?? 0);
+  const todayTopic = selectNextTopic(
+    topics,
+    progressMap,
+    null,
+    hasUnansweredQuestions
+  );
+  const reviewTopic = todayTopic
+    ? null
+    : weakTopics.find(({ topic }) => !hasUnansweredQuestions(topic))?.topic ?? null;
+  const missionTopic = todayTopic ?? reviewTopic;
+  const missionIsReview = reviewTopic !== null;
+  const missionMeta = missionTopic
     ? buildTopicCardMeta({
-        slug: todayTopic.slug,
-        totalQuestions: questionCounts[todayTopic.id] ?? 0,
-        answeredQuestions: answeredMap[todayTopic.id] ?? 0,
-        progress: progressMap[todayTopic.id],
+        slug: missionTopic.slug,
+        totalQuestions: questionCounts[missionTopic.id] ?? 0,
+        answeredQuestions: answeredMap[missionTopic.id] ?? 0,
+        progress: progressMap[missionTopic.id],
       })
     : null;
   const missionPct = missionMeta ? (missionMeta.done ? 100 : missionMeta.coveragePct) : 0;
@@ -471,7 +481,7 @@ export default async function HomePage() {
 
         {surfaceExamCardEarly && examCta}
 
-        {todayTopic && missionMeta ? (
+        {missionTopic && missionMeta ? (
           <div className={styles.todayCard} data-complete={missionComplete || undefined}>
             <span className={styles.todayBadge}>{t("todayBadge")}</span>
             <div className={styles.missionRow}>
@@ -482,9 +492,11 @@ export default async function HomePage() {
                 percentText={t("topicsPercent", { percent: missionPct })}
               />
               <div className={styles.todayTaskInfo}>
-                <h2>{getTopicName(todayTopic)}</h2>
+                <h2>{getTopicName(missionTopic)}</h2>
                 <span className={styles.todayTaskDesc}>
-                  {t("todayTaskDesc", { count: missionMeta.total })}
+                  {missionIsReview
+                    ? t("todayReviewTaskDesc")
+                    : t("todayTaskDesc", { count: missionMeta.total })}
                 </span>
                 {missionComplete || missionMeta.duration ? (
                   <div className={styles.topicMetaRow}>
@@ -509,8 +521,11 @@ export default async function HomePage() {
                 ) : null}
               </div>
             </div>
-            <Link href={`/topics/${todayTopic.slug}`} className="btn-primary">
-              {t("startBtn")}
+            <Link
+              href={`/topics/${missionTopic.slug}${missionIsReview ? "/review" : ""}`}
+              className="btn-primary"
+            >
+              {missionIsReview ? t("missionReviewBtn") : t("startBtn")}
             </Link>
           </div>
         ) : (

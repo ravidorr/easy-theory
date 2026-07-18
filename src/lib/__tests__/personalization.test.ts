@@ -177,6 +177,17 @@ describe("selectNextTopic", () => {
     ).toBe("c");
   });
 
+  it("skips an in-progress topic that is not eligible", () => {
+    expect(
+      selectNextTopic(
+        topics,
+        statuses({ a: "in_progress", b: "in_progress", c: "not_started" }),
+        null,
+        (topic) => topic.id !== "a"
+      )?.id
+    ).toBe("b");
+  });
+
   it("returns null when every other topic is completed", () => {
     expect(
       selectNextTopic(

@@ -131,9 +131,12 @@ export function findResumePoint(
 export function selectNextTopic<T extends { id: string }>(
   topics: T[],
   progressByTopicId: Record<string, Pick<TopicProgress, "status"> | undefined>,
-  excludeTopicId?: string | null
+  excludeTopicId?: string | null,
+  isEligible: (topic: T) => boolean = () => true
 ): T | null {
-  const candidates = topics.filter((topic) => topic.id !== excludeTopicId);
+  const candidates = topics.filter(
+    (topic) => topic.id !== excludeTopicId && isEligible(topic)
+  );
   return (
     candidates.find(
       (topic) => progressByTopicId[topic.id]?.status === "in_progress"
