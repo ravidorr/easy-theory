@@ -34,7 +34,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 // Builds a chainable Supabase query mock that resolves to `result`.
 function chain(result: { data: unknown; error?: unknown }) {
   const mock: Record<string, unknown> = {};
-  for (const m of ["select", "eq", "order", "limit", "in", "range", "not"]) {
+  for (const m of ["select", "eq", "order", "limit", "in", "range", "not", "upsert"]) {
     mock[m] = vi.fn().mockReturnValue(mock);
   }
   mock.single = vi.fn().mockResolvedValue(result);

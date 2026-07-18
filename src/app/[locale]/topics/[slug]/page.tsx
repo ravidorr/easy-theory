@@ -288,6 +288,7 @@ export default async function TopicQuizPage({
         </div>
       </main>
 
+      <Script src="/js/medal.js" strategy="afterInteractive" />
       <Script src="/js/quiz.js" strategy="afterInteractive" />
       <Script src="/js/bookmark.js" strategy="afterInteractive" />
     </>

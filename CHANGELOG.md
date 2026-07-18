@@ -3,6 +3,14 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.182] — 2026-07-18
+
+### Fixed
+
+- Derived achievements are now immutable medal events. Completing a first or final topic, answering the 100th question, and passing a simulated exam create a dated `user_medals` row exactly once, show the localized celebration immediately, and remain earned if the question or topic bank later changes. Migration 019 serializes a learner's submissions so concurrent answers cannot skip the 100-question or all-topics crossings; migrations 020–021 restrict writes to verified RPC paths. Existing users are not backfilled.
+
+---
+
 ## [0.3.181] — 2026-07-18
 
 ### Changed

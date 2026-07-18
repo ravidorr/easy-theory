@@ -10,18 +10,14 @@ import {
   getUserMedals,
   getUserStats,
   getTopics,
-  getTopicProgress,
   getTopicAccuracy,
   getTopicQuestionCounts,
-  hasPassedExam,
 } from "@/lib/db";
 import {
-  deriveAchievements,
   completionSummary,
   LEVEL_CURVE_UNIT,
   levelForPoints,
   overallAccuracy,
-  type AchievementSlug,
 } from "@/lib/gamification";
 import { getTranslations, getLocale } from "next-intl/server";
 import { LanguageToggle } from "@/components/LanguageToggle";
@@ -38,20 +34,17 @@ export default async function MorePage() {
   const locale = await getLocale();
   const t = await getTranslations("More");
 
-  const [medals, stats, topics, progressRows, topicAccuracy, questionCounts, passedExam] =
+  const [medals, stats, topics, topicAccuracy, questionCounts] =
     await Promise.all([
       getUserMedals(supabase, user.id),
       getUserStats(supabase, user.id),
       getTopics(supabase),
-      getTopicProgress(supabase, user.id),
       getTopicAccuracy(supabase, user.id),
       getTopicQuestionCounts(supabase),
-      hasPassedExam(supabase, user.id),
     ]);
   const earnedSet = new Set(medals.map((m) => m.medal_slug));
   const earnedDateMap = Object.fromEntries(medals.map((m) => [m.medal_slug, m.earned_at]));
 
-  const progressMap = Object.fromEntries(progressRows.map((p) => [p.topic_id, p]));
   const answeredMap = Object.fromEntries(topicAccuracy.map((a) => [a.topic_id, a.total]));
   const completion = completionSummary(
     topics.map((topic) => topic.id),
@@ -60,15 +53,6 @@ export default async function MorePage() {
   );
   const accuracy = overallAccuracy(topicAccuracy);
   const levelInfo = levelForPoints(stats.star_points);
-  const completedTopicCount = topics.filter(
-    (topic) => progressMap[topic.id]?.status === "completed"
-  ).length;
-  const achievements = deriveAchievements({
-    completedTopicCount,
-    totalTopicCount: topics.length,
-    questionsAnswered: completion.answeredQuestions,
-    hasPassedExam: passedExam,
-  });
 
   const cookieStore = await cookies();
   const isDark = (cookieStore.get("theme")?.value ?? "dark") === "dark";
@@ -82,7 +66,7 @@ export default async function MorePage() {
     { slug: "streak-30", label: t("milestone30"), icon: "trophy" },
   ];
 
-  const ACHIEVEMENT_META: Record<AchievementSlug, { label: string; icon: IconName }> = {
+  const ACHIEVEMENT_META: Record<string, { label: string; icon: IconName }> = {
     "first-topic": { label: t("achFirstTopic"), icon: "check" },
     "questions-100": { label: t("achQuestions100"), icon: "cards" },
     "all-topics": { label: t("achAllTopics"), icon: "globe" },
@@ -97,8 +81,8 @@ export default async function MorePage() {
     );
   }
 
-  // Persisted streak medals (dated) and derived achievements (undated) share
-  // one tile shape so the grid renders from a single list.
+  // Every medal is an immutable earn event; this prevents a later topic-bank
+  // expansion from taking an already-earned achievement away.
   const medalItems = [
     ...MILESTONES.map(({ slug, label, icon }) => {
       const earned = earnedSet.has(slug);
@@ -110,13 +94,16 @@ export default async function MorePage() {
         dateText: earned ? fmtDate(earnedDateMap[slug]) : t("medalLockedLabel"),
       };
     }),
-    ...achievements.map(({ slug, earned }) => ({
-      slug: slug as string,
-      label: ACHIEVEMENT_META[slug].label,
-      icon: ACHIEVEMENT_META[slug].icon,
+    ...Object.entries(ACHIEVEMENT_META).map(([slug, meta]) => {
+      const earned = earnedSet.has(slug);
+      return {
+      slug,
+      label: meta.label,
+      icon: meta.icon,
       earned,
-      dateText: earned ? t("achEarnedLabel") : t("medalLockedLabel"),
-    })),
+      dateText: earned ? fmtDate(earnedDateMap[slug]) : t("medalLockedLabel"),
+      };
+    }),
   ];
 
   return (

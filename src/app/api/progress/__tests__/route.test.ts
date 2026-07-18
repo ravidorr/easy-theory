@@ -1,12 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { POST } from "../route";
-import { createClient } from "@/lib/supabase";
+import { createAdminClient, createClient } from "@/lib/supabase";
 import { checkRateLimit } from "@/lib/rate-limit";
 
-vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
+vi.mock("@/lib/supabase", () => ({ createAdminClient: vi.fn(), createClient: vi.fn() }));
 vi.mock("@/lib/rate-limit", () => ({ checkRateLimit: vi.fn() }));
 
 const mockCreateClient = vi.mocked(createClient);
+const mockCreateAdminClient = vi.mocked(createAdminClient);
 const mockCheckRateLimit = vi.mocked(checkRateLimit);
 
 const USER_ID = "user-uuid";
@@ -36,6 +37,9 @@ function makeClient({
   insertError = false,
 } = {}) {
   let progressCallCount = 0;
+  const insert = vi.fn().mockResolvedValue({
+    error: insertError ? { message: "err" } : null,
+  });
 
   // Chainable mock that is also directly awaitable.
   function chain(data: unknown, error: unknown = null) {
@@ -67,14 +71,18 @@ function makeClient({
         updateChain.eq = vi.fn().mockReturnValue(updateChain);
         return {
           update: vi.fn().mockReturnValue(updateChain),
-          insert: vi.fn().mockResolvedValue({
-            error: insertError ? { message: "err" } : null,
-          }),
+          insert,
         };
       }
       return chain(null);
     }),
+    insert,
   };
+}
+
+function mockClients(client: ReturnType<typeof makeClient>) {
+  mockCreateClient.mockResolvedValue(client as never);
+  mockCreateAdminClient.mockReturnValue(client as never);
 }
 
 describe("POST /api/progress", () => {
@@ -84,41 +92,53 @@ describe("POST /api/progress", () => {
   });
 
   it("returns 401 when not authenticated", async () => {
-    mockCreateClient.mockResolvedValue(makeClient({ user: null }) as never);
+    mockClients(makeClient({ user: null }));
     const res = await POST(makeRequest({ topic_id: "t1" }));
     expect(res.status).toBe(401);
   });
 
   it("returns 429 when rate limited", async () => {
-    mockCreateClient.mockResolvedValue(makeClient() as never);
+    mockClients(makeClient());
     mockCheckRateLimit.mockResolvedValue(false);
     const res = await POST(makeRequest({ topic_id: "t1" }));
     expect(res.status).toBe(429);
   });
 
   it("returns 400 for a malformed JSON body", async () => {
-    mockCreateClient.mockResolvedValue(makeClient() as never);
+    mockClients(makeClient());
     const res = await POST(makeRawRequest("{not json"));
     expect(res.status).toBe(400);
   });
 
   it("returns 400 when topic_id is missing", async () => {
-    mockCreateClient.mockResolvedValue(makeClient() as never);
+    mockClients(makeClient());
     const res = await POST(makeRequest({}));
     expect(res.status).toBe(400);
   });
 
   it("inserts a new record when no existing progress", async () => {
     const client = makeClient({ existing: null });
-    mockCreateClient.mockResolvedValue(client as never);
+    mockClients(client);
     const res = await POST(makeRequest({ topic_id: "t1", status: "in_progress" }));
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ ok: true });
   });
 
+  it("does not accept client-reported completion", async () => {
+    const client = makeClient({ existing: null });
+    mockClients(client);
+
+    const res = await POST(makeRequest({ topic_id: "t1", status: "completed" }));
+
+    expect(res.status).toBe(200);
+    expect(client.insert).toHaveBeenCalledWith(
+      expect.objectContaining({ status: "in_progress" })
+    );
+  });
+
   it("returns 500 when the insert fails", async () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-    mockCreateClient.mockResolvedValue(makeClient({ existing: null, insertError: true }) as never);
+    mockClients(makeClient({ existing: null, insertError: true }));
     const res = await POST(makeRequest({ topic_id: "t1" }));
     expect(res.status).toBe(500);
     consoleSpy.mockRestore();
@@ -127,7 +147,7 @@ describe("POST /api/progress", () => {
   it("updates existing record and never downgrades from completed", async () => {
     const existing = { id: "p1", best_score: 80, status: "completed" };
     const client = makeClient({ existing });
-    mockCreateClient.mockResolvedValue(client as never);
+    mockClients(client);
     const res = await POST(makeRequest({ topic_id: "t1", status: "in_progress", score: 50 }));
     expect(res.status).toBe(200);
     // The update mock is called — we trust the route doesn't downgrade (tested via status logic)
@@ -137,7 +157,7 @@ describe("POST /api/progress", () => {
   it("returns 500 when the update fails", async () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const existing = { id: "p1", best_score: 80, status: "in_progress" };
-    mockCreateClient.mockResolvedValue(makeClient({ existing, updateError: true }) as never);
+    mockClients(makeClient({ existing, updateError: true }));
     const res = await POST(makeRequest({ topic_id: "t1", score: 90 }));
     expect(res.status).toBe(500);
     consoleSpy.mockRestore();
@@ -145,7 +165,7 @@ describe("POST /api/progress", () => {
 
   it("defaults invalid status to in_progress", async () => {
     const client = makeClient({ existing: null });
-    mockCreateClient.mockResolvedValue(client as never);
+    mockClients(client);
     const res = await POST(makeRequest({ topic_id: "t1", status: "bogus" }));
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ ok: true });
@@ -154,7 +174,7 @@ describe("POST /api/progress", () => {
   it("uses best_score max when updating existing record", async () => {
     const existing = { id: "p1", best_score: 70, status: "in_progress" };
     const client = makeClient({ existing });
-    mockCreateClient.mockResolvedValue(client as never);
+    mockClients(client);
     const res = await POST(makeRequest({ topic_id: "t1", score: 90 }));
     expect(res.status).toBe(200);
   });

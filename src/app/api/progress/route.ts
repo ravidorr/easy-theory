@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase";
+import { createAdminClient, createClient } from "@/lib/supabase";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getApiTranslator, parseJsonBody } from "@/lib/api";
 import { reportError } from "@/lib/monitoring";
@@ -23,11 +23,14 @@ export async function POST(request: Request) {
   const { topic_id, score, status } = body;
   if (!topic_id) return NextResponse.json({ error: t("topicIdMissing") }, { status: 400 });
 
-  const validStatus = ["not_started", "in_progress", "completed"];
-  const safeStatus = typeof status === "string" && validStatus.includes(status) ? status : "in_progress";
+  // Topic completion is established exclusively by submit_quiz_answer after
+  // every question has been answered correctly. This endpoint only records
+  // non-authoritative study activity.
+  const safeStatus = status === "not_started" ? "not_started" : "in_progress";
   const safeScore = typeof score === "number" ? score : null;
+  const admin = createAdminClient();
 
-  const { data: existing } = await supabase
+  const { data: existing } = await admin
     .from("user_topic_progress")
     .select("id, best_score, status")
     .eq("user_id", user.id)
@@ -37,7 +40,7 @@ export async function POST(request: Request) {
   if (existing) {
     // Never downgrade from completed to a lesser status
     const effectiveStatus = existing.status === "completed" ? "completed" : safeStatus;
-    const { error } = await supabase
+    const { error } = await admin
       .from("user_topic_progress")
       .update({
         status: effectiveStatus,
@@ -53,7 +56,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: t("progressSaveFailed") }, { status: 500 });
     }
   } else {
-    const { error } = await supabase.from("user_topic_progress").insert({
+    const { error } = await admin.from("user_topic_progress").insert({
       user_id: user.id,
       topic_id,
       status: safeStatus,
