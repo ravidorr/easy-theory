@@ -29,12 +29,14 @@ function slideHTML(index: number, correct: string) {
 }
 
 function setupDOM(opts: {
+  locale?: string;
   userId?: string;
   quizMode?: string;
   answeredIds?: string[];
   answeredCount?: number;
   bareFinalScreen?: boolean;
 } = {}) {
+  (window as unknown as { __locale: string }).__locale = opts.locale || "he";
   const userAttr = opts.userId ? ` data-user-id="${opts.userId}"` : "";
   const modeAttr = opts.quizMode ? ` data-quiz-mode="${opts.quizMode}"` : "";
   const answeredAttr = opts.answeredIds
@@ -175,6 +177,10 @@ function fetchCalls(url: string) {
   );
 }
 
+function resumeKey(locale = "he", userId = "u1", topicId = "t1") {
+  return `quiz-resume:v1:${locale}:${userId}:${topicId}`;
+}
+
 async function flushAsyncWork() {
   await Promise.resolve();
   await Promise.resolve();
@@ -289,7 +295,7 @@ describe("quiz.js – rejected answer persistence", () => {
       expect(messageText()).toBe("שגיאת API מקומית");
       expect(actionButton().textContent).toBe("נתחיל מחדש");
       expect(actionButton().disabled).toBe(false);
-      expect(localStorage.getItem("quiz-resume:v1:u1:t1")).toBeNull();
+      expect(localStorage.getItem(resumeKey())).toBeNull();
       expect(fetchCalls("/api/quiz")).toHaveLength(1);
     }
   );
@@ -306,7 +312,7 @@ describe("quiz.js – rejected answer persistence", () => {
 
     expect(messageText()).toBe("לא מחוברת");
     expect(actionButton().textContent).toBe("נתחיל מחדש");
-    expect(localStorage.getItem("quiz-resume:v1:u1:t1")).toBeNull();
+    expect(localStorage.getItem(resumeKey())).toBeNull();
     expect(fetchCalls("/api/quiz")).toHaveLength(1);
   });
 
@@ -465,9 +471,9 @@ describe("quiz.js – rejected answer persistence", () => {
       expect(messageText()).toBe("לא הצלחנו לשמור את התשובה. ננסה שוב.");
       expect(actionButton().textContent).toBe(expectedAction);
       if (status === 400) {
-        expect(localStorage.getItem("quiz-resume:v1:u1:t1")).toBeNull();
+        expect(localStorage.getItem(resumeKey())).toBeNull();
       } else {
-        expect(localStorage.getItem("quiz-resume:v1:u1:t1")).toEqual(
+        expect(localStorage.getItem(resumeKey())).toEqual(
           expect.any(String)
         );
       }
@@ -1277,7 +1283,7 @@ describe("quiz.js – completion celebration", () => {
 });
 
 describe("quiz.js – resume", () => {
-  const KEY = "quiz-resume:v1:u1:t1";
+  const KEY = resumeKey();
 
   beforeEach(() => {
     resetTestState();
@@ -1423,6 +1429,103 @@ describe("quiz.js – resume", () => {
     expect(progressBody).toMatchObject({ score: 100, status: "completed" });
   });
 
+  it("stores structured acknowledged state without rendered feedback", async () => {
+    setupDOM({ userId: "u1" });
+    clickOption(0, "a");
+    await flushAsyncWork();
+
+    const saved = JSON.parse(localStorage.getItem(KEY)!);
+    expect(saved.acknowledgedSubmission).toEqual(
+      expect.objectContaining({
+        questionId: "q1",
+        selectedOption: "a",
+        isCorrect: true,
+        topicCompleted: false,
+      })
+    );
+    expect(saved.acknowledgedSubmission).not.toHaveProperty("feedbackMessage");
+    expect(localStorage.getItem(KEY)).not.toContain("יפה מאוד!");
+  });
+
+  it("keeps Hebrew and Arabic resume state in separate keys", async () => {
+    setupDOM({ locale: "he", userId: "u1" });
+    clickOption(0, "a");
+    await flushAsyncWork();
+
+    expect(localStorage.getItem(resumeKey("he"))).toEqual(expect.any(String));
+    expect(localStorage.getItem(resumeKey("ar"))).toBeNull();
+
+    setupDOM({ locale: "ar", userId: "u1" });
+    expect(slideDisplay(0)).toBe("flex");
+    expect(scoreText()).toBe("0");
+    clickOption(0, "a");
+    await flushAsyncWork();
+
+    expect(localStorage.getItem(resumeKey("he"))).toEqual(expect.any(String));
+    expect(localStorage.getItem(resumeKey("ar"))).toEqual(expect.any(String));
+  });
+
+  it("re-renders restored correct feedback from the current locale strings", async () => {
+    (window as unknown as { __t: Record<string, string> }).__t = {
+      rewardCorrect: "رسالة قديمة",
+    };
+    setupDOM({ locale: "ar", userId: "u1" });
+    clickOption(0, "a");
+    await flushAsyncWork();
+
+    (window as unknown as { __t: Record<string, string> }).__t = {
+      rewardCorrect: "إجابة صحيحة جديدة",
+    };
+    setupDOM({ locale: "ar", userId: "u1" });
+
+    expect(messageText()).toBe("إجابة صحيحة جديدة");
+    expect(localStorage.getItem(resumeKey("ar"))).not.toContain("رسالة قديمة");
+  });
+
+  it("re-renders restored wrong feedback from the current locale strings", async () => {
+    (window as unknown as { __t: Record<string, string> }).__t = {
+      rewardWrongPrefix: "قديم ",
+      rewardWrongSuffix: " قديم",
+    };
+    setupDOM({ locale: "ar", userId: "u1" });
+    clickOption(0, "b");
+    await flushAsyncWork();
+
+    (window as unknown as { __t: Record<string, string> }).__t = {
+      rewardWrongPrefix: "اخترنا ",
+      rewardWrongSuffix: " وسنحاول مجددًا",
+    };
+    setupDOM({ locale: "ar", userId: "u1" });
+
+    expect(messageText()).toBe("اخترنا ב وسنحاول مجددًا");
+    expect(localStorage.getItem(resumeKey("ar"))).not.toContain("قديم");
+  });
+
+  it("re-renders restored topic-complete feedback from the current locale strings", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ topic_completed: true }),
+      })
+    );
+    (window as unknown as { __t: Record<string, string> }).__t = {
+      rewardTopicDone: "اكتمل قديمًا",
+    };
+    setupDOM({ locale: "ar", userId: "u1" });
+    clickOption(0, "a");
+    await flushAsyncWork();
+
+    (window as unknown as { __t: Record<string, string> }).__t = {
+      rewardCorrect: "إجابة صحيحة",
+      rewardTopicDone: "أكملنا الموضوع",
+    };
+    setupDOM({ locale: "ar", userId: "u1" });
+
+    expect(messageText()).toBe("أكملنا الموضوع");
+    expect(localStorage.getItem(resumeKey("ar"))).not.toContain("اكتمل قديمًا");
+  });
+
   it("restores an acknowledged wrong answer without reposting or changing score", async () => {
     setupDOM({ userId: "u1" });
     clickOption(0, "b");
@@ -1494,7 +1597,7 @@ describe("quiz.js – resume", () => {
 });
 
 describe("quiz.js – skip answered", () => {
-  const KEY = "quiz-resume:v1:u1:t1";
+  const KEY = resumeKey();
 
   beforeEach(() => {
     resetTestState();
@@ -1527,6 +1630,7 @@ describe("quiz.js – skip answered", () => {
         pendingSubmission: {
           questionId: "q1",
           selectedOption: "a",
+          isCorrect: true,
           idempotencyKey: "key-1",
         },
       })

@@ -35,13 +35,17 @@
     return !prefersReducedMotion;
   })();
 
-  // Resume state is persisted per user + topic so a reload continues the same
-  // run, including an unacknowledged submission. Retry sessions are throwaway
-  // and intentionally never persist.
+  // Resume state is persisted per locale + user + topic so a reload continues
+  // the same run without leaking rendered copy across locales. Retry sessions
+  // are throwaway and intentionally never persist.
+  const locale =
+    typeof window.__locale === "string" && window.__locale.length > 0
+      ? window.__locale
+      : "he";
   const storageKey =
     container.dataset.quizMode === "retry"
       ? null
-      : "quiz-resume:v1:" + (container.dataset.userId || "anon") + ":" + (container.dataset.topicId || "topic");
+      : "quiz-resume:v1:" + locale + ":" + (container.dataset.userId || "anon") + ":" + (container.dataset.topicId || "topic");
 
   function readResume() {
     if (!storageKey) return null;
@@ -74,12 +78,15 @@
       pending &&
       typeof pending.questionId === "string" &&
       ["a", "b", "c", "d"].includes(pending.selectedOption) &&
+      typeof pending.isCorrect === "boolean" &&
       typeof pending.idempotencyKey === "string" &&
       pending.idempotencyKey.length > 0;
     const hasValidAcknowledged =
       acknowledged &&
       typeof acknowledged.questionId === "string" &&
       ["a", "b", "c", "d"].includes(acknowledged.selectedOption) &&
+      typeof acknowledged.isCorrect === "boolean" &&
+      typeof acknowledged.topicCompleted === "boolean" &&
       typeof acknowledged.idempotencyKey === "string" &&
       acknowledged.idempotencyKey.length > 0;
     // A stored total that no longer matches means the question set changed.
@@ -509,9 +516,12 @@
     handleConfirm(slide);
   }
 
-  function showAnswerFeedback(slide, awardReward) {
+  function showAnswerFeedback(slide, awardReward, restoredCorrectness) {
     const correctOption = slide.dataset.correct;
-    const isCorrect = selectedOption === correctOption;
+    const isCorrect =
+      typeof restoredCorrectness === "boolean"
+        ? restoredCorrectness
+        : selectedOption === correctOption;
 
     slide.querySelectorAll(".quiz-option").forEach(function (o) {
       if (o.dataset.option === correctOption) {
@@ -635,6 +645,7 @@
       pendingSubmission = {
         questionId: questionId,
         selectedOption: selectedOption,
+        isCorrect: selectedOption === slide.dataset.correct,
         idempotencyKey: submissionSessionKey + ":" + questionId,
       };
     }
@@ -698,8 +709,9 @@
       acknowledgedSubmission = {
         questionId: acknowledged.questionId,
         selectedOption: acknowledged.selectedOption,
+        isCorrect: acknowledged.isCorrect,
         idempotencyKey: acknowledged.idempotencyKey,
-        feedbackMessage: rewardMessage ? rewardMessage.textContent : answerFeedback,
+        topicCompleted: data.topic_completed === true,
       };
       persistResume();
       persistLatestStats(data);
@@ -750,7 +762,7 @@
     selectedOption = restoredSubmission.selectedOption;
     confirmed = true;
     lockOptions(slide);
-    showAnswerFeedback(slide, false);
+    showAnswerFeedback(slide, false, restoredSubmission.isCorrect);
     answerFeedback = rewardMessage ? rewardMessage.textContent : "";
 
     if (pendingSubmission) {
@@ -765,11 +777,8 @@
       }
     } else {
       answerPersistence = "succeeded";
-      if (
-        rewardMessage &&
-        typeof acknowledgedSubmission.feedbackMessage === "string"
-      ) {
-        rewardMessage.textContent = acknowledgedSubmission.feedbackMessage;
+      if (rewardMessage && acknowledgedSubmission.topicCompleted) {
+        rewardMessage.textContent = t.rewardTopicDone || "כל הכבוד! סיימנו את כל הנושא!";
       }
       if (actionBtn) {
         actionBtn.textContent = t.nextBtn || "לשאלה הבאה";
