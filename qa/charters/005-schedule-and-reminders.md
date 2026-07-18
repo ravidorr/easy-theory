@@ -1,7 +1,7 @@
 ---
 id: "005-schedule-and-reminders"
 title: "Weekly study schedule: pick, save, persist, notify toggle"
-flow: "Open schedule → pick days/time/duration → live summary updates → save → redirect home → reopen schedule and verify persistence"
+flow: "Open schedule → pick days/time/duration → live summary updates → save → success toast on More → reopen schedule and verify persistence"
 persona: >
   Hebrew-speaking learner who keeps postponing study sessions and wants the
   app to hold them to a routine: two fixed evenings a week with a reminder.
@@ -34,8 +34,8 @@ checks:
     desc: "Time and duration selections update the summary"
     oracle: "Changing #time-input and picking a .duration-btn are reflected in #summary-text; exactly one duration is active at a time"
   - id: CHK-SCHED-04
-    desc: "Saving persists the schedule and returns home"
-    oracle: "#save-schedule-btn triggers PUT /api/schedule with 2xx and the browser lands on /he"
+    desc: "Saving persists the schedule and returns to More with confirmation"
+    oracle: "#save-schedule-btn triggers PUT /api/schedule with 2xx, shows the localized success toast, and lands on /he/more after the brief confirmation delay"
   - id: CHK-SCHED-05
     desc: "The saved schedule round-trips"
     oracle: "Reopening /he/schedule shows exactly the days, time, and duration saved in CHK-SCHED-04 (served via GET /api/schedule)"
@@ -69,13 +69,14 @@ Route hints:
   `#duration-picker`/`.duration-btn`, `#notify-toggle`, `#days-label`,
   `#summary-text`, `#save-schedule-btn`.
 - API: GET `/api/schedule` populates, PUT `/api/schedule` replaces atomically; on
-  success the script navigates to `/`. Server validates days 0-6 and HH:MM.
+  success the script shows a toast then navigates to `/<locale>/more`. Server validates
+  days 0-6 and HH:MM.
 - Push: the toggle asks for browser notification permission and POSTs
   `/api/push/subscribe`. In an automated browser, permission is often unavailable —
   that path earns a `blocked` verdict with the observed behavior, never a silent pass.
 - Copy sources: `messages/he.json`, namespaces `Schedule`, `JS.Schedule`.
 - Meaningful-step screenshots: initial state, days+time+duration selected with summary,
-  post-save landing on home, reopened schedule showing persisted values, notify-toggle
+  save confirmation toast and post-save More page, reopened schedule showing persisted values, notify-toggle
   state.
 
 Severity rubric: blocker / major / minor / cosmetic / question — see

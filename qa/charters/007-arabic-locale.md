@@ -15,7 +15,7 @@ environment:
     required: true
     user: "qa-user@clearroad.test"
     mint: "pnpm qa:mint --next /ar"
-  data_assumptions: "Seeded test DB with Arabic columns (question_ar, option_*_ar, explanation_ar, sign name_ar) populated by migration 005; some rows may legitimately fall back to Hebrew where _ar is null"
+  data_assumptions: "Seeded test DB with Arabic columns from migration 005 and Arabic content imported separately; migration 015 supplements question 15 in the signs topic. Arabic routes never fall back to Hebrew when an _ar value is missing"
 timebox_minutes: 25
 out_of_scope:
   - "Deep flow mechanics already proven in Hebrew charters (001-006) — this run checks localization, not logic"
@@ -32,7 +32,7 @@ checks:
     oracle: "Greeting, pills, topic cards, and tab bar show copy from messages/ar.json; no raw keys and no Hebrew strings in UI chrome (DB topic names in Arabic where name_ar exists)"
   - id: CHK-AR-03
     desc: "Quiz content is served in Arabic"
-    oracle: "In a topic quiz under /ar, question text and options come from the _ar columns; feedback and button labels match ar.json (JS.Quiz); where a row lacks _ar the Hebrew fallback renders (file as question if seen, not bug)"
+    oracle: "In a topic quiz under /ar, question text and options come from the _ar columns; feedback and button labels match ar.json (JS.Quiz); no Hebrew question, option, explanation, or sign name is rendered as a fallback. A missing required Arabic value is a data/content defect."
   - id: CHK-AR-04
     desc: "Flashcards show Arabic sign names"
     oracle: "/ar/flashcards flips reveal name_ar-based names; UI labels come from ar.json Flashcards namespace"
@@ -65,10 +65,10 @@ proven in Hebrew), flip a few flashcards, glance at More — but your attention 
 words and layout, not mechanics: is every label Arabic, does the DB content come from
 the `_ar` columns, does anything clip or flip direction?
 
-The fallback rule matters: the product intentionally falls back to Hebrew where an
-`_ar` column is null. Seeing Hebrew content (not UI chrome) is therefore a `question`
-finding with the specific question/sign identified — unless the `_ar` value exists in
-the DB and Hebrew shows anyway, which is a bug.
+Arabic routes intentionally use Arabic DB fields only. Hebrew content in a question,
+option, explanation, or sign name is a defect; a missing Arabic value that produces
+blank required content is also a data/content defect. Record the exact question or sign
+identifier in either case.
 
 Route hints:
 
@@ -76,9 +76,10 @@ Route hints:
 - Locale routing: `/ar/...` prefix, `NEXT_LOCALE` cookie, toggle via the More page.
   UI copy: `messages/ar.json` (namespaces mirror he.json; parity is test-enforced).
 - DB content: `question_ar`, `option_a_ar`..`option_d_ar`, `explanation_ar`,
-  sign `name_ar` (added in `seeds/migrations/005_arabic_columns`).
+  sign `name_ar` (introduced in migration 005 and supplemented by migration 015).
 - Meaningful-step screenshots: Arabic dashboard, one Arabic quiz question with
-  feedback, an Arabic flashcard back, /ar/more, one Hebrew-fallback example if found.
+  feedback, an Arabic flashcard back, /ar/more, and any missing/non-Arabic content
+  with its question or sign identifier.
 
 Severity rubric: blocker / major / minor / cosmetic / question — see
 `qa/charters/TEMPLATE.md`. When unsure whether something is a bug or a product decision,

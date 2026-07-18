@@ -1,7 +1,7 @@
 ---
 id: "006-more-settings-and-logout"
-title: "More hub: stats, medals, dark mode, language toggle, logout"
-flow: "Open More → cross-check stats vs dashboard → medals grid → dark-mode toggle + persistence → language round-trip → logout kills the session"
+title: "More hub: expanded stats, achievements, settings, bookmarks, logout"
+flow: "Open More → cross-check stats vs dashboard → achievements + navigation → theme/auto-advance settings → language round-trip → logout kills the session"
 persona: >
   Hebrew-speaking returning learner poking around the settings area. Cares
   that their stats match what the home page brags about, prefers dark mode
@@ -15,7 +15,7 @@ environment:
     user: "qa-user@clearroad.test"
     mint: "pnpm qa:mint"
   data_assumptions: "Seeded test DB; test user has some progress/streak from earlier runs (stats cross-check is home-vs-more within the same run, not absolute values)"
-timebox_minutes: 20
+timebox_minutes: 25
 out_of_scope:
   - "Full Arabic content sweep (007) — only the toggle round-trip is checked here"
   - "Earning new medals (covered by quiz flows)"
@@ -24,14 +24,14 @@ out_of_scope:
 known_issues: []
 checks:
   - id: CHK-MORE-01
-    desc: "More page stats agree with the home dashboard"
-    oracle: "Streak and star points shown on /he/more equal the values on /he pills captured in the same run (no NaN/undefined/empty)"
+    desc: "More page stats agree with the home dashboard and remain complete"
+    oracle: "Streak, star points, and level shown on /he/more equal their home values captured in the same run; More's accuracy, answered-question, and completion values render as intentional values or intentional empty treatment (no NaN/undefined/empty layout)"
   - id: CHK-MORE-02
-    desc: "Medals grid renders earned and unearned states"
-    oracle: "The medals grid lists the streak medals (3/7/14/30); earned vs unearned is visually and programmatically distinguishable; empty/zero state renders cleanly if the user has none"
+    desc: "Achievements grid renders streak medals and derived achievements"
+    oracle: "The grid includes streak medals (3/7/14/30) and achievement tiles for first topic, 100 questions, all topics, and exam pass; earned vs locked state is visually and programmatically distinguishable, including for a zero-progress user"
   - id: CHK-MORE-03
     desc: "Navigation entries lead where they claim"
-    oracle: "Links/rows for exam, schedule, and credits navigate to /he/exam, /he/schedule, /he/credits respectively"
+    oracle: "Links/rows for exam, schedule, bookmarks, and credits navigate to /he/exam, /he/schedule, /he/bookmarks, and /he/credits respectively"
   - id: CHK-MORE-04
     desc: "Dark-mode toggle flips the theme and persists"
     oracle: "#dark-mode-toggle flips html[data-theme] between dark and light immediately; after a full reload the chosen theme is still applied (theme cookie); toggle state matches the applied theme"
@@ -41,12 +41,15 @@ checks:
   - id: CHK-MORE-06
     desc: "Logout terminates the session"
     oracle: "#logout-btn POSTs /api/auth/logout with 2xx and lands on /he/auth/login; afterwards navigating to /he redirects back to the login page (no cached authed page with working data)"
+  - id: CHK-MORE-07
+    desc: "Auto-advance setting persists and controls the practice-quiz loop"
+    oracle: "#auto-advance-toggle exposes and changes its switch state, persists the `quiz-auto-advance` cookie through reload, and when off a correct practice answer remains on feedback until manually advanced; restoring it on permits the normal automatic advance"
   - id: CHK-CONSOLE-01
     desc: "No console errors anywhere in the flow"
     oracle: "Browser console contains zero error-level entries across all steps (warnings triaged case by case)"
   - id: CHK-A11Y-01
     desc: "Accessibility basics on the More page"
-    oracle: "Dark-mode and language toggles expose role and state (aria-checked/pressed); medal earned-state is not color-only; rows/links have accessible names; a heading exists"
+    oracle: "Theme, auto-advance, and language controls expose role and state (aria-checked/pressed); achievement earned-state is not color-only; rows/links have accessible names; a heading exists"
   - id: CHK-COPY-RTL-01
     desc: "No hardcoded or direction-broken strings in the flow"
     oracle: "Visible strings exist in he.json (More namespace); no raw keys or unexpected English; numbers in stats render without direction breakage"
@@ -56,8 +59,9 @@ exploration_budget: "After all checks, up to 5 min within scope: browser back im
 ## Narrative
 
 Evening session on the couch: open the More tab, check your numbers match what the
-home screen told you, admire (or covet) the medals, switch to dark mode, and peek at
-the Arabic UI out of curiosity before switching back. End the session by logging out
+home screen told you, inspect the expanded achievements, open saved questions, switch
+to dark mode, toggle quiz auto-advance, and peek at the Arabic UI before switching
+back. End the session by logging out
 and making sure the app is genuinely locked afterwards — this is a shared phone.
 
 Do the logout LAST: it kills the minted session, and every check after it would be
@@ -68,14 +72,15 @@ Route hints:
 - Page `/he/more`, driven by `public/js/more.js` (theme + logout) and the
   `LanguageToggle` component (locale swap in place via the router).
 - Hooks: `#dark-mode-toggle` (sets the `theme` cookie and `html[data-theme]`),
-  `#logout-btn` (POST `/api/auth/logout` then `/auth/login`).
+  `#auto-advance-toggle` (sets the `quiz-auto-advance` cookie), and `#logout-btn`
+  (POST `/api/auth/logout` then `/auth/login`).
 - Theme default is dark; the layout reads the cookie server-side, so a reload is the
   persistence proof.
 - Copy sources: `messages/he.json` (and `ar.json` for the toggle round-trip),
   namespace `More`.
-- Meaningful-step screenshots: More page top (stats), medals grid, dark vs light
-  theme, /ar/more during the round-trip, login page after logout, redirect-to-login
-  proof after logout.
+- Meaningful-step screenshots: More page top (stats), achievements grid, bookmarks
+  navigation, dark vs light theme, auto-advance off state, /ar/more during the
+  round-trip, login page after logout, redirect-to-login proof after logout.
 
 Severity rubric: blocker / major / minor / cosmetic / question — see
 `qa/charters/TEMPLATE.md`. When unsure whether something is a bug or a product decision,

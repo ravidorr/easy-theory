@@ -33,7 +33,7 @@ checks:
     oracle: "/sw.js returns 2xx; after loading /he and reloading once, navigator.serviceWorker.controller is non-null for the page"
   - id: CHK-PWA-03
     desc: "Caches are created with the expected shape"
-    oracle: "CacheStorage contains clearroad-*-v1 caches; after visiting home + one topic + flashcards, the pages cache holds visited navigations and the images cache holds fetched /signs/ images"
+    oracle: "CacheStorage contains `clearroad-*-v2` caches; after visiting home + one topic + flashcards, the pages cache holds visited navigations and the images cache holds fetched /signs/ images"
   - id: CHK-PWA-04
     desc: "Visited pages reload while offline"
     oracle: "With the browser offline, reloading /he (previously visited) renders the cached page instead of the browser's offline error; an unvisited page fails gracefully (report observed behavior)"
@@ -74,7 +74,7 @@ contents, THEN go offline and reload.
 
 Route hints:
 
-- Service worker `public/sw.js`, caches prefixed `clearroad-` (v1): navigations are
+- Service worker `public/sw.js`, caches prefixed `clearroad-` (v2): navigations are
   network-first (pages cache), static assets cache-first, `/signs/`, `/questions/`
   and Next image routes cache-first (images cache), `/js/` and `/icons/`
   stale-while-revalidate. `/api/`, cross-origin, and RSC requests are deliberately
