@@ -2,12 +2,18 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { POST } from "../route";
 import { createClient } from "@/lib/supabase";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { insertUserMedals } from "@/lib/db";
 
 vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
 vi.mock("@/lib/rate-limit", () => ({ checkRateLimit: vi.fn() }));
+vi.mock("@/lib/db", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/db")>()),
+  insertUserMedals: vi.fn(),
+}));
 
 const mockCreateClient = vi.mocked(createClient);
 const mockCheckRateLimit = vi.mocked(checkRateLimit);
+const mockInsertUserMedals = vi.mocked(insertUserMedals);
 
 const USER_ID = "user-uuid";
 // Valid UUIDs for question ids (the route filters non-UUID ids out).
@@ -61,6 +67,7 @@ describe("POST /api/exam", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockCheckRateLimit.mockResolvedValue(true);
+    mockInsertUserMedals.mockResolvedValue([]);
   });
 
   it("returns 401 when not authenticated", async () => {
@@ -159,6 +166,46 @@ describe("POST /api/exam", () => {
     const res = await POST(makeRequest({ answers }));
     const body = await res.json();
     expect(body).toMatchObject({ score: 25, passed: false });
+  });
+
+  it("returns exam-pass only when the medal insert is new", async () => {
+    const questions = Array.from({ length: 30 }, (_, i) => ({ id: QID(i), correct_option: "a" }));
+    const { client } = makeClient({ questions });
+    mockCreateClient.mockResolvedValue(client as never);
+    mockInsertUserMedals.mockResolvedValue(["exam-pass"]);
+
+    const res = await POST(makeRequest({ answers: questions.map((q) => ({ question_id: q.id, selected_option: "a" })) }));
+
+    expect(await res.json()).toMatchObject({ passed: true, medals_earned: ["exam-pass"] });
+    expect(mockInsertUserMedals).toHaveBeenCalledWith(client, USER_ID, ["exam-pass"]);
+  });
+
+  it("does not return exam-pass for a repeated pass", async () => {
+    const questions = Array.from({ length: 30 }, (_, i) => ({ id: QID(i), correct_option: "a" }));
+    const { client } = makeClient({ questions });
+    mockCreateClient.mockResolvedValue(client as never);
+
+    const res = await POST(makeRequest({ answers: questions.map((q) => ({ question_id: q.id, selected_option: "a" })) }));
+
+    expect(await res.json()).not.toHaveProperty("medals_earned");
+  });
+
+  it("keeps a saved passing attempt successful when medal persistence fails", async () => {
+    const questions = Array.from({ length: 30 }, (_, i) => ({ id: QID(i), correct_option: "a" }));
+    const { client } = makeClient({ questions });
+    mockCreateClient.mockResolvedValue(client as never);
+    mockInsertUserMedals.mockRejectedValue(new Error("boom"));
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const res = await POST(makeRequest({ answers: questions.map((q) => ({ question_id: q.id, selected_option: "a" })) }));
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ passed: true });
+    expect(errorSpy).toHaveBeenCalledWith(
+      "[exam] achievement persistence failed:",
+      expect.any(Error)
+    );
+    errorSpy.mockRestore();
   });
 
   it("treats an empty submission as a failed exam (auto-submit at timeout)", async () => {

@@ -1,9 +1,16 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase";
 import { getApiTranslator, parseJsonBody } from "@/lib/api";
-import { upsertSrsCard } from "@/lib/db";
+import {
+  countUserQuizResponses,
+  getTopicProgress,
+  getTopics,
+  insertUserMedals,
+  upsertSrsCard,
+} from "@/lib/db";
 import { reportError } from "@/lib/monitoring";
 import { INITIAL_SRS_STATE, reviewCard } from "@/lib/srs";
+import { deriveAchievements } from "@/lib/gamification";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 // Advance the question's SM-2 card after a graded answer. Deliberately
@@ -27,6 +34,60 @@ async function updateQuestionSrs(
   }
   const review = reviewCard(existing ?? INITIAL_SRS_STATE, isCorrect);
   await upsertSrsCard(supabase, userId, { question_id: questionId }, review);
+}
+
+type QuizResult = Record<string, unknown> & {
+  medals_earned?: unknown;
+  topic_completed?: unknown;
+};
+
+function appendMedals(result: QuizResult, medals: string[]): QuizResult {
+  if (medals.length === 0) return result;
+  const existing = Array.isArray(result.medals_earned)
+    ? result.medals_earned.filter((slug): slug is string => typeof slug === "string")
+    : [];
+  return { ...result, medals_earned: [...new Set([...existing, ...medals])] };
+}
+
+async function persistQuizAchievements(
+  supabase: SupabaseClient,
+  userId: string,
+  result: QuizResult
+): Promise<string[]> {
+  const candidates = new Set<string>();
+
+  if (result.topic_completed === true) {
+    const [topics, progressRows] = await Promise.all([
+      getTopics(supabase),
+      getTopicProgress(supabase, userId),
+    ]);
+    const completedTopicCount = progressRows.filter((progress) => progress.status === "completed").length;
+    for (const achievement of deriveAchievements({
+      completedTopicCount,
+      totalTopicCount: topics.length,
+      questionsAnswered: 0,
+      hasPassedExam: false,
+    })) {
+      if (achievement.earned && (achievement.slug === "first-topic" || achievement.slug === "all-topics")) {
+        candidates.add(achievement.slug);
+      }
+    }
+  }
+
+  const questionsAnswered = await countUserQuizResponses(supabase, userId);
+  for (const achievement of deriveAchievements({
+    completedTopicCount: 0,
+    totalTopicCount: 0,
+    questionsAnswered,
+    hasPassedExam: false,
+  })) {
+    // Award only at the crossing event, never as a lazy backfill.
+    if (achievement.slug === "questions-100" && achievement.earned && questionsAnswered === 100) {
+      candidates.add(achievement.slug);
+    }
+  }
+
+  return insertUserMedals(supabase, userId, [...candidates]);
 }
 
 // Known submit_quiz_answer exceptions, mapped to a status plus a
@@ -151,5 +212,12 @@ export async function POST(request: Request) {
     }
   }
 
-  return NextResponse.json(data);
+  const result = (data ?? {}) as QuizResult;
+  try {
+    const medals = await persistQuizAchievements(supabase, user.id, result);
+    return NextResponse.json(appendMedals(result, medals));
+  } catch (achievementError) {
+    reportError("quiz", "achievement persistence failed", achievementError);
+    return NextResponse.json(result);
+  }
 }

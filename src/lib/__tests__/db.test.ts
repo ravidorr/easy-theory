@@ -11,6 +11,8 @@ import {
   getUserSchedule,
   getUsersScheduledForDay,
   getUserMedals,
+  insertUserMedals,
+  countUserQuizResponses,
   getPushSubscriptionsForUsers,
   getMistakesForTopic,
   getAnsweredQuestionIdsForTopic,
@@ -34,7 +36,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 // Builds a chainable Supabase query mock that resolves to `result`.
 function chain(result: { data: unknown; error?: unknown }) {
   const mock: Record<string, unknown> = {};
-  for (const m of ["select", "eq", "order", "limit", "in", "range", "not"]) {
+  for (const m of ["select", "eq", "order", "limit", "in", "range", "not", "upsert"]) {
     mock[m] = vi.fn().mockReturnValue(mock);
   }
   mock.single = vi.fn().mockResolvedValue(result);
@@ -247,6 +249,43 @@ describe("getUserMedals", () => {
     await expect(getUserMedals(makeClient(null, boom), "u1")).rejects.toThrow(
       /getUserMedals: user_medals query failed: boom/
     );
+  });
+});
+
+describe("insertUserMedals", () => {
+  it("returns only medal slugs inserted by this request", async () => {
+    const client = makeClient([{ medal_slug: "first-topic" }]);
+    expect(await insertUserMedals(client, "u1", ["first-topic", "all-topics"])).toEqual([
+      "first-topic",
+    ]);
+  });
+
+  it("skips the database call for no candidates", async () => {
+    const client = makeClient([]);
+    expect(await insertUserMedals(client, "u1", [])).toEqual([]);
+    expect((client as unknown as { from: ReturnType<typeof vi.fn> }).from).not.toHaveBeenCalled();
+  });
+
+  it("throws when the insert fails", async () => {
+    await expect(insertUserMedals(makeClient(null, boom), "u1", ["first-topic"])).rejects.toThrow(
+      /insertUserMedals: user_medals query failed: boom/
+    );
+  });
+});
+
+describe("countUserQuizResponses", () => {
+  it("returns the exact response count", async () => {
+    const query = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockResolvedValue({ count: 100, error: null }),
+    };
+    const client = { from: vi.fn().mockReturnValue(query) } as unknown as SupabaseClient;
+    expect(await countUserQuizResponses(client, "u1")).toBe(100);
+    expect(query.select).toHaveBeenCalledWith("*", { count: "exact", head: true });
+  });
+
+  it("returns zero when the exact count is absent", async () => {
+    expect(await countUserQuizResponses(makeClient(null), "u1")).toBe(0);
   });
 });
 

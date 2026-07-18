@@ -252,6 +252,38 @@ export async function getUserMedals(
   return data ?? [];
 }
 
+// `ignoreDuplicates` maps to INSERT ... ON CONFLICT DO NOTHING, so the
+// returned representation contains only medals this request actually earned.
+export async function insertUserMedals(
+  supabase: SupabaseClient,
+  userId: string,
+  medalSlugs: string[]
+): Promise<string[]> {
+  if (medalSlugs.length === 0) return [];
+
+  const { data, error } = await supabase
+    .from("user_medals")
+    .upsert(
+      medalSlugs.map((medal_slug) => ({ user_id: userId, medal_slug })),
+      { onConflict: "user_id,medal_slug", ignoreDuplicates: true }
+    )
+    .select("medal_slug");
+  throwOnDbError(error, "insertUserMedals: user_medals");
+  return (data ?? []).map((row) => row.medal_slug);
+}
+
+export async function countUserQuizResponses(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<number> {
+  const { count, error } = await supabase
+    .from("user_quiz_responses")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId);
+  throwOnDbError(error, "countUserQuizResponses: user_quiz_responses");
+  return count ?? 0;
+}
+
 export type QuizMistake = Question & {
   selected_option: "a" | "b" | "c" | "d";
   // Next SRS review; null = never scheduled, treated as due (see migration 014).
