@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { readFileSync } from "fs";
 import { resolve } from "path";
 
@@ -15,6 +15,7 @@ type ModalApi = {
     cancelText?: string;
   }) => Promise<boolean>;
   alert: (options: { message: string; title?: string }) => Promise<void>;
+  toast: (options: { message: string }) => Promise<void>;
   dismissAll: () => void;
 };
 
@@ -244,5 +245,64 @@ describe("modal.js – alert", () => {
     // A second Escape must not throw or re-remove anything.
     pressKey("Escape");
     expect(scrim()).toBeNull();
+  });
+});
+
+describe("modal.js – toast", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    document.body.innerHTML = `<button id="opener">פתיחה</button>`;
+    eval(modalScript);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  function toastEl() {
+    return document.querySelector(".toast") as HTMLElement | null;
+  }
+
+  it("renders a success status region and sets the text only after insertion", async () => {
+    const opener = document.getElementById("opener") as HTMLButtonElement;
+    opener.focus();
+
+    void modal().toast({ message: "התוכנית נשמרה!" });
+
+    // Inserted empty: screen readers only announce text that changes after
+    // the live region is already in the accessibility tree.
+    expect(toastEl()!.getAttribute("role")).toBe("status");
+    expect(toastEl()!.className).toBe("toast toast-success");
+    expect(toastEl()!.textContent).toBe("");
+
+    await vi.advanceTimersByTimeAsync(30);
+    expect(toastEl()!.textContent).toBe("התוכנית נשמרה!");
+    expect(document.activeElement).toBe(opener);
+  });
+
+  it("removes itself and resolves after the toast duration", async () => {
+    const promise = modal().toast({ message: "נשמר" });
+
+    await vi.advanceTimersByTimeAsync(1999);
+    expect(toastEl()).not.toBeNull();
+
+    await vi.advanceTimersByTimeAsync(1);
+    expect(toastEl()).toBeNull();
+    await expect(promise).resolves.toBeUndefined();
+  });
+
+  it("replaces a visible toast and resolves the replaced one", async () => {
+    const first = modal().toast({ message: "ראשון" });
+    const second = modal().toast({ message: "שני" });
+
+    await expect(first).resolves.toBeUndefined();
+    expect(document.querySelectorAll(".toast")).toHaveLength(1);
+
+    await vi.advanceTimersByTimeAsync(30);
+    expect(toastEl()!.textContent).toBe("שני");
+
+    await vi.advanceTimersByTimeAsync(2000);
+    expect(toastEl()).toBeNull();
+    await expect(second).resolves.toBeUndefined();
   });
 });

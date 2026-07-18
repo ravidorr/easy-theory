@@ -98,6 +98,50 @@ body {
   }
 }
 
+/* ── Status toast (built by public/js/modal.js) ──────────────── */
+
+/* Above .modal-scrim (100): a dialog opening must not hide a status. */
+.toast {
+  position: fixed;
+  inset-block-end: calc(24px + env(safe-area-inset-bottom));
+  inset-inline: 0;
+  z-index: 110;
+  margin-inline: auto;
+  width: fit-content;
+  max-width: calc(100vw - 48px);
+  padding: 12px 20px;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-pop);
+  font-family: var(--font-ui);
+  font-size: var(--type-body-size);
+  text-align: center;
+  animation: toast-rise var(--dur-med) var(--ease-out);
+}
+
+.toast-success {
+  background: var(--success-soft);
+  color: var(--success-text);
+  border: 1px solid var(--success);
+}
+
+@keyframes toast-rise {
+  from {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none;
+  }
+}
+
 /* ── Medal modal content ─────────────────────────────────────── */
 .medal-modal-figure {
   display: inline-flex;

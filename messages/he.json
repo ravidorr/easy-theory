@@ -415,7 +415,8 @@
       "needDay": "נבחר לפחות יום אחד ללימוד.",
       "saving": "שומרים...",
       "saveError": "שגיאה בשמירה, שננסה שוב?",
-      "saved": "נשמר!"
+      "saved": "נשמר!",
+      "savedToast": "התוכנית נשמרה!"
     },
     "Flashcard": {
       "cardCount": "כרטיס {current} מתוך {total}",

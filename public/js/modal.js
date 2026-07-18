@@ -1,6 +1,14 @@
-/** Reusable modal dialogs: Promise-returning confirm/alert styled by global .modal-* classes. */
+/** Reusable modal dialogs and toasts: Promise-returning confirm/alert/toast styled by global classes. */
 (function () {
   const t = window.__t || {};
+
+  const TOAST_DURATION = 2000;
+  // Screen readers only announce text that changes after the live region is
+  // already in the accessibility tree, so the message is set this long after
+  // the toast element is inserted.
+  const TOAST_TEXT_DELAY = 30;
+  // Hide callback of the currently visible toast, so a new toast replaces it.
+  let hideActiveToast = null;
 
   const FOCUSABLE =
     "button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])";
@@ -126,6 +134,37 @@
     });
   }
 
+  /**
+   * Shows a transient, non-blocking success toast and resolves once it is
+   * removed. Not a dialog: no focus move, no dismissers registration. The
+   * promise also resolves early when a newer toast replaces this one, so do
+   * not chain must-run work (like navigation) on it.
+   * options: { message }
+   */
+  function showToast(options) {
+    return new Promise(function (resolve) {
+      if (hideActiveToast) hideActiveToast();
+
+      const toast = document.createElement("div");
+      toast.className = "toast toast-success";
+      toast.setAttribute("role", "status");
+
+      function hide() {
+        clearTimeout(timer);
+        hideActiveToast = null;
+        toast.remove();
+        resolve();
+      }
+
+      const timer = setTimeout(hide, TOAST_DURATION);
+      hideActiveToast = hide;
+      document.body.appendChild(toast);
+      setTimeout(function () {
+        toast.textContent = options.message;
+      }, TOAST_TEXT_DELAY);
+    });
+  }
+
   window.modal = {
     /** Resolves true on confirm, false on cancel / Escape / backdrop. */
     confirm: function (options) {
@@ -166,6 +205,9 @@
         ],
       });
     },
+
+    /** Resolves after the toast disappears (or is replaced by a newer one). */
+    toast: showToast,
 
     /** Closes every open dialog with its dismiss value (e.g. when the screen behind it changes). */
     dismissAll: function () {
