@@ -12,8 +12,22 @@
     "exam-pass": { label: t.achievementExamPassLabel || "עברנו סימולציה", description: t.achievementExamPassDesc || "עברנו את הסימולציה. עבודה מצוינת!" },
   };
   const medalQueue = [];
+  const FOCUSABLE =
+    "button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])";
 
-  function buildMedalModal(meta) {
+  function canRestoreFocus(element) {
+    return Boolean(
+      element &&
+        element.isConnected &&
+        element.matches(FOCUSABLE) &&
+        !element.disabled &&
+        getComputedStyle(element).display !== "none" &&
+        getComputedStyle(element).visibility !== "hidden"
+    );
+  }
+
+  function buildMedalModal(meta, fallbackFocus) {
+    const previouslyFocused = document.activeElement;
     const scrim = document.createElement("div");
     scrim.className = "modal-scrim";
     const card = document.createElement("div");
@@ -22,29 +36,71 @@
     card.setAttribute("aria-modal", "true");
     card.setAttribute("aria-label", t.medalModalLabel || "מדליה חדשה");
     card.innerHTML = '<div class="medal-modal-figure"><div class="medal-modal-badge"><svg width="32" height="32" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1.5c.4 2.2 3.1 3.4 3.9 5.8.9 2.7-.8 6-3.9 6s-4.8-3.3-3.9-6c.4-1.3 1.4-2.2 2.2-3.2.8-1 1.5-1.7 1.7-2.6z"/><circle cx="8" cy="10.6" r="2.1" fill="var(--gold-soft)" opacity="0.85"/></svg></div><span class="medal-modal-label">' + meta.label + '</span></div><div class="modal-text"><h2 class="modal-title">' + (t.medalModalTitle || "מדליה חדשה!") + '</h2><span class="modal-message">' + meta.description + '</span></div><button type="button" class="btn-primary">' + (t.medalModalBtn || "מעולה, נמשיך!") + "</button>";
-    function dismiss() {
-      document.body.removeChild(scrim);
-      showNextMedal();
+    function restoreFocus() {
+      const target = canRestoreFocus(previouslyFocused)
+        ? previouslyFocused
+        : fallbackFocus;
+      if (canRestoreFocus(target) && typeof target.focus === "function") target.focus();
     }
-    scrim.addEventListener("click", dismiss);
-    card.addEventListener("click", function (event) { event.stopPropagation(); });
+
+    function dismiss() {
+      document.removeEventListener("keydown", onKeydown, true);
+      scrim.remove();
+      if (medalQueue.length > 0) {
+        showNextMedal(fallbackFocus);
+      } else {
+        restoreFocus();
+      }
+    }
+
+    function onKeydown(event) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        dismiss();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusable = card.querySelectorAll(FOCUSABLE);
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const outside = !card.contains(document.activeElement);
+      if (event.shiftKey && (document.activeElement === first || outside)) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || outside)) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+    let pressStartedOnScrim = true;
+    scrim.addEventListener("mousedown", function (event) {
+      pressStartedOnScrim = event.target === scrim;
+    });
+    scrim.addEventListener("click", function (event) {
+      const shouldDismiss = event.target === scrim && pressStartedOnScrim;
+      pressStartedOnScrim = true;
+      if (shouldDismiss) dismiss();
+    });
+    document.addEventListener("keydown", onKeydown, true);
     card.querySelector("button").addEventListener("click", dismiss);
     scrim.appendChild(card);
-    return scrim;
+    document.body.appendChild(scrim);
+    card.querySelector("button").focus();
   }
 
-  function showNextMedal() {
+  function showNextMedal(fallbackFocus) {
     if (medalQueue.length === 0) return;
     const meta = MEDAL_META[medalQueue.shift()];
-    if (!meta) return showNextMedal();
-    document.body.appendChild(buildMedalModal(meta));
+    if (!meta) return showNextMedal(fallbackFocus);
+    buildMedalModal(meta, fallbackFocus);
   }
 
   window.medalCelebration = {
-    show: function (slugs) {
+    show: function (slugs, options) {
       if (!Array.isArray(slugs)) return;
       medalQueue.push.apply(medalQueue, slugs);
-      showNextMedal();
+      showNextMedal(options && options.fallbackFocus);
     },
   };
 })();

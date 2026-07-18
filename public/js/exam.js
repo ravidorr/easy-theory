@@ -230,7 +230,9 @@
       stopTimer();
       showResults(data, auto);
       if (data.medals_earned && window.medalCelebration) {
-        window.medalCelebration.show(data.medals_earned);
+        window.medalCelebration.show(data.medals_earned, {
+          fallbackFocus: resultScreen && resultScreen.querySelector("button, a"),
+        });
       }
     }).catch(function () {
       submitting = false;

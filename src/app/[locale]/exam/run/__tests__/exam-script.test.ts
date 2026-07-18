@@ -210,7 +210,16 @@ describe("exam.js – submit", () => {
     await flushPromises();
 
     expect(resultScreen().style.display).toBe("flex");
-    expect(document.querySelector('[role="dialog"]')).not.toBeNull();
+    const dialogButton = document.querySelector<HTMLButtonElement>('[role="dialog"] button')!;
+    expect(dialogButton).not.toBeNull();
+    expect(document.activeElement).toBe(dialogButton);
+
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true }));
+    expect(document.activeElement).toBe(dialogButton);
+
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    expect(document.activeElement).toBe(document.getElementById("exam-review-btn"));
   });
 
   beforeEach(() => {
