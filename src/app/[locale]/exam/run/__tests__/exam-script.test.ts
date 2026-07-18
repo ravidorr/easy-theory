@@ -6,6 +6,10 @@ const examScript = readFileSync(
   resolve(__dirname, "../../../../../../public/js/exam.js"),
   "utf-8"
 );
+const medalScript = readFileSync(
+  resolve(__dirname, "../../../../../../public/js/medal.js"),
+  "utf-8"
+);
 
 function slideHTML(index: number) {
   return `
@@ -49,6 +53,7 @@ function setupDOM({ total = 3, durationSeconds = 2400, translations = {} } = {})
     </main>
   `;
   vi.stubGlobal("__t", translations);
+  eval(medalScript);
   eval(examScript);
 }
 
@@ -195,6 +200,28 @@ describe("exam.js – answering and navigation", () => {
 });
 
 describe("exam.js – submit", () => {
+  it("celebrates a newly earned exam medal after showing results", async () => {
+    mockFetch(passResponse({ medals_earned: ["exam-pass"] }));
+    setupDOM();
+    clickOption(0, "a");
+    clickOption(1, "b");
+    clickOption(2, "c");
+    submitBtn().click();
+    await flushPromises();
+
+    expect(resultScreen().style.display).toBe("flex");
+    const dialogButton = document.querySelector<HTMLButtonElement>('[role="dialog"] button')!;
+    expect(dialogButton).not.toBeNull();
+    expect(document.activeElement).toBe(dialogButton);
+
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true }));
+    expect(document.activeElement).toBe(dialogButton);
+
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    expect(document.activeElement).toBe(document.getElementById("exam-review-btn"));
+  });
+
   beforeEach(() => {
     vi.useFakeTimers();
   });

@@ -157,7 +157,6 @@ CREATE POLICY "own insert" ON user_stats          FOR INSERT WITH CHECK (user_id
 CREATE POLICY "own update" ON user_stats          FOR UPDATE USING (user_id = auth.uid());
 
 CREATE POLICY "own select" ON user_medals         FOR SELECT USING (user_id = auth.uid());
-CREATE POLICY "own insert" ON user_medals         FOR INSERT WITH CHECK (user_id = auth.uid());
 
 CREATE POLICY "own select" ON user_schedule       FOR SELECT USING (user_id = auth.uid());
 CREATE POLICY "own insert" ON user_schedule       FOR INSERT WITH CHECK (user_id = auth.uid());
@@ -165,12 +164,8 @@ CREATE POLICY "own update" ON user_schedule       FOR UPDATE USING (user_id = au
 CREATE POLICY "own delete" ON user_schedule       FOR DELETE USING (user_id = auth.uid());
 
 CREATE POLICY "own select" ON user_topic_progress FOR SELECT USING (user_id = auth.uid());
-CREATE POLICY "own insert" ON user_topic_progress FOR INSERT WITH CHECK (user_id = auth.uid());
-CREATE POLICY "own update" ON user_topic_progress FOR UPDATE USING (user_id = auth.uid());
 
 CREATE POLICY "own select" ON user_quiz_responses FOR SELECT USING (user_id = auth.uid());
-CREATE POLICY "own insert" ON user_quiz_responses FOR INSERT WITH CHECK (user_id = auth.uid());
-CREATE POLICY "own update" ON user_quiz_responses FOR UPDATE USING (user_id = auth.uid());
 
 ALTER TABLE user_push_subscriptions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "own select" ON user_push_subscriptions FOR SELECT USING (user_id = auth.uid());
@@ -179,7 +174,6 @@ CREATE POLICY "own delete" ON user_push_subscriptions FOR DELETE USING (user_id 
 
 ALTER TABLE user_exam_attempts ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "own select" ON user_exam_attempts FOR SELECT USING (user_id = auth.uid());
-CREATE POLICY "own insert" ON user_exam_attempts FOR INSERT WITH CHECK (user_id = auth.uid());
 
 ALTER TABLE user_question_bookmarks ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "own select" ON user_question_bookmarks FOR SELECT USING (user_id = auth.uid());

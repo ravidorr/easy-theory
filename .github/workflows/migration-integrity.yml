@@ -1,0 +1,68 @@
+name: Migration Integrity
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  migrations:
+    name: Migration integrity
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Require append-only sequential migrations
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+
+          changes="$(
+            git diff --name-status "$BASE_SHA" "$GITHUB_SHA" -- \
+              ':(glob)seeds/migrations/*.sql'
+          )"
+          invalid="$(printf '%s\n' "$changes" | awk 'NF && $1 != "A" { print }')"
+          if [ -n "$invalid" ]; then
+            echo "Existing migrations must not be modified, deleted, or renamed:"
+            echo "$invalid"
+            exit 1
+          fi
+
+          added="$(
+            printf '%s\n' "$changes" |
+              awk '$1 == "A" { print $2 }' |
+              sed -nE 's#^seeds/migrations/([0-9]{3})_.*\.sql$#\1#p' |
+              sort
+          )"
+          added_files="$(printf '%s\n' "$changes" | awk '$1 == "A" { print $2 }')"
+          added_count="$(printf '%s\n' "$added" | grep -c . || true)"
+          added_file_count="$(printf '%s\n' "$added_files" | grep -c . || true)"
+          if [ "$added_count" -ne "$added_file_count" ]; then
+            echo "New migration files must match seeds/migrations/NNN_name.sql"
+            exit 1
+          fi
+          if [ "$added_count" -eq 0 ]; then
+            exit 0
+          fi
+
+          base_max="$(
+            git ls-tree -r --name-only "$BASE_SHA" seeds/migrations |
+              sed -nE 's#^seeds/migrations/([0-9]{3})_.*\.sql$#\1#p' |
+              sort -n |
+              tail -1
+          )"
+          expected=$((10#${base_max:-000} + 1))
+          for number in $added; do
+            if [ "$((10#$number))" -ne "$expected" ]; then
+              printf 'Expected migration %03d, found %s\n' "$expected" "$number"
+              exit 1
+            fi
+            expected=$((expected + 1))
+          done

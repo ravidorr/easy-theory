@@ -7,10 +7,8 @@ import {
   getUserMedals,
   getUserStats,
   getTopics,
-  getTopicProgress,
   getTopicAccuracy,
   getTopicQuestionCounts,
-  hasPassedExam,
 } from "@/lib/db";
 import { cookies } from "next/headers";
 import { getTranslations, getLocale } from "next-intl/server";
@@ -25,10 +23,8 @@ vi.mock("@/lib/db", () => ({
   getUserMedals: vi.fn(),
   getUserStats: vi.fn(),
   getTopics: vi.fn(),
-  getTopicProgress: vi.fn(),
   getTopicAccuracy: vi.fn(),
   getTopicQuestionCounts: vi.fn(),
-  hasPassedExam: vi.fn(),
 }));
 vi.mock("next/headers", () => ({
   cookies: vi.fn().mockResolvedValue({
@@ -51,10 +47,8 @@ const mockCreateClient = vi.mocked(createClient);
 const mockGetMedals = vi.mocked(getUserMedals);
 const mockGetStats = vi.mocked(getUserStats);
 const mockGetTopics = vi.mocked(getTopics);
-const mockGetProgress = vi.mocked(getTopicProgress);
 const mockGetTopicAccuracy = vi.mocked(getTopicAccuracy);
 const mockGetQuestionCounts = vi.mocked(getTopicQuestionCounts);
-const mockHasPassedExam = vi.mocked(hasPassedExam);
 const mockCookies = vi.mocked(cookies);
 
 const TOPIC_A = { id: "t1", slug: "signs", name_he: "תמרורים", icon: null };
@@ -76,10 +70,8 @@ describe("MorePage", () => {
       last_active_date: null,
     });
     mockGetTopics.mockResolvedValue([TOPIC_A, TOPIC_B] as never);
-    mockGetProgress.mockResolvedValue([]);
     mockGetTopicAccuracy.mockResolvedValue([]);
     mockGetQuestionCounts.mockResolvedValue({ t1: 20, t2: 10 });
-    mockHasPassedExam.mockResolvedValue(false);
     mockCookies.mockResolvedValue({ get: vi.fn().mockReturnValue({ value: "dark" }) } as never);
     vi.mocked(getTranslations).mockResolvedValue(((key: string) => key) as never);
     vi.mocked(getLocale).mockResolvedValue("he");
@@ -198,49 +190,27 @@ describe("MorePage", () => {
     });
   });
 
-  describe("derived achievements", () => {
-    it("marks first-topic earned once a topic is completed", async () => {
-      mockGetProgress.mockResolvedValue([
-        { topic_id: "t1", status: "completed", best_score: 90 },
+  describe("persisted achievements", () => {
+    it("does not infer achievements from current progress", async () => {
+      mockGetTopicAccuracy.mockResolvedValue([{ topic_id: "t1", correct: 80, total: 100 }]);
+      const jsx = await MorePage();
+      render(jsx);
+      expect(screen.getAllByText("medalLockedLabel")).toHaveLength(8);
+    });
+
+    it("marks and dates achievements stored in user_medals", async () => {
+      mockGetMedals.mockResolvedValue([
+        { medal_slug: "first-topic", earned_at: "2026-01-15T10:00:00Z" },
+        { medal_slug: "questions-100", earned_at: "2026-01-15T10:00:00Z" },
+        { medal_slug: "all-topics", earned_at: "2026-01-15T10:00:00Z" },
+        { medal_slug: "exam-pass", earned_at: "2026-01-15T10:00:00Z" },
       ] as never);
       const jsx = await MorePage();
       render(jsx);
-      const label = screen.getByText("achFirstTopic");
-      expect(label.className).toContain("medalLabelEarned");
-      expect(screen.getByText("achAllTopics").className).not.toContain(
-        "medalLabelEarned"
-      );
-    });
-
-    it("marks all-topics earned only when every topic is completed", async () => {
-      mockGetProgress.mockResolvedValue([
-        { topic_id: "t1", status: "completed", best_score: 90 },
-        { topic_id: "t2", status: "completed", best_score: 80 },
-      ] as never);
-      const jsx = await MorePage();
-      render(jsx);
-      expect(screen.getByText("achAllTopics").className).toContain("medalLabelEarned");
-    });
-
-    it("marks the questions achievement from the answered count", async () => {
-      mockGetTopicAccuracy.mockResolvedValue([
-        { topic_id: "t1", correct: 80, total: 100 },
-      ]);
-      const jsx = await MorePage();
-      render(jsx);
-      expect(screen.getByText("achQuestions100").className).toContain(
-        "medalLabelEarned"
-      );
-    });
-
-    it("marks the exam achievement when an exam was passed", async () => {
-      mockHasPassedExam.mockResolvedValue(true);
-      const jsx = await MorePage();
-      render(jsx);
-      expect(screen.getByText("achExamPass").className).toContain("medalLabelEarned");
-      // The date slot swaps the locked label for the earned label.
-      expect(screen.getByText("achEarnedLabel")).toBeInTheDocument();
-      expect(screen.getAllByText("medalLockedLabel")).toHaveLength(7);
+      for (const label of ["achFirstTopic", "achQuestions100", "achAllTopics", "achExamPass"]) {
+        expect(screen.getByText(label).className).toContain("medalLabelEarned");
+      }
+      expect(screen.getAllByText("medalLockedLabel")).toHaveLength(4);
     });
 
     it("leaves all achievements locked for a fresh account", async () => {

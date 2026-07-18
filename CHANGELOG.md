@@ -3,11 +3,35 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
-## [0.3.180] — 2026-07-18
+## [0.3.183] — 2026-07-18
 
 ### Changed
 
 - Refreshed the exploratory QA charters for locale-scoped quiz resume state, daily goals and missions, paginated mistake review, exam-answer review, schedule-save confirmation, expanded More settings and achievements, Arabic-only content, empty states, and PWA cache v2. Added a bookmarks charter and documented migrations 014–017 in QA setup.
+
+---
+
+## [0.3.182] — 2026-07-18
+
+### Fixed
+
+- Derived achievements are now immutable medal events. Completing a first or final topic, answering the 100th question, and passing a simulated exam create a dated `user_medals` row exactly once, show the localized celebration immediately, and remain earned if the question or topic bank later changes. Migration 019 serializes a learner's submissions so concurrent answers cannot skip the 100-question or all-topics crossings; migrations 020–021 restrict writes to verified RPC paths. Existing users are not backfilled.
+
+---
+
+## [0.3.181] — 2026-07-18
+
+### Changed
+
+- Database Alignment now publishes a trusted PR-head `Database alignment gate` status before comparing production and QA, then always reports the comparison result on that same commit so it can be required for merges.
+
+---
+
+## [0.3.180] — 2026-07-18
+
+### Added
+
+- Add database-alignment tooling: read-only `pnpm db:compare` detects production and QA drift in the PostgREST-visible schema, RPC signatures, and shared reference content, while `pnpm db:sync-reference` safely previews or applies production reference content to QA with QA-only backups, no user-row synchronization, and dependency-ordered table phases. Migration 018 repairs legacy `REAL` SRS ease columns as `DOUBLE PRECISION`. Required-check workflows run the live comparison from trusted `main` code and enforce append-only sequential migrations.
 
 ---
 

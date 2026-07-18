@@ -34,7 +34,7 @@ vi.mock("next/link", () => ({
     React.createElement("a", { href, ...rest }, children as React.ReactNode),
 }));
 vi.mock("next/script", () => ({
-  default: () => React.createElement("div", null),
+  default: ({ src }: { src: string }) => React.createElement("script", { src }),
 }));
 vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn().mockResolvedValue((key: string) => key),
@@ -107,6 +107,17 @@ describe("RetryMistakesPage", () => {
     await expect(
       RetryMistakesPage({ params: Promise.resolve({ slug: "unknown" }) })
     ).rejects.toThrow("notFound");
+  });
+
+  it("loads medal support before quiz interactivity", async () => {
+    const jsx = await RetryMistakesPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    const scripts = [...container.querySelectorAll("script")].map((script) => script.src);
+    expect(scripts.map((src) => new URL(src).pathname)).toEqual([
+      "/js/medal.js",
+      "/js/quiz.js",
+      "/js/bookmark.js",
+    ]);
   });
 
   it("redirects to review page when there are no mistakes", async () => {

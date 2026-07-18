@@ -6,6 +6,10 @@ const quizScript = readFileSync(
   resolve(__dirname, "../../../../../../public/js/quiz.js"),
   "utf-8"
 );
+const medalScript = readFileSync(
+  resolve(__dirname, "../../../../../../public/js/medal.js"),
+  "utf-8"
+);
 const TOUCH_DOUBLE_TAP_SUPPRESSION_MS = 300;
 const AUTO_ADVANCE_DELAY_MS = 900;
 const AUTO_RETRY_DELAY_MS = 1200;
@@ -76,6 +80,7 @@ function setupDOM(opts: {
       </div>
     </main>
   `;
+  eval(medalScript);
   eval(quizScript);
 }
 
@@ -763,6 +768,26 @@ describe("quiz.js – auto-advance", () => {
 
     expect(slideDisplay(0)).toBe("flex");
     expect(document.querySelector('[role="dialog"]')).not.toBeNull();
+  });
+
+  it("restores focus to Next after dismissing an earned medal", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ medals_earned: ["streak-3"] }),
+      })
+    );
+    setupDOM();
+
+    clickOption(0, "a");
+    await flushAsyncWork();
+    expect(actionButton().disabled).toBe(false);
+
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    expect(document.activeElement).toBe(actionButton());
   });
 
   it("does not auto-advance past the topic-completed message", async () => {
@@ -1552,7 +1577,7 @@ describe("quiz.js – resume", () => {
     });
     localStorage.setItem(legacyResumeKey(), legacy);
     const originalSetItem = Storage.prototype.setItem;
-    vi.spyOn(Storage.prototype, "setItem").mockImplementation(function (
+    vi.spyOn(Storage.prototype, "setItem").mockImplementation(function (this: Storage,
       key,
       value
     ) {

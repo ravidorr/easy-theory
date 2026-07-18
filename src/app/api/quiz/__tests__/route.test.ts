@@ -342,6 +342,24 @@ describe("POST /api/quiz", () => {
     errorSpy.mockRestore();
   });
 
+  it("returns every medal earned by the transactional RPC", async () => {
+    const client = buildClient({
+      result: {
+        ...storedResult,
+        medals_earned: ["streak-3", "questions-100", "first-topic", "all-topics"],
+        topic_completed: true,
+      },
+    });
+    mockCreateClient.mockResolvedValue(client as never);
+
+    const response = await POST(makeRequest(defaultBody));
+
+    expect(await response.json()).toEqual({
+      ...storedResult,
+      medals_earned: ["streak-3", "questions-100", "first-topic", "all-topics"],
+    });
+  });
+
   it("returns 500 with a correlation ref when the transactional submission fails", async () => {
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const client = buildClient({

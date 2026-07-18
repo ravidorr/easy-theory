@@ -49,6 +49,7 @@ yarn-error.log*
 qa/runs/*
 
 # conductor / mcp tooling
+.context/
 .agents/
 .mcp.json
 skills-lock.json

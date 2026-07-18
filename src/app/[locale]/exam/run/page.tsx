@@ -237,6 +237,7 @@ export default async function ExamRunPage() {
       </main>
 
       <Script src="/js/modal.js" strategy="afterInteractive" />
+      <Script src="/js/medal.js" strategy="afterInteractive" />
       <Script src="/js/exam.js" strategy="afterInteractive" />
     </>
   );

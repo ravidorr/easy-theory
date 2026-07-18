@@ -1,0 +1,84 @@
+name: Database Alignment
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+  schedule:
+    - cron: "17 */6 * * *"
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: database-alignment-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  alignment:
+    name: Database alignment
+    runs-on: ubuntu-latest
+    environment: database-audit
+
+    steps:
+      - name: Mark database alignment pending
+        if: github.event_name == 'pull_request_target'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh api --method POST \
+            "repos/$GITHUB_REPOSITORY/statuses/$HEAD_SHA" \
+            -f state=pending \
+            -f context="Database alignment gate" \
+            -f description="Comparing production and QA databases" \
+            -f target_url="$RUN_URL"
+
+      - name: Check out trusted main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install trusted dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Compare production and QA
+        id: compare
+        run: pnpm db:compare
+        env:
+          PROD_SUPABASE_URL: ${{ secrets.PROD_SUPABASE_URL }}
+          PROD_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.PROD_SUPABASE_SERVICE_ROLE_KEY }}
+          QA_SUPABASE_URL: ${{ secrets.QA_SUPABASE_URL }}
+          QA_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.QA_SUPABASE_SERVICE_ROLE_KEY }}
+
+      - name: Publish database alignment result
+        if: always() && github.event_name == 'pull_request_target'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          COMPARE_OUTCOME: ${{ steps.compare.outcome }}
+        run: |
+          if [ "$COMPARE_OUTCOME" = "success" ]; then
+            state="success"
+            description="Production and QA databases are aligned"
+          else
+            state="failure"
+            description="Database alignment failed or found drift"
+          fi
+
+          gh api --method POST \
+            "repos/$GITHUB_REPOSITORY/statuses/$HEAD_SHA" \
+            -f state="$state" \
+            -f context="Database alignment gate" \
+            -f description="$description" \
+            -f target_url="$RUN_URL"
