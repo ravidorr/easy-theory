@@ -3,6 +3,14 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.184] — 2026-07-19
+
+### Fixed
+
+- Switching between Hebrew and Arabic no longer renders raw script elements during client navigation, preventing React’s script-tag console error while keeping legacy page-script translations and theme-color metadata synchronized.
+
+---
+
 ## [0.3.183] — 2026-07-18
 
 ### Changed
