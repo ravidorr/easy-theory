@@ -15,6 +15,7 @@ import {
   getQuestionNumbersForTopic,
   getAnsweredQuestionIdsForTopic,
   getQuizAccuracyForWindow,
+  getQuizAnswerEventCountForWindow,
 } from "@/lib/db";
 import { nextMedalTarget } from "@/lib/quiz";
 import {
@@ -136,7 +137,7 @@ export default async function HomePage() {
     topicAccuracy,
     questionCounts,
     yesterdayAccuracy,
-    todayAccuracy,
+    answeredToday,
   ] = await Promise.all([
     getUserStats(supabase, user.id),
     getTopics(supabase),
@@ -150,7 +151,7 @@ export default async function HomePage() {
       yesterdayWindow.fromIso,
       yesterdayWindow.toIso
     ),
-    getQuizAccuracyForWindow(
+    getQuizAnswerEventCountForWindow(
       supabase,
       user.id,
       todayWindow.fromIso,
@@ -239,7 +240,6 @@ export default async function HomePage() {
 
   const levelInfo = levelForPoints(stats.star_points);
   const levelPct = Math.round(levelInfo.progress * 100);
-  const answeredToday = todayAccuracy.total;
   const dailyGoalDone = answeredToday >= DAILY_GOAL_QUESTIONS;
   const dailyGoalPct = Math.min(
     100,

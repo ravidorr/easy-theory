@@ -3,6 +3,14 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.179] — 2026-07-18
+
+### Fixed
+
+- The daily goal now counts every accepted answer submitted today instead of distinct questions whose mutable latest response was updated today. Migration 017 adds an append-only, replay-safe answer-event ledger indexed for the Jerusalem-day query, backfills finalized retained submissions from the current Jerusalem day during deployment (falling back to mutable response rows on older projects without that ledger), and leaves the rate-limited quiz RPC as the only response-write path. Daily-goal progress reads that ledger while accuracy remains distinct-question based. QA preflight now verifies the required schema object.
+
+---
+
 ## [0.3.178] — 2026-07-18
 
 ### Fixed

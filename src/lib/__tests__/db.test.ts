@@ -26,6 +26,7 @@ import {
   getTopicAccuracy,
   getTopicQuestionCounts,
   getQuizAccuracyForWindow,
+  getQuizAnswerEventCountForWindow,
   getQuestionNumbersForTopic,
 } from "../db";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -1035,6 +1036,49 @@ describe("getQuizAccuracyForWindow", () => {
       getQuizAccuracyForWindow(makeWindowClient(null, boom), "u1", "a", "b")
     ).rejects.toThrow(
       /getQuizAccuracyForWindow: user_quiz_responses query failed: boom/
+    );
+  });
+});
+
+describe("getQuizAnswerEventCountForWindow", () => {
+  function makeAnswerEventWindowClient(
+    count: number | null,
+    error: { message: string } | null = null
+  ) {
+    const result = { data: null, error, count: error ? null : count };
+    const mock: Record<string, unknown> = {};
+    for (const m of ["select", "eq", "gte", "lt"]) {
+      mock[m] = vi.fn().mockReturnValue(mock);
+    }
+    mock.then = (
+      onFulfilled: (v: typeof result) => unknown,
+      onRejected?: (e: unknown) => unknown
+    ) => Promise.resolve(result).then(onFulfilled, onRejected);
+    return { from: vi.fn().mockReturnValue(mock) } as unknown as SupabaseClient;
+  }
+
+  it("returns the exact count for the answer-event window", async () => {
+    await expect(
+      getQuizAnswerEventCountForWindow(
+        makeAnswerEventWindowClient(12),
+        "u1",
+        "2026-07-13T21:00:00Z",
+        "2026-07-14T21:00:00Z"
+      )
+    ).resolves.toBe(12);
+  });
+
+  it("returns zero when Supabase omits the count", async () => {
+    await expect(
+      getQuizAnswerEventCountForWindow(makeAnswerEventWindowClient(null), "u1", "a", "b")
+    ).resolves.toBe(0);
+  });
+
+  it("throws when the query fails", async () => {
+    await expect(
+      getQuizAnswerEventCountForWindow(makeAnswerEventWindowClient(null, boom), "u1", "a", "b")
+    ).rejects.toThrow(
+      /getQuizAnswerEventCountForWindow: quiz_answer_events query failed: boom/
     );
   });
 });

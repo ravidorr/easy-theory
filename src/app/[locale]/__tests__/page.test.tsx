@@ -13,6 +13,7 @@ import {
   getQuestionNumbersForTopic,
   getAnsweredQuestionIdsForTopic,
   getQuizAccuracyForWindow,
+  getQuizAnswerEventCountForWindow,
 } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
 
@@ -36,6 +37,7 @@ vi.mock("@/lib/db", () => ({
   getQuestionNumbersForTopic: vi.fn(),
   getAnsweredQuestionIdsForTopic: vi.fn(),
   getQuizAccuracyForWindow: vi.fn(),
+  getQuizAnswerEventCountForWindow: vi.fn(),
 }));
 vi.mock("next/link", () => ({
   default: ({ href, children, ...rest }: { href: string; children: unknown }) =>
@@ -63,6 +65,7 @@ const mockGetQuestionCounts = vi.mocked(getTopicQuestionCounts);
 const mockGetQuestionNumbers = vi.mocked(getQuestionNumbersForTopic);
 const mockGetAnsweredIds = vi.mocked(getAnsweredQuestionIdsForTopic);
 const mockGetWindowAccuracy = vi.mocked(getQuizAccuracyForWindow);
+const mockGetWindowAnswerCount = vi.mocked(getQuizAnswerEventCountForWindow);
 
 const TOPIC_A = { id: "t1", slug: "signs", name_he: "תמרורים", icon: null };
 const TOPIC_B = { id: "t2", slug: "priority", name_he: "זכות קדימה", icon: null };
@@ -99,6 +102,7 @@ describe("HomePage", () => {
     mockGetQuestionNumbers.mockResolvedValue([]);
     mockGetAnsweredIds.mockResolvedValue(new Set());
     mockGetWindowAccuracy.mockResolvedValue({ correct: 0, total: 0 });
+    mockGetWindowAnswerCount.mockResolvedValue(0);
     vi.mocked(getTranslations).mockResolvedValue(keyT);
     vi.mocked(getLocale).mockResolvedValue("he");
   });
@@ -159,17 +163,19 @@ describe("HomePage", () => {
       expect(screen.getByText('levelToNext|{"points":210}')).toBeInTheDocument();
     });
 
-    it("fetches today's window separately from yesterday's", async () => {
+    it("fetches today's answer count separately from yesterday's accuracy", async () => {
       await HomePage();
-      expect(mockGetWindowAccuracy).toHaveBeenCalledTimes(2);
-      const [yesterdayCall, todayCall] = mockGetWindowAccuracy.mock.calls;
+      expect(mockGetWindowAccuracy).toHaveBeenCalledTimes(1);
+      expect(mockGetWindowAnswerCount).toHaveBeenCalledTimes(1);
+      const yesterdayCall = mockGetWindowAccuracy.mock.calls[0];
+      const todayCall = mockGetWindowAnswerCount.mock.calls[0];
       expect(yesterdayCall[2]).not.toBe(todayCall[2]);
       expect(yesterdayCall[3]).toBe(todayCall[2]);
     });
 
     it("shows daily-goal progress with the remaining count", async () => {
       vi.mocked(getTranslations).mockResolvedValue(valuesT);
-      mockGetWindowAccuracy.mockResolvedValue({ correct: 5, total: 12 });
+      mockGetWindowAnswerCount.mockResolvedValue(12);
       const jsx = await HomePage();
       const { container } = render(jsx);
       expect(
@@ -181,14 +187,14 @@ describe("HomePage", () => {
     });
 
     it("uses the singular string when one question remains for the goal", async () => {
-      mockGetWindowAccuracy.mockResolvedValue({ correct: 10, total: 19 });
+      mockGetWindowAnswerCount.mockResolvedValue(19);
       const jsx = await HomePage();
       render(jsx);
       expect(screen.getByText("dailyGoalRemainingOne")).toBeInTheDocument();
     });
 
     it("marks the goal as done and caps the bar at 100%", async () => {
-      mockGetWindowAccuracy.mockResolvedValue({ correct: 20, total: 25 });
+      mockGetWindowAnswerCount.mockResolvedValue(25);
       const jsx = await HomePage();
       const { container } = render(jsx);
       expect(screen.getByText("dailyGoalDone")).toBeInTheDocument();
@@ -218,7 +224,7 @@ describe("HomePage", () => {
     });
 
     it("hides the empty captions once the user has activity", async () => {
-      mockGetWindowAccuracy.mockResolvedValue({ correct: 5, total: 12 });
+      mockGetWindowAnswerCount.mockResolvedValue(12);
       const jsx = await HomePage();
       render(jsx);
       expect(screen.queryByText("statsStreakEmpty")).not.toBeInTheDocument();
