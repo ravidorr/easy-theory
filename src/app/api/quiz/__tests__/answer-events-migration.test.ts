@@ -55,4 +55,13 @@ describe("quiz answer events migration", () => {
       /REVOKE ALL ON FUNCTION public\.record_quiz_answer_event\(\) FROM anon, authenticated/i
     );
   });
+
+  it("backfills finalized submissions from the current Jerusalem day", () => {
+    expect(migrationSql).toMatch(
+      /INSERT INTO public\.quiz_answer_events[\s\S]*SELECT[\s\S]*submissions\.user_id[\s\S]*submissions\.question_id[\s\S]*\(submissions\.result ->> 'is_correct'\)::BOOLEAN[\s\S]*submissions\.created_at[\s\S]*FROM public\.quiz_answer_submissions AS submissions[\s\S]*WHERE submissions\.result IS NOT NULL/i
+    );
+    expect(migrationSql).toMatch(
+      /date_trunc\('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia\/Jerusalem'\)[\s\S]*INTERVAL '1 day'/i
+    );
+  });
 });

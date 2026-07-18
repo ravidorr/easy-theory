@@ -55,5 +55,31 @@ ON public.user_quiz_responses
 FOR EACH ROW
 EXECUTE FUNCTION public.record_quiz_answer_event();
 
+-- The idempotency ledger retains successful submissions for 24 hours. Seed
+-- the current Jerusalem day so deploying mid-day preserves goal progress.
+INSERT INTO public.quiz_answer_events (
+  user_id,
+  question_id,
+  is_correct,
+  answered_at
+)
+SELECT
+  submissions.user_id,
+  submissions.question_id,
+  (submissions.result ->> 'is_correct')::BOOLEAN,
+  submissions.created_at
+FROM public.quiz_answer_submissions AS submissions
+WHERE submissions.result IS NOT NULL
+  AND submissions.created_at >= (
+    date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jerusalem')
+      AT TIME ZONE 'Asia/Jerusalem'
+  )
+  AND submissions.created_at < (
+    (
+      date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jerusalem')
+        + INTERVAL '1 day'
+    ) AT TIME ZONE 'Asia/Jerusalem'
+  );
+
 REVOKE ALL ON FUNCTION public.record_quiz_answer_event() FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.record_quiz_answer_event() FROM anon, authenticated;
