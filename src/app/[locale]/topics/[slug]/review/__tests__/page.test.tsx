@@ -78,10 +78,13 @@ function makeClient(user: { id: string } | null = { id: "u1" }) {
   return { auth: { getUser: vi.fn().mockResolvedValue({ data: { user } }) } };
 }
 
-const callPage = (scope?: string, slug = "signs") =>
+const callPage = (scope?: string, slug = "signs", page?: string) =>
   ReviewPage({
     params: Promise.resolve({ slug }),
-    searchParams: Promise.resolve(scope ? { scope } : {}),
+    searchParams: Promise.resolve({
+      ...(scope ? { scope } : {}),
+      ...(page ? { page } : {}),
+    }),
   });
 
 describe("ReviewPage", () => {
@@ -477,6 +480,81 @@ describe("ReviewPage", () => {
       const jsx = await callPage("all");
       const { container } = render(jsx);
       expect(container.querySelector('a[href="/topics/signs/retry"]')).toBeTruthy();
+    });
+  });
+
+  describe("pagination", () => {
+    const manyMistakes = Array.from({ length: 41 }, (_, index) => ({
+      ...MISTAKE_A,
+      id: `q${index + 1}`,
+      question_he: `שאלה ${index + 1}`,
+      due_at: null,
+    }));
+
+    it("renders only 20 cards for the first page while keeping whole-scope totals", async () => {
+      const translate = vi.fn((key: string) => key);
+      vi.mocked(getTranslations).mockResolvedValue(translate as never);
+      mockGetMistakes.mockResolvedValue(manyMistakes as never);
+      const jsx = await callPage();
+      render(jsx);
+
+      expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(20);
+      expect(screen.getByText("שאלה 1")).toBeInTheDocument();
+      expect(screen.queryByText("שאלה 21")).not.toBeInTheDocument();
+      expect(translate).toHaveBeenCalledWith("mistakeCountMany", { count: 41 });
+      expect(translate).toHaveBeenCalledWith("dueCount", { count: 41 });
+    });
+
+    it("uses the requested valid page", async () => {
+      mockGetMistakes.mockResolvedValue(manyMistakes as never);
+      const jsx = await callPage(undefined, "signs", "2");
+      render(jsx);
+
+      expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(20);
+      expect(screen.getByText("שאלה 21")).toBeInTheDocument();
+      expect(screen.queryByText("שאלה 1")).not.toBeInTheDocument();
+    });
+
+    it("defaults an invalid page value to the first page", async () => {
+      mockGetMistakes.mockResolvedValue(manyMistakes as never);
+      const jsx = await callPage(undefined, "signs", "zero");
+      render(jsx);
+
+      expect(screen.getByText("שאלה 1")).toBeInTheDocument();
+      expect(screen.queryByText("שאלה 21")).not.toBeInTheDocument();
+    });
+
+    it("clamps an out-of-range page to the final populated page", async () => {
+      mockGetMistakes.mockResolvedValue(manyMistakes as never);
+      const jsx = await callPage(undefined, "signs", "99");
+      render(jsx);
+
+      expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(1);
+      expect(screen.getByText("שאלה 41")).toBeInTheDocument();
+    });
+
+    it("omits page one from the previous link and adds it to the next link", async () => {
+      mockGetMistakes.mockResolvedValue(manyMistakes as never);
+      const jsx = await callPage(undefined, "signs", "2");
+      const { container } = render(jsx);
+
+      expect(container.querySelector('a[href="/topics/signs/review"]')).toBeTruthy();
+      expect(container.querySelector('a[href="/topics/signs/review?page=3"]')).toBeTruthy();
+    });
+
+    it("preserves the all-time scope in page links", async () => {
+      mockGetMistakes.mockResolvedValue(manyMistakes as never);
+      const jsx = await callPage("all", "signs", "2");
+      render(jsx);
+
+      expect(screen.getByText("previousPage")).toHaveAttribute(
+        "href",
+        "/topics/signs/review?scope=all"
+      );
+      expect(screen.getByText("nextPage")).toHaveAttribute(
+        "href",
+        "/topics/signs/review?scope=all&page=3"
+      );
     });
   });
 

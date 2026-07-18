@@ -38,6 +38,20 @@ function signNumberFromUrl(url: string): string | null {
 // its meaning — a full description would give away the answer.
 type TranslateFn = (key: string, values?: Record<string, string | number>) => string;
 
+const PAGE_SIZE = 20;
+
+function getReviewHref(slug: string, scope: MistakeScope, page: number): string {
+  const params = new URLSearchParams();
+  if (scope === "all") params.set("scope", "all");
+  if (page > 1) params.set("page", String(page));
+  const query = params.toString();
+  return `/topics/${slug}/review${query ? `?${query}` : ""}`;
+}
+
+function parsePage(page: string | undefined): number {
+  return page && /^[1-9]\d*$/.test(page) ? Number(page) : 1;
+}
+
 function QuestionReview({
   question,
   letters,
@@ -155,11 +169,12 @@ export default async function ReviewPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ scope?: string }>;
+  searchParams: Promise<{ scope?: string; page?: string }>;
 }) {
   const { slug } = await params;
-  const { scope: scopeParam } = await searchParams;
+  const { scope: scopeParam, page: pageParam } = await searchParams;
   const scope: MistakeScope = scopeParam === "all" ? "all" : "lastSession";
+  const requestedPage = parsePage(pageParam);
   const supabase = await createClient();
   const {
     data: { user },
@@ -195,6 +210,8 @@ export default async function ReviewPage({
   }
 
   const dueMistakeCount = mistakes.filter((m) => isDue(m.due_at)).length;
+  const totalPages = Math.ceil(mistakes.length / PAGE_SIZE);
+  const currentPage = Math.min(requestedPage, Math.max(totalPages, 1));
 
   const letters = tQuiz("letters").split(",");
 
@@ -202,6 +219,10 @@ export default async function ReviewPage({
     ...q,
     ...localizeQuestion(locale, q as Record<string, unknown>),
   }));
+  const pageMistakes = localizedMistakes.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
 
   return (
     <main className={styles.page}>
@@ -261,7 +282,7 @@ export default async function ReviewPage({
               {t("retryBtn")}
             </Link>
           )}
-          {localizedMistakes.map((mistake) => (
+          {pageMistakes.map((mistake) => (
             <QuestionReview
               key={mistake.id}
               question={mistake}
@@ -271,6 +292,33 @@ export default async function ReviewPage({
               dueBadge={isDue(mistake.due_at) ? t("dueBadge") : undefined}
             />
           ))}
+          {totalPages > 1 && (
+            <nav className={styles.pagination} aria-label={t("paginationLabel")}>
+              {currentPage > 1 ? (
+                <Link
+                  href={getReviewHref(slug, scope, currentPage - 1)}
+                  className={`btn-secondary ${styles.pageLink} ${styles.previousPage}`}
+                >
+                  {t("previousPage")}
+                </Link>
+              ) : (
+                <span />
+              )}
+              <span className={styles.pageStatus} aria-current="page">
+                {t("pageStatus", { page: currentPage, total: totalPages })}
+              </span>
+              {currentPage < totalPages ? (
+                <Link
+                  href={getReviewHref(slug, scope, currentPage + 1)}
+                  className={`btn-secondary ${styles.pageLink} ${styles.nextPage}`}
+                >
+                  {t("nextPage")}
+                </Link>
+              ) : (
+                <span />
+              )}
+            </nav>
+          )}
           <Link href="/" className={`btn-primary ${styles.btnFull} ${styles.returnLink}`}>
             {t("backHome")}
           </Link>
