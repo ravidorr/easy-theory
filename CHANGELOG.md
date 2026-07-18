@@ -3,6 +3,14 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.180] — 2026-07-18
+
+### Changed
+
+- Refreshed the exploratory QA charters for locale-scoped quiz resume state, daily goals and missions, paginated mistake review, exam-answer review, schedule-save confirmation, expanded More settings and achievements, Arabic-only content, empty states, and PWA cache v2. Added a bookmarks charter and documented migrations 014–017 in QA setup.
+
+---
+
 ## [0.3.179] — 2026-07-18
 
 ### Fixed

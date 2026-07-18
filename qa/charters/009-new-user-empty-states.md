@@ -1,7 +1,7 @@
 ---
 id: "009-new-user-empty-states"
-title: "Brand-new user: every empty state, then first-answer initialization"
-flow: "Mint a fresh user → home empty states → exam landing (no history) → review (no mistakes) → more (zero stats) → answer one question → counters initialize"
+title: "Brand-new user: empty states, daily mission, then first-answer initialization"
+flow: "Mint a fresh user → home empty states + daily goal → exam landing (no history) → review (no mistakes) → more (zero stats) → answer one question → counters initialize"
 persona: >
   Hebrew-speaking learner who just signed up minutes ago. Has done nothing
   yet: no streak, no points, no attempts, no mistakes. Judges the app by
@@ -24,14 +24,14 @@ out_of_scope:
 known_issues: []
 checks:
   - id: CHK-EMPTY-01
-    desc: "Home renders clean zero-value pills for a fresh user"
-    oracle: "/he shows streak and star points as 0 (or an intentional empty treatment) — never NaN, undefined, null, or a blank pill"
+    desc: "Home renders intentional initial gamification values for a fresh user"
+    oracle: "/he shows streak and star points as 0, a defined starting level, and a daily goal of 0/20 (or intentional equivalent treatment) — never NaN, undefined, null, or blank stat tiles"
   - id: CHK-EMPTY-02
     desc: "All topics show the not-started state"
     oracle: "All 4 seeded topics render with not-started status and zero progress; the completed counter reads 0 / 4"
   - id: CHK-EMPTY-03
-    desc: "Conditional home sections handle no-data"
-    oracle: "No weak-topics section appears (requires answer history); the readiness card shows its empty state inviting a first exam, not a bogus score"
+    desc: "Conditional home sections and first daily mission handle no-data"
+    oracle: "No weak-topics section appears (requires answer history); readiness invites a first exam rather than showing a bogus score; the daily-mission card names an unstarted topic with 0% progress and a working start CTA"
   - id: CHK-EMPTY-04
     desc: "Exam landing shows an empty history"
     oracle: "/he/exam renders the rules and start button with an intentional empty-history treatment; no phantom best score"
@@ -40,10 +40,10 @@ checks:
     oracle: "/he/topics/<slug>/review renders the localized no-mistakes empty state (both scopes); /he/topics/<slug>/retry redirects to review instead of opening an empty quiz"
   - id: CHK-EMPTY-06
     desc: "More page zero states are intentional"
-    oracle: "/he/more stats show zeros matching home; the medals grid shows all medals unearned (or its empty treatment) without layout breakage"
+    oracle: "/he/more streak/points/level match home, accuracy has intentional empty treatment, answered/completion values are zero, and all streak + derived-achievement tiles are locked without layout breakage"
   - id: CHK-INIT-01
-    desc: "First correct answer initializes streak and points"
-    oracle: "After confirming one correct answer in any topic quiz, POST /api/quiz returns 2xx with streak_days=1 and star_points=10; the dashboard pills reflect 1 and 10 afterwards"
+    desc: "First correct answer initializes streak, points, and today's goal"
+    oracle: "After confirming one correct answer in any topic quiz, POST /api/quiz returns 2xx with streak_days=1 and star_points=10; after returning home, stats reflect 1 and 10 and the daily goal advances from 0/20 to 1/20"
   - id: CHK-INIT-02
     desc: "First activity flips the topic out of not-started"
     oracle: "After the first answered question (and leaving the quiz), the topic no longer shows the pristine not-started zero state on the dashboard"
@@ -78,14 +78,15 @@ fresh; mint another rather than reporting false findings.
 
 Route hints:
 
-- Empty-state sources: home page (pills, weak topics, readiness card), `/he/exam`
-  history, `/he/topics/<slug>/review` (both scopes), `/he/more` stats + medals.
+- Empty-state sources: home page (stats strip, daily mission, weak topics, readiness
+  card), `/he/exam` history, `/he/topics/<slug>/review` (both scopes), `/he/more`
+  stats + achievements.
 - Initialization constants (`src/lib/quiz.ts`): 10 points per correct answer, streak
   milestones at 3/7/14/30 (so one answer earns no medal — none should appear).
 - Copy sources: `messages/he.json`, namespaces `Home`, `Exam`, `Review`, `More`.
-- Meaningful-step screenshots: fresh home, readiness empty card, exam empty history,
-  review empty state, More zero stats/medals, the one answered question, home after
-  with streak 1 / points 10.
+- Meaningful-step screenshots: fresh home with 0/20 daily goal and mission, readiness
+  empty card, exam empty history, review empty state, More zero stats/achievements,
+  the one answered question, home after with streak 1 / points 10 / daily goal 1/20.
 
 Severity rubric: blocker / major / minor / cosmetic / question — see
 `qa/charters/TEMPLATE.md`. When unsure whether something is a bug or a product decision,

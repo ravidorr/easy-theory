@@ -35,7 +35,9 @@ In the project's **SQL editor**, run these files in exactly this order:
    `007_exam_attempts.sql`, `008_replace_user_schedule.sql`,
    `009_schedule_locale.sql`, `010_quiz_submission_idempotency.sql`,
    `011_fix_sign_409_correct_answer.sql`, `012_videos_resources.sql`,
-   `013_question_bookmarks.sql`)
+   `013_question_bookmarks.sql`, `014_srs_cards.sql`,
+   `015_signs_question_15_arabic.sql`, `016_fix_prompt_sign_images.sql`,
+   `017_quiz_answer_events.sql`)
 
 **Keep the QA project's schema in sync**: whenever a new file lands in
 `seeds/migrations/`, run it in the QA project's SQL editor too. The app's code assumes

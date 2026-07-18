@@ -1,7 +1,7 @@
 ---
 id: "003-exam-simulation"
 title: "Mock exam: landing, timed run, server scoring, history, readiness"
-flow: "Exam landing rules → start run → answer 30 questions → submit → result screen → attempt history → home readiness card"
+flow: "Exam landing rules → start run → answer 30 questions → submit → result screen → answer review → history → home readiness card"
 persona: >
   Hebrew-speaking learner a week before their real theory exam. Wants a
   realistic dress rehearsal: strict timer, no feedback until the end, a
@@ -48,6 +48,9 @@ checks:
   - id: CHK-EXAM-08
     desc: "Home readiness card reflects having exam attempts"
     oracle: "On /he the readiness card is not in its empty state and shows a readiness level (values are real, no NaN/undefined)"
+  - id: CHK-EXAM-09
+    desc: "Result review exposes answers without leaving stale exam controls"
+    oracle: "From `#exam-result`, `#exam-review-btn` opens slide-by-slide review with correct/wrong states and a visible `#exam-review-bar`; timer and answered counter are hidden, the normal footer stays usable for review navigation, and `#exam-back-to-results` restores the result screen, timer, and focus to `#exam-review-btn`"
   - id: CHK-CONSOLE-01
     desc: "No console errors anywhere in the flow"
     oracle: "Browser console contains zero error-level entries across all steps (warnings triaged case by case)"
@@ -75,13 +78,14 @@ Route hints:
 - Runner hooks: `#exam-container` (`data-total`, `data-duration-seconds`,
   `data-pass-mark`), `#exam-prev`, `#exam-next`, `#exam-submit`, `#exam-timer`,
   `#exam-answered`, `#exam-error`, `#exam-result` (+ `#exam-result-title`,
-  `#exam-result-score`, `#exam-review-btn`).
+  `#exam-result-score`, `#exam-review-btn`), `#exam-review-bar`, and
+  `#exam-back-to-results`.
 - Scoring is server-side via POST `/api/exam` — the page never receives correct
   answers up front; verify the DOM to prove it.
 - Copy sources: `messages/he.json`, namespaces `Exam`, `JS.Exam`.
 - Meaningful-step screenshots: landing with rules, first question, answered-counter
-  mid-run, unanswered-submit confirm dialog, result screen, landing history after,
-  home readiness card after.
+  mid-run, unanswered-submit confirm dialog, result screen, answer-review mode,
+  restored result screen, landing history after, home readiness card after.
 
 Severity rubric: blocker / major / minor / cosmetic / question — see
 `qa/charters/TEMPLATE.md`. When unsure whether something is a bug or a product decision,

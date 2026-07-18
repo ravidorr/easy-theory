@@ -1,7 +1,7 @@
 ---
 id: "002-review-and-retry"
 title: "Mistake review page + throwaway retry session"
-flow: "Seed mistakes via a quiz → review last-session mistakes → all-time scope → retry the mistakes → verify retry persists nothing"
+flow: "Seed mistakes via a quiz → review last-session mistakes → all-time scope + pagination → retry the mistakes → verify retry persists nothing"
 persona: >
   Hebrew-speaking learner who just finished a practice quiz and got several
   questions wrong. Wants to understand what they missed and immediately
@@ -33,6 +33,9 @@ checks:
   - id: CHK-REVIEW-03
     desc: "Review empty state renders when a scope has no mistakes"
     oracle: "On a topic with no last-session mistakes (or before the setup quiz), the empty state shows localized copy and offers the all-time scope link instead of an empty table"
+  - id: CHK-REVIEW-04
+    desc: "Long all-time reviews paginate without losing scope"
+    oracle: "For a topic with more than 20 all-time mistakes, `/review?scope=all` renders at most 20 question cards plus localized previous/next controls and a current-page status; page 2 uses `?scope=all&page=2`, contains the next set without duplicates, and switching page preserves `scope=all`"
   - id: CHK-RETRY-01
     desc: "Retry page runs a quiz over exactly the last-session mistakes"
     oracle: "/he/topics/<slug>/retry shows #quiz-container with data-quiz-mode=retry; data-total equals the last-session mistake count; the questions match the reviewed ones"
@@ -72,14 +75,18 @@ expected review content.
 Route hints:
 
 - Review page: `/he/topics/<slug>/review`, scope via `?scope=all`
-  (default is last session). Active scope option has `data-active` and
-  `aria-current="page"`.
+  (default is last session), then pagination via `&page=N`. Each page contains at
+  most 20 cards; page links must preserve the selected scope. Active scope option has
+  `data-active` and `aria-current="page"`.
 - Retry page: `/he/topics/<slug>/retry`. Driven by `public/js/quiz.js` in retry mode:
   `#quiz-container[data-quiz-mode="retry"]`. Retry never writes the
-  `quiz-resume:v1:<userId>:<topicId>` localStorage key and never POSTs
+  `quiz-resume:v1:*` localStorage key and never POSTs
   `/api/progress`; it DOES still POST `/api/quiz` per confirmed answer.
 - A topic with no last-session mistakes redirects `/retry` → `/review` server-side.
 - Copy sources: `messages/he.json`, namespaces `Review`, `Retry`, `Quiz`.
+- Pagination preflight: the normal setup quiz is intentionally short. To exercise
+  `CHK-REVIEW-04`, select a topic that already has more than 20 all-time mistakes in
+  the QA DB; otherwise mark that check `blocked` with the observed count.
 - Meaningful-step screenshots: setup quiz wrong-answer feedback, review list
   (last session), review list (all time), review empty state, retry first question,
   retry final screen, dashboard before/after retry.
