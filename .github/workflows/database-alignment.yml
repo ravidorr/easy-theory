@@ -1,0 +1,45 @@
+name: Database Alignment
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+  schedule:
+    - cron: "17 */6 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: database-alignment-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  alignment:
+    name: Database alignment
+    runs-on: ubuntu-latest
+    environment: database-audit
+
+    steps:
+      - name: Check out trusted main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install trusted dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Compare production and QA
+        run: pnpm db:compare
+        env:
+          PROD_SUPABASE_URL: ${{ secrets.PROD_SUPABASE_URL }}
+          PROD_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.PROD_SUPABASE_SERVICE_ROLE_KEY }}
+          QA_SUPABASE_URL: ${{ secrets.QA_SUPABASE_URL }}
+          QA_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.QA_SUPABASE_SERVICE_ROLE_KEY }}
