@@ -286,6 +286,7 @@
       if (footer) footer.style.display = "none";
       if (timerEl) timerEl.hidden = false;
       if (resultScreen) resultScreen.style.display = "flex";
+      if (reviewBtn) reviewBtn.focus();
     });
   }
 
