@@ -7,7 +7,7 @@ One version bump and one entry per PR (enforced by the pre-push hook); individua
 
 ### Fixed
 
-- Derived achievements are now immutable medal events. Completing a first or final topic, answering the 100th question, and passing a simulated exam create a dated `user_medals` row exactly once, show the localized celebration immediately, and remain earned if the question or topic bank later changes. Migration 018 serializes a learner's submissions so concurrent answers cannot skip the 100-question or all-topics crossings. Existing users are not backfilled.
+- Derived achievements are now immutable medal events. Completing a first or final topic, answering the 100th question, and passing a simulated exam create a dated `user_medals` row exactly once, show the localized celebration immediately, and remain earned if the question or topic bank later changes. Migration 018 serializes a learner's submissions so concurrent answers cannot skip the 100-question or all-topics crossings; migration 019 restricts writes to verified RPC paths. Existing users are not backfilled.
 
 ---
 

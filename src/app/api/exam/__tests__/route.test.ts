@@ -2,18 +2,12 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { POST } from "../route";
 import { createClient } from "@/lib/supabase";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { insertUserMedals } from "@/lib/db";
 
 vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
 vi.mock("@/lib/rate-limit", () => ({ checkRateLimit: vi.fn() }));
-vi.mock("@/lib/db", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@/lib/db")>()),
-  insertUserMedals: vi.fn(),
-}));
 
 const mockCreateClient = vi.mocked(createClient);
 const mockCheckRateLimit = vi.mocked(checkRateLimit);
-const mockInsertUserMedals = vi.mocked(insertUserMedals);
 
 const USER_ID = "user-uuid";
 // Valid UUIDs for question ids (the route filters non-UUID ids out).
@@ -31,6 +25,8 @@ function makeClient({
   user = { id: USER_ID } as { id: string } | null,
   questions = [] as { id: string; correct_option: string }[],
   insertError = false,
+  medalSlug = null as string | null,
+  medalError = null as { message: string } | null,
 } = {}) {
   // Chainable mock that is also directly awaitable.
   function chain(data: unknown) {
@@ -58,6 +54,7 @@ function makeClient({
         if (table === "user_exam_attempts") return { insert };
         return chain(null);
       }),
+      rpc: vi.fn().mockResolvedValue({ data: medalSlug, error: medalError }),
     },
     insert,
   };
@@ -67,7 +64,6 @@ describe("POST /api/exam", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockCheckRateLimit.mockResolvedValue(true);
-    mockInsertUserMedals.mockResolvedValue([]);
   });
 
   it("returns 401 when not authenticated", async () => {
@@ -168,16 +164,15 @@ describe("POST /api/exam", () => {
     expect(body).toMatchObject({ score: 25, passed: false });
   });
 
-  it("returns exam-pass only when the medal insert is new", async () => {
+  it("returns exam-pass only when the protected RPC awards it", async () => {
     const questions = Array.from({ length: 30 }, (_, i) => ({ id: QID(i), correct_option: "a" }));
-    const { client } = makeClient({ questions });
+    const { client } = makeClient({ questions, medalSlug: "exam-pass" });
     mockCreateClient.mockResolvedValue(client as never);
-    mockInsertUserMedals.mockResolvedValue(["exam-pass"]);
 
     const res = await POST(makeRequest({ answers: questions.map((q) => ({ question_id: q.id, selected_option: "a" })) }));
 
     expect(await res.json()).toMatchObject({ passed: true, medals_earned: ["exam-pass"] });
-    expect(mockInsertUserMedals).toHaveBeenCalledWith(client, USER_ID, ["exam-pass"]);
+    expect(client.rpc).toHaveBeenCalledWith("award_exam_pass_medal");
   });
 
   it("does not return exam-pass for a repeated pass", async () => {
@@ -192,9 +187,8 @@ describe("POST /api/exam", () => {
 
   it("keeps a saved passing attempt successful when medal persistence fails", async () => {
     const questions = Array.from({ length: 30 }, (_, i) => ({ id: QID(i), correct_option: "a" }));
-    const { client } = makeClient({ questions });
+    const { client } = makeClient({ questions, medalError: { message: "boom" } });
     mockCreateClient.mockResolvedValue(client as never);
-    mockInsertUserMedals.mockRejectedValue(new Error("boom"));
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     const res = await POST(makeRequest({ answers: questions.map((q) => ({ question_id: q.id, selected_option: "a" })) }));
@@ -203,7 +197,7 @@ describe("POST /api/exam", () => {
     expect(await res.json()).toMatchObject({ passed: true });
     expect(errorSpy).toHaveBeenCalledWith(
       "[exam] achievement persistence failed:",
-      expect.any(Error)
+      expect.objectContaining({ message: "boom" })
     );
     errorSpy.mockRestore();
   });

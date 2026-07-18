@@ -11,7 +11,6 @@ import {
   getUserSchedule,
   getUsersScheduledForDay,
   getUserMedals,
-  insertUserMedals,
   getPushSubscriptionsForUsers,
   getMistakesForTopic,
   getAnsweredQuestionIdsForTopic,
@@ -247,27 +246,6 @@ describe("getUserMedals", () => {
   it("throws when the query fails", async () => {
     await expect(getUserMedals(makeClient(null, boom), "u1")).rejects.toThrow(
       /getUserMedals: user_medals query failed: boom/
-    );
-  });
-});
-
-describe("insertUserMedals", () => {
-  it("returns only medal slugs inserted by this request", async () => {
-    const client = makeClient([{ medal_slug: "first-topic" }]);
-    expect(await insertUserMedals(client, "u1", ["first-topic", "all-topics"])).toEqual([
-      "first-topic",
-    ]);
-  });
-
-  it("skips the database call for no candidates", async () => {
-    const client = makeClient([]);
-    expect(await insertUserMedals(client, "u1", [])).toEqual([]);
-    expect((client as unknown as { from: ReturnType<typeof vi.fn> }).from).not.toHaveBeenCalled();
-  });
-
-  it("throws when the insert fails", async () => {
-    await expect(insertUserMedals(makeClient(null, boom), "u1", ["first-topic"])).rejects.toThrow(
-      /insertUserMedals: user_medals query failed: boom/
     );
   });
 });

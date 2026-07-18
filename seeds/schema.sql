@@ -157,7 +157,6 @@ CREATE POLICY "own insert" ON user_stats          FOR INSERT WITH CHECK (user_id
 CREATE POLICY "own update" ON user_stats          FOR UPDATE USING (user_id = auth.uid());
 
 CREATE POLICY "own select" ON user_medals         FOR SELECT USING (user_id = auth.uid());
-CREATE POLICY "own insert" ON user_medals         FOR INSERT WITH CHECK (user_id = auth.uid());
 
 CREATE POLICY "own select" ON user_schedule       FOR SELECT USING (user_id = auth.uid());
 CREATE POLICY "own insert" ON user_schedule       FOR INSERT WITH CHECK (user_id = auth.uid());

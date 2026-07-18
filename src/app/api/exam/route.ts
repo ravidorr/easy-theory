@@ -5,8 +5,6 @@ import { EXAM_QUESTION_COUNT, EXAM_PASS_MARK, scoreExam } from "@/lib/exam";
 import type { ExamAnswer } from "@/lib/exam";
 import { getApiTranslator, parseJsonBody } from "@/lib/api";
 import { reportError } from "@/lib/monitoring";
-import { insertUserMedals } from "@/lib/db";
-import { deriveAchievements } from "@/lib/gamification";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const OPTION_RE = /^[a-d]$/;
@@ -93,16 +91,9 @@ export async function POST(request: Request) {
   if (!passed) return NextResponse.json(response);
 
   try {
-    const candidates = deriveAchievements({
-      completedTopicCount: 0,
-      totalTopicCount: 0,
-      questionsAnswered: 0,
-      hasPassedExam: true,
-    })
-      .filter((achievement) => achievement.earned && achievement.slug === "exam-pass")
-      .map((achievement) => achievement.slug);
-    const medals = await insertUserMedals(supabase, user.id, candidates);
-    return NextResponse.json(medals.length ? { ...response, medals_earned: medals } : response);
+    const { data: medalSlug, error: medalError } = await supabase.rpc("award_exam_pass_medal");
+    if (medalError) throw medalError;
+    return NextResponse.json(medalSlug ? { ...response, medals_earned: [medalSlug] } : response);
   } catch (achievementError) {
     reportError("exam", "achievement persistence failed", achievementError);
     return NextResponse.json(response);
