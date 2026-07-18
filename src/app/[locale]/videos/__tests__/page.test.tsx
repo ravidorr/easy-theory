@@ -133,6 +133,22 @@ describe("VideosPage", () => {
     expect(youtubeLinks).toHaveLength(6);
   });
 
+  it("renders a decorative YouTube icon beside every video title", async () => {
+    const jsx = await VideosPage();
+    const { container } = render(jsx);
+    const youtubeLinks = container.querySelectorAll('a[href*="youtube.com"]');
+    youtubeLinks.forEach((link) => {
+      expect(link.querySelector('svg[width="16"][height="16"]')).toBeTruthy();
+    });
+  });
+
+  it("does not render the removed subtitle or YouTube note", async () => {
+    const jsx = await VideosPage();
+    render(jsx);
+    expect(screen.queryByText("subtitle")).not.toBeInTheDocument();
+    expect(screen.queryByText("pageNote")).not.toBeInTheDocument();
+  });
+
   it("renders the featured marathon video link with its duration badge", async () => {
     const jsx = await VideosPage();
     const { container } = render(jsx);

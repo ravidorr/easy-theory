@@ -60,6 +60,11 @@
     <path d="m14 12-4-2.5v5z" fill="currentColor" stroke="none"></path>
   </symbol>
 
+  <symbol id="icon-youtube" viewBox="0 0 24 24">
+    <path d="M21.6 7.2a2.9 2.9 0 0 0-2-2C17.8 4.7 12 4.7 12 4.7s-5.8 0-7.6.5a2.9 2.9 0 0 0-2 2A30.2 30.2 0 0 0 2 12a30.2 30.2 0 0 0 .4 4.8 2.9 2.9 0 0 0 2 2c1.8.5 7.6.5 7.6.5s5.8 0 7.6-.5a2.9 2.9 0 0 0 2-2A30.2 30.2 0 0 0 22 12a30.2 30.2 0 0 0-.4-4.8Z" fill="currentColor"></path>
+    <path d="m10 15.5 5-3.5-5-3.5v7Z" fill="var(--surface)"></path>
+  </symbol>
+
   <symbol id="icon-link" viewBox="0 0 24 24">
     <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"></path>

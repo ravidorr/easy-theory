@@ -243,10 +243,8 @@
   },
   "Videos": {
     "pageTitle": "فيديوهات تعليمية",
-    "subtitle": "دروس قصيرة وماراثونات، حسب الموضوع.",
     "marathonsTitle": "الماراثونات",
-    "lessonsTitle": "دروس حسب الموضوع",
-    "pageNote": "الفيديوهات تُفتح على يوتيوب"
+    "lessonsTitle": "دروس حسب الموضوع"
   },
   "Resources": {
     "pageTitle": "مواد مفيدة",
