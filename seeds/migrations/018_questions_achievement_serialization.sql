@@ -76,31 +76,35 @@ BEGIN
   END IF;
 
   -- A topic-completion result is emitted only when this submission completed
-  -- that topic. The user lock makes the final two topic completions observe
-  -- one another, so all-topics is awarded by the latter transaction.
+  -- that topic. Count the completion crossing under the user lock: the first
+  -- topic is only awarded at count one, never as a late historical backfill.
+  -- The same lock makes the final two completions observe one another, so
+  -- all-topics is awarded by the latter transaction.
   IF COALESCE((v_result ->> 'topic_completed')::BOOLEAN, FALSE) THEN
-    v_medal_slug := NULL;
-    INSERT INTO public.user_medals (user_id, medal_slug)
-    VALUES (v_user_id, 'first-topic')
-    ON CONFLICT (user_id, medal_slug) DO NOTHING
-    RETURNING medal_slug INTO v_medal_slug;
-
-    IF v_medal_slug IS NOT NULL THEN
-      v_result := jsonb_set(
-        v_result,
-        '{medals_earned}',
-        COALESCE(v_result -> 'medals_earned', '[]'::JSONB)
-          || jsonb_build_array(v_medal_slug)
-      );
-      v_result_changed := TRUE;
-    END IF;
-
     SELECT COUNT(*) INTO v_topic_count FROM public.topics;
     SELECT COUNT(*)
     INTO v_completed_topic_count
     FROM public.user_topic_progress
     WHERE user_id = v_user_id
       AND status = 'completed';
+
+    IF v_completed_topic_count = 1 THEN
+      v_medal_slug := NULL;
+      INSERT INTO public.user_medals (user_id, medal_slug)
+      VALUES (v_user_id, 'first-topic')
+      ON CONFLICT (user_id, medal_slug) DO NOTHING
+      RETURNING medal_slug INTO v_medal_slug;
+
+      IF v_medal_slug IS NOT NULL THEN
+        v_result := jsonb_set(
+          v_result,
+          '{medals_earned}',
+          COALESCE(v_result -> 'medals_earned', '[]'::JSONB)
+            || jsonb_build_array(v_medal_slug)
+        );
+        v_result_changed := TRUE;
+      END IF;
+    END IF;
 
     IF v_topic_count > 0 AND v_completed_topic_count >= v_topic_count THEN
       v_medal_slug := NULL;

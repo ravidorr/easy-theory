@@ -45,7 +45,7 @@ describe("questions-100 achievement migration", () => {
       /IF COALESCE\(\(v_result ->> 'topic_completed'\)::BOOLEAN, FALSE\) THEN/i
     );
     expect(migrationSql).toMatch(
-      /VALUES \(v_user_id, 'first-topic'\)[\s\S]*ON CONFLICT \(user_id, medal_slug\) DO NOTHING/i
+      /IF v_completed_topic_count = 1 THEN[\s\S]*VALUES \(v_user_id, 'first-topic'\)[\s\S]*ON CONFLICT \(user_id, medal_slug\) DO NOTHING/i
     );
     expect(migrationSql).toMatch(
       /SELECT COUNT\(\*\) INTO v_topic_count FROM public\.topics[\s\S]*SELECT COUNT\(\*[\s\S]*FROM public\.user_topic_progress[\s\S]*status = 'completed'/i
