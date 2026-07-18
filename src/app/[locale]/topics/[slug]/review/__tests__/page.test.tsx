@@ -247,7 +247,7 @@ describe("ReviewPage", () => {
     expect(container.querySelector("[data-testid='sign-img']")).toBeTruthy();
   });
 
-  it("skips sign image at top when image_url is sign path and all options are sign numbers", async () => {
+  it("renders a prompt sign when all numeric options have different numbers", async () => {
     const m = {
       ...MISTAKE_A,
       image_url: "/signs/sign-999.png",
@@ -261,10 +261,10 @@ describe("ReviewPage", () => {
     const { container } = render(jsx);
     expect(
       container.querySelector("[data-testid='sign-img'][src='/signs/sign-999.png']")
-    ).toBeNull();
+    ).toBeTruthy();
   });
 
-  it("skips sign image at top when one option is non-numeric text", async () => {
+  it("renders a prompt sign when mixed options have different numbers", async () => {
     const m = {
       ...MISTAKE_A,
       image_url: "/signs/sign-999.png",
@@ -278,7 +278,24 @@ describe("ReviewPage", () => {
     const { container } = render(jsx);
     expect(
       container.querySelector("[data-testid='sign-img'][src='/signs/sign-999.png']")
-    ).toBeNull();
+    ).toBeTruthy();
+  });
+
+  it("suppresses a question sign when its number is an answer option", async () => {
+    const m = {
+      ...MISTAKE_A,
+      image_url: "/signs/sign-101.png",
+      option_a: "101",
+      option_b: "102",
+      option_c: "103",
+      option_d: "104",
+    };
+    mockGetMistakes.mockResolvedValue([m] as never);
+    const jsx = await callPage();
+    const { container } = render(jsx);
+    const matchingImages = container.querySelectorAll("img[src='/signs/sign-101.png']");
+    expect(matchingImages).toHaveLength(1);
+    expect(matchingImages[0].closest(".quiz-option")).toBeTruthy();
   });
 
   it("renders text for digit option when sign file does not exist", async () => {
