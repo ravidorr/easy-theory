@@ -57,29 +57,62 @@ EXECUTE FUNCTION public.record_quiz_answer_event();
 
 -- The idempotency ledger retains successful submissions for 24 hours. Seed
 -- the current Jerusalem day so deploying mid-day preserves goal progress.
-INSERT INTO public.quiz_answer_events (
-  user_id,
-  question_id,
-  is_correct,
-  answered_at
-)
-SELECT
-  submissions.user_id,
-  submissions.question_id,
-  (submissions.result ->> 'is_correct')::BOOLEAN,
-  submissions.created_at
-FROM public.quiz_answer_submissions AS submissions
-WHERE submissions.result IS NOT NULL
-  AND submissions.created_at >= (
-    date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jerusalem')
-      AT TIME ZONE 'Asia/Jerusalem'
-  )
-  AND submissions.created_at < (
-    (
+-- Older projects that predate that ledger retain only the latest response,
+-- which is still enough to preserve their distinct-question progress.
+DO $$
+BEGIN
+  IF to_regclass('public.quiz_answer_submissions') IS NOT NULL THEN
+    EXECUTE $backfill$
+      INSERT INTO public.quiz_answer_events (
+        user_id,
+        question_id,
+        is_correct,
+        answered_at
+      )
+      SELECT
+        submissions.user_id,
+        submissions.question_id,
+        (submissions.result ->> 'is_correct')::BOOLEAN,
+        submissions.created_at
+      FROM public.quiz_answer_submissions AS submissions
+      WHERE submissions.result IS NOT NULL
+        AND submissions.created_at >= (
+          date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jerusalem')
+            AT TIME ZONE 'Asia/Jerusalem'
+        )
+        AND submissions.created_at < (
+          (
+            date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jerusalem')
+              + INTERVAL '1 day'
+          ) AT TIME ZONE 'Asia/Jerusalem'
+        )
+    $backfill$;
+  ELSE
+    INSERT INTO public.quiz_answer_events (
+      user_id,
+      question_id,
+      is_correct,
+      answered_at
+    )
+    SELECT
+      responses.user_id,
+      responses.question_id,
+      responses.is_correct,
+      responses.answered_at
+    FROM public.user_quiz_responses AS responses
+    WHERE responses.answered_at >= (
       date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jerusalem')
-        + INTERVAL '1 day'
-    ) AT TIME ZONE 'Asia/Jerusalem'
-  );
+        AT TIME ZONE 'Asia/Jerusalem'
+    )
+      AND responses.answered_at < (
+        (
+          date_trunc('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jerusalem')
+            + INTERVAL '1 day'
+        ) AT TIME ZONE 'Asia/Jerusalem'
+      );
+  END IF;
+END;
+$$;
 
 REVOKE ALL ON FUNCTION public.record_quiz_answer_event() FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.record_quiz_answer_event() FROM anon, authenticated;

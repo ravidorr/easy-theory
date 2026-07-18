@@ -56,9 +56,12 @@ describe("quiz answer events migration", () => {
     );
   });
 
-  it("backfills finalized submissions from the current Jerusalem day", () => {
+  it("backfills today's ledger rows, with a response-row fallback for older projects", () => {
     expect(migrationSql).toMatch(
-      /INSERT INTO public\.quiz_answer_events[\s\S]*SELECT[\s\S]*submissions\.user_id[\s\S]*submissions\.question_id[\s\S]*\(submissions\.result ->> 'is_correct'\)::BOOLEAN[\s\S]*submissions\.created_at[\s\S]*FROM public\.quiz_answer_submissions AS submissions[\s\S]*WHERE submissions\.result IS NOT NULL/i
+      /IF to_regclass\('public\.quiz_answer_submissions'\) IS NOT NULL[\s\S]*EXECUTE \$backfill\$[\s\S]*FROM public\.quiz_answer_submissions AS submissions[\s\S]*WHERE submissions\.result IS NOT NULL/i
+    );
+    expect(migrationSql).toMatch(
+      /ELSE[\s\S]*FROM public\.user_quiz_responses AS responses[\s\S]*responses\.answered_at/i
     );
     expect(migrationSql).toMatch(
       /date_trunc\('day', CURRENT_TIMESTAMP AT TIME ZONE 'Asia\/Jerusalem'\)[\s\S]*INTERVAL '1 day'/i
