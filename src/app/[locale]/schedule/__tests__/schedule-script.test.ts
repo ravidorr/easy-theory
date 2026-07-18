@@ -61,6 +61,7 @@ function stubModal() {
   const modal = {
     confirm: vi.fn().mockResolvedValue(true),
     alert: vi.fn().mockResolvedValue(undefined),
+    toast: vi.fn().mockResolvedValue(undefined),
     dismissAll: vi.fn(),
   };
   vi.stubGlobal("modal", modal);
@@ -242,7 +243,7 @@ describe("schedule.js – successful save", () => {
     alertSpy.mockRestore();
   });
 
-  it("PUTs the schedule, shows saved text, and redirects home", async () => {
+  it("PUTs the schedule, shows saved text, and redirects back to More without modal.js", async () => {
     vi.useFakeTimers();
     const fetchMock = vi.fn().mockResolvedValue({ ok: true });
     vi.stubGlobal("fetch", fetchMock);
@@ -274,7 +275,32 @@ describe("schedule.js – successful save", () => {
     expect(loc.href).toBe("");
 
     await vi.advanceTimersByTimeAsync(800);
-    expect(loc.href).toBe("/he");
+    expect(loc.href).toBe("/he/more");
+  });
+
+  it("shows a success toast and still redirects on time even if it never settles", async () => {
+    vi.useFakeTimers();
+    const modal = stubModal();
+    // Navigation must not depend on the toast promise (it can resolve early
+    // when replaced, or never settle).
+    modal.toast.mockReturnValue(new Promise<void>(() => {}));
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true });
+    vi.stubGlobal("fetch", fetchMock);
+    const loc = { href: "" };
+    Object.defineProperty(window, "location", {
+      value: loc,
+      writable: true,
+      configurable: true,
+    });
+
+    clickSave();
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(modal.toast).toHaveBeenCalledWith({ message: "התוכנית נשמרה!" });
+    expect(loc.href).toBe("");
+
+    await vi.advanceTimersByTimeAsync(800);
+    expect(loc.href).toBe("/he/more");
   });
 
   it("saves schedule before subscribing to push when notifications are on", async () => {
@@ -321,7 +347,7 @@ describe("schedule.js – successful save", () => {
     const btn = document.getElementById("save-schedule-btn") as HTMLButtonElement;
     expect(btn.textContent).toBe("נשמר!");
     await vi.advanceTimersByTimeAsync(800);
-    expect(loc.href).toBe("/he");
+    expect(loc.href).toBe("/he/more");
     vi.useRealTimers();
   });
 
@@ -339,7 +365,7 @@ describe("schedule.js – successful save", () => {
     expect(body.notify).toBe(false);
   });
 
-  it("redirects to the active locale home after save", async () => {
+  it("redirects to the active locale More page after save", async () => {
     vi.useFakeTimers();
     (window as unknown as { __locale?: string }).__locale = "ar";
     const fetchMock = vi.fn().mockResolvedValue({ ok: true });
@@ -354,7 +380,7 @@ describe("schedule.js – successful save", () => {
     clickSave();
     await vi.advanceTimersByTimeAsync(0);
     await vi.advanceTimersByTimeAsync(800);
-    expect(loc.href).toBe("/ar");
+    expect(loc.href).toBe("/ar/more");
     vi.useRealTimers();
   });
 });

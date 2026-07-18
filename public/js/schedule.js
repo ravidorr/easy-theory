@@ -27,9 +27,11 @@
 
   let notifyOn = notifyToggle ? notifyToggle.dataset.on === "true" : true;
 
-  function scheduleHomePath() {
+  // Saving returns to More: that is where the user came from, and where
+  // the page's own back button points.
+  function morePath() {
     var locale = window.__locale || "he";
-    return "/" + locale;
+    return "/" + locale + "/more";
   }
 
   function showAlert(message) {
@@ -127,8 +129,14 @@
       }
 
       saveBtn.textContent = t.saved || "נשמר!";
+      // Fire-and-forget: the toast stays visible while the More page loads.
+      // Navigation is deliberately not chained on the toast promise, which
+      // can resolve early if another toast replaces it.
+      if (window.modal && window.modal.toast) {
+        void window.modal.toast({ message: t.savedToast || "התוכנית נשמרה!" });
+      }
       setTimeout(function () {
-        window.location.href = scheduleHomePath();
+        window.location.href = morePath();
       }, 800);
     } catch {
       // Re-enable and refocus before the alert (disabling blurred the button),

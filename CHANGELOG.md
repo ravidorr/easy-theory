@@ -3,6 +3,11 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.172] — 2026-07-18
+
+### Fixed
+- Saving the study schedule now returns to the More screen (`/{locale}/more`) instead of Home, matching where the user came from and where the page's own back button points, and shows a success toast confirming the save. `public/js/modal.js` gained a `window.modal.toast({ message })` helper: a transient, non-blocking `role="status"` live region (inserted empty and populated a tick later so screen readers actually announce it), auto-dismissed after 2s, one toast at a time (a newer toast replaces and resolves the previous one), deliberately excluded from `dismissAll()` and never chained to navigation — `schedule.js` fires it and keeps its own unconditional 800ms redirect timer, so a replaced or never-settling toast cannot strand or yank the user. Styled by new global `.toast` (layout, `z-index` 110 above the modal scrim, logical properties for RTL) and `.toast-success` (`--success*` tokens) classes in `globals.css`. New `JS.Schedule.savedToast` string in he + ar. The modal script tests cover the toast lifecycle (deferred text, auto-dismiss, replacement) and the schedule tests now assert the `/more` redirect in both locales plus that navigation does not depend on the toast promise. (TODO: schedule save redirects Home with no confirmation)
+
 ## [0.3.171] — 2026-07-18
 
 ### Changed
