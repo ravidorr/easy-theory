@@ -159,6 +159,10 @@
   background: var(--surface);
 }
 
+.reviewBar[hidden] {
+  display: none;
+}
+
 .reviewLabel {
   color: var(--text-muted);
   font-size: var(--type-small-size);
