@@ -38,9 +38,18 @@ describe("quiz answer events migration", () => {
     );
   });
 
+  it("allows only the quiz RPC to mutate response rows", () => {
+    expect(migrationSql).toMatch(
+      /DROP POLICY IF EXISTS "own insert" ON public\.user_quiz_responses/i
+    );
+    expect(migrationSql).toMatch(
+      /DROP POLICY IF EXISTS "own update" ON public\.user_quiz_responses/i
+    );
+  });
+
   it("keeps event writes inside the answer transaction", () => {
     expect(migrationSql).toMatch(
-      /CREATE OR REPLACE FUNCTION public\.record_quiz_answer_event\(\)[\s\S]*SECURITY DEFINER[\s\S]*INSERT INTO public\.quiz_answer_events[\s\S]*NEW\.user_id[\s\S]*NEW\.question_id[\s\S]*NEW\.is_correct[\s\S]*NEW\.answered_at/i
+      /CREATE OR REPLACE FUNCTION public\.record_quiz_answer_event\(\)[\s\S]*INSERT INTO public\.quiz_answer_events[\s\S]*NEW\.user_id[\s\S]*NEW\.question_id[\s\S]*NEW\.is_correct[\s\S]*NEW\.answered_at/i
     );
     expect(migrationSql).toMatch(
       /REVOKE ALL ON FUNCTION public\.record_quiz_answer_event\(\) FROM anon, authenticated/i

@@ -20,13 +20,16 @@ CREATE POLICY "own select" ON public.quiz_answer_events
 
 GRANT SELECT ON TABLE public.quiz_answer_events TO authenticated;
 
--- submit_quiz_answer is a single database transaction. Recording from this
--- trigger means only successful, non-replayed response mutations add an event
--- while avoiding a stale second copy of the RPC body in this migration.
+-- Quiz responses are mutated only by the rate-limited SECURITY DEFINER RPC.
+-- Otherwise clients could create answer events without an accepted submission.
+DROP POLICY IF EXISTS "own insert" ON public.user_quiz_responses;
+DROP POLICY IF EXISTS "own update" ON public.user_quiz_responses;
+
+-- The trigger runs in submit_quiz_answer's transaction, so it records only
+-- accepted, non-replayed submissions without duplicating the RPC body.
 CREATE OR REPLACE FUNCTION public.record_quiz_answer_event()
 RETURNS TRIGGER
 LANGUAGE plpgsql
-SECURITY DEFINER
 SET search_path = ''
 AS $$
 BEGIN
