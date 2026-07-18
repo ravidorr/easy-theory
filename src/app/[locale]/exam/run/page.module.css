@@ -147,6 +147,28 @@
   gap: 12px;
 }
 
+.reviewBar {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.reviewBar[hidden] {
+  display: none;
+}
+
+.reviewLabel {
+  color: var(--text-muted);
+  font-size: var(--type-small-size);
+  font-weight: 700;
+}
+
 .examError {
   text-align: center;
   font-size: var(--type-small-size);

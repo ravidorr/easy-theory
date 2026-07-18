@@ -444,7 +444,9 @@
       "examFailFarTitle": "נתחיל לתרגל, ונשתפר עם הזמן.",
       "examResultScore": "{score} מתוך {total} נכון (ציון עובר: {passMark})",
       "examTimeUp": "הזמן נגמר, המבחן הוגש.",
-      "examSubmitError": "שגיאה בשליחה, שננסה שוב?"
+      "examSubmitError": "שגיאה בשליחה, שננסה שוב?",
+      "examReviewMode": "סקירת תשובות",
+      "examBackToResults": "חזרה לתוצאות"
     },
     "Bookmark": {
       "bookmarkSaveError": "שגיאה בשמירה, שננסה שוב?"

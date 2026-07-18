@@ -11,18 +11,14 @@ Architecture facts every item relies on:
 
 ## Items
 
-1. **Exam answer-review mode keeps leftover exam chrome.**
-    The `reviewBtn` handler (`exam.js:255-261`) re-shows `#exam-footer` (which contains `#exam-answered`) and leaves the frozen `#exam-timer` (`exam/run/page.tsx:170-176`) visible. Fix in exam.js: entering review hides the timer and answered counter and shows a review-mode indicator plus a back-to-results affordance. Strings to `JS.Exam` (he + ar); styles in `exam/run/page.module.css` (server markup can pre-render the hidden review bar).
-
-2. **Daily goal counts distinct questions, not answers given today.**
+1. **Daily goal counts distinct questions, not answers given today.**
    Confirmed: `user_quiz_responses` has `UNIQUE(user_id, question_id)`; RPC `submit_quiz_answer` (`010:240-286`) updates `answered_at = NOW()` on re-answer. Read path is `getQuizAccuracyForWindow` (`db.ts:639-661`, its own comment admits the bug) feeding `answeredToday` at `page.tsx:232`. The existing `quiz_answer_submissions` ledger is 24h-pruned and REVOKEd, so it is not a read source. Fix: migration `017` adding an append-only `quiz_answer_events(user_id, question_id, is_correct, answered_at)` written inside the RPC, plus a `db.ts` count helper over today's Jerusalem window (`dayWindow`, `personalization.ts:76`); switch the homepage daily goal to it (accuracy displays can stay distinct-question-based). Note: QA DB schema changes need a human in the Supabase SQL editor.
 
-3. **Persist derived achievements to `user_medals`.**
+2. **Persist derived achievements to `user_medals`.**
     Schema is ready (`schema.sql:47-53`: open TEXT slug, UNIQUE, own-insert RLS). Today only streak medals are written (RPC `010:337-349`); the four derived achievements come from `deriveAchievements` (`gamification.ts:124-144`; the comment at `:117-122` already names this follow-up) on each More render. Fix: app-layer check-and-insert in `/api/quiz` (and `/api/exam` for exam-pass) after the RPC - compute derived achievements, insert newly earned slugs, and append them to the response's `medals_earned` so the existing celebration pipeline fires (`quiz.js:717-719` into `medalQueue` and `buildMedalModal`). Extend `MEDAL_META` (`quiz.js:324+`) and add the four slugs' strings to he + ar. The More page then reads earned dates from `user_medals` instead of recomputing (fixes all-topics un-earning).
 
 ## Execution order (minimizes cross-item conflicts)
 
-1. Independent feature: 1 (review chrome).
-2. Schema-heavy: 2 (daily goal, migration 017+), 3 (medals).
+1. Schema-heavy: 1 (daily goal, migration 017+), 2 (medals).
 
-Conflict hotspots when workspaces overlap: `messages/*.json` (most items), `public/js/quiz.js` (3), `public/js/exam.js` (1), migration numbering (2, 3 - renumber right before push).
+Conflict hotspots when workspaces overlap: `messages/*.json` (most items), `public/js/quiz.js` (2), migration numbering (1, 2 - renumber right before push).

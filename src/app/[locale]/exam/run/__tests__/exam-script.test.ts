@@ -37,6 +37,10 @@ function setupDOM({ total = 3, durationSeconds = 2400, translations = {} } = {})
         <button id="exam-next">הבאה</button>
         <button id="exam-submit">הגשת המבחן</button>
       </div>
+      <div id="exam-review-bar" hidden>
+        <span>סקירת תשובות</span>
+        <button id="exam-back-to-results">חזרה לתוצאות</button>
+      </div>
       <div id="exam-result" style="display: none">
         <h2 id="exam-result-title"></h2>
         <span id="exam-result-score"></span>
@@ -404,11 +408,25 @@ describe("exam.js – submit", () => {
     expect(resultScreen().style.display).toBe("none");
     expect(slide(0).style.display).toBe("flex");
     expect(submitBtn().style.display).toBe("none");
+    expect(document.getElementById("exam-timer")!.hidden).toBe(true);
+    expect(document.getElementById("exam-answered")!.hidden).toBe(true);
+    expect(document.getElementById("exam-review-bar")!.hidden).toBe(false);
+
+    nextBtn().click();
+    expect(slide(1).style.display).toBe("flex");
 
     // Options stay locked: clicking doesn't change state or counter.
     clickOption(0, "d");
     const options = slide(0).querySelectorAll<HTMLElement>(".quiz-option");
     expect(options[3].dataset.state).not.toBe("selected");
+
+    (document.getElementById("exam-back-to-results") as HTMLButtonElement).click();
+    expect(resultScreen().style.display).toBe("flex");
+    expect(slide(0).style.display).toBe("none");
+    expect(document.getElementById("exam-footer")!.style.display).toBe("none");
+    expect(document.getElementById("exam-review-bar")!.hidden).toBe(true);
+    expect(document.getElementById("exam-timer")!.hidden).toBe(false);
+    expect(document.activeElement).toBe(document.getElementById("exam-review-btn"));
   });
 });
 

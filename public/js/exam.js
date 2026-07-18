@@ -30,6 +30,8 @@
   const resultTitle = document.getElementById("exam-result-title");
   const resultScore = document.getElementById("exam-result-score");
   const reviewBtn = document.getElementById("exam-review-btn");
+  const reviewBar = document.getElementById("exam-review-bar");
+  const backToResultsBtn = document.getElementById("exam-back-to-results");
   const errorEl = document.getElementById("exam-error");
 
   let currentIndex = 0;
@@ -269,8 +271,22 @@
   if (reviewBtn) {
     reviewBtn.addEventListener("click", function () {
       if (resultScreen) resultScreen.style.display = "none";
+      if (timerEl) timerEl.hidden = true;
+      if (answeredEl) answeredEl.hidden = true;
+      if (reviewBar) reviewBar.hidden = false;
       if (footer) footer.style.display = "flex";
       showSlide(0);
+    });
+  }
+
+  if (backToResultsBtn) {
+    backToResultsBtn.addEventListener("click", function () {
+      slides.forEach(function (slide) { slide.style.display = "none"; });
+      if (reviewBar) reviewBar.hidden = true;
+      if (footer) footer.style.display = "none";
+      if (timerEl) timerEl.hidden = false;
+      if (resultScreen) resultScreen.style.display = "flex";
+      if (reviewBtn) reviewBtn.focus();
     });
   }
 
