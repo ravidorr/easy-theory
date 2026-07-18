@@ -342,6 +342,12 @@ describe("exam.js – submit", () => {
     await expect(
       submitForResultTitle(passResponse({ score: 24, total: 30, passed: false, pass_mark: 26 }), translations)
     ).resolves.toBe("near");
+    await expect(
+      submitForResultTitle(
+        passResponse({ score: 25, total: 30, passed: false, pass_mark: 26 }),
+        { examFailTitle: "legacy near" }
+      )
+    ).resolves.toBe("legacy near");
   });
 
   it("uses mid-range copy three through five points below the pass mark", async () => {

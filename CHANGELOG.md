@@ -7,7 +7,7 @@ One version bump and one entry per PR (enforced by the pre-push hook); individua
 
 ### Fixed
 
-- Exam result titles now reflect the gap to the passing score: near misses, mid-range misses, and larger gaps receive distinct localized encouragement in Hebrew and Arabic.
+- Exam result titles now reflect the gap to the passing score: near misses, mid-range misses, and larger gaps receive distinct localized encouragement in Hebrew and Arabic. The legacy near-miss key remains available while stale service-worker scripts roll over.
 
 ---
 

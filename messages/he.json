@@ -438,6 +438,7 @@
       "examSubmitting": "שולחים...",
       "examConfirmUnanswered": "יש {count} שאלות שלא נענו. להגיש בכל זאת?",
       "examPassTitle": "עברנו!",
+      "examFailTitle": "לא נורא, כמעט שם.",
       "examFailNearTitle": "לא נורא, כמעט שם.",
       "examFailMidTitle": "יש לנו בסיס טוב, נתרגל עוד קצת.",
       "examFailFarTitle": "נתחיל לתרגל, ונשתפר עם הזמן.",

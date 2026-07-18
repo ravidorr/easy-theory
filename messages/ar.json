@@ -438,6 +438,7 @@
       "examSubmitting": "جارٍ الإرسال...",
       "examConfirmUnanswered": "هناك {count} أسئلة بدون إجابة. هل تريدين التسليم رغم ذلك؟",
       "examPassTitle": "نجحنا!",
+      "examFailTitle": "لا بأس، اقتربتِ.",
       "examFailNearTitle": "لا بأس، اقتربتِ.",
       "examFailMidTitle": "لديكِ أساس جيد، لنتدرّب قليلًا أكثر.",
       "examFailFarTitle": "لنبدأ بالتدرّب، وسنتحسن مع الوقت.",

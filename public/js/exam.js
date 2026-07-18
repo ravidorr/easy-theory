@@ -169,7 +169,7 @@
       } else {
         const scoreGap = data.pass_mark - data.score;
         resultTitle.textContent = scoreGap <= 2
-          ? (t.examFailNearTitle || "לא נורא, כמעט שם.")
+          ? (t.examFailNearTitle || t.examFailTitle || "לא נורא, כמעט שם.")
           : scoreGap <= 5
             ? (t.examFailMidTitle || "יש לנו בסיס טוב, נתרגל עוד קצת.")
             : (t.examFailFarTitle || "נתחיל לתרגל, ונשתפר עם הזמן.");
