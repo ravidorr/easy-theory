@@ -12,9 +12,9 @@ environment:
   viewport: { width: 390, height: 844 }
   auth:
     required: true
-    user: "qa-user@clearroad.test"
-    mint: "pnpm qa:mint"
-  data_assumptions: "Seeded test DB: 1273 questions, 277 signs, and migration 013 user_question_bookmarks applied; run starts by recording at least one bookmark and must clean up the bookmarks it creates"
+    user: "isolated qa-bookmarks-<run-id>@clearroad.test"
+    mint: "pnpm qa:mint --email qa-bookmarks-<run-id>@clearroad.test"
+  data_assumptions: "Seeded test DB: 1273 questions, 277 signs, and migration 013 user_question_bookmarks applied; use a new isolated QA user so its bookmark list starts empty"
 timebox_minutes: 20
 out_of_scope:
   - "Practice quiz answer/feedback mechanics beyond reaching a bookmark control (001)"
@@ -34,7 +34,7 @@ checks:
     oracle: "The Bookmarks row on `/he/more` opens `/he/bookmarks`; the list includes the saved question's text, correct option, and explanation when available, with its bookmark control pressed"
   - id: CHK-BOOKMARK-04
     desc: "Removing a saved question propagates and restores the empty state"
-    oracle: "Setting the bookmark control to off sends successful PUT `/api/bookmarks` with `bookmarked: false`; after reload the question is absent from `/he/bookmarks`, its source control is unpressed, and when the run-created list is empty the localized empty state and back-home link render"
+    oracle: "Setting the bookmark control to off sends successful PUT `/api/bookmarks` with `bookmarked: false`; after reload the question is absent from `/he/bookmarks`, its source control is unpressed, and when the isolated run user's list is empty the localized empty state and back-home link render"
   - id: CHK-BOOKMARK-05
     desc: "Bookmark failures preserve the prior visual state"
     oracle: "If a PUT `/api/bookmarks` request is forced to fail, the control rolls back to its prior `aria-pressed` state and a localized polite error is announced; no stale optimistic saved state remains"
@@ -55,9 +55,11 @@ exploration_budget: "After all checks, up to 5 min within scope: bookmark severa
 You find a question that deserves a second look, save it, and later return through
 More to study the saved list. The feature is a persistent list, not a visual toggle:
 the state must survive navigation and a fresh tab, and removal must be reflected at
-the source and in the list. Keep a note of the question text or id selected so the
-cross-page assertion is unambiguous. Remove every bookmark created by this run before
-finishing so shared QA-user state stays usable for the next run.
+the source and in the list. Mint a unique `qa-bookmarks-<run-id>@clearroad.test`
+account for this run; do not use the shared `qa-user`, because the empty-state
+assertion needs a known-empty bookmark list. Keep a note of the question text or id
+selected so the cross-page assertion is unambiguous. Remove every bookmark created by
+this run before finishing.
 
 Route hints:
 

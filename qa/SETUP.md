@@ -37,13 +37,16 @@ In the project's **SQL editor**, run these files in exactly this order:
    `011_fix_sign_409_correct_answer.sql`, `012_videos_resources.sql`,
    `013_question_bookmarks.sql`, `014_srs_cards.sql`,
    `015_signs_question_15_arabic.sql`, `016_fix_prompt_sign_images.sql`,
-   `017_quiz_answer_events.sql`)
+   `017_quiz_answer_events.sql`, `018_align_user_srs_ease.sql`,
+   `019_questions_achievement_serialization.sql`,
+   `020_protect_achievement_medals.sql`,
+   `021_protect_quiz_achievement_facts.sql`)
 
 **Keep the QA project's schema in sync**: whenever a new file lands in
 `seeds/migrations/`, run it in the QA project's SQL editor too. The app's code assumes
 all migrations are applied — a stale QA schema fails mid-run (e.g. every quiz
-submission 500s), and `pnpm qa:mint --check` now probes one schema object per
-migration to catch this drift in preflight.
+submission 500s). `pnpm qa:mint --check` probes critical schema objects, but it
+does not replace applying the complete migration list above.
 
 Sanity-check the result:
 
