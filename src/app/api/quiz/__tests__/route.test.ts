@@ -1,26 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "../route";
 import { createClient } from "@/lib/supabase";
-import {
-  countUserQuizResponses,
-  getTopicProgress,
-  getTopics,
-  insertUserMedals,
-} from "@/lib/db";
+import { getTopicProgress, getTopics, insertUserMedals } from "@/lib/db";
 import arMessages from "../../../../../messages/ar.json";
 import heMessages from "../../../../../messages/he.json";
 
 vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
 vi.mock("@/lib/db", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/db")>()),
-  countUserQuizResponses: vi.fn(),
   getTopicProgress: vi.fn(),
   getTopics: vi.fn(),
   insertUserMedals: vi.fn(),
 }));
 
 const mockCreateClient = vi.mocked(createClient);
-const mockCountUserQuizResponses = vi.mocked(countUserQuizResponses);
 const mockGetTopicProgress = vi.mocked(getTopicProgress);
 const mockGetTopics = vi.mocked(getTopics);
 const mockInsertUserMedals = vi.mocked(insertUserMedals);
@@ -95,7 +88,6 @@ function buildClient({
 describe("POST /api/quiz", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockCountUserQuizResponses.mockResolvedValue(0);
     mockGetTopicProgress.mockResolvedValue([]);
     mockGetTopics.mockResolvedValue([]);
     mockInsertUserMedals.mockResolvedValue([]);
@@ -363,34 +355,29 @@ describe("POST /api/quiz", () => {
     errorSpy.mockRestore();
   });
 
-  it("returns newly earned achievements alongside an RPC streak medal", async () => {
-    const client = buildClient({ result: { ...storedResult, topic_completed: true } });
+  it("returns RPC-earned questions-100 and newly persisted topic achievements", async () => {
+    const client = buildClient({
+      result: {
+        ...storedResult,
+        medals_earned: ["streak-3", "questions-100"],
+        topic_completed: true,
+      },
+    });
     mockCreateClient.mockResolvedValue(client as never);
-    mockCountUserQuizResponses.mockResolvedValue(100);
     mockGetTopics.mockResolvedValue([{ id: TOPIC_ID }] as never);
     mockGetTopicProgress.mockResolvedValue([{ topic_id: TOPIC_ID, status: "completed" }] as never);
-    mockInsertUserMedals.mockResolvedValue(["first-topic", "all-topics", "questions-100"]);
+    mockInsertUserMedals.mockResolvedValue(["first-topic", "all-topics"]);
 
     const response = await POST(makeRequest(defaultBody));
 
     expect(await response.json()).toMatchObject({
-      medals_earned: ["streak-3", "first-topic", "all-topics", "questions-100"],
+      medals_earned: ["streak-3", "questions-100", "first-topic", "all-topics"],
     });
     expect(mockInsertUserMedals).toHaveBeenCalledWith(
       client,
       USER_ID,
-      expect.arrayContaining(["first-topic", "all-topics", "questions-100"])
+      expect.arrayContaining(["first-topic", "all-topics"])
     );
-  });
-
-  it("does not lazily backfill questions-100 after its crossing event", async () => {
-    const client = buildClient();
-    mockCreateClient.mockResolvedValue(client as never);
-    mockCountUserQuizResponses.mockResolvedValue(101);
-
-    await POST(makeRequest(defaultBody));
-
-    expect(mockInsertUserMedals).toHaveBeenCalledWith(client, USER_ID, []);
   });
 
   it("keeps the accepted quiz result when achievement persistence fails", async () => {

@@ -1,13 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase";
 import { getApiTranslator, parseJsonBody } from "@/lib/api";
-import {
-  countUserQuizResponses,
-  getTopicProgress,
-  getTopics,
-  insertUserMedals,
-  upsertSrsCard,
-} from "@/lib/db";
+import { getTopicProgress, getTopics, insertUserMedals, upsertSrsCard } from "@/lib/db";
 import { reportError } from "@/lib/monitoring";
 import { INITIAL_SRS_STATE, reviewCard } from "@/lib/srs";
 import { deriveAchievements } from "@/lib/gamification";
@@ -71,19 +65,6 @@ async function persistQuizAchievements(
       if (achievement.earned && (achievement.slug === "first-topic" || achievement.slug === "all-topics")) {
         candidates.add(achievement.slug);
       }
-    }
-  }
-
-  const questionsAnswered = await countUserQuizResponses(supabase, userId);
-  for (const achievement of deriveAchievements({
-    completedTopicCount: 0,
-    totalTopicCount: 0,
-    questionsAnswered,
-    hasPassedExam: false,
-  })) {
-    // Award only at the crossing event, never as a lazy backfill.
-    if (achievement.slug === "questions-100" && achievement.earned && questionsAnswered === 100) {
-      candidates.add(achievement.slug);
     }
   }
 

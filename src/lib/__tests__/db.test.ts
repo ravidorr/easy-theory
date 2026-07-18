@@ -12,7 +12,6 @@ import {
   getUsersScheduledForDay,
   getUserMedals,
   insertUserMedals,
-  countUserQuizResponses,
   getPushSubscriptionsForUsers,
   getMistakesForTopic,
   getAnsweredQuestionIdsForTopic,
@@ -270,22 +269,6 @@ describe("insertUserMedals", () => {
     await expect(insertUserMedals(makeClient(null, boom), "u1", ["first-topic"])).rejects.toThrow(
       /insertUserMedals: user_medals query failed: boom/
     );
-  });
-});
-
-describe("countUserQuizResponses", () => {
-  it("returns the exact response count", async () => {
-    const query = {
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockResolvedValue({ count: 100, error: null }),
-    };
-    const client = { from: vi.fn().mockReturnValue(query) } as unknown as SupabaseClient;
-    expect(await countUserQuizResponses(client, "u1")).toBe(100);
-    expect(query.select).toHaveBeenCalledWith("*", { count: "exact", head: true });
-  });
-
-  it("returns zero when the exact count is absent", async () => {
-    expect(await countUserQuizResponses(makeClient(null), "u1")).toBe(0);
   });
 });
 

@@ -272,18 +272,6 @@ export async function insertUserMedals(
   return (data ?? []).map((row) => row.medal_slug);
 }
 
-export async function countUserQuizResponses(
-  supabase: SupabaseClient,
-  userId: string
-): Promise<number> {
-  const { count, error } = await supabase
-    .from("user_quiz_responses")
-    .select("*", { count: "exact", head: true })
-    .eq("user_id", userId);
-  throwOnDbError(error, "countUserQuizResponses: user_quiz_responses");
-  return count ?? 0;
-}
-
 export type QuizMistake = Question & {
   selected_option: "a" | "b" | "c" | "d";
   // Next SRS review; null = never scheduled, treated as due (see migration 014).
