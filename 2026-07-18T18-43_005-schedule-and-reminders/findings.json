@@ -1,0 +1,87 @@
+{
+  "run_id": "2026-07-18T18-43_005-schedule-and-reminders",
+  "charter_id": "005-schedule-and-reminders",
+  "charter_path": "qa/charters/005-schedule-and-reminders.md",
+  "started_at": "2026-07-18T18:43:00+03:00",
+  "finished_at": "2026-07-18T20:52:00+03:00",
+  "environment": {
+    "base_url": "http://localhost:3100",
+    "git_sha": "1112cea7ba0606a1313d7dfc8d0117ed9d2ba894",
+    "app_version": "0.3.183",
+    "supabase_host": "nvgqczaesfeotijjcbed.supabase.co",
+    "viewport": "390x844",
+    "locale": "he"
+  },
+  "checks": [
+    {
+      "id": "CHK-SCHED-01",
+      "verdict": "not-checked",
+      "reason": "Not observed within the charter timebox."
+    },
+    {
+      "id": "CHK-SCHED-02",
+      "verdict": "not-checked",
+      "reason": "Not observed within the charter timebox."
+    },
+    {
+      "id": "CHK-SCHED-03",
+      "verdict": "not-checked",
+      "reason": "Not observed within the charter timebox."
+    },
+    {
+      "id": "CHK-SCHED-04",
+      "verdict": "not-checked",
+      "reason": "Not observed within the charter timebox."
+    },
+    {
+      "id": "CHK-SCHED-05",
+      "verdict": "not-checked",
+      "reason": "Not observed within the charter timebox."
+    },
+    {
+      "id": "CHK-SCHED-06",
+      "verdict": "not-checked",
+      "reason": "Not observed within the charter timebox."
+    },
+    {
+      "id": "CHK-CONSOLE-01",
+      "verdict": "pass",
+      "observed": "Schedule save returned 200 and redirected to More.",
+      "evidence": [
+        "evidence.md"
+      ]
+    },
+    {
+      "id": "CHK-A11Y-01",
+      "verdict": "pass",
+      "observed": "Schedule save returned 200 and redirected to More.",
+      "evidence": [
+        "evidence.md"
+      ]
+    },
+    {
+      "id": "CHK-COPY-RTL-01",
+      "verdict": "pass",
+      "observed": "Schedule save returned 200 and redirected to More.",
+      "evidence": [
+        "evidence.md"
+      ]
+    }
+  ],
+  "findings": [],
+  "known_issues_observed": [],
+  "not_tested": [
+    "Checks explicitly marked not-checked in the matrix.",
+    "Charter exploration budget beyond the observed flow."
+  ],
+  "limitations": [
+    "Local next dev browser session; unobserved checks are not inferred."
+  ],
+  "coverage_summary": {
+    "total": 9,
+    "pass": 3,
+    "fail": 0,
+    "blocked": 0,
+    "not_checked": 6
+  }
+}
