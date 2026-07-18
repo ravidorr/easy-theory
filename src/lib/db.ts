@@ -661,6 +661,24 @@ export async function getQuizAccuracyForWindow(
   };
 }
 
+/** Counts every accepted answer in the supplied half-open time window. */
+export async function getQuizAnswerEventCountForWindow(
+  supabase: SupabaseClient,
+  userId: string,
+  fromIso: string,
+  toIso: string
+): Promise<number> {
+  const { count, error } = await supabase
+    .from("quiz_answer_events")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .gte("answered_at", fromIso)
+    .lt("answered_at", toIso);
+  throwOnDbError(error, "getQuizAnswerEventCountForWindow: quiz_answer_events");
+
+  return count ?? 0;
+}
+
 export type QuestionRef = {
   id: string;
   question_number: number;
