@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase";
+import { createAdminClient, createClient } from "@/lib/supabase";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { EXAM_QUESTION_COUNT, EXAM_PASS_MARK, scoreExam } from "@/lib/exam";
 import type { ExamAnswer } from "@/lib/exam";
@@ -66,7 +66,10 @@ export async function POST(request: Request) {
       ? Math.max(0, Math.round(duration_seconds))
       : null;
 
-  const { error: insertError } = await supabase.from("user_exam_attempts").insert({
+  // Scores are computed above from server-fetched answers. Persist the result
+  // with the service-role client so browser sessions cannot forge passing rows.
+  const admin = createAdminClient();
+  const { error: insertError } = await admin.from("user_exam_attempts").insert({
     user_id: user.id,
     score,
     total,
@@ -91,7 +94,9 @@ export async function POST(request: Request) {
   if (!passed) return NextResponse.json(response);
 
   try {
-    const { data: medalSlug, error: medalError } = await supabase.rpc("award_exam_pass_medal");
+    const { data: medalSlug, error: medalError } = await admin.rpc("award_exam_pass_medal", {
+      p_user_id: user.id,
+    });
     if (medalError) throw medalError;
     return NextResponse.json(medalSlug ? { ...response, medals_earned: [medalSlug] } : response);
   } catch (achievementError) {

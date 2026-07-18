@@ -4,31 +4,37 @@
 DROP POLICY IF EXISTS "own insert" ON public.user_medals;
 REVOKE INSERT, UPDATE, DELETE ON TABLE public.user_medals FROM authenticated;
 
-CREATE FUNCTION public.award_exam_pass_medal()
+-- Exam attempts are evidence for exam-pass, so they must be written only by
+-- the server-side scorer using the service role.
+DROP POLICY IF EXISTS "own insert" ON public.user_exam_attempts;
+REVOKE INSERT, UPDATE, DELETE ON TABLE public.user_exam_attempts FROM authenticated;
+
+DROP FUNCTION IF EXISTS public.award_exam_pass_medal();
+
+CREATE FUNCTION public.award_exam_pass_medal(p_user_id UUID)
 RETURNS TEXT
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = ''
 AS $$
 DECLARE
-  v_user_id UUID := auth.uid();
   v_medal_slug TEXT;
 BEGIN
-  IF v_user_id IS NULL THEN
-    RAISE EXCEPTION 'not_authenticated';
+  IF p_user_id IS NULL THEN
+    RAISE EXCEPTION 'invalid_user';
   END IF;
 
   IF NOT EXISTS (
     SELECT 1
     FROM public.user_exam_attempts
-    WHERE user_id = v_user_id
+    WHERE user_id = p_user_id
       AND passed = TRUE
   ) THEN
     RAISE EXCEPTION 'exam_not_passed';
   END IF;
 
   INSERT INTO public.user_medals (user_id, medal_slug)
-  VALUES (v_user_id, 'exam-pass')
+  VALUES (p_user_id, 'exam-pass')
   ON CONFLICT (user_id, medal_slug) DO NOTHING
   RETURNING medal_slug INTO v_medal_slug;
 
@@ -36,6 +42,6 @@ BEGIN
 END;
 $$;
 
-REVOKE ALL ON FUNCTION public.award_exam_pass_medal() FROM PUBLIC;
-REVOKE ALL ON FUNCTION public.award_exam_pass_medal() FROM anon;
-GRANT EXECUTE ON FUNCTION public.award_exam_pass_medal() TO authenticated;
+REVOKE ALL ON FUNCTION public.award_exam_pass_medal(UUID) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.award_exam_pass_medal(UUID) FROM anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.award_exam_pass_medal(UUID) TO service_role;

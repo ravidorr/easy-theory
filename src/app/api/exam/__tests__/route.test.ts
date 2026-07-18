@@ -1,12 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { POST } from "../route";
-import { createClient } from "@/lib/supabase";
+import { createAdminClient, createClient } from "@/lib/supabase";
 import { checkRateLimit } from "@/lib/rate-limit";
 
-vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
+vi.mock("@/lib/supabase", () => ({ createAdminClient: vi.fn(), createClient: vi.fn() }));
 vi.mock("@/lib/rate-limit", () => ({ checkRateLimit: vi.fn() }));
 
 const mockCreateClient = vi.mocked(createClient);
+const mockCreateAdminClient = vi.mocked(createAdminClient);
 const mockCheckRateLimit = vi.mocked(checkRateLimit);
 
 const USER_ID = "user-uuid";
@@ -64,6 +65,7 @@ describe("POST /api/exam", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockCheckRateLimit.mockResolvedValue(true);
+    mockCreateAdminClient.mockReturnValue(makeClient().client as never);
   });
 
   it("returns 401 when not authenticated", async () => {
@@ -112,6 +114,7 @@ describe("POST /api/exam", () => {
       questions: [{ id: QID(1), correct_option: "a" }],
     });
     mockCreateClient.mockResolvedValue(client as never);
+    mockCreateAdminClient.mockReturnValue(client as never);
     const res = await POST(
       makeRequest({
         answers: [
@@ -168,11 +171,12 @@ describe("POST /api/exam", () => {
     const questions = Array.from({ length: 30 }, (_, i) => ({ id: QID(i), correct_option: "a" }));
     const { client } = makeClient({ questions, medalSlug: "exam-pass" });
     mockCreateClient.mockResolvedValue(client as never);
+    mockCreateAdminClient.mockReturnValue(client as never);
 
     const res = await POST(makeRequest({ answers: questions.map((q) => ({ question_id: q.id, selected_option: "a" })) }));
 
     expect(await res.json()).toMatchObject({ passed: true, medals_earned: ["exam-pass"] });
-    expect(client.rpc).toHaveBeenCalledWith("award_exam_pass_medal");
+    expect(client.rpc).toHaveBeenCalledWith("award_exam_pass_medal", { p_user_id: USER_ID });
   });
 
   it("does not return exam-pass for a repeated pass", async () => {
@@ -189,6 +193,7 @@ describe("POST /api/exam", () => {
     const questions = Array.from({ length: 30 }, (_, i) => ({ id: QID(i), correct_option: "a" }));
     const { client } = makeClient({ questions, medalError: { message: "boom" } });
     mockCreateClient.mockResolvedValue(client as never);
+    mockCreateAdminClient.mockReturnValue(client as never);
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     const res = await POST(makeRequest({ answers: questions.map((q) => ({ question_id: q.id, selected_option: "a" })) }));
@@ -205,6 +210,7 @@ describe("POST /api/exam", () => {
   it("treats an empty submission as a failed exam (auto-submit at timeout)", async () => {
     const { client, insert } = makeClient();
     mockCreateClient.mockResolvedValue(client as never);
+    mockCreateAdminClient.mockReturnValue(client as never);
     const res = await POST(makeRequest({ answers: [] }));
     expect(res.status).toBe(200);
     const body = await res.json();
@@ -219,6 +225,7 @@ describe("POST /api/exam", () => {
       questions: [{ id: QID(1), correct_option: "b" }],
     });
     mockCreateClient.mockResolvedValue(client as never);
+    mockCreateAdminClient.mockReturnValue(client as never);
     await POST(
       makeRequest({
         answers: [{ question_id: QID(1), selected_option: "b" }],
@@ -244,6 +251,7 @@ describe("POST /api/exam", () => {
   it("stores null duration when duration_seconds is invalid", async () => {
     const { client, insert } = makeClient();
     mockCreateClient.mockResolvedValue(client as never);
+    mockCreateAdminClient.mockReturnValue(client as never);
     await POST(makeRequest({ answers: [], duration_seconds: "abc" }));
     expect(insert).toHaveBeenCalledWith(
       expect.objectContaining({ duration_seconds: null })
@@ -253,6 +261,7 @@ describe("POST /api/exam", () => {
   it("returns 500 when the attempt insert fails", async () => {
     const { client } = makeClient({ insertError: true });
     mockCreateClient.mockResolvedValue(client as never);
+    mockCreateAdminClient.mockReturnValue(client as never);
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const res = await POST(makeRequest({ answers: [] }));
     expect(res.status).toBe(500);

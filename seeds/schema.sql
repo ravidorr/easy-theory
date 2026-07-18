@@ -178,7 +178,6 @@ CREATE POLICY "own delete" ON user_push_subscriptions FOR DELETE USING (user_id 
 
 ALTER TABLE user_exam_attempts ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "own select" ON user_exam_attempts FOR SELECT USING (user_id = auth.uid());
-CREATE POLICY "own insert" ON user_exam_attempts FOR INSERT WITH CHECK (user_id = auth.uid());
 
 ALTER TABLE user_question_bookmarks ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "own select" ON user_question_bookmarks FOR SELECT USING (user_id = auth.uid());
