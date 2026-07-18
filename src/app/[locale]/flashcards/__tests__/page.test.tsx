@@ -305,4 +305,20 @@ describe("FlashcardsPage", () => {
     expect(data[1].name).toBe("");
     expect(data[1].alt).toBe("");
   });
+
+  it("renders the corrected Arabic text for sign 104", async () => {
+    vi.mocked(getLocale).mockResolvedValue("ar" as never);
+    mockGetSigns.mockResolvedValue([
+      {
+        ...SIGN_1,
+        sign_number: "104",
+        name_he: "עקומה ימינה ולאחר מכן שמאלה.",
+        name_ar: "منعطف إلى اليمين ثم إلى اليسار.",
+      },
+    ] as never);
+
+    const jsx = await FlashcardsPage();
+    render(jsx);
+    expect(screen.getByText("منعطف إلى اليمين ثم إلى اليسار")).toBeInTheDocument();
+  });
 });

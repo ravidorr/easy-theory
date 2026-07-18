@@ -40,7 +40,8 @@ In the project's **SQL editor**, run these files in exactly this order:
    `017_quiz_answer_events.sql`, `018_align_user_srs_ease.sql`,
    `019_questions_achievement_serialization.sql`,
    `020_protect_achievement_medals.sql`,
-   `021_protect_quiz_achievement_facts.sql`)
+   `021_protect_quiz_achievement_facts.sql`,
+   `022_correct_signs_104_107_locales.sql`)
 
 **Keep the QA project's schema in sync**: whenever a new file lands in
 `seeds/migrations/`, run it in the QA project's SQL editor too. The app's code assumes
