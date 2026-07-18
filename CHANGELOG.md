@@ -3,6 +3,14 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.181] — 2026-07-18
+
+### Changed
+
+- Database Alignment now publishes a trusted PR-head `Database alignment gate` status before comparing production and QA, then always reports the comparison result on that same commit so it can be required for merges.
+
+---
+
 ## [0.3.180] — 2026-07-18
 
 ### Added
