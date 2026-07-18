@@ -3,6 +3,14 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.187] — 2026-07-19
+
+### Fixed
+
+- Corrected Hebrew and Arabic flashcard text for warning signs 104–107, including the missing left-then-right curve sign and the sharp left-curve guidance.
+
+---
+
 ## [0.3.186] — 2026-07-19
 
 ### Changed
