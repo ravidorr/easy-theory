@@ -74,7 +74,7 @@ contents, THEN go offline and reload.
 
 Route hints:
 
-- Service worker `public/sw.js`, caches prefixed `clearroad-` (v1): navigations are
+- Service worker `public/sw.js`, caches prefixed `clearroad-` (v2): navigations are
   network-first (pages cache), static assets cache-first, `/signs/`, `/questions/`
   and Next image routes cache-first (images cache), `/js/` and `/icons/`
   stale-while-revalidate. `/api/`, cross-origin, and RSC requests are deliberately

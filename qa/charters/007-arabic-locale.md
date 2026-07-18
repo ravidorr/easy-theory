@@ -15,7 +15,7 @@ environment:
     required: true
     user: "qa-user@clearroad.test"
     mint: "pnpm qa:mint --next /ar"
-  data_assumptions: "Seeded test DB with Arabic columns (question_ar, option_*_ar, explanation_ar, sign name_ar) populated by migrations 005 and 015; Arabic routes never fall back to Hebrew when an _ar value is missing"
+  data_assumptions: "Seeded test DB with Arabic columns from migration 005 and Arabic content imported separately; migration 015 supplements question 15 in the signs topic. Arabic routes never fall back to Hebrew when an _ar value is missing"
 timebox_minutes: 25
 out_of_scope:
   - "Deep flow mechanics already proven in Hebrew charters (001-006) — this run checks localization, not logic"
