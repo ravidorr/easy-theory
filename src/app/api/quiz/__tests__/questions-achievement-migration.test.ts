@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 const migrationPath = resolve(
   __dirname,
-  "../../../../../seeds/migrations/018_questions_achievement_serialization.sql"
+  "../../../../../seeds/migrations/019_questions_achievement_serialization.sql"
 );
 const migrationSql = existsSync(migrationPath) ? readFileSync(migrationPath, "utf-8") : "";
 
