@@ -16,6 +16,13 @@ describe("Icon", () => {
     expect(container.querySelector("svg")).toHaveAttribute("viewBox", "0 0 24 24");
   });
 
+  it("renders the YouTube icon as a 24x24 currentColor glyph", () => {
+    const { container } = render(<Icon name="youtube" />);
+    const svg = container.querySelector("svg");
+    expect(svg).toHaveAttribute("viewBox", "0 0 24 24");
+    expect(svg!.querySelector("path")).toHaveAttribute("fill", "currentColor");
+  });
+
   it("defaults to size 24", () => {
     const { container } = render(<Icon name="calendar" />);
     const svg = container.querySelector("svg");

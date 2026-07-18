@@ -3,6 +3,14 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.186] — 2026-07-19
+
+### Changed
+
+- Simplified the learning-videos page by removing redundant YouTube copy and adding a muted YouTube icon beside every video title.
+
+---
+
 ## [0.3.185] — 2026-07-19
 
 ### Changed

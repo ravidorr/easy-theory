@@ -33,7 +33,6 @@ export default async function VideosPage() {
       <main className={styles.page}>
         <div>
           <h1>{t("pageTitle")}</h1>
-          <span className={styles.subtitle}>{t("subtitle")}</span>
         </div>
 
         <div className={styles.section}>
@@ -65,6 +64,7 @@ export default async function VideosPage() {
               </div>
               <div className={styles.videoMeta}>
                 <span className={styles.videoTitle}>
+                  <Icon name="youtube" size={16} className={styles.youtubeIcon} />
                   {loc(featured.title_he, featured.title_ar)}
                 </span>
                 <span className={styles.videoDesc}>
@@ -96,6 +96,7 @@ export default async function VideosPage() {
               </div>
               <div className={styles.videoBody}>
                 <span className={styles.videoTitle}>
+                  <Icon name="youtube" size={16} className={styles.youtubeIcon} />
                   {loc(video.title_he, video.title_ar)}
                 </span>
                 <span className={styles.videoDesc}>
@@ -131,6 +132,7 @@ export default async function VideosPage() {
               </div>
               <div className={styles.videoBody}>
                 <span className={styles.videoTitle}>
+                  <Icon name="youtube" size={16} className={styles.youtubeIcon} />
                   {loc(video.title_he, video.title_ar)}
                 </span>
                 <span className={styles.videoTag}>
@@ -140,8 +142,6 @@ export default async function VideosPage() {
             </a>
           ))}
         </div>
-
-        <span className={styles.pageNote}>{t("pageNote")}</span>
       </main>
       <TabBar active="videos" />
     </>

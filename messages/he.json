@@ -243,10 +243,8 @@
   },
   "Videos": {
     "pageTitle": "סרטוני לימוד",
-    "subtitle": "שיעורים קצרים ומרתונים, לפי נושא.",
     "marathonsTitle": "מרתונים",
-    "lessonsTitle": "שיעורים לפי נושא",
-    "pageNote": "הסרטונים נפתחים ביוטיוב"
+    "lessonsTitle": "שיעורים לפי נושא"
   },
   "Resources": {
     "pageTitle": "חומרים שימושיים",
