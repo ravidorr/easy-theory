@@ -40,7 +40,7 @@ describe("questions-100 achievement migration", () => {
     );
   });
 
-  it("evaluates first-topic and all-topics in the serialized completion transaction", () => {
+  it("evaluates topic achievements from protected correct-answer facts", () => {
     expect(migrationSql).toMatch(
       /IF COALESCE\(\(v_result ->> 'topic_completed'\)::BOOLEAN, FALSE\) THEN/i
     );
@@ -48,7 +48,7 @@ describe("questions-100 achievement migration", () => {
       /IF v_completed_topic_count = 1 THEN[\s\S]*VALUES \(v_user_id, 'first-topic'\)[\s\S]*ON CONFLICT \(user_id, medal_slug\) DO NOTHING/i
     );
     expect(migrationSql).toMatch(
-      /SELECT COUNT\(\*\) INTO v_topic_count FROM public\.topics[\s\S]*SELECT COUNT\(\*[\s\S]*FROM public\.user_topic_progress[\s\S]*status = 'completed'/i
+      /FROM public\.topics AS topics[\s\S]*LEFT JOIN public\.user_quiz_responses AS responses[\s\S]*responses\.is_correct IS NOT TRUE/i
     );
     expect(migrationSql).toMatch(
       /v_topic_count > 0 AND v_completed_topic_count >= v_topic_count[\s\S]*VALUES \(v_user_id, 'all-topics'\)/i

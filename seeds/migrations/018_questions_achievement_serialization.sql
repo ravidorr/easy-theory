@@ -81,12 +81,30 @@ BEGIN
   -- The same lock makes the final two completions observe one another, so
   -- all-topics is awarded by the latter transaction.
   IF COALESCE((v_result ->> 'topic_completed')::BOOLEAN, FALSE) THEN
-    SELECT COUNT(*) INTO v_topic_count FROM public.topics;
+    -- Completion status is presentation state. Achievement ownership is based
+    -- on the correct answers recorded by the protected submission RPC.
+    SELECT COUNT(*)
+    INTO v_topic_count
+    FROM public.topics AS topics
+    WHERE EXISTS (
+      SELECT 1 FROM public.questions WHERE topic_id = topics.id
+    );
+
     SELECT COUNT(*)
     INTO v_completed_topic_count
-    FROM public.user_topic_progress
-    WHERE user_id = v_user_id
-      AND status = 'completed';
+    FROM public.topics AS topics
+    WHERE EXISTS (
+      SELECT 1 FROM public.questions WHERE topic_id = topics.id
+    )
+      AND NOT EXISTS (
+        SELECT 1
+        FROM public.questions AS questions
+        LEFT JOIN public.user_quiz_responses AS responses
+          ON responses.question_id = questions.id
+          AND responses.user_id = v_user_id
+        WHERE questions.topic_id = topics.id
+          AND (responses.id IS NULL OR responses.is_correct IS NOT TRUE)
+      );
 
     IF v_completed_topic_count = 1 THEN
       v_medal_slug := NULL;
