@@ -17,6 +17,14 @@ describe("locale messages", () => {
     expect(flattenKeys(ar).sort()).toEqual(flattenKeys(he).sort());
   });
 
+  it("keeps duplicate quiz feedback copy aligned with the runtime messages", () => {
+    for (const messages of [he, ar]) {
+      expect(messages.Quiz.rewardTopicDone).toBe(messages.JS.Quiz.rewardTopicDone);
+      expect(messages.Quiz.rewardWrongPrefix).toBe(messages.JS.Quiz.rewardWrongPrefix);
+      expect(messages.Quiz.rewardWrongSuffix).toBe(messages.JS.Quiz.rewardWrongSuffix);
+    }
+  });
+
   it("keeps the ICU placeholders of the daily task description in both locales", () => {
     expect(he.Home.todayTaskDesc).toContain("{count}");
     expect(ar.Home.todayTaskDesc).toContain("{count}");

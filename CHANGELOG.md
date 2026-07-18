@@ -3,6 +3,11 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.171] — 2026-07-18
+
+### Changed
+- Normalized Hebrew and Arabic copy to the first-person-plural voice across the home, quiz, retry, review, exam, and schedule flows, including progress and completion states. Duplicate quiz feedback is now consistent between page translations and the `JS.Quiz` runtime messages; the shipped `quiz.js`, `exam.js`, and `schedule.js` Hebrew fallbacks now match the final translation values. Updated their focused script tests for the new copy. (TODO: Copy consistency pass)
+
 ## [0.3.170] — 2026-07-18
 
 ### Changed

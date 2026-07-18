@@ -165,7 +165,7 @@
     container.setAttribute("data-passed", data.passed ? "true" : "false");
     if (resultTitle) {
       resultTitle.textContent = data.passed
-        ? (t.examPassTitle || "עברת!")
+        ? (t.examPassTitle || "עברנו!")
         : (t.examFailTitle || "לא נורא, כמעט שם.");
     }
     if (resultScore) {

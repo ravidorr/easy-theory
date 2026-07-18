@@ -103,7 +103,7 @@ describe("schedule.js – save failure handling", () => {
     expect(btn.textContent).toBe("שמרי");
     // Refocused before the alert so the modal restores focus to it on dismiss.
     expect(document.activeElement).toBe(btn);
-    expect(modal.alert).toHaveBeenCalledWith({ message: "שגיאה בשמירה, אפשר לנסות שוב." });
+    expect(modal.alert).toHaveBeenCalledWith({ message: "שגיאה בשמירה, שננסה שוב?" });
   });
 
   it("restores button text and re-enables after a network failure", async () => {
@@ -116,7 +116,7 @@ describe("schedule.js – save failure handling", () => {
     const btn = document.getElementById("save-schedule-btn") as HTMLButtonElement;
     expect(btn.disabled).toBe(false);
     expect(btn.textContent).toBe("שמרי");
-    expect(modal.alert).toHaveBeenCalledWith({ message: "שגיאה בשמירה, אפשר לנסות שוב." });
+    expect(modal.alert).toHaveBeenCalledWith({ message: "שגיאה בשמירה, שננסה שוב?" });
   });
 
   it("falls back to window.alert on save failure when modal.js is not loaded", async () => {
@@ -129,7 +129,7 @@ describe("schedule.js – save failure handling", () => {
     const btn = document.getElementById("save-schedule-btn") as HTMLButtonElement;
     expect(btn.disabled).toBe(false);
     expect(btn.textContent).toBe("שמרי");
-    expect(alertSpy).toHaveBeenCalledWith("שגיאה בשמירה, אפשר לנסות שוב.");
+    expect(alertSpy).toHaveBeenCalledWith("שגיאה בשמירה, שננסה שוב?");
     alertSpy.mockRestore();
   });
 });
@@ -154,7 +154,7 @@ describe("schedule.js – pickers and notify toggle", () => {
       "טרם נבחרו ימים"
     );
     expect(document.getElementById("summary-text")!.textContent).toBe(
-      "יש לבחור ימים כדי להתחיל"
+      "נבחר ימים כדי להתחיל"
     );
   });
 
@@ -225,7 +225,7 @@ describe("schedule.js – successful save", () => {
     dayBtn(0).click();
     clickSave();
 
-    expect(modal.alert).toHaveBeenCalledWith({ message: "יש לבחור לפחות יום אחד ללמוד." });
+    expect(modal.alert).toHaveBeenCalledWith({ message: "נבחר לפחות יום אחד ללימוד." });
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
@@ -237,7 +237,7 @@ describe("schedule.js – successful save", () => {
     dayBtn(0).click();
     clickSave();
 
-    expect(alertSpy).toHaveBeenCalledWith("יש לבחור לפחות יום אחד ללמוד.");
+    expect(alertSpy).toHaveBeenCalledWith("נבחר לפחות יום אחד ללימוד.");
     expect(fetchMock).not.toHaveBeenCalled();
     alertSpy.mockRestore();
   });
