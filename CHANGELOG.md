@@ -3,6 +3,14 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.182] — 2026-07-18
+
+### Changed
+
+- Validation-only pull request for the required Database alignment gate.
+
+---
+
 ## [0.3.181] — 2026-07-18
 
 ### Changed
