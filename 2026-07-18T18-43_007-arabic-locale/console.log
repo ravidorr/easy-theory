@@ -1,0 +1,4 @@
+2026-07-18T20:48:00+03:00 switch /he/more -> /ar/more
+ERROR Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client. Consider using template tag instead (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template). @ /_next/static/chunks/0ru1_next_dist_19envxl._.js:1248
+
+The same error was observed in an earlier Hebrew-to-Arabic client locale switch during this run.

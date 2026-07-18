@@ -1,0 +1,25 @@
+{
+  "run_id": "2026-07-18T18-43_007-arabic-locale",
+  "charter_id": "007-arabic-locale",
+  "charter_path": "qa/charters/007-arabic-locale.md",
+  "started_at": "2026-07-18T18:43:00+03:00",
+  "finished_at": "2026-07-18T20:51:01+03:00",
+  "environment": {"base_url":"http://localhost:3100","git_sha":"1112cea7ba0606a1313d7dfc8d0117ed9d2ba894","app_version":"0.3.183","supabase_host":"nvgqczaesfeotijjcbed.supabase.co","viewport":"390x844","locale":"ar"},
+  "checks": [
+    {"id":"CHK-AR-01","verdict":"pass","observed":"Arabic routes rendered with lang=ar and dir=rtl in an authenticated QA session.","evidence":["evidence.md"]},
+    {"id":"CHK-AR-02","verdict":"pass","observed":"Arabic More and dashboard chrome rendered localized Arabic labels and counters without Hebrew leakage.","evidence":["evidence.md"]},
+    {"id":"CHK-AR-03","verdict":"pass","observed":"Vehicle question 41 and all four options rendered in Arabic with no Hebrew characters in main content.","evidence":["evidence.md"]},
+    {"id":"CHK-AR-04","verdict":"pass","observed":"Flashcard 1 of 277 rendered the Arabic sign name and Arabic controls.","evidence":["evidence.md"]},
+    {"id":"CHK-AR-05","verdict":"pass","observed":"More rendered in Arabic after the locale switch and exposed the return-to-Hebrew control.","evidence":["evidence.md"]},
+    {"id":"CHK-AR-06","verdict":"not-checked","reason":"Reload persistence was observed, but bare-root redirect behavior was not rechecked in the Arabic session."},
+    {"id":"CHK-AR-07","verdict":"pass","observed":"Arabic More rendered localized counters and the Arabic-Indic date ١٥ يوليو without RTL breakage.","evidence":["evidence.md"]},
+    {"id":"CHK-CONSOLE-01","verdict":"fail","observed":"A React console error occurs on every observed Hebrew-to-Arabic client locale switch.","evidence":["console.log"]},
+    {"id":"CHK-A11Y-01","verdict":"pass","observed":"Arabic pages exposed headings, named buttons and links, localized image alt text, and lang/dir metadata.","evidence":["evidence.md"]},
+    {"id":"CHK-COPY-RTL-01","verdict":"pass","observed":"Observed Arabic quiz, flashcard, and More copy contained no Hebrew leakage or direction breakage.","evidence":["evidence.md"]}
+  ],
+  "findings": [{"id":"F-001","title":"Avoid React script-tag console error when switching locales","severity":"minor","confidence":"high","category":"console","related_checks":["CHK-CONSOLE-01"],"repro_steps":["Authenticate and open /he/more.","Activate Switch to Arabic.","Inspect browser console.","Repeat the Hebrew-to-Arabic switch."],"expected":"Changing locale should complete without an error-level React console message.","actual":"React logs that a script tag was encountered while rendering a component; it reproduced twice.","evidence":["console.log"],"known_issue_match":null}],
+  "known_issues_observed": [],
+  "not_tested": ["Bare-root Arabic redirect after locale persistence.","Arabic exam, schedule, and review/retry flows."],
+  "limitations": ["QA ran against next dev; the finding is a browser console error, while the rendered Arabic UI remained usable."],
+  "coverage_summary": {"total":10,"pass":8,"fail":1,"blocked":0,"not_checked":1}
+}
