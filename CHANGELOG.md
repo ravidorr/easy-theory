@@ -3,6 +3,14 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.176] — 2026-07-18
+
+### Fixed
+
+- Mistake review now renders 20 cards per server-rendered page. Previous and next links preserve the selected scope, invalid or out-of-range pages safely resolve to populated content, and total mistake and due counts continue to describe the complete scope.
+
+---
+
 ## [0.3.175] — 2026-07-18
 
 ### Fixed

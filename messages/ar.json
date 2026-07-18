@@ -238,7 +238,11 @@
     "emptyHintLastSession": "لا أخطاء في آخر تدريب!",
     "viewAllMistakes": "عرض كل الأخطاء",
     "dueBadge": "للمراجعة",
-    "dueCount": "{count} أسئلة للمراجعة"
+    "dueCount": "{count} أسئلة للمراجعة",
+    "paginationLabel": "التنقل بين صفحات الأخطاء",
+    "previousPage": "الصفحة السابقة",
+    "nextPage": "الصفحة التالية",
+    "pageStatus": "الصفحة {page} من {total}"
   },
   "Bookmarks": {
     "topBarTitle": "الأسئلة المحفوظة",

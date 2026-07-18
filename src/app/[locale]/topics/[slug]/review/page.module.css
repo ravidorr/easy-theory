@@ -176,6 +176,32 @@
   margin-top: 8px;
 }
 
+.pagination {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+}
+
+.pageLink {
+  min-width: 100px;
+  text-align: center;
+}
+
+.previousPage {
+  justify-self: start;
+}
+
+.nextPage {
+  justify-self: end;
+}
+
+.pageStatus {
+  color: var(--text-muted);
+  font-size: var(--type-small-size);
+  white-space: nowrap;
+}
+
 .scopeToggle {
   display: flex;
   gap: 4px;
