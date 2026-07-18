@@ -1,7 +1,6 @@
 import { describe, it, expect } from "vitest";
 import he from "../../../messages/he.json";
 import ar from "../../../messages/ar.json";
-import { STREAK_MILESTONES } from "@/lib/quiz";
 
 function flattenKeys(obj: Record<string, unknown>, prefix = ""): string[] {
   return Object.entries(obj).flatMap(([key, value]) => {
@@ -37,64 +36,27 @@ describe("locale messages", () => {
     }
   });
 
-  it("keeps the ICU placeholders of the topic answered-count label in both locales", () => {
+  it("keeps the ICU placeholders of the daily-progress label in both locales", () => {
     for (const messages of [he, ar]) {
-      expect(messages.Home.topicAnsweredCountPct).toContain("{answered}");
-      expect(messages.Home.topicAnsweredCountPct).toContain("{total}");
-      expect(messages.Home.topicAnsweredCountPct).toContain("{percent}");
+      expect(messages.Home.dailyProgress).toContain("{answered}");
+      expect(messages.Home.dailyProgress).toContain("{goal}");
     }
   });
 
-  it("keeps the ICU placeholders of the overall progress strings in both locales", () => {
+  it("keeps progress-ring and readiness values translatable in both locales", () => {
     for (const messages of [he, ar]) {
       expect(messages.Home.topicsPercent).toContain("{percent}");
-      expect(messages.Home.topicsAnsweredOverall).toContain("{answered}");
-      expect(messages.Home.topicsAnsweredOverall).toContain("{total}");
-      expect(messages.Home.topicsRemaining).toContain("{count}");
-      expect(messages.Home.topicsRemainingOne).toBeTruthy();
+      expect(messages.Home.examReadiness).toContain("{percent}");
+      expect(messages.Home.examReadiness).toContain("{level}");
     }
   });
 
-  it("keeps the ICU placeholders of the personalized greeting strings in both locales", () => {
+  it("defines concise topic states in both locales", () => {
     for (const messages of [he, ar]) {
-      expect(messages.Home.resumeLine).toContain("{number}");
-      expect(messages.Home.resumeLine).toContain("{minutes}");
-      expect(messages.Home.resumeLineOneMinute).toContain("{number}");
-      expect(messages.Home.yesterdayAccuracyHigh).toContain("{percent}");
-      expect(messages.Home.yesterdayAccuracyLow).toContain("{percent}");
-      expect(messages.Home.focusTopicLine).toContain("{topic}");
-      expect(messages.Home.masteredTopicLine).toContain("{topic}");
-      expect(messages.Home.remainingQuestionsLine).toContain("{count}");
-      expect(messages.Home.remainingQuestionsLineOne).toBeTruthy();
-      expect(messages.Home.examReadyLine).toBeTruthy();
-    }
-  });
-
-  it("keeps the ICU placeholders of the medal nudge strings in both locales", () => {
-    for (const messages of [he, ar]) {
-      expect(messages.Home.daysToMedalOne).toContain("{medal}");
-      expect(messages.Home.daysToMedalMany).toContain("{count, plural,");
-      expect(messages.Home.daysToMedalMany).toContain("{medal}");
-      expect(messages.Home.daysToMedalStart).toContain("{count}");
-    }
-  });
-
-  it("keeps levelToNext a plain {points} substitution in both locales", () => {
-    // stats-pills.js re-renders this string client-side with the simple
-    // window.__tf interpolator, which cannot evaluate ICU plural/select.
-    for (const messages of [he, ar]) {
-      expect(messages.Home.levelToNext).toContain("{points}");
-      expect(messages.Home.levelToNext).not.toContain("plural");
-      expect(messages.Home.levelToNext).not.toContain("select");
-    }
-  });
-
-  it("defines a medal name for every streak milestone in both locales", () => {
-    for (const messages of [he, ar]) {
-      const home = messages.Home as Record<string, string>;
-      for (const milestone of STREAK_MILESTONES) {
-        expect(home[`medalName${milestone}`]).toBeTruthy();
-      }
+      expect(messages.Home.topicCompleted).toBeTruthy();
+      expect(messages.Home.topicInProgress).toBeTruthy();
+      expect(messages.Home.topicNeedsPractice).toBeTruthy();
+      expect(messages.Home.topicNotStarted).toBeTruthy();
     }
   });
 });

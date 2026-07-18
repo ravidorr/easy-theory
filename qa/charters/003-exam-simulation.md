@@ -1,7 +1,7 @@
 ---
 id: "003-exam-simulation"
 title: "Mock exam: landing, timed run, server scoring, history, readiness"
-flow: "Exam landing rules → start run → answer 30 questions → submit → result screen → answer review → history → home readiness card"
+flow: "Exam landing rules → start run → answer 30 questions → submit → result screen → answer review → history → home simulation card"
 persona: >
   Hebrew-speaking learner a week before their real theory exam. Wants a
   realistic dress rehearsal: strict timer, no feedback until the end, a
@@ -46,8 +46,8 @@ checks:
     desc: "The attempt lands in history with best score maintained"
     oracle: "Back on /he/exam the history contains one new attempt with this run's score and date; best score is the max of before + this attempt"
   - id: CHK-EXAM-08
-    desc: "Home readiness card reflects having exam attempts"
-    oracle: "On /he the readiness card is not in its empty state and shows a readiness level (values are real, no NaN/undefined)"
+    desc: "Home simulation card reflects having exam attempts"
+    oracle: "On /he the simulation card is not in its first-simulation state and shows a real readiness percentage and level, with no NaN/undefined"
   - id: CHK-EXAM-09
     desc: "Result review exposes answers without leaving stale exam controls"
     oracle: "From `#exam-result`, `#exam-review-btn` opens slide-by-slide review with correct/wrong states and a visible `#exam-review-bar`; timer and answered counter are hidden, the normal footer stays usable for review navigation, and `#exam-back-to-results` restores the result screen, timer, and focus to `#exam-review-btn`"
@@ -85,7 +85,7 @@ Route hints:
 - Copy sources: `messages/he.json`, namespaces `Exam`, `JS.Exam`.
 - Meaningful-step screenshots: landing with rules, first question, answered-counter
   mid-run, unanswered-submit confirm dialog, result screen, answer-review mode,
-  restored result screen, landing history after, home readiness card after.
+  restored result screen, landing history after, home simulation card after.
 
 Severity rubric: blocker / major / minor / cosmetic / question — see
 `qa/charters/TEMPLATE.md`. When unsure whether something is a bug or a product decision,

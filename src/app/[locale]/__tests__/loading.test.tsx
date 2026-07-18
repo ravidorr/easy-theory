@@ -19,14 +19,9 @@ describe("home loading skeleton", () => {
     expect(container.querySelector("main")).toHaveAttribute("aria-busy", "true");
   });
 
-  it("renders the real wordmark while the rest is placeholder", async () => {
-    render(await Loading());
-    expect(screen.getByText("wordmark")).toBeInTheDocument();
-  });
-
-  it("mirrors the home layout: stat tiles, mission ring, and topic cards", async () => {
+  it("mirrors the quiet home layout: heading, mission, simulation, and topic cards", async () => {
     const { container } = render(await Loading());
-    expect(container.querySelectorAll('[data-skeleton="circle"]')).toHaveLength(5);
+    expect(container.querySelectorAll('[data-skeleton="circle"]')).toHaveLength(1);
     expect(container.querySelectorAll('[data-skeleton="card"]')).toHaveLength(6);
   });
 

@@ -10,189 +10,115 @@
   box-sizing: border-box;
 }
 
-.page h1 {
+.page h1,
+.page h2 {
   margin: 0;
+  color: var(--text);
+  line-height: var(--line-tight);
+}
+
+.page h1 {
   font-size: var(--type-h1-size);
   font-weight: var(--type-h1-weight);
-  line-height: var(--line-tight);
-  color: var(--text);
 }
 
 .page h2 {
-  margin: 0;
   font-size: var(--type-h2-size);
   font-weight: var(--type-h2-weight);
-  line-height: var(--line-tight);
-  color: var(--text);
 }
 
-.topBar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.wordmark {
-  font-weight: 800;
-  font-size: 20px;
-  color: var(--text);
-}
-
-.statsStrip {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.statTile {
+.todayCard,
+.examCta,
+.topicLink {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
   box-shadow: var(--shadow-card);
-  padding: 14px 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-
-.statTileIcon {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 2px;
-}
-
-.statTileIconStreak,
-.statTileIconLevel {
-  background: var(--primary-soft);
-  color: var(--primary-soft-text);
-}
-
-.statTileIconPoints {
-  background: var(--gold-soft);
-  color: var(--gold-text);
-}
-
-.statTileIconGoal {
-  background: var(--surface-2);
-  color: var(--text-muted);
-}
-
-.statTileIconGoalDone {
-  background: var(--success-soft);
-  color: var(--success-text);
-}
-
-.statTileValue {
-  font-size: 24px;
-  font-weight: 800;
-  color: var(--text);
-  line-height: 1;
-}
-
-.statTileLabel {
-  font-size: var(--type-caption-size);
-  font-weight: 500;
-  color: var(--text-faint);
-}
-
-.statTileTrack {
-  width: 100%;
-  margin-top: 4px;
-}
-
-.statTileCaption {
-  font-size: 11px;
-  color: var(--text-muted);
-  text-align: center;
-}
-
-.statTileCaptionDone {
-  color: var(--success-text);
-  font-weight: 600;
-}
-
-.greeting {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.greetingText {
-  font-size: var(--type-small-size);
-  color: var(--text-muted);
-}
-
-.medalNudge {
-  font-size: var(--type-caption-size);
-  font-weight: 600;
-  color: var(--primary-soft-text);
-}
-
-.personalLines {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-top: 2px;
-}
-
-.personalLine {
-  font-size: var(--type-small-size);
-  color: var(--text-muted);
-}
-
-.personalLineLink {
-  font-size: var(--type-small-size);
-  font-weight: 600;
-  color: var(--primary-soft-text);
-  text-decoration: none;
-}
-
-@media (hover: hover) {
-  .personalLineLink:hover {
-    text-decoration: underline;
-  }
-}
-
-.personalLineLink:active {
-  color: var(--primary);
 }
 
 .todayCard {
-  background: var(--surface);
-  border: 1px solid var(--border);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-card);
   padding: 20px;
   display: flex;
   flex-direction: column;
+  gap: 20px;
+}
+
+.missionRow {
+  display: flex;
+  align-items: center;
   gap: 16px;
 }
 
-.todayBadge {
-  align-self: flex-start;
-  background: var(--primary-soft);
+.missionRing {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+}
+
+.missionRingSvg {
+  width: 100%;
+  height: 100%;
+  transform: scaleX(-1) rotate(-90deg);
+}
+
+.missionRingTrack {
+  fill: none;
+  stroke: var(--surface-3);
+  stroke-width: 8;
+}
+
+.missionRingFill {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-dasharray: var(--ring-circ);
+  stroke-dashoffset: var(--ring-offset);
+  animation: mission-ring-fill 800ms var(--ease-out, ease-out) both;
+}
+
+.missionRing[data-empty] .missionRingFill {
+  animation: none;
+}
+
+@keyframes mission-ring-fill {
+  from {
+    stroke-dashoffset: var(--ring-circ);
+  }
+}
+
+.missionRingValue {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: var(--type-small-size);
   color: var(--primary-soft-text);
-  border-radius: var(--radius-sm);
-  padding: 3px 10px;
-  font-size: var(--type-caption-size);
-  font-weight: var(--type-caption-weight);
 }
 
 .todayTaskInfo {
+  min-width: 0;
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 4px;
 }
 
-.todayTaskDesc {
+.todayTaskDesc,
+.dailyProgress,
+.examCtaDesc,
+.examReadiness,
+.emptyCardDesc,
+.topicStatus {
   font-size: var(--type-small-size);
   color: var(--text-muted);
+}
+
+.dailyProgress {
+  font-weight: 600;
+  color: var(--primary-soft-text);
 }
 
 .emptyStateCard {
@@ -204,20 +130,49 @@
   gap: 12px;
 }
 
-.emptyCardTitle {
-  margin: 0;
-  font-size: var(--type-h2-size);
-  font-weight: var(--type-h2-weight);
-  color: var(--primary-soft-text);
-}
-
 .emptyStateCard h2 {
   color: var(--primary-soft-text);
 }
 
-.emptyCardDesc {
-  font-size: var(--type-small-size);
-  color: var(--text-muted);
+.examCta {
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  min-height: var(--hit-min);
+  box-sizing: border-box;
+}
+
+.examCtaIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--primary-soft);
+  color: var(--primary-soft-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.examCtaBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.examCtaTitle,
+.topicName {
+  font-size: var(--type-body-size);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.examReadiness {
+  margin-top: 2px;
 }
 
 .topicsSection {
@@ -226,37 +181,8 @@
   gap: 12px;
 }
 
-.topicsHeader {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-}
-
-.topicsCount {
-  font-size: var(--type-caption-size);
-  font-weight: var(--type-caption-weight);
-  color: var(--text-faint);
-}
-
-.overallProgress {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.overallMeta {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  font-size: var(--type-caption-size);
-  color: var(--text-muted);
-}
-
 .topicLink {
-  background: var(--surface);
-  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-card);
   padding: 16px;
   display: flex;
   align-items: center;
@@ -303,27 +229,18 @@
   gap: 8px;
 }
 
-.topicName {
-  font-weight: 600;
-  font-size: var(--type-body-size);
-  color: var(--text);
-}
-
 .topicStatus {
-  font-size: var(--type-caption-size);
-  font-weight: 600;
-  color: var(--text-faint);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   flex-shrink: 0;
 }
 
+.topicStatusNeedsPractice {
+  color: var(--text-muted);
+}
+
 .topicLink[data-complete] .topicStatus {
-  display: inline-flex;
-  align-items: center;
-  align-self: center;
-  gap: 4px;
-  padding: 2px 8px;
-  border-radius: var(--radius-pill);
-  background: var(--success-soft);
   color: var(--success-text);
 }
 
@@ -340,287 +257,16 @@
   background: var(--primary);
 }
 
-/* Scoped to the level bar (the only fill stats-pills.js rewrites) so the
-   other home-page bars keep their instant width. 700ms matches the script's
-   count-up so the bar and the numbers land together after the sync. */
-.progressFill[data-stat="level-fill"] {
-  transition: width 700ms var(--ease-out, ease-out);
-}
-
 .topicLink[data-complete] .progressFill {
   background: var(--success);
-}
-
-.progressFillDone {
-  background: var(--success);
-}
-
-.topicDesc {
-  font-size: var(--type-small-size);
-  color: var(--text-muted);
-  line-height: var(--line-body);
-}
-
-.topicMetaRow {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-}
-
-.topicChip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: var(--type-caption-size);
-  font-weight: 600;
-  border-radius: var(--radius-pill);
-  padding: 2px 8px;
-  background: var(--surface-2);
-  color: var(--text-muted);
-}
-
-.topicChipEasy {
-  background: var(--success-soft);
-  color: var(--success-text);
-}
-
-.topicChipMedium {
-  background: var(--gold-soft);
-  color: var(--gold-text);
-}
-
-.topicChipHard {
-  background: var(--danger-soft);
-  color: var(--danger-text);
 }
 
 .noUnderline {
   text-decoration: none;
 }
 
-/* Mission ring (today's mission card) */
-
-.missionRow {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.missionRing {
-  position: relative;
-  width: 72px;
-  height: 72px;
-  flex-shrink: 0;
-}
-
-/* The app is RTL-only (he/ar): mirror the sweep so it starts at 12 o'clock
-   and runs counter-clockwise, matching reading direction. */
-.missionRingSvg {
-  width: 100%;
-  height: 100%;
-  transform: scaleX(-1) rotate(-90deg);
-}
-
-.missionRingTrack {
-  fill: none;
-  stroke: var(--surface-3);
-  stroke-width: 8;
-}
-
-.missionRingFill {
-  fill: none;
-  stroke: var(--primary);
-  stroke-width: 8;
-  stroke-linecap: round;
-  stroke-dasharray: var(--ring-circ);
-  stroke-dashoffset: var(--ring-offset);
-
-  /* Not --ease-spring: an overshooting bezier would push the dashoffset
-     negative at 100% and open a notch at the sweep origin. */
-  animation: mission-ring-fill 800ms var(--ease-out, ease-out) both;
-}
-
-/* Nothing to sweep at 0%: skip the no-op animation. */
-.missionRing[data-empty] .missionRingFill {
-  animation: none;
-}
-
-@keyframes mission-ring-fill {
-  from {
-    stroke-dashoffset: var(--ring-circ);
-  }
-}
-
-.missionRingValue {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  font-weight: 700;
-  font-size: var(--type-small-size);
-  color: var(--primary-soft-text);
-}
-
-.missionXpChip {
-  background: var(--primary-soft);
-  color: var(--primary-soft-text);
-}
-
-.missionCompleteLabel {
-  font-size: var(--type-small-size);
-  font-weight: 600;
-  color: var(--success-text);
-}
-
-.todayCard[data-complete] .missionRingFill {
-  stroke: var(--success);
-}
-
-.todayCard[data-complete] .missionRingValue {
-  color: var(--success-text);
-}
-
-/* The pop lands just before the ring fill finishes so the two read as one
-   completion beat. */
-.todayCard[data-complete] .missionRing {
-  animation: mission-complete-pop 500ms var(--ease-spring, ease-out) 700ms both;
-}
-
-@keyframes mission-complete-pop {
-  0% {
-    transform: scale(1);
-  }
-
-  40% {
-    transform: scale(1.12);
-  }
-
-  100% {
-    transform: scale(1);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .missionRingFill,
-  .todayCard[data-complete] .missionRing {
+  .missionRingFill {
     animation: none;
   }
-
-  .progressFill[data-stat="level-fill"] {
-    transition: none;
-  }
-}
-
-.examCta {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-card);
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 16px;
-  min-height: var(--hit-min);
-  box-sizing: border-box;
-}
-
-.examCtaIcon {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-md);
-  background: var(--primary-soft);
-  color: var(--primary-soft-text);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.examCtaBody {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.examCtaTitle {
-  font-size: var(--type-body-size);
-  font-weight: 600;
-  color: var(--text);
-}
-
-.examCtaDesc {
-  font-size: var(--type-caption-size);
-  color: var(--text-muted);
-}
-
-/* Readiness card */
-.readinessCard {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-card);
-  padding: 16px 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.readinessHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.readinessTitle {
-  font-size: var(--type-body-size);
-  font-weight: 600;
-  color: var(--text);
-}
-
-.readinessChip {
-  font-size: var(--type-caption-size);
-  font-weight: 700;
-  border-radius: var(--radius-pill);
-  padding: 3px 10px;
-  flex-shrink: 0;
-}
-
-.readinessChipHigh {
-  background: var(--success-soft);
-  color: var(--success-text);
-}
-
-.readinessChipMedium {
-  background: var(--gold-soft);
-  color: var(--gold-text);
-}
-
-.readinessChipLow {
-  background: var(--danger-soft);
-  color: var(--danger-text);
-}
-
-.readinessValue {
-  font-size: var(--type-h2-size);
-  font-weight: 800;
-  color: var(--text);
-}
-
-.readinessCaption {
-  font-size: var(--type-caption-size);
-  color: var(--text-muted);
-}
-
-.weakTopicPct {
-  font-size: var(--type-caption-size);
-  font-weight: 600;
-  color: var(--danger-text);
-  flex-shrink: 0;
-}
-
-.progressFillWeak {
-  background: var(--gold);
 }
