@@ -1,7 +1,7 @@
 ---
 id: "001-home-and-quiz"
-title: "Authed home dashboard, daily mission + topic quiz practice flow"
-flow: "Login-redirect sanity → minted session → dashboard goal/mission → enter first topic → complete a quiz → verify progress persistence"
+title: "Authed home screen, daily mission + topic quiz practice flow"
+flow: "Login-redirect sanity → minted session → daily mission → enter first topic → complete a quiz → verify progress persistence"
 persona: >
   Hebrew-speaking learner preparing for the Israeli theory exam (B license).
   Studies on their phone in short sessions, expects a fully RTL Hebrew UI, and
@@ -32,14 +32,14 @@ checks:
     desc: "Minted session grants access; / lands on the dashboard"
     oracle: "URL is /he; dashboard widgets render; no redirect loop back to login"
   - id: CHK-HOME-01
-    desc: "Dashboard shows progress, gamification stats, and the daily goal"
-    oracle: "Streak, star points, level, daily-goal count (out of 20), and per-topic progress are real values (no NaN/undefined/empty); topic list is non-empty and names match seeded topics"
+    desc: "Home shows one daily mission, daily progress, and a topic list"
+    oracle: "The mission has a real topic-progress value and a daily count out of 20; the topic list is non-empty, names match seeded topics, and no NaN/undefined/empty values appear"
   - id: CHK-HOME-02
     desc: "Dashboard copy matches messages/he.json Home namespace; layout is RTL"
     oracle: "No raw keys (e.g. 'Home.title') or unexpected English on screen; html has dir=rtl and lang=he"
   - id: CHK-HOME-03
-    desc: "Daily mission and exam placement lead to the appropriate next step"
-    oracle: "The daily-mission card has a visible progress value and its CTA opens an unanswered topic, or opens that topic's review when the mission is complete; the exam CTA is present and remains reachable (it may move above the mission once coverage reaches 50%)"
+    desc: "Daily mission and simulation CTA lead to the appropriate next step"
+    oracle: "The daily-mission card has a visible progress value and its CTA opens an unanswered topic, or opens that topic's review when the mission is complete; one simulation CTA is present and reachable"
   - id: CHK-QUIZ-01
     desc: "Entering the first topic loads the quiz"
     oracle: "#quiz-container present; a question with 4 answer options renders; sign image shown when the question has one"
@@ -84,10 +84,9 @@ afterwards.
 Route hints:
 
 - Topic links on the dashboard go to `/he/topics/<slug>`. Use the first/suggested topic.
-- The dashboard's stats strip includes streak, points, level, and a 20-question daily
-  goal. Its mission CTA targets the next unfinished topic; once all eligible questions
-  are complete it targets that topic's mistake review. The exam CTA is deliberately
-  promoted above the mission after 50% overall coverage.
+- Home shows one 20-question daily-progress line alongside the mission. Its mission CTA
+  targets the next unfinished topic; once all eligible questions are complete it targets
+  that topic's mistake review. Streak, points, and level live on More.
 - The quiz is driven by `public/js/quiz.js`: answer options are buttons inside
   `#quiz-container`; confirming an answer POSTs `/api/quiz`; finishing the batch shows
   `#quiz-final` and POSTs `/api/progress`. On a fresh browser session, the page passes

@@ -3,6 +3,14 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.185] — 2026-07-19
+
+### Changed
+
+- Simplified the authenticated Home screen around one daily task: removed greeting and reward narration, dashboard stat tiles, duplicate readiness and topic sections, course-total pressure, and excess topic metadata. Daily progress now appears beside the task, readiness appears inside the simulation CTA, and each topic has one concise status and progress bar. (#238, #239, #240, #241)
+
+---
+
 ## [0.3.184] — 2026-07-19
 
 ### Fixed
