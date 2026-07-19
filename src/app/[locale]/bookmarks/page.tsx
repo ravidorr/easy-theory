@@ -180,7 +180,7 @@ export default async function BookmarksPage() {
 
         <Script src="/js/bookmark.js" strategy="afterInteractive" />
       </main>
-      <TabBar active="more" />
+      <TabBar active="more" current={null} />
     </>
   );
 }

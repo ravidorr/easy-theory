@@ -24,8 +24,8 @@ vi.mock("@/components/SignImage", () => ({
     React.createElement("img", { src, alt, "data-testid": "sign-img" }),
 }));
 vi.mock("@/components/TabBar", () => ({
-  TabBar: ({ active }: { active: string }) =>
-    React.createElement("div", { "data-testid": "tabbar", "data-active": active }),
+  TabBar: ({ active, current }: { active: string; current?: string | null }) =>
+    React.createElement("div", { "data-testid": "tabbar", "data-active": active, "data-current": current ?? "none" }),
 }));
 vi.mock("next/script", () => ({
   default: ({ src }: { src: string }) =>
@@ -199,6 +199,7 @@ describe("BookmarksPage", () => {
     const jsx = await BookmarksPage();
     const { container } = render(jsx);
     expect(screen.getByTestId("tabbar")).toHaveAttribute("data-active", "more");
+    expect(screen.getByTestId("tabbar")).toHaveAttribute("data-current", "none");
     expect(container.querySelector("a[aria-label='closeLabel']")).toBeNull();
     expect(screen.queryByText("backHome")).not.toBeInTheDocument();
   });

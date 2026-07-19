@@ -24,7 +24,7 @@ export default async function Loading() {
           </div>
         ))}
       </SkeletonScreen>
-      <TabBar active="more" />
+      <TabBar active="more" current={null} />
     </>
   );
 }

@@ -25,7 +25,7 @@
   color: var(--text-faint);
 }
 
-.navItem[aria-current="page"] {
+.navItem[data-active="true"] {
   color: var(--primary-soft-text);
 }
 
@@ -41,12 +41,12 @@
 }
 
 @media (hover: hover) {
-  .navItem:not([aria-current="page"]):hover .iconPill {
+.navItem:not([data-active="true"]):hover .iconPill {
     background: var(--surface-2);
   }
 }
 
-.navItem[aria-current="page"] .iconPill {
+.navItem[data-active="true"] .iconPill {
   background: var(--primary-soft);
 }
 
@@ -55,6 +55,6 @@
   font-weight: 600;
 }
 
-.navItem[aria-current="page"] .navLabel {
+.navItem[data-active="true"] .navLabel {
   font-weight: 700;
 }
