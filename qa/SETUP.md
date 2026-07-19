@@ -41,7 +41,8 @@ In the project's **SQL editor**, run these files in exactly this order:
    `019_questions_achievement_serialization.sql`,
    `020_protect_achievement_medals.sql`,
    `021_protect_quiz_achievement_facts.sql`,
-   `022_correct_signs_104_107_locales.sql`)
+   `022_correct_signs_104_107_locales.sql`,
+   `023_migration_ledger.sql`)
 
 **Keep the QA project's schema in sync**: whenever a new file lands in
 `seeds/migrations/`, run it in the QA project's SQL editor too. The app's code assumes
@@ -113,7 +114,35 @@ To preview production reference-content changes for QA, run
 QA reference content and QA `user_srs_cards` rows. Production user rows are never
 downloaded by the sync tooling.
 
-## 7. Resetting the test user (optional)
+## 7. Direct catalog and migration audit
+
+After applying migration 023 to **both** projects, set these GitHub environment
+secrets on `database-audit` to direct PostgreSQL connection strings (not Supabase
+API URLs): `PROD_DATABASE_URL` and `QA_DATABASE_URL`. Then run the **Database Catalog
+Audit** workflow once. It compares tables, columns, constraints, indexes, RLS policies,
+triggers, function definitions, and grants, and verifies the migration ledger against
+the SQL files in `seeds/migrations/`.
+
+The workflow runs every six hours thereafter. `pnpm db:audit` runs the same read-only
+check locally when those two environment variables are available.
+
+Every migration from 024 onward must finish with its own ledger row. Put the marker
+and an initial placeholder checksum at the end of the file, run the checksum command,
+then replace the placeholder before executing the migration:
+
+```sql
+-- migration-ledger: the checksum literal is normalized before hashing
+INSERT INTO public.schema_migrations (version, filename, checksum)
+VALUES (24, '024_example.sql', '<sha256 from db:migration:checksum>');
+```
+
+```bash
+pnpm db:migration:checksum seeds/migrations/024_example.sql
+```
+
+The migration-integrity workflow rejects a new migration that lacks this marker.
+
+## 8. Resetting the test user (optional)
 
 To start a run from a clean slate, wipe the test user's data in the SQL editor:
 

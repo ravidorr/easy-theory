@@ -3,6 +3,14 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.188] — 2026-07-19
+
+### Added
+
+- Added a direct PostgreSQL catalog audit and checksum-backed migration ledger. Migration 023 records the verified 001–022 baseline; the scheduled audit compares both environments’ tables, columns, constraints, indexes, RLS policies, triggers, function definitions, and grants, then verifies every migration source against the ledger.
+
+---
+
 ## [0.3.187] — 2026-07-19
 
 ### Fixed

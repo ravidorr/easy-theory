@@ -1,0 +1,36 @@
+name: Database Catalog Audit
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "41 */6 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: Direct PostgreSQL catalog and migration ledger
+    runs-on: ubuntu-latest
+    environment: database-audit
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install trusted dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Audit direct PostgreSQL metadata and migration ledger
+        run: pnpm db:audit
+        env:
+          PROD_DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+          QA_DATABASE_URL: ${{ secrets.QA_DATABASE_URL }}

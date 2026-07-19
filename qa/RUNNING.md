@@ -76,6 +76,8 @@ Declare `out_of_scope` honestly (it feeds the NOT-tested section) and list
 | Command | What it does |
 | --- | --- |
 | `pnpm db:compare` | Compare production and QA API schema plus shared reference data |
+| `pnpm db:audit` | Compare direct PostgreSQL metadata and verify the migration ledger (requires direct DB URLs) |
+| `pnpm db:migration:checksum <file>` | Print the ledger checksum for a migration source |
 | `pnpm db:sync-reference` | Preview production reference-content updates for QA |
 | `pnpm qa:dev` | Start the QA dev server manually (port 3100) |
 | `pnpm qa:mint --check` | Verify DB connectivity + seed counts |
