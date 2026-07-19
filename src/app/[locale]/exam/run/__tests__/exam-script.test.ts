@@ -139,6 +139,7 @@ describe("exam.js – answering and navigation", () => {
   afterEach(() => {
     vi.useRealTimers();
     vi.unstubAllGlobals();
+    document.cookie = "quiz-auto-advance=; path=/; max-age=0";
   });
 
   it("marks the clicked option as selected and updates the answered counter", () => {
@@ -165,6 +166,61 @@ describe("exam.js – answering and navigation", () => {
     expect(options[0].getAttribute("aria-pressed")).toBe("false");
     expect(options[1].getAttribute("aria-pressed")).toBe("false");
     expect(options[3].getAttribute("aria-pressed")).toBe("false");
+  });
+
+  it("auto-advances 900ms after recording the selected answer by default", () => {
+    clickOption(0, "a");
+    expect(slide(0).querySelector('[data-option="a"]')!.getAttribute("aria-pressed")).toBe("true");
+    vi.advanceTimersByTime(899);
+    expect(slide(0).style.display).toBe("flex");
+    vi.advanceTimersByTime(1);
+    expect(slide(1).style.display).toBe("flex");
+  });
+
+  it("keeps the manual flow when the auto-advance preference is off", () => {
+    document.cookie = "quiz-auto-advance=off; path=/";
+    setupDOM();
+    clickOption(0, "a");
+    vi.advanceTimersByTime(2_000);
+    expect(slide(0).style.display).toBe("flex");
+    expect(nextBtn().style.display).not.toBe("none");
+    nextBtn().click();
+    expect(slide(1).style.display).toBe("flex");
+  });
+
+  it("keeps the manual flow for reduced-motion users without an explicit preference", () => {
+    vi.stubGlobal("matchMedia", vi.fn().mockReturnValue({ matches: true }));
+    setupDOM();
+    clickOption(0, "a");
+    vi.advanceTimersByTime(2_000);
+    expect(slide(0).style.display).toBe("flex");
+  });
+
+  it("honors an explicit auto-advance opt-in for reduced-motion users", () => {
+    document.cookie = "quiz-auto-advance=on; path=/";
+    vi.stubGlobal("matchMedia", vi.fn().mockReturnValue({ matches: true }));
+    setupDOM();
+    clickOption(0, "a");
+    vi.advanceTimersByTime(900);
+    expect(slide(1).style.display).toBe("flex");
+  });
+
+  it("restarts auto-advance after replacing an answer", () => {
+    clickOption(0, "a");
+    vi.advanceTimersByTime(800);
+    clickOption(0, "c");
+    vi.advanceTimersByTime(100);
+    expect(slide(0).style.display).toBe("flex");
+    vi.advanceTimersByTime(800);
+    expect(slide(1).style.display).toBe("flex");
+  });
+
+  it("cancels auto-advance after manual navigation", () => {
+    clickOption(0, "a");
+    nextBtn().click();
+    prevBtn().click();
+    vi.advanceTimersByTime(1_000);
+    expect(slide(0).style.display).toBe("flex");
   });
 
   it("navigates forward and back between slides", () => {

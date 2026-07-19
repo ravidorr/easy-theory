@@ -21,6 +21,14 @@ vi.mock("@/components/SignImage", () => ({
   SignImage: ({ src, alt = "" }: { src: string; alt?: string }) =>
     React.createElement("img", { src, alt }),
 }));
+vi.mock("@/components/TabBar", () => ({
+  TabBar: ({ active, current }: { active: string; current?: string | null }) =>
+    React.createElement("div", {
+      "data-testid": "tabbar",
+      "data-active": active,
+      "data-current": current ?? "none",
+    }),
+}));
 vi.mock("next/link", () => ({
   default: ({ href, children, ...rest }: { href: string; children: unknown }) =>
     React.createElement("a", { href, ...rest }, children as React.ReactNode),
@@ -123,6 +131,14 @@ describe("ExamRunPage", () => {
     expect(container.querySelector("#exam-submit")).toBeTruthy();
     expect(container.querySelector("#exam-result")).toBeTruthy();
     expect(container.querySelector('a[href="/exam"]')).toBeTruthy();
+  });
+
+  it("renders shared Home navigation without the redundant close control", async () => {
+    const jsx = await ExamRunPage();
+    const { container } = render(jsx);
+    expect(screen.getByTestId("tabbar")).toHaveAttribute("data-active", "home");
+    expect(screen.getByTestId("tabbar")).toHaveAttribute("data-current", "none");
+    expect(container.querySelector(".icon-btn")).toBeNull();
   });
 
   it("server-renders the hidden review bar", async () => {

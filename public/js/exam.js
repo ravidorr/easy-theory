@@ -11,6 +11,15 @@
 
   const durationSeconds = parseInt(container.dataset.durationSeconds, 10) || 2400;
   const WARNING_SECONDS = 300;
+  const AUTO_ADVANCE_DELAY_MS = 900;
+  const prefersReducedMotion =
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const autoAdvanceEnabled = (function () {
+    const match = document.cookie.match(/(?:^|;\s*)quiz-auto-advance=([^;]*)/);
+    if (match) return decodeURIComponent(match[1]) !== "off";
+    return !prefersReducedMotion;
+  })();
 
   const sessionId =
     window.crypto && typeof window.crypto.randomUUID === "function"
@@ -41,6 +50,7 @@
   let submitting = false;
   let submitted = false;
   let timerId = null;
+  let autoAdvanceTimer = null;
 
   function answeredCount() {
     return Object.keys(answers).length;
@@ -57,6 +67,24 @@
       clearInterval(timerId);
       timerId = null;
     }
+  }
+
+  function cancelAutoAdvance() {
+    if (autoAdvanceTimer !== null) {
+      clearTimeout(autoAdvanceTimer);
+      autoAdvanceTimer = null;
+    }
+  }
+
+  function scheduleAutoAdvance(questionIndex) {
+    cancelAutoAdvance();
+    if (!autoAdvanceEnabled || questionIndex >= total - 1) return;
+    autoAdvanceTimer = setTimeout(function () {
+      autoAdvanceTimer = null;
+      if (!submitted && !submitting && currentIndex === questionIndex) {
+        showSlide(questionIndex + 1);
+      }
+    }, AUTO_ADVANCE_DELAY_MS);
   }
 
   function tick() {
@@ -121,6 +149,7 @@
 
     updateAnswered();
     updateNav();
+    scheduleAutoAdvance(currentIndex);
   }
 
   // Exposes the correct/wrong result to screen readers; visually it is
@@ -190,6 +219,7 @@
 
   async function submit(auto) {
     if (submitting || submitted) return;
+    cancelAutoAdvance();
     if (!auto && answeredCount() < total) {
       const unanswered = total - answeredCount();
       const message = tf(t.examConfirmUnanswered || "יש {count} שאלות שלא נענו. להגיש בכל זאת?", {
@@ -257,13 +287,19 @@
 
   if (prevBtn) {
     prevBtn.addEventListener("click", function () {
-      if (currentIndex > 0) showSlide(currentIndex - 1);
+      if (currentIndex > 0) {
+        cancelAutoAdvance();
+        showSlide(currentIndex - 1);
+      }
     });
   }
 
   if (nextBtn) {
     nextBtn.addEventListener("click", function () {
-      if (currentIndex < total - 1) showSlide(currentIndex + 1);
+      if (currentIndex < total - 1) {
+        cancelAutoAdvance();
+        showSlide(currentIndex + 1);
+      }
     });
   }
 
@@ -275,6 +311,7 @@
 
   if (reviewBtn) {
     reviewBtn.addEventListener("click", function () {
+      cancelAutoAdvance();
       if (resultScreen) resultScreen.style.display = "none";
       if (timerEl) timerEl.hidden = true;
       if (answeredEl) answeredEl.hidden = true;
@@ -286,6 +323,7 @@
 
   if (backToResultsBtn) {
     backToResultsBtn.addEventListener("click", function () {
+      cancelAutoAdvance();
       slides.forEach(function (slide) { slide.style.display = "none"; });
       if (reviewBar) reviewBar.hidden = true;
       if (footer) footer.style.display = "none";

@@ -5,7 +5,7 @@ import Script from "next/script";
 import { existsSync } from "fs";
 import { join } from "path";
 import { SignImage } from "@/components/SignImage";
-import { Icon } from "@/components/Icon";
+import { TabBar } from "@/components/TabBar";
 import { createClient } from "@/lib/supabase";
 import { getRandomExamQuestions } from "@/lib/db";
 import type { Question } from "@/lib/db";
@@ -163,9 +163,6 @@ export default async function ExamRunPage() {
         className={styles.page}
       >
         <div className={styles.topBar}>
-          <Link href="/exam" className={`icon-btn ${styles.closeBtn}`} aria-label={t("closeLabel")}>
-            <Icon name="close" size={20} />
-          </Link>
           <div className={styles.progressTrack}>
             <div
               id="exam-progress-fill"
@@ -235,6 +232,8 @@ export default async function ExamRunPage() {
           </Link>
         </div>
       </main>
+
+      <TabBar active="home" current={null} />
 
       <Script src="/js/modal.js" strategy="afterInteractive" />
       <Script src="/js/medal.js" strategy="afterInteractive" />
