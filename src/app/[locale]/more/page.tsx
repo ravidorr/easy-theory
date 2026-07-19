@@ -110,6 +110,7 @@ export default async function MorePage() {
     <>
       <main className={styles.page}>
         <h1>{t("pageTitle")}</h1>
+        <p className={styles.subtitle}>{t("pageSubtitle")}</p>
 
         <div className={styles.statsCard}>
           <div className={styles.statCell}>
@@ -222,27 +223,29 @@ export default async function MorePage() {
         </div>
 
         <div className={styles.settingsCard}>
-          <label className={styles.settingsRow}>
+          <div className={styles.settingsRow}>
             <span className={styles.settingsIcon}>
               <Icon name="moon" size={20} />
             </span>
             <span className={styles.settingsRowLabel}>{t("darkMode")}</span>
-            <span
+            <button
+              type="button"
               id="dark-mode-toggle"
               role="switch"
               aria-checked={isDark ? "true" : "false"}
               className={`pressable ${styles.toggle} ${isDark ? styles.toggleOn : ""}`}
             >
               <span className={`${styles.toggleThumb} ${isDark ? styles.toggleThumbOn : ""}`} />
-            </span>
-          </label>
+            </button>
+          </div>
 
-          <label className={styles.settingsRow}>
+          <div className={styles.settingsRow}>
             <span className={styles.settingsIcon}>
               <Icon name="play" size={20} />
             </span>
             <span className={styles.settingsRowLabel}>{t("autoAdvance")}</span>
-            <span
+            <button
+              type="button"
               id="auto-advance-toggle"
               role="switch"
               aria-checked={autoAdvanceOn ? "true" : "false"}
@@ -251,8 +254,8 @@ export default async function MorePage() {
               <span
                 className={`${styles.toggleThumb} ${autoAdvanceOn ? styles.toggleThumbOn : ""}`}
               />
-            </span>
-          </label>
+            </button>
+          </div>
 
           <div className={styles.settingsRow}>
             <span className={styles.settingsIcon}>
@@ -263,7 +266,7 @@ export default async function MorePage() {
           </div>
         </div>
 
-        <button id="logout-btn" className={`pressable ${styles.logoutBtn}`}>
+        <button id="logout-btn" className={`btn-danger ${styles.logoutBtn}`}>
           {t("logoutBtn")}
         </button>
       </main>

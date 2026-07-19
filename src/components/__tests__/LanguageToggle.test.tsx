@@ -51,6 +51,18 @@ describe("LanguageToggle", () => {
     expect(mockReplace).toHaveBeenCalledWith("/he/more", { locale: "ar" });
   });
 
+  it("disables after activation to prevent duplicate locale changes", () => {
+    render(<LanguageToggle />);
+    const button = screen.getByRole("button");
+
+    fireEvent.click(button);
+    fireEvent.click(button);
+
+    expect(mockReplace).toHaveBeenCalledTimes(1);
+    expect(button).toBeDisabled();
+    expect(button).toHaveAttribute("aria-busy", "true");
+  });
+
   it("calls router.replace with he locale when clicked from ar", () => {
     vi.mocked(useLocale).mockReturnValue("ar");
     vi.mocked(usePathname).mockReturnValue("/ar/more");
