@@ -1,6 +1,6 @@
 {
   "name": "clear-road",
-  "version": "0.3.187",
+  "version": "0.3.188",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -18,6 +18,8 @@
     "generate-explanations": "tsx --env-file=.env.local scripts/generate_explanations.ts",
     "translate-arabic": "tsx --env-file=.env.local scripts/translate_arabic.ts",
     "db:compare": "tsx scripts/compare-databases.ts",
+    "db:audit": "tsx scripts/audit-database-metadata.ts",
+    "db:migration:checksum": "tsx scripts/checksum-migration.ts",
     "db:sync-reference": "tsx scripts/sync-reference-data.ts",
     "qa:dev": "scripts/qa/qa-dev.sh",
     "qa:mint": "tsx --env-file=.env.qa scripts/qa/mint-session.ts",
@@ -33,6 +35,7 @@
     "@vercel/speed-insights": "^2.0.0",
     "next": "16.3.0-preview.5",
     "next-intl": "^4.13.2",
+    "postgres": "^3.4.7",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-markdown": "^10.1.0",

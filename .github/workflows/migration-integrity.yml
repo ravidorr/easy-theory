@@ -66,3 +66,12 @@ jobs:
             fi
             expected=$((expected + 1))
           done
+
+          for file in $added_files; do
+            number="$(basename "$file" | cut -d_ -f1)"
+            if [ "$((10#$number))" -ge 24 ] && ! grep -q '^-- migration-ledger:' "$file"; then
+              echo "New migrations from 024 onward must append a migration-ledger row."
+              echo "See qa/SETUP.md for the required format."
+              exit 1
+            fi
+          done
