@@ -1,4 +1,4 @@
-const VERSION = "v2";
+const VERSION = "v3";
 const CACHE_PREFIX = "clearroad-";
 const STATIC_CACHE = `${CACHE_PREFIX}static-${VERSION}`;
 const PAGES_CACHE = `${CACHE_PREFIX}pages-${VERSION}`;
@@ -108,12 +108,14 @@ self.addEventListener("fetch", function (event) {
   // /_next/image is the optimizer endpoint the sign/question images (and
   // proxied video thumbnails) are served through; the direct /signs/ and
   // /questions/ paths still cover SVGs and JS-swapped flashcard images.
+  // Prefer a fresh image online so corrected assets replace stale cache entries;
+  // retain the cached response as the offline fallback.
   if (
     url.pathname.startsWith("/signs/") ||
     url.pathname.startsWith("/questions/") ||
     url.pathname.startsWith("/_next/image")
   ) {
-    event.respondWith(cacheFirst(request, IMAGES_CACHE));
+    event.respondWith(networkFirst(request, IMAGES_CACHE));
     return;
   }
   if (

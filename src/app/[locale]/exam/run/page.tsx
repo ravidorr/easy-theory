@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import Script from "next/script";
 import { existsSync } from "fs";
 import { join } from "path";
 import { SignImage } from "@/components/SignImage";
+import { QuestionImage } from "@/components/QuestionImage";
 import { TabBar } from "@/components/TabBar";
 import { createClient } from "@/lib/supabase";
 import { getRandomExamQuestions } from "@/lib/db";
@@ -86,12 +86,9 @@ function ExamSlide({
         {imageUrl && (
           isWide ? (
             <div className={styles.imgWide}>
-              <Image
+              <QuestionImage
                 src={imageUrl}
                 alt={t("questionImageAlt")}
-                width={480}
-                height={270}
-                sizes="(max-width: 480px) 100vw, 440px"
                 className={styles.imgEl}
               />
             </div>

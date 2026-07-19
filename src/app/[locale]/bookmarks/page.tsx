@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
-import Image from "next/image";
 import Script from "next/script";
 import { existsSync } from "fs";
 import { join } from "path";
 import { SignImage } from "@/components/SignImage";
+import { QuestionImage } from "@/components/QuestionImage";
 import { Icon } from "@/components/Icon";
 import { TabBar } from "@/components/TabBar";
 import { InlineMarkdown } from "@/components/InlineMarkdown";
@@ -82,12 +82,9 @@ function BookmarkCard({
       {imageUrl && (
         isWide ? (
           <div className={styles.imgWide}>
-            <Image
+            <QuestionImage
               src={imageUrl}
               alt={t("questionImageAlt")}
-              width={480}
-              height={270}
-              sizes="(max-width: 480px) 100vw, 440px"
               className={styles.imgEl}
             />
           </div>

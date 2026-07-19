@@ -3,6 +3,14 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.198] — 2026-07-20
+
+### Fixed
+
+- Question photos now fall back to the placeholder on runtime load failures, and PWA image requests refresh online while retaining offline cache support.
+
+---
+
 ## [0.3.197] — 2026-07-20
 
 ### Fixed

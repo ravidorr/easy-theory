@@ -5,9 +5,9 @@ import { resolve } from "path";
 const swScript = readFileSync(resolve(__dirname, "../../public/sw.js"), "utf-8");
 
 const ORIGIN = "http://localhost";
-const STATIC_CACHE = "clearroad-static-v2";
-const PAGES_CACHE = "clearroad-pages-v2";
-const IMAGES_CACHE = "clearroad-images-v2";
+const STATIC_CACHE = "clearroad-static-v3";
+const PAGES_CACHE = "clearroad-pages-v3";
+const IMAGES_CACHE = "clearroad-images-v3";
 
 interface FakeResponse {
   ok: boolean;
@@ -174,11 +174,11 @@ describe("sw.js", () => {
 
   describe("activate", () => {
     it("deletes stale clearroad caches, keeps current and foreign ones, claims clients", async () => {
-      cachesMock.stores.set("clearroad-static-v0", new Map());
+      cachesMock.stores.set("clearroad-images-v2", new Map());
       cachesMock.stores.set(STATIC_CACHE, new Map());
       cachesMock.stores.set("some-other-app", new Map());
       await dispatchLifecycle("activate");
-      expect(cachesMock.stores.has("clearroad-static-v0")).toBe(false);
+      expect(cachesMock.stores.has("clearroad-images-v2")).toBe(false);
       expect(cachesMock.stores.has(STATIC_CACHE)).toBe(true);
       expect(cachesMock.stores.has("some-other-app")).toBe(true);
       expect(selfMock.clients.claim).toHaveBeenCalled();
@@ -233,18 +233,19 @@ describe("sw.js", () => {
     });
   });
 
-  describe("fetch - images and static assets (cache-first)", () => {
-    it("caches sign images on first fetch and serves from cache after", async () => {
-      const networkResponse = makeResponse();
-      fetchMock.mockResolvedValue(networkResponse);
-      const first = await dispatchFetch(makeRequest("/signs/sign-301.png"));
-      expect(first.response).toBe(networkResponse);
-      expect(fetchMock).toHaveBeenCalledTimes(1);
+  describe("fetch - images and static assets", () => {
+    it("refreshes cached sign images from the network", async () => {
+      const cached = makeResponse();
+      const fresh = makeResponse();
+      const request = makeRequest("/signs/sign-301.png");
+      cachesMock.seed(IMAGES_CACHE, request, cached);
+      fetchMock.mockResolvedValue(fresh);
 
-      const second = await dispatchFetch(makeRequest("/signs/sign-301.png"));
-      expect(second.response).toBe(networkResponse);
+      const { response } = await dispatchFetch(request);
+
+      expect(response).toBe(fresh);
       expect(fetchMock).toHaveBeenCalledTimes(1);
-      expect(cachesMock.stores.get(IMAGES_CACHE)!.size).toBe(1);
+      expect(cachesMock.stores.get(IMAGES_CACHE)!.get(`${ORIGIN}/signs/sign-301.png`)).toBe(fresh);
     });
 
     it("serves question images from the images cache when offline", async () => {
@@ -253,19 +254,15 @@ describe("sw.js", () => {
       fetchMock.mockRejectedValue(new Error("offline"));
       const { response } = await dispatchFetch(makeRequest("/questions/3012.jpg"));
       expect(response).toBe(cached);
-      expect(fetchMock).not.toHaveBeenCalled();
+      expect(fetchMock).toHaveBeenCalledTimes(1);
     });
 
     it("caches optimized /_next/image responses in the images cache", async () => {
       const networkResponse = makeResponse();
       fetchMock.mockResolvedValue(networkResponse);
       const imageUrl = "/_next/image?url=%2Fsigns%2Fsign-301.png&w=96&q=75";
-      const first = await dispatchFetch(makeRequest(imageUrl));
-      expect(first.response).toBe(networkResponse);
-      expect(fetchMock).toHaveBeenCalledTimes(1);
-
-      const second = await dispatchFetch(makeRequest(imageUrl));
-      expect(second.response).toBe(networkResponse);
+      const { response } = await dispatchFetch(makeRequest(imageUrl));
+      expect(response).toBe(networkResponse);
       expect(fetchMock).toHaveBeenCalledTimes(1);
       expect(cachesMock.stores.get(IMAGES_CACHE)!.size).toBe(1);
     });
