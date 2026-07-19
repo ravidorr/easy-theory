@@ -265,9 +265,7 @@
     "builtWithTitle": "נבנה עם",
     "supabaseDesc": "בסיס נתונים ואימות משתמשים",
     "geminiDesc": "הסברים חכמים לשאלות שגויות",
-    "rubikDesc": "גופן עברי ולטיני - Google Fonts",
-    "footer": "© 2026 Raanan Avidor · קוד פתוח",
-    "backLabel": "חזרה"
+    "rubikDesc": "גופן עברי ולטיני - Google Fonts"
   },
   "Api": {
     "notAuthenticated": "נדרשת התחברות",

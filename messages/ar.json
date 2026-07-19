@@ -265,9 +265,7 @@
     "builtWithTitle": "بُني بـ",
     "supabaseDesc": "قاعدة البيانات والمصادقة",
     "geminiDesc": "شرح ذكي للأسئلة الخاطئة",
-    "rubikDesc": "خط عربي ولاتيني - Google Fonts",
-    "footer": "© 2026 Raanan Avidor · مفتوح المصدر",
-    "backLabel": "رجوع"
+    "rubikDesc": "خط عربي ولاتيني - Google Fonts"
   },
   "Api": {
     "notAuthenticated": "يجب تسجيل الدخول",

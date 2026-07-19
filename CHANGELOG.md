@@ -3,6 +3,14 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.192] — 2026-07-19
+
+### Fixed
+
+- Credits now uses the shared More navigation, removes redundant header/footer chrome, and links to the live Wikimedia road-sign category. (#252)
+
+---
+
 ## [0.3.191] — 2026-07-19
 
 ### Fixed

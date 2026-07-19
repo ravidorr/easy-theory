@@ -11,12 +11,12 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
-vi.mock("next/link", () => ({
-  default: ({ href, children, ...rest }: { href: string; children: unknown }) =>
-    React.createElement("a", { href, ...rest }, children as React.ReactNode),
-}));
 vi.mock("@/components/SignImage", () => ({
   SignImage: ({ src }: { src: string }) => React.createElement("img", { src }),
+}));
+vi.mock("@/components/TabBar", () => ({
+  TabBar: ({ active }: { active: string }) =>
+    React.createElement("div", { "data-testid": "tabbar", "data-active": active }),
 }));
 vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn().mockResolvedValue((key: string) => key),
@@ -41,16 +41,16 @@ describe("CreditsPage", () => {
     await expect(CreditsPage()).rejects.toThrow("redirect");
   });
 
-  it("renders a back link to /more", async () => {
+  it("renders the More TabBar as active", async () => {
     const jsx = await CreditsPage();
-    const { container } = render(jsx);
-    expect(container.querySelector('a[href="/more"]')).toBeTruthy();
+    render(jsx);
+    expect(screen.getByTestId("tabbar")).toHaveAttribute("data-active", "more");
   });
 
-  it("gives the icon-only back link an accessible name", async () => {
+  it("does not render a top-level back link", async () => {
     const jsx = await CreditsPage();
     const { container } = render(jsx);
-    expect(container.querySelector("a[aria-label='backLabel']")).toBeTruthy();
+    expect(container.querySelector('a[href="/more"]')).toBeNull();
   });
 
   it("renders the data sources section heading", async () => {
@@ -77,6 +77,14 @@ describe("CreditsPage", () => {
     expect(screen.getByText("credit3Title")).toBeInTheDocument();
   });
 
+  it("links Wikimedia Commons to the live Israel road-sign category", async () => {
+    const jsx = await CreditsPage();
+    const { container } = render(jsx);
+    expect(
+      container.querySelector('a[href="https://commons.wikimedia.org/wiki/Category:Road_signs_in_Israel"]'),
+    ).toBeTruthy();
+  });
+
   it("credits Next.js (hardcoded name)", async () => {
     const jsx = await CreditsPage();
     render(jsx);
@@ -87,5 +95,11 @@ describe("CreditsPage", () => {
     const jsx = await CreditsPage();
     render(jsx);
     expect(screen.getByRole("heading", { level: 1, name: "pageTitle" })).toBeInTheDocument();
+  });
+
+  it("does not render the legacy copyright footer", async () => {
+    const jsx = await CreditsPage();
+    render(jsx);
+    expect(screen.queryByText("footer")).not.toBeInTheDocument();
   });
 });
