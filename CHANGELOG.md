@@ -3,6 +3,14 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.197] — 2026-07-20
+
+### Fixed
+
+- Exam results actions now use matching full-width buttons.
+
+---
+
 ## [0.3.196] — 2026-07-19
 
 ### Fixed
