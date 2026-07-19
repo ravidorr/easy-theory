@@ -3,6 +3,14 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.191] — 2026-07-19
+
+### Fixed
+
+- Exam start now uses the shared bottom navigation with Home active, without a redundant close control. (#253)
+
+---
+
 ## [0.3.190] — 2026-07-19
 
 ### Fixed

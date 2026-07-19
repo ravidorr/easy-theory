@@ -17,6 +17,9 @@ vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn(),
   getLocale: vi.fn(),
 }));
+vi.mock("@/components/TabBar", () => ({
+  TabBar: ({ active }: { active: string }) => <div data-testid="tabbar" data-active={active} />,
+}));
 
 const mockCreateClient = vi.mocked(createClient);
 const mockGetExamAttempts = vi.mocked(getExamAttempts);
@@ -94,11 +97,10 @@ describe("ExamPage", () => {
     expect(container.textContent).toContain("٢٠٢٦");
   });
 
-  it("has an accessible close link back home", async () => {
+  it("renders the home TabBar without a top-level close control", async () => {
     const jsx = await ExamPage();
     const { container } = render(jsx);
-    const close = container.querySelector('a[href="/"]');
-    expect(close).toBeTruthy();
-    expect(close?.getAttribute("aria-label")).toBe("closeLabel");
+    expect(screen.getByTestId("tabbar")).toHaveAttribute("data-active", "home");
+    expect(container.querySelector("a[aria-label='closeLabel']")).toBeNull();
   });
 });
