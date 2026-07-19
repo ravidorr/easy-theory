@@ -188,6 +188,23 @@ describe("exam.js – answering and navigation", () => {
     expect(slide(1).style.display).toBe("flex");
   });
 
+  it("keeps the manual flow for reduced-motion users without an explicit preference", () => {
+    vi.stubGlobal("matchMedia", vi.fn().mockReturnValue({ matches: true }));
+    setupDOM();
+    clickOption(0, "a");
+    vi.advanceTimersByTime(2_000);
+    expect(slide(0).style.display).toBe("flex");
+  });
+
+  it("honors an explicit auto-advance opt-in for reduced-motion users", () => {
+    document.cookie = "quiz-auto-advance=on; path=/";
+    vi.stubGlobal("matchMedia", vi.fn().mockReturnValue({ matches: true }));
+    setupDOM();
+    clickOption(0, "a");
+    vi.advanceTimersByTime(900);
+    expect(slide(1).style.display).toBe("flex");
+  });
+
   it("restarts auto-advance after replacing an answer", () => {
     clickOption(0, "a");
     vi.advanceTimersByTime(800);

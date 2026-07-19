@@ -12,9 +12,13 @@
   const durationSeconds = parseInt(container.dataset.durationSeconds, 10) || 2400;
   const WARNING_SECONDS = 300;
   const AUTO_ADVANCE_DELAY_MS = 900;
+  const prefersReducedMotion =
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const autoAdvanceEnabled = (function () {
     const match = document.cookie.match(/(?:^|;\s*)quiz-auto-advance=([^;]*)/);
-    return !match || decodeURIComponent(match[1]) !== "off";
+    if (match) return decodeURIComponent(match[1]) !== "off";
+    return !prefersReducedMotion;
   })();
 
   const sessionId =
