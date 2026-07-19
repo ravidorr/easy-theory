@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { TabBar } from "@/components/TabBar";
 import {
   Skeleton,
   SkeletonCard,
@@ -12,23 +13,23 @@ export default async function Loading() {
   const t = await getTranslations("Loading");
 
   return (
-    <SkeletonScreen label={t("label")} className={styles.page}>
-      <SkeletonRow>
-        <Skeleton variant="circle" size="s40" />
+    <>
+      <SkeletonScreen label={t("label")} className={styles.page}>
         <SkeletonCol>
-          <Skeleton size="w40" />
+          <Skeleton variant="lineLg" size="w40" />
           <Skeleton size="w25" />
         </SkeletonCol>
-      </SkeletonRow>
-      <Skeleton variant="bar" />
-      <SkeletonCard>
-        <Skeleton variant="image" />
-        <Skeleton size="w60" />
-      </SkeletonCard>
-      <SkeletonRow>
-        <Skeleton variant="block" />
-        <Skeleton variant="block" />
-      </SkeletonRow>
-    </SkeletonScreen>
+        <Skeleton variant="bar" />
+        <SkeletonCard>
+          <Skeleton variant="image" />
+          <Skeleton size="w60" />
+        </SkeletonCard>
+        <SkeletonRow>
+          <Skeleton variant="block" />
+          <Skeleton variant="block" />
+        </SkeletonRow>
+      </SkeletonScreen>
+      <TabBar active="cards" />
+    </>
   );
 }

@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import Script from "next/script";
 import { SignImage } from "@/components/SignImage";
 import { Icon } from "@/components/Icon";
+import { TabBar } from "@/components/TabBar";
 import { createClient } from "@/lib/supabase";
 import { getSigns, getSignSrsCards } from "@/lib/db";
 import type { Sign, SrsCard } from "@/lib/db";
@@ -130,16 +130,11 @@ export default async function FlashcardsPage() {
   return (
     <>
       <main className={styles.page}>
-        <div className={styles.topBar}>
-          <Link href="/" className={`icon-btn ${styles.backBtn}`} aria-label={t("backLabel")}>
-            →
-          </Link>
-          <div className={styles.topBarBody}>
-            <span className={styles.topBarTitle}>{t("topBarTitle")}</span>
-            <span id="fc-count" className={styles.topBarCount}>
-              {t("cardCount", { current: 1, total })}
-            </span>
-          </div>
+        <div>
+          <h1>{t("topBarTitle")}</h1>
+          <span id="fc-count" className={styles.topBarCount}>
+            {t("cardCount", { current: 1, total })}
+          </span>
         </div>
 
         {dueCount > 0 && (
@@ -181,6 +176,7 @@ export default async function FlashcardsPage() {
       </main>
 
       <Script src="/js/flashcard.js" strategy="afterInteractive" />
+      <TabBar active="cards" />
     </>
   );
 }
