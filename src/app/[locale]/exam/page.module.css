@@ -1,6 +1,6 @@
 .page {
   background: var(--bg);
-  padding: 20px 20px 40px;
+  padding: 20px 20px 96px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -16,24 +16,6 @@
   font-weight: var(--type-h1-weight);
   line-height: var(--line-tight);
   color: var(--text);
-}
-
-.topBar {
-  display: flex;
-  align-items: center;
-  min-height: 32px;
-}
-
-.closeBtn {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-  color: var(--text-muted);
-  background: var(--surface-2);
 }
 
 .subtitle {
