@@ -5,7 +5,13 @@ import styles from "./TabBar.module.css";
 
 type ActiveTab = "home" | "videos" | "cards" | "links" | "more";
 
-export async function TabBar({ active }: { active: ActiveTab }) {
+export async function TabBar({
+  active,
+  current = active,
+}: {
+  active: ActiveTab;
+  current?: ActiveTab | null;
+}) {
   const t = await getTranslations("TabBar");
 
   const tabs = [
@@ -45,11 +51,13 @@ export async function TabBar({ active }: { active: ActiveTab }) {
     <nav className={styles.nav}>
       {tabs.map((tab) => {
         const isActive = tab.key === active;
+        const isCurrent = tab.key === current;
         return (
           <Link
             key={tab.key}
             href={tab.href}
-            aria-current={isActive ? "page" : undefined}
+            aria-current={isCurrent ? "page" : undefined}
+            data-active={isActive ? "true" : undefined}
             className={`pressable ${styles.navItem}`}
           >
             <span className={styles.iconPill}>{tab.icon}</span>

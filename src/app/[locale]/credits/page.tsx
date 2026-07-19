@@ -133,7 +133,7 @@ export default async function CreditsPage() {
         </a>
         </div>
       </main>
-      <TabBar active="more" />
+      <TabBar active="more" current={null} />
     </>
   );
 }

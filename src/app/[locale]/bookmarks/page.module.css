@@ -1,6 +1,6 @@
 .page {
   background: var(--bg);
-  padding: 20px;
+  padding: 20px 20px 96px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -12,30 +12,10 @@
 
 .page h1 {
   margin: 0;
-  font-size: var(--type-h2-size);
-  font-weight: var(--type-h2-weight);
+  font-size: var(--type-h1-size);
+  font-weight: var(--type-h1-weight);
+  line-height: var(--line-tight);
   color: var(--text);
-}
-
-.topBar {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.closeBtn {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 1px solid var(--border-strong);
-  background: var(--surface);
-  color: var(--text-muted);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  text-decoration: none;
 }
 
 .questionCard {
@@ -137,20 +117,8 @@
   color: var(--text-muted);
 }
 
-.btnWide {
-  min-width: 180px;
-}
-
 .bookmarkCount {
   margin: 0;
   font-size: var(--type-small-size);
   color: var(--text-muted);
-}
-
-.btnFull {
-  width: 100%;
-}
-
-.returnLink {
-  margin-top: 8px;
 }

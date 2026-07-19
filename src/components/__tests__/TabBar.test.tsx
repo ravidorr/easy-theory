@@ -65,4 +65,12 @@ describe("TabBar", () => {
     expect(screen.getByText("קישורים").closest("a")).not.toHaveAttribute("aria-current");
     expect(screen.getByText("עוד").closest("a")).not.toHaveAttribute("aria-current");
   });
+
+  it("keeps a section active without marking another route as current", async () => {
+    render(await TabBar({ active: "more", current: null }));
+    expect(screen.getByText("עוד").closest("a")).toHaveAttribute("data-active", "true");
+    for (const { label } of tabs) {
+      expect(screen.getByText(label).closest("a")).not.toHaveAttribute("aria-current");
+    }
+  });
 });

@@ -6,8 +6,8 @@ vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn().mockResolvedValue((key: string) => key),
 }));
 vi.mock("@/components/TabBar", () => ({
-  TabBar: ({ active }: { active: string }) => (
-    <div data-testid="tabbar" data-active={active} />
+  TabBar: ({ active, current }: { active: string; current?: string | null }) => (
+    <div data-testid="tabbar" data-active={active} data-current={current ?? "none"} />
   ),
 }));
 
@@ -26,5 +26,6 @@ describe("credits loading skeleton", () => {
   it("keeps the More TabBar visible", async () => {
     render(await Loading());
     expect(screen.getByTestId("tabbar")).toHaveAttribute("data-active", "more");
+    expect(screen.getByTestId("tabbar")).toHaveAttribute("data-current", "none");
   });
 });

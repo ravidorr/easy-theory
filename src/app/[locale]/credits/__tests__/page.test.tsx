@@ -15,8 +15,8 @@ vi.mock("@/components/SignImage", () => ({
   SignImage: ({ src }: { src: string }) => React.createElement("img", { src }),
 }));
 vi.mock("@/components/TabBar", () => ({
-  TabBar: ({ active }: { active: string }) =>
-    React.createElement("div", { "data-testid": "tabbar", "data-active": active }),
+  TabBar: ({ active, current }: { active: string; current?: string | null }) =>
+    React.createElement("div", { "data-testid": "tabbar", "data-active": active, "data-current": current ?? "none" }),
 }));
 vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn().mockResolvedValue((key: string) => key),
@@ -45,6 +45,7 @@ describe("CreditsPage", () => {
     const jsx = await CreditsPage();
     render(jsx);
     expect(screen.getByTestId("tabbar")).toHaveAttribute("data-active", "more");
+    expect(screen.getByTestId("tabbar")).toHaveAttribute("data-current", "none");
   });
 
   it("does not render a top-level back link", async () => {
