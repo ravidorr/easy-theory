@@ -3,12 +3,9 @@ import { SignImage } from "@/components/SignImage";
 import { createClient } from "@/lib/supabase";
 import { getResources, type Resource } from "@/lib/db";
 import { TabBar } from "@/components/TabBar";
-import { Icon } from "@/components/Icon";
 import { getLocale, getTranslations } from "next-intl/server";
 import { localizedContent } from "@/lib/content-locale";
 import styles from "./page.module.css";
-
-const ExternalIcon = () => <Icon name="external" size={18} className={styles.externalIcon} />;
 
 const iconWrapVariants: Record<Resource["icon_variant"], string> = {
   neutral: styles.iconWrapNeutral,
@@ -29,9 +26,14 @@ export default async function ResourcesPage() {
   const loc = (he: string | null, ar: string | null) => localizedContent(locale, he, ar);
 
   const resources = await getResources(supabase);
+  const [featured, ...officialResources] = resources.filter((resource) => resource.section === "official");
   const sections = [
-    { title: t("officialTitle"), items: resources.filter((r) => r.section === "official") },
-    { title: t("practiceTitle"), items: resources.filter((r) => r.section === "practice") },
+    { title: t("officialTitle"), featured, items: officialResources },
+    {
+      title: t("practiceTitle"),
+      featured: undefined,
+      items: resources.filter((resource) => resource.section === "practice"),
+    },
   ];
 
   return (
@@ -39,12 +41,37 @@ export default async function ResourcesPage() {
       <main className={styles.page}>
         <div>
           <h1>{t("pageTitle")}</h1>
-          <span className={styles.subtitle}>{t("subtitle")}</span>
         </div>
 
         {sections.map((section) => (
           <div key={section.title} className={styles.section}>
             <h2>{section.title}</h2>
+
+            {section.featured && (
+              <a
+                href={section.featured.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`pressable-card ${styles.featuredLink}`}
+                data-testid="featured-resource"
+              >
+                <div className={styles.featuredVisual}>
+                  {section.featured.icon_type === "sign" ? (
+                    <SignImage src={section.featured.icon_value} size="md" />
+                  ) : (
+                    <span className={styles.featuredChar}>{section.featured.icon_value}</span>
+                  )}
+                </div>
+                <div className={styles.featuredBody}>
+                  <span className={styles.resourceTitle}>
+                    {loc(section.featured.title_he, section.featured.title_ar)}
+                  </span>
+                  <span className={styles.resourceDesc}>
+                    {loc(section.featured.description_he, section.featured.description_ar)}
+                  </span>
+                </div>
+              </a>
+            )}
 
             {section.items.map((resource) => (
               <a
@@ -69,7 +96,6 @@ export default async function ResourcesPage() {
                     {loc(resource.description_he, resource.description_ar)}
                   </span>
                 </div>
-                <ExternalIcon />
               </a>
             ))}
           </div>

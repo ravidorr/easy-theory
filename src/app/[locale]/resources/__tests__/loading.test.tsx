@@ -19,9 +19,10 @@ describe("resources loading skeleton", () => {
     expect(container.querySelector("main")).toHaveAttribute("aria-busy", "true");
   });
 
-  it("mirrors two sections of resource rows", async () => {
+  it("mirrors the featured resource and compact resource rows", async () => {
     const { container } = render(await Loading());
-    expect(container.querySelectorAll('[data-skeleton="card"]')).toHaveLength(6);
+    expect(container.querySelectorAll('[data-skeleton="image"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-skeleton="card"]')).toHaveLength(4);
   });
 
   it("keeps the links tab bar visible", async () => {

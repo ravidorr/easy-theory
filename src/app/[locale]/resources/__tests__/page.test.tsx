@@ -112,6 +112,27 @@ describe("ResourcesPage", () => {
     expect(externalLinks).toHaveLength(4);
   });
 
+  it("promotes the first official resource to a featured card", async () => {
+    const jsx = await ResourcesPage();
+    const { container } = render(jsx);
+    const featured = container.querySelector('[data-testid="featured-resource"]');
+
+    expect(featured).toHaveAttribute(
+      "href",
+      "https://www.gov.il/he/pages/tamrurim_7924_01_18"
+    );
+    expect(featured).toHaveAttribute("target", "_blank");
+    expect(featured!.querySelector('img[src="/signs/sign-301.png"]')).toBeTruthy();
+  });
+
+  it("does not render a subtitle or external-link icon", async () => {
+    const jsx = await ResourcesPage();
+    const { container } = render(jsx);
+
+    expect(screen.queryByText("subtitle")).not.toBeInTheDocument();
+    expect(container.querySelectorAll("svg")).toHaveLength(0);
+  });
+
   it("renders link to the official government signs chart with its sign icon", async () => {
     const jsx = await ResourcesPage();
     const { container } = render(jsx);
