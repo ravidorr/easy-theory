@@ -3,6 +3,14 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.195] — 2026-07-19
+
+### Fixed
+
+- More now has account-focused copy, persistent semantic settings controls, protected language switching, and a destructive logout action. (#250)
+
+---
+
 ## [0.3.194] — 2026-07-19
 
 ### Fixed

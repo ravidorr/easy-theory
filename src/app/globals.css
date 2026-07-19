@@ -433,8 +433,36 @@ button.quiz-option:active { transform: scale(0.985); }
   background: var(--surface-3);
 }
 
+.btn-danger {
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 15.5px;
+  min-height: var(--hit-min);
+  padding: 10px 22px;
+  border-radius: var(--radius-lg);
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--danger);
+  color: #fff;
+  transition: background 120ms, transform 80ms;
+}
+
+.btn-danger:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.btn-secondary:disabled,
+.btn-danger:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
 a.btn-primary,
-a.btn-secondary {
+a.btn-secondary,
+a.btn-danger {
   text-decoration: none;
 }
 

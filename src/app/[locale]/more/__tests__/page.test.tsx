@@ -82,6 +82,13 @@ describe("MorePage", () => {
     await expect(MorePage()).rejects.toThrow("redirect");
   });
 
+  it("renders the account heading and subtitle", async () => {
+    const jsx = await MorePage();
+    render(jsx);
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("pageTitle");
+    expect(screen.getByText("pageSubtitle")).toBeTruthy();
+  });
+
   it("renders navigation links to exam, schedule, bookmarks, and credits", async () => {
     const jsx = await MorePage();
     const { container } = render(jsx);
@@ -232,6 +239,8 @@ describe("MorePage", () => {
     const { container } = render(jsx);
     const toggle = container.querySelector("#dark-mode-toggle");
     expect(toggle).toHaveAttribute("aria-checked", "true");
+    expect(toggle?.tagName).toBe("BUTTON");
+    expect(toggle).toHaveAttribute("type", "button");
   });
 
   it("defaults to dark mode when theme cookie is absent", async () => {
@@ -248,6 +257,14 @@ describe("MorePage", () => {
     const { container } = render(jsx);
     const toggle = container.querySelector("#auto-advance-toggle");
     expect(toggle).toHaveAttribute("aria-checked", "true");
+    expect(toggle?.tagName).toBe("BUTTON");
+    expect(toggle).toHaveAttribute("type", "button");
+  });
+
+  it("uses the shared destructive button for logout", async () => {
+    const jsx = await MorePage();
+    const { container } = render(jsx);
+    expect(container.querySelector("#logout-btn")?.className).toContain("btn-danger");
   });
 
   it("renders the auto-advance toggle off when the cookie opts out", async () => {
