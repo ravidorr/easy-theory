@@ -23,9 +23,9 @@ vi.mock("@/components/SignImage", () => ({
   SignImage: ({ src, alt = "" }: { src: string; alt?: string }) =>
     React.createElement("img", { src, alt, "data-testid": "sign-img" }),
 }));
-vi.mock("next/link", () => ({
-  default: ({ href, children, ...rest }: { href: string; children: unknown }) =>
-    React.createElement("a", { href, ...rest }, children as React.ReactNode),
+vi.mock("@/components/TabBar", () => ({
+  TabBar: ({ active }: { active: string }) =>
+    React.createElement("div", { "data-testid": "tabbar", "data-active": active }),
 }));
 vi.mock("next/script", () => ({
   default: ({ src }: { src: string }) =>
@@ -83,11 +83,11 @@ describe("BookmarksPage", () => {
     await expect(BookmarksPage()).rejects.toThrow("redirect");
   });
 
-  it("shows emptyHint and a home link when there are no bookmarks", async () => {
+  it("shows emptyHint without a return-home CTA when there are no bookmarks", async () => {
     const jsx = await BookmarksPage();
-    const { container } = render(jsx);
+    render(jsx);
     expect(screen.getByText("emptyHint")).toBeInTheDocument();
-    expect(container.querySelector('a[href="/"]')).toBeTruthy();
+    expect(screen.queryByText("backHome")).not.toBeInTheDocument();
   });
 
   it("shows countOne for a single bookmark", async () => {
@@ -194,10 +194,13 @@ describe("BookmarksPage", () => {
     expect(screen.queryByText("מה המשמעות של תמרור זה?")).not.toBeInTheDocument();
   });
 
-  it("links back to the more page from the top bar", async () => {
+  it("renders the More TabBar as active without redundant exit controls", async () => {
+    mockGetBookmarks.mockResolvedValue([BOOKMARK_A] as never);
     const jsx = await BookmarksPage();
     const { container } = render(jsx);
-    expect(container.querySelector('a[href="/more"][aria-label="closeLabel"]')).toBeTruthy();
+    expect(screen.getByTestId("tabbar")).toHaveAttribute("data-active", "more");
+    expect(container.querySelector("a[aria-label='closeLabel']")).toBeNull();
+    expect(screen.queryByText("backHome")).not.toBeInTheDocument();
   });
 
   it("loads the bookmark script", async () => {

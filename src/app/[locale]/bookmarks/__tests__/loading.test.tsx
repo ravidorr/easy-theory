@@ -5,6 +5,11 @@ import Loading from "../loading";
 vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn().mockResolvedValue((key: string) => key),
 }));
+vi.mock("@/components/TabBar", () => ({
+  TabBar: ({ active }: { active: string }) => (
+    <div data-testid="tabbar" data-active={active} />
+  ),
+}));
 
 describe("bookmarks loading skeleton", () => {
   it("announces loading and marks the content busy", async () => {
@@ -17,5 +22,10 @@ describe("bookmarks loading skeleton", () => {
     const { container } = render(await Loading());
     expect(container.querySelectorAll('[data-skeleton="card"]')).toHaveLength(2);
     expect(container.querySelectorAll('[data-skeleton="block"]')).toHaveLength(8);
+  });
+
+  it("keeps the More TabBar visible", async () => {
+    render(await Loading());
+    expect(screen.getByTestId("tabbar")).toHaveAttribute("data-active", "more");
   });
 });

@@ -1,11 +1,11 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import Image from "next/image";
 import Script from "next/script";
 import { existsSync } from "fs";
 import { join } from "path";
 import { SignImage } from "@/components/SignImage";
 import { Icon } from "@/components/Icon";
+import { TabBar } from "@/components/TabBar";
 import { InlineMarkdown } from "@/components/InlineMarkdown";
 import { createClient } from "@/lib/supabase";
 import { getBookmarkedQuestions } from "@/lib/db";
@@ -157,38 +157,30 @@ export default async function BookmarksPage() {
   }));
 
   return (
-    <main className={styles.page}>
-      <div className={styles.topBar}>
-        <Link href="/more" className={`icon-btn ${styles.closeBtn}`} aria-label={tQuiz("closeLabel")}>
-          <Icon name="close" size={20} />
-        </Link>
+    <>
+      <main className={styles.page}>
         <h1>{t("topBarTitle")}</h1>
-      </div>
 
-      {localizedBookmarks.length === 0 ? (
-        <div className={styles.emptyState}>
-          <p className={styles.emptyHint}>{t("emptyHint")}</p>
-          <Link href="/" className={`btn-primary ${styles.btnWide}`}>
-            {t("backHome")}
-          </Link>
-        </div>
-      ) : (
-        <>
-          <p className={styles.bookmarkCount}>
-            {localizedBookmarks.length === 1
-              ? t("countOne")
-              : t("countMany", { count: localizedBookmarks.length })}
-          </p>
-          {localizedBookmarks.map((bookmark) => (
-            <BookmarkCard key={bookmark.id} question={bookmark} letters={letters} t={tQuiz} />
-          ))}
-          <Link href="/" className={`btn-primary ${styles.btnFull} ${styles.returnLink}`}>
-            {t("backHome")}
-          </Link>
-        </>
-      )}
+        {localizedBookmarks.length === 0 ? (
+          <div className={styles.emptyState}>
+            <p className={styles.emptyHint}>{t("emptyHint")}</p>
+          </div>
+        ) : (
+          <>
+            <p className={styles.bookmarkCount}>
+              {localizedBookmarks.length === 1
+                ? t("countOne")
+                : t("countMany", { count: localizedBookmarks.length })}
+            </p>
+            {localizedBookmarks.map((bookmark) => (
+              <BookmarkCard key={bookmark.id} question={bookmark} letters={letters} t={tQuiz} />
+            ))}
+          </>
+        )}
 
-      <Script src="/js/bookmark.js" strategy="afterInteractive" />
-    </main>
+        <Script src="/js/bookmark.js" strategy="afterInteractive" />
+      </main>
+      <TabBar active="more" />
+    </>
   );
 }

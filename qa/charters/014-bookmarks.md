@@ -34,7 +34,7 @@ checks:
     oracle: "The Bookmarks row on `/he/more` opens `/he/bookmarks`; the list includes the saved question's text, correct option, and explanation when available, with its bookmark control pressed"
   - id: CHK-BOOKMARK-04
     desc: "Removing a saved question propagates and restores the empty state"
-    oracle: "Setting the bookmark control to off sends successful PUT `/api/bookmarks` with `bookmarked: false`; after reload the question is absent from `/he/bookmarks`, its source control is unpressed, and when the isolated run user's list is empty the localized empty state and back-home link render"
+    oracle: "Setting the bookmark control to off sends successful PUT `/api/bookmarks` with `bookmarked: false`; after reload the question is absent from `/he/bookmarks`, its source control is unpressed, and when the isolated run user's list is empty the localized empty state and usable More TabBar render without a return-home CTA"
   - id: CHK-BOOKMARK-05
     desc: "Bookmark failures preserve the prior visual state"
     oracle: "If a PUT `/api/bookmarks` request is forced to fail, the control rolls back to its prior `aria-pressed` state and a localized polite error is announced; no stale optimistic saved state remains"
@@ -69,7 +69,7 @@ Route hints:
   `{ question_id, bookmarked: boolean }`. A failed request must roll back the
   optimistic pressed state and announce the localized error.
 - More has a `/he/bookmarks` row. The list page renders each saved question with the
-  correct answer and explanation, where available; its empty state returns home.
+  correct answer and explanation, where available; its empty state retains the More TabBar.
 - To force the write-failure check, use browser request blocking or response override
   for `/api/bookmarks`; restore network handling immediately afterwards.
 - Copy sources: `messages/he.json`, namespaces `Bookmarks` and `Quiz`.
