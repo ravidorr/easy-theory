@@ -17,12 +17,12 @@ vi.mock("@/components/SignImage", () => ({
   SignImage: ({ src, alt, className }: { src: string; alt: string; className?: string }) =>
     React.createElement("img", { src, alt, className }),
 }));
-vi.mock("next/link", () => ({
-  default: ({ href, children, ...rest }: { href: string; children: unknown }) =>
-    React.createElement("a", { href, ...rest }, children as React.ReactNode),
-}));
 vi.mock("next/script", () => ({
   default: () => React.createElement("div", null),
+}));
+vi.mock("@/components/TabBar", () => ({
+  TabBar: ({ active }: { active: string }) =>
+    React.createElement("div", { "data-testid": "tabbar", "data-active": active }),
 }));
 // Echo keys, except signBadge which interpolates so the numeric-name
 // fallback test can verify the sign number is threaded through.
@@ -88,11 +88,11 @@ describe("FlashcardsPage", () => {
     await expect(FlashcardsPage()).rejects.toThrow("redirect");
   });
 
-  it("shows cardCount key in header", async () => {
+  it("shows the shared title hierarchy and card count", async () => {
     mockGetSigns.mockResolvedValue([SIGN_1, SIGN_2] as never);
     const jsx = await FlashcardsPage();
     render(jsx);
-    // t("cardCount", { current: 1, total }) returns "cardCount"
+    expect(screen.getByRole("heading", { level: 1, name: "topBarTitle" })).toBeInTheDocument();
     expect(screen.getByText("cardCount")).toBeInTheDocument();
   });
 
@@ -158,18 +158,18 @@ describe("FlashcardsPage", () => {
     expect(container.querySelector("#fc-name")!.textContent).toContain("…");
   });
 
-  it("renders back link to home (/)", async () => {
+  it("renders the flashcards TabBar as active", async () => {
     mockGetSigns.mockResolvedValue([SIGN_1] as never);
     const jsx = await FlashcardsPage();
-    const { container } = render(jsx);
-    expect(container.querySelector('a[href="/"]')).toBeTruthy();
+    render(jsx);
+    expect(screen.getByTestId("tabbar")).toHaveAttribute("data-active", "cards");
   });
 
-  it("gives the icon-only back link an accessible name", async () => {
+  it("does not render a top-level back link", async () => {
     mockGetSigns.mockResolvedValue([SIGN_1] as never);
     const jsx = await FlashcardsPage();
     const { container } = render(jsx);
-    expect(container.querySelector("a[aria-label='backLabel']")).toBeTruthy();
+    expect(container.querySelector('a[href="/"]')).toBeNull();
   });
 
   it("renders btnYes and btnNo buttons", async () => {

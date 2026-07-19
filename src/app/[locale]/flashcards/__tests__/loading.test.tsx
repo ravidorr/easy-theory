@@ -6,6 +6,12 @@ vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn().mockResolvedValue((key: string) => key),
 }));
 
+vi.mock("@/components/TabBar", () => ({
+  TabBar: ({ active }: { active: string }) => (
+    <div data-testid="tabbar" data-active={active} />
+  ),
+}));
+
 describe("flashcards loading skeleton", () => {
   it("announces loading and marks the content busy", async () => {
     const { container } = render(await Loading());
@@ -17,5 +23,10 @@ describe("flashcards loading skeleton", () => {
     const { container } = render(await Loading());
     expect(container.querySelectorAll('[data-skeleton="image"]')).toHaveLength(1);
     expect(container.querySelectorAll('[data-skeleton="block"]')).toHaveLength(2);
+  });
+
+  it("keeps the flashcards tab bar visible", async () => {
+    render(await Loading());
+    expect(screen.getByTestId("tabbar")).toHaveAttribute("data-active", "cards");
   });
 });
