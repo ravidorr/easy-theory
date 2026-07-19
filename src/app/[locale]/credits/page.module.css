@@ -25,34 +25,6 @@
   color: var(--text);
 }
 
-.topBar {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.backBtn {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 1px solid var(--border-strong);
-  background: var(--surface);
-  color: var(--text-muted);
-  font-size: 20px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  text-decoration: none;
-}
-
-.titleCol {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
 .subtitle {
   font-size: var(--type-small-size);
   color: var(--text-muted);
@@ -133,12 +105,4 @@
 
 .externalIcon {
   flex-shrink: 0;
-}
-
-.pageNote {
-  font-size: var(--type-caption-size);
-  color: var(--text-faint);
-  text-align: center;
-  line-height: var(--line-body);
-  margin-top: auto;
 }

@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase";
 import { SignImage } from "@/components/SignImage";
+import { TabBar } from "@/components/TabBar";
 import { Icon } from "@/components/Icon";
 import { getTranslations } from "next-intl/server";
 import styles from "./page.module.css";
@@ -18,17 +18,15 @@ export default async function CreditsPage() {
   const t = await getTranslations("Credits");
 
   return (
-    <main className={styles.page}>
-      <div className={styles.topBar}>
-        <Link href="/more" className={`icon-btn ${styles.backBtn}`} aria-label={t("backLabel")}>→</Link>
-        <div className={styles.titleCol}>
+    <>
+      <main className={styles.page}>
+        <div>
           <h1>{t("pageTitle")}</h1>
           <span className={styles.subtitle}>{t("subtitle")}</span>
         </div>
-      </div>
 
-      <div className={styles.section}>
-        <h2>{t("dataSourcesTitle")}</h2>
+        <div className={styles.section}>
+          <h2>{t("dataSourcesTitle")}</h2>
 
         <a
           href="https://www.gov.il/he/departments/dynamiccollectors/theoryexamhe_data"
@@ -60,23 +58,23 @@ export default async function CreditsPage() {
           <ExternalIcon />
         </a>
 
-        <a
-          href="https://commons.wikimedia.org/wiki/Road_signs_in_Israel"
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`pressable-card ${styles.resourceLink}`}
-        >
-          <div className={`${styles.iconWrap} ${styles.iconWrapMuted}`}>W</div>
-          <div className={styles.resourceBody}>
-            <span className={styles.resourceTitle}>{t("credit3Title")}</span>
-            <span className={styles.resourceDesc}>{t("credit3Desc")}</span>
-          </div>
-          <ExternalIcon />
-        </a>
-      </div>
+          <a
+            href="https://commons.wikimedia.org/wiki/Category:Road_signs_in_Israel"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`pressable-card ${styles.resourceLink}`}
+          >
+            <div className={`${styles.iconWrap} ${styles.iconWrapMuted}`}>W</div>
+            <div className={styles.resourceBody}>
+              <span className={styles.resourceTitle}>{t("credit3Title")}</span>
+              <span className={styles.resourceDesc}>{t("credit3Desc")}</span>
+            </div>
+            <ExternalIcon />
+          </a>
+        </div>
 
-      <div className={styles.section}>
-        <h2>{t("builtWithTitle")}</h2>
+        <div className={styles.section}>
+          <h2>{t("builtWithTitle")}</h2>
 
         <a
           href="https://nextjs.org"
@@ -133,9 +131,9 @@ export default async function CreditsPage() {
           </div>
           <ExternalIcon />
         </a>
-      </div>
-
-      <span className={styles.pageNote}>{t("footer")}</span>
-    </main>
+        </div>
+      </main>
+      <TabBar active="more" />
+    </>
   );
 }
