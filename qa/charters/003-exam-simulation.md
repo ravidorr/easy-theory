@@ -31,8 +31,14 @@ checks:
     desc: "Exam run renders 30 questions with no answer leakage"
     oracle: "/he/exam/run has #exam-container with data-total=30; no element in the DOM carries data-correct or otherwise reveals the correct option before submission"
   - id: CHK-EXAM-03
-    desc: "Navigation and answered-counter work across questions"
-    oracle: "#exam-prev/#exam-next move between questions preserving selections; #exam-answered increments once per distinct answered question"
+    desc: "Navigation, answer state, and answered-counter work across questions"
+    oracle: "#exam-prev is disabled on question 1; #exam-prev/#exam-next preserve selections; #exam-answered increments once per distinct answered question"
+  - id: CHK-EXAM-03A
+    desc: "Auto-advance respects the More-page preference"
+    oracle: "With quiz-auto-advance on (default), a selected option visibly enters its selected state then advances after about 900ms; after turning it off in /he/more, the selection remains on the current question until #exam-next is used"
+  - id: CHK-EXAM-03B
+    desc: "Shared navigation remains visible during the run"
+    oracle: "The fixed TabBar is visible and its links are usable; no redundant top close/X control appears"
   - id: CHK-EXAM-04
     desc: "Timer counts down during the run"
     oracle: "#exam-timer starts near 40:00 and decreases monotonically across observations"
@@ -82,6 +88,9 @@ Route hints:
   `#exam-back-to-results`.
 - Scoring is server-side via POST `/api/exam` — the page never receives correct
   answers up front; verify the DOM to prove it.
+- The shared TabBar remains visible during the run. The More-page auto-advance
+  preference is stored in the `quiz-auto-advance` cookie and defaults to on;
+  when enabled, exam selections advance after 900ms.
 - Copy sources: `messages/he.json`, namespaces `Exam`, `JS.Exam`.
 - Meaningful-step screenshots: landing with rules, first question, answered-counter
   mid-run, unanswered-submit confirm dialog, result screen, answer-review mode,
