@@ -25,43 +25,42 @@
   color: var(--text);
 }
 
-.topBar {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.backBtn {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 1px solid var(--border-strong);
-  background: var(--surface);
-  color: var(--text-muted);
-  font-size: 20px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  text-decoration: none;
-}
-
-.titleCol {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.subtitle {
-  font-size: var(--type-small-size);
-  color: var(--text-muted);
-}
-
 .section {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.featuredLink {
+  text-decoration: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.featuredVisual {
+  aspect-ratio: 16 / 9;
+  background: var(--surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.featuredChar {
+  color: var(--primary-soft-text);
+  font-size: 56px;
+  font-weight: 800;
+}
+
+.featuredBody {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .resourceLink {
@@ -129,10 +128,6 @@
   font-size: var(--type-small-size);
   color: var(--text-muted);
   line-height: var(--line-body);
-}
-
-.externalIcon {
-  flex-shrink: 0;
 }
 
 .pageNote {

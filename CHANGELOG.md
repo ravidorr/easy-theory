@@ -3,6 +3,14 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.194] — 2026-07-19
+
+### Fixed
+
+- Resources now promotes the official sign chart to the featured-card hierarchy, removes the route-only subtitle and external-link icons, and keeps compact resource rows aligned with Videos. (#248)
+
+---
+
 ## [0.3.193] — 2026-07-19
 
 ### Fixed

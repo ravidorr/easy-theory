@@ -1,6 +1,11 @@
 import { getTranslations } from "next-intl/server";
 import { TabBar } from "@/components/TabBar";
-import { Skeleton, SkeletonIconCard, SkeletonScreen } from "@/components/Skeleton";
+import {
+  Skeleton,
+  SkeletonCard,
+  SkeletonIconCard,
+  SkeletonScreen,
+} from "@/components/Skeleton";
 import styles from "./page.module.css";
 
 export default async function Loading() {
@@ -10,15 +15,21 @@ export default async function Loading() {
     <>
       <SkeletonScreen label={t("label")} className={styles.page}>
         <Skeleton variant="lineLg" size="w40" />
-        <Skeleton size="w80" />
-        {[0, 1].map((section) => (
-          <div key={section} className={styles.section}>
-            <Skeleton size="w25" />
-            {[0, 1, 2].map((i) => (
-              <SkeletonIconCard key={i} />
-            ))}
-          </div>
-        ))}
+        <div className={styles.section}>
+          <Skeleton size="w25" />
+          <SkeletonCard>
+            <Skeleton variant="image" />
+            <Skeleton size="w60" />
+            <Skeleton size="w40" />
+          </SkeletonCard>
+          <SkeletonIconCard />
+        </div>
+        <div className={styles.section}>
+          <Skeleton size="w25" />
+          {[0, 1].map((i) => (
+            <SkeletonIconCard key={i} />
+          ))}
+        </div>
       </SkeletonScreen>
       <TabBar active="links" />
     </>
