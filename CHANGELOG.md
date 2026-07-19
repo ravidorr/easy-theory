@@ -3,6 +3,14 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.189] — 2026-07-19
+
+### Changed
+
+- Upgraded GitHub Actions checkout, setup-node, and pnpm setup actions to their Node 24-compatible v5 releases, removing the Node 20 deprecation warning from CI and scheduled database audits.
+
+---
+
 ## [0.3.188] — 2026-07-19
 
 ### Added
