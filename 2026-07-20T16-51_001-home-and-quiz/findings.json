@@ -1,0 +1,48 @@
+{
+  "run_id": "2026-07-20T16-51_001-home-and-quiz",
+  "charter_id": "001-home-and-quiz",
+  "charter_path": "qa/charters/001-home-and-quiz.md",
+  "started_at": "2026-07-20T13:51:00Z",
+  "finished_at": "2026-07-20T13:56:01Z",
+  "environment": {
+    "base_url": "http://localhost:3100",
+    "git_sha": "6b5149513c9da0a37be915ed8c8106b95ccef521",
+    "app_version": "0.3.200",
+    "supabase_host": "nvgqczaesfeotijjcbed.supabase.co",
+    "viewport": "390x844",
+    "locale": "he"
+  },
+  "checks": [
+    { "id": "CHK-AUTH-01", "verdict": "pass", "observed": "An unauthenticated visit redirected to /he/auth/login with an email field and the login submit button.", "evidence": ["screenshots/step-01-unauth-redirect.png"] },
+    { "id": "CHK-AUTH-02", "verdict": "pass", "observed": "A freshly minted QA link landed on /he and rendered the dashboard without a redirect loop.", "evidence": ["screenshots/step-02-dashboard.png"] },
+    { "id": "CHK-HOME-01", "verdict": "pass", "observed": "The dashboard showed one mission, 0/20 daily progress, and four populated seeded topics with no empty or raw values.", "evidence": ["screenshots/step-02-dashboard.png"] },
+    { "id": "CHK-HOME-02", "verdict": "pass", "observed": "The rendered Hebrew dashboard matched the Home copy namespace and the document had lang=he and dir=rtl.", "evidence": ["screenshots/step-02-dashboard.png"] },
+    { "id": "CHK-HOME-03", "verdict": "pass", "observed": "The mission CTA linked to /topics/vehicle and the dashboard exposed a reachable exam-simulation CTA.", "evidence": ["screenshots/step-02-dashboard.png"] },
+    { "id": "CHK-QUIZ-01", "verdict": "pass", "observed": "Entering the mission topic rendered #quiz-container, a numbered question, and four answer options.", "evidence": ["screenshots/step-03-quiz-first-question.png"] },
+    { "id": "CHK-QUIZ-02", "verdict": "pass", "observed": "A selected wrong answer showed correct/wrong feedback and the next control; a correct answer POSTed successfully and auto-advanced from question 42 to 43.", "evidence": ["screenshots/step-04-wrong-answer-feedback.png", "screenshots/step-05-correct-answer-feedback.png"] },
+    { "id": "CHK-QUIZ-03", "verdict": "not-checked", "reason": "Two manually paced answer submissions returned 200, but a rapid automated completion pass intentionally hit the quiz rate limit (429), so the charter's no-4xx oracle was not cleanly established." },
+    { "id": "CHK-QUIZ-04", "verdict": "blocked", "reason": "The remaining batch could not be completed inside the timebox after the QA rate limiter returned 429; the retry control subsequently recovered with 200." },
+    { "id": "CHK-QUIZ-05", "verdict": "blocked", "reason": "Depends on completing the quiz and observing its final progress-save request; completion was blocked by the rate limit." },
+    { "id": "CHK-QUIZ-06", "verdict": "pass", "observed": "After localStorage was cleared, reopening the topic began at question 69 rather than question 1, using server-known answered progress.", "evidence": ["screenshots/step-09-fresh-storage-resume.png"] },
+    { "id": "CHK-QUIZ-07", "verdict": "pass", "observed": "Reloading mid-quiz resumed at question 68 and retained a locale-scoped quiz-resume:v1 key with pending-submission state.", "evidence": ["screenshots/step-07-reload-resume.png"] },
+    { "id": "CHK-CONSOLE-01", "verdict": "not-checked", "reason": "The only error-level console entry was the expected 429 from the deliberately rapid automated submission burst; a clean full-flow console run was not completed." },
+    { "id": "CHK-A11Y-01", "verdict": "pass", "observed": "Dashboard and quiz exposed headings and accessible link/button names; the document language and direction were he/rtl, and topic sign images were decorative inside named topic links.", "evidence": ["screenshots/step-02-dashboard.png", "screenshots/step-03-quiz-first-question.png"] },
+    { "id": "CHK-COPY-RTL-01", "verdict": "pass", "observed": "Observed Home, Quiz, and TabBar strings matched messages/he.json with no raw translation keys or visible direction breakage.", "evidence": ["screenshots/step-02-dashboard.png", "screenshots/step-04-wrong-answer-feedback.png"] }
+  ],
+  "findings": [],
+  "known_issues_observed": [],
+  "not_tested": [
+    "Quiz final screen and /api/progress completion request.",
+    "Post-completion dashboard persistence assertion.",
+    "Push notifications and service worker.",
+    "Arabic locale.",
+    "Email sending path.",
+    "Flashcards, schedule, videos, resources, credits, and More pages.",
+    "Desktop viewport."
+  ],
+  "limitations": [
+    "The QA test user had existing vehicle-topic progress at run start.",
+    "A rapid non-human answer burst hit the intended quiz rate limit; retry recovered successfully."
+  ],
+  "coverage_summary": { "total": 15, "pass": 11, "fail": 0, "blocked": 2, "not_checked": 2 }
+}
