@@ -185,7 +185,7 @@
     });
   }
 
-  function showResults(data, auto) {
+  function showResults(data) {
     // A confirm dialog may still be open if the timer auto-submitted while
     // the user was deliberating; it is moot once results are on screen.
     if (window.modal && window.modal.dismissAll) window.modal.dismissAll();
@@ -207,12 +207,11 @@
       }
     }
     if (resultScore) {
-      let text = tf(t.examResultScore || "{score} מתוך {total} נכון (ציון עובר: {passMark})", {
+      const text = tf(t.examResultScore || "{score} מתוך {total} נכון (ציון עובר: {passMark})", {
         score: data.score,
         total: data.total,
         passMark: data.pass_mark,
       });
-      if (auto) text += " · " + (t.examTimeUp || "הזמן נגמר, המבחן הוגש.");
       resultScore.textContent = text;
     }
   }
@@ -258,7 +257,7 @@
       submitted = true;
       submitting = false;
       stopTimer();
-      showResults(data, auto);
+      showResults(data);
       if (data.medals_earned && window.medalCelebration) {
         window.medalCelebration.show(data.medals_earned, {
           fallbackFocus: resultScreen && resultScreen.querySelector("button, a"),

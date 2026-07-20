@@ -115,15 +115,21 @@ async function checkSchema(): Promise<number> {
         p_topic_id: NIL_UUID,
       },
     },
+    {
+      fn: "award_exam_pass_medal",
+      migration: "020",
+      args: { p_user_id: NIL_UUID },
+      expectedError: /exam_not_passed/,
+    },
   ];
-  for (const { fn, migration, args } of rpcProbes) {
+  for (const { fn, migration, args, expectedError = /not_authenticated/ } of rpcProbes) {
     const { error } = await admin.rpc(fn, args);
-    if (error && /not_authenticated/.test(error.message)) {
+    if (error && expectedError.test(error.message)) {
       console.error(`qa:mint --check - schema rpc ${fn} (migration ${migration}): ok`);
     } else {
       console.error(
         `qa:mint --check - schema rpc ${fn} (migration ${migration}): ${
-          error ? error.message : "executed without raising not_authenticated"
+          error ? error.message : "executed without raising the expected error"
         }`
       );
       failures += 1;

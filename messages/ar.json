@@ -210,7 +210,6 @@
     "bestScore": "أفضل نتيجة: {score} من {total}",
     "attemptScore": "{score} من {total}",
     "passChip": "نجحنا",
-    "failChip": "لم ننجح",
     "closeLabel": "إغلاق",
     "count": "{current} من {total}",
     "answered": "تمت الإجابة على {answered} من {total}",

@@ -75,7 +75,7 @@ describe("ExamPage", () => {
     expect(screen.queryByText("bestScore")).toBeNull();
   });
 
-  it("renders attempt rows with pass and fail chips", async () => {
+  it("renders a chip only for passed attempts", async () => {
     mockGetExamAttempts.mockResolvedValue([
       attempt({ id: "e1", passed: true }),
       attempt({ id: "e2", score: 20, passed: false, created_at: "2026-06-20T10:00:00Z" }),
@@ -83,7 +83,7 @@ describe("ExamPage", () => {
     const jsx = await ExamPage();
     render(jsx);
     expect(screen.getByText("passChip")).toBeInTheDocument();
-    expect(screen.getByText("failChip")).toBeInTheDocument();
+    expect(screen.queryByText("failChip")).toBeNull();
     expect(screen.getAllByText("attemptScore")).toHaveLength(2);
     expect(screen.getByText("bestScore")).toBeInTheDocument();
     expect(screen.queryByText("historyEmpty")).toBeNull();

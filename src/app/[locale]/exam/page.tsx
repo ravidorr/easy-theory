@@ -73,13 +73,11 @@ export default async function ExamPage() {
                     <span className={styles.attemptScore}>
                       {t("attemptScore", { score: attempt.score, total: attempt.total })}
                     </span>
-                    <span
-                      className={`${styles.attemptChip} ${
-                        attempt.passed ? styles.attemptChipPass : styles.attemptChipFail
-                      }`}
-                    >
-                      {attempt.passed ? t("passChip") : t("failChip")}
-                    </span>
+                    {attempt.passed && (
+                      <span className={`${styles.attemptChip} ${styles.attemptChipPass}`}>
+                        {t("passChip")}
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>

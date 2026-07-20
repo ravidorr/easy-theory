@@ -109,8 +109,3 @@
   background: var(--success-soft);
   color: var(--success-text);
 }
-
-.attemptChipFail {
-  background: var(--danger-soft);
-  color: var(--danger-text);
-}
