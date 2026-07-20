@@ -23,8 +23,8 @@ vi.mock("@/lib/navigation", () => ({
 
 const tabs = [
   { label: "הבית", href: "/" },
-  { label: "סרטונים", href: "/videos" },
   { label: "כרטיסיות", href: "/flashcards" },
+  { label: "סרטונים", href: "/videos" },
   { label: "קישורים", href: "/resources" },
   { label: "עוד", href: "/more" },
 ];
@@ -35,6 +35,13 @@ describe("TabBar", () => {
     for (const { label } of tabs) {
       expect(screen.getByText(label)).toBeInTheDocument();
     }
+  });
+
+  it("renders tabs in navigation order", async () => {
+    const { container } = render(await TabBar({ active: "home" }));
+    expect([...container.querySelectorAll("nav > a")].map((tab) => tab.textContent)).toEqual(
+      tabs.map((tab) => expect.stringContaining(tab.label)),
+    );
   });
 
   it("renders correct hrefs for all tabs", async () => {

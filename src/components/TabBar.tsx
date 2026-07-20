@@ -22,16 +22,16 @@ export async function TabBar({
       icon: <Icon name="home" size={22} />,
     },
     {
-      key: "videos" as ActiveTab,
-      href: "/videos" as const,
-      label: t("videos"),
-      icon: <Icon name="video" size={22} />,
-    },
-    {
       key: "cards" as ActiveTab,
       href: "/flashcards" as const,
       label: t("flashcards"),
       icon: <Icon name="cards" size={22} />,
+    },
+    {
+      key: "videos" as ActiveTab,
+      href: "/videos" as const,
+      label: t("videos"),
+      icon: <Icon name="video" size={22} />,
     },
     {
       key: "links" as ActiveTab,
