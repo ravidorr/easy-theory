@@ -3,6 +3,14 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.200] — 2026-07-20
+
+### Fixed
+
+- Made exam results and attempt history less discouraging, and added the exam-pass medal RPC to QA preflight checks.
+
+---
+
 ## [0.3.199] — 2026-07-20
 
 ### Changed

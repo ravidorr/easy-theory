@@ -546,7 +546,7 @@ describe("exam.js – timer", () => {
     const confirmMock = vi.fn();
     vi.stubGlobal("confirm", confirmMock);
     const modal = stubModal();
-    setupDOM({ durationSeconds: 3 });
+    setupDOM({ durationSeconds: 3, translations: { examTimeUp: "time-up note" } });
     clickOption(0, "a");
 
     vi.advanceTimersByTime(3000);
@@ -558,8 +558,7 @@ describe("exam.js – timer", () => {
     const body = JSON.parse(fetchMock.mock.calls[0][1].body);
     expect(body.answers).toEqual([{ question_id: "q1", selected_option: "a" }]);
     expect(resultScreen().style.display).toBe("flex");
-    // The time-up note is appended to the score line.
-    expect(document.getElementById("exam-result-score")!.textContent).toContain("·");
+    expect(document.getElementById("exam-result-score")!.textContent).not.toContain("time-up note");
   });
 
   it("does not submit twice when time expires after a manual submit", async () => {

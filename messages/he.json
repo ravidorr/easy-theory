@@ -210,7 +210,6 @@
     "bestScore": "השיא שלך: {score} מתוך {total}",
     "attemptScore": "{score} מתוך {total}",
     "passChip": "עברנו",
-    "failChip": "לא עברנו",
     "closeLabel": "סגירה",
     "count": "{current} מתוך {total}",
     "answered": "נענו {answered} מתוך {total}",
