@@ -8,10 +8,11 @@ import { Icon } from "@/components/Icon";
 import { TabBar } from "@/components/TabBar";
 import { InlineMarkdown } from "@/components/InlineMarkdown";
 import { createClient } from "@/lib/supabase";
-import { getBookmarkedQuestions } from "@/lib/db";
+import { getBookmarkedQuestions, getTopics } from "@/lib/db";
 import type { BookmarkedQuestion } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
 import { localizeQuestion } from "@/lib/content-locale";
+import { resolveOptionSignImage } from "@/lib/option-sign-image";
 import { shouldSuppressQuestionImage } from "@/lib/question-image";
 import styles from "./page.module.css";
 
@@ -21,12 +22,6 @@ function resolveImageUrl(url: string | null | undefined): string | null {
     if (!existsSync(join(process.cwd(), "public", url))) return "/placeholder.svg";
   }
   return url;
-}
-
-function resolveOptionSignImage(text: string): string | null {
-  if (!/^\d{2,4}$/.test(text.trim())) return null;
-  const path = join(process.cwd(), "public", "signs", `sign-${text.trim()}.png`);
-  return existsSync(path) ? `/signs/sign-${text.trim()}.png` : null;
 }
 
 function signNumberFromUrl(url: string): string | null {
@@ -41,10 +36,12 @@ function BookmarkCard({
   question,
   letters,
   t,
+  isSignsTopic,
 }: {
   question: BookmarkedQuestion;
   letters: string[];
   t: TranslateFn;
+  isSignsTopic: boolean;
 }) {
   const qAny = question as Record<string, unknown>;
   const options: [string, string][] = [
@@ -99,7 +96,7 @@ function BookmarkCard({
 
       <div className={styles.optionsList}>
         {options.map(([key, text], i) => {
-          const optionSignImg = resolveOptionSignImage(text);
+          const optionSignImg = resolveOptionSignImage(text, isSignsTopic);
           const state = key === question.correct_option ? "correct" : undefined;
 
           return (
@@ -144,7 +141,11 @@ export default async function BookmarksPage() {
   const t = await getTranslations("Bookmarks");
   const tQuiz = await getTranslations("Quiz");
 
-  const bookmarks = await getBookmarkedQuestions(supabase, user.id);
+  const [bookmarks, topics] = await Promise.all([
+    getBookmarkedQuestions(supabase, user.id),
+    getTopics(supabase),
+  ]);
+  const signTopicIds = new Set(topics.filter((topic) => topic.slug === "signs").map((topic) => topic.id));
 
   const letters = tQuiz("letters").split(",");
 
@@ -170,7 +171,13 @@ export default async function BookmarksPage() {
                 : t("countMany", { count: localizedBookmarks.length })}
             </p>
             {localizedBookmarks.map((bookmark) => (
-              <BookmarkCard key={bookmark.id} question={bookmark} letters={letters} t={tQuiz} />
+              <BookmarkCard
+                key={bookmark.id}
+                question={bookmark}
+                letters={letters}
+                t={tQuiz}
+                isSignsTopic={signTopicIds.has(bookmark.topic_id)}
+              />
             ))}
           </>
         )}

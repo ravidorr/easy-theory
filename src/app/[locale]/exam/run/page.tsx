@@ -7,7 +7,7 @@ import { SignImage } from "@/components/SignImage";
 import { QuestionImage } from "@/components/QuestionImage";
 import { TabBar } from "@/components/TabBar";
 import { createClient } from "@/lib/supabase";
-import { getRandomExamQuestions } from "@/lib/db";
+import { getRandomExamQuestions, getTopics } from "@/lib/db";
 import type { Question } from "@/lib/db";
 import {
   EXAM_QUESTION_COUNT,
@@ -16,6 +16,7 @@ import {
 } from "@/lib/exam";
 import { getTranslations, getLocale } from "next-intl/server";
 import { localizeQuestion } from "@/lib/content-locale";
+import { resolveOptionSignImage } from "@/lib/option-sign-image";
 import { shouldSuppressQuestionImage } from "@/lib/question-image";
 import styles from "./page.module.css";
 
@@ -25,12 +26,6 @@ function resolveImageUrl(url: string | null | undefined): string | null {
     if (!existsSync(join(process.cwd(), "public", url))) return "/placeholder.svg";
   }
   return url;
-}
-
-function resolveOptionSignImage(text: string): string | null {
-  if (!/^\d{2,4}$/.test(text.trim())) return null;
-  const path = join(process.cwd(), "public", "signs", `sign-${text.trim()}.png`);
-  return existsSync(path) ? `/signs/sign-${text.trim()}.png` : null;
 }
 
 function signNumberFromUrl(url: string): string | null {
@@ -48,11 +43,13 @@ function ExamSlide({
   index,
   letters,
   t,
+  isSignsTopic,
 }: {
   question: Question;
   index: number;
   letters: string[];
   t: TranslateFn;
+  isSignsTopic: boolean;
 }) {
   const qAny = question as Record<string, unknown>;
   const options: [string, string][] = [
@@ -103,7 +100,7 @@ function ExamSlide({
 
       <div className={styles.optionsList}>
         {options.map(([key, text], i) => {
-          const optionSignImg = resolveOptionSignImage(text);
+          const optionSignImg = resolveOptionSignImage(text, isSignsTopic);
           return (
             <button key={key} className="quiz-option" data-option={key} aria-pressed="false">
               <span className="quiz-option-badge">{letters[i]}</span>
@@ -140,7 +137,11 @@ export default async function ExamRunPage() {
   const tJs = await getTranslations("JS.Exam");
   const tQuiz = await getTranslations("Quiz");
 
-  const questions = await getRandomExamQuestions(supabase, EXAM_QUESTION_COUNT);
+  const [questions, topics] = await Promise.all([
+    getRandomExamQuestions(supabase, EXAM_QUESTION_COUNT),
+    getTopics(supabase),
+  ]);
+  const signTopicIds = new Set(topics.filter((topic) => topic.slug === "signs").map((topic) => topic.id));
   const total = questions.length;
 
   const letters = t("letters").split(",");
@@ -185,7 +186,14 @@ export default async function ExamRunPage() {
           </div>
         ) : (
           localizedQuestions.map((q, i) => (
-            <ExamSlide key={q.id} question={q} index={i} letters={letters} t={tQuiz} />
+            <ExamSlide
+              key={q.id}
+              question={q}
+              index={i}
+              letters={letters}
+              t={tQuiz}
+              isSignsTopic={signTopicIds.has(q.topic_id)}
+            />
           ))
         )}
 

@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import ExamRunPage from "../page";
 import { createClient } from "@/lib/supabase";
-import { getRandomExamQuestions } from "@/lib/db";
+import { getRandomExamQuestions, getTopics } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
 
 vi.mock("next/image", () => ({
@@ -16,7 +16,7 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
-vi.mock("@/lib/db", () => ({ getRandomExamQuestions: vi.fn() }));
+vi.mock("@/lib/db", () => ({ getRandomExamQuestions: vi.fn(), getTopics: vi.fn() }));
 vi.mock("@/components/SignImage", () => ({
   SignImage: ({ src, alt = "" }: { src: string; alt?: string }) =>
     React.createElement("img", { src, alt }),
@@ -43,11 +43,12 @@ vi.mock("next-intl/server", () => ({
 
 const mockCreateClient = vi.mocked(createClient);
 const mockGetQuestions = vi.mocked(getRandomExamQuestions);
+const mockGetTopics = vi.mocked(getTopics);
 
 function makeQuestion(n: number) {
   return {
     id: `q${n}`,
-    topic_id: "t1",
+    topic_id: "t-traffic-laws",
     question_number: n,
     question_he: `שאלה ${n}`,
     question_ar: `سؤال ${n}`,
@@ -73,6 +74,10 @@ describe("ExamRunPage", () => {
     mockGetQuestions.mockResolvedValue(
       Array.from({ length: 30 }, (_, i) => makeQuestion(i + 1)) as never
     );
+    mockGetTopics.mockResolvedValue([
+      { id: "t-signs", slug: "signs", name_he: "תמרורים" },
+      { id: "t-traffic-laws", slug: "traffic-laws", name_he: "חוקי התנועה" },
+    ] as never);
     vi.mocked(getTranslations).mockResolvedValue(((key: string) => key) as never);
     vi.mocked(getLocale).mockResolvedValue("he" as never);
   });
@@ -156,7 +161,7 @@ describe("ExamRunPage", () => {
       // Existing question photo → wide <img> with the real path.
       { ...makeQuestion(2), image_url: "/questions/3012.jpg" },
       // Sign question (sign image + numeric option) → no question image, option rendered as sign.
-      { ...makeQuestion(3), image_url: "/signs/sign-101.png", option_a: "101" },
+      { ...makeQuestion(3), topic_id: "t-signs", image_url: "/signs/sign-101.png", option_a: "101" },
       // Prompt sign does not match the numeric answer option → question image remains visible.
       { ...makeQuestion(4), image_url: "/signs/sign-126.png", option_a: "123" },
     ] as never);
@@ -168,12 +173,36 @@ describe("ExamRunPage", () => {
     expect(container.querySelector('img[src="/signs/sign-126.png"]')).toBeTruthy();
   });
 
+  it("renders question 1687 speed options as text", async () => {
+    mockGetQuestions.mockResolvedValue([
+      {
+        ...makeQuestion(1687),
+        question_number: 1687,
+        option_a: "80",
+        option_b: "110",
+        option_c: "90",
+        option_d: "100",
+        correct_option: "b",
+        image_url: null,
+      },
+    ] as never);
+
+    const jsx = await ExamRunPage();
+    const { container } = render(jsx);
+
+    expect(screen.getByText("80")).toBeInTheDocument();
+    expect(screen.getByText("110")).toBeInTheDocument();
+    expect(screen.getByText("90")).toBeInTheDocument();
+    expect(screen.getByText("100")).toBeInTheDocument();
+    expect(container.querySelector('img[src^="/signs/sign-"]')).toBeNull();
+  });
+
   it("gives question and option images alt text without revealing the answer", async () => {
     mockGetQuestions.mockResolvedValue([
       // Wide question photo → generic question-image alt.
       { ...makeQuestion(1), image_url: "/questions/3012.jpg" },
       // Sign question → option sign image labelled by sign number only.
-      { ...makeQuestion(2), image_url: "/signs/sign-101.png", option_a: "101" },
+      { ...makeQuestion(2), topic_id: "t-signs", image_url: "/signs/sign-101.png", option_a: "101" },
       // Square sign as the question image (non-numeric options).
       { ...makeQuestion(3), image_url: "/signs/sign-100.png" },
     ] as never);

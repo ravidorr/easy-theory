@@ -12,6 +12,7 @@ import { getQuestionsForTopic, getBookmarkedQuestionIds, getAnsweredQuestionIdsF
 import type { Question } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
 import { localizeQuestion, localizedRecordField } from "@/lib/content-locale";
+import { resolveOptionSignImage } from "@/lib/option-sign-image";
 import { selectNextTopic } from "@/lib/personalization";
 import { shouldSuppressQuestionImage } from "@/lib/question-image";
 import styles from "./page.module.css";
@@ -22,12 +23,6 @@ function resolveImageUrl(url: string | null | undefined): string | null {
     if (!existsSync(join(process.cwd(), "public", url))) return "/placeholder.svg";
   }
   return url;
-}
-
-function resolveOptionSignImage(text: string): string | null {
-  if (!/^\d{2,4}$/.test(text.trim())) return null;
-  const path = join(process.cwd(), "public", "signs", `sign-${text.trim()}.png`);
-  return existsSync(path) ? `/signs/sign-${text.trim()}.png` : null;
 }
 
 function signNumberFromUrl(url: string): string | null {
@@ -42,6 +37,7 @@ function QuestionSlide({
   question,
   index,
   topicId,
+  isSignsTopic,
   letters,
   bookmarked,
   t,
@@ -49,6 +45,7 @@ function QuestionSlide({
   question: Question;
   index: number;
   topicId: string;
+  isSignsTopic: boolean;
   letters: string[];
   bookmarked: boolean;
   t: TranslateFn;
@@ -114,7 +111,7 @@ function QuestionSlide({
 
       <div className={styles.optionsList}>
         {options.map(([key, text], i) => {
-          const optionSignImg = resolveOptionSignImage(text);
+          const optionSignImg = resolveOptionSignImage(text, isSignsTopic);
           return (
             <button key={key} className="quiz-option" data-option={key} aria-pressed="false">
               <span className="quiz-option-badge">{letters[i]}</span>
@@ -215,6 +212,7 @@ export default async function TopicQuizPage({
               question={q}
               index={i}
               topicId={topic.id}
+              isSignsTopic={topic.slug === "signs"}
               letters={letters}
               bookmarked={bookmarkedIds.has(q.id)}
               t={t}

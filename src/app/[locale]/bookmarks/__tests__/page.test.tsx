@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import BookmarksPage from "../page";
 import { createClient } from "@/lib/supabase";
-import { getBookmarkedQuestions } from "@/lib/db";
+import { getBookmarkedQuestions, getTopics } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
 
 vi.mock("next/image", () => ({
@@ -18,6 +18,7 @@ vi.mock("next/navigation", () => ({
 vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
 vi.mock("@/lib/db", () => ({
   getBookmarkedQuestions: vi.fn(),
+  getTopics: vi.fn(),
 }));
 vi.mock("@/components/SignImage", () => ({
   SignImage: ({ src, alt = "" }: { src: string; alt?: string }) =>
@@ -38,9 +39,11 @@ vi.mock("next-intl/server", () => ({
 
 const mockCreateClient = vi.mocked(createClient);
 const mockGetBookmarks = vi.mocked(getBookmarkedQuestions);
+const mockGetTopics = vi.mocked(getTopics);
 
 const BOOKMARK_A = {
   id: "q1",
+  topic_id: "t-signs",
   question_he: "מה המשמעות של תמרור זה?",
   option_a: "עצור",
   option_b: "פנה ימינה",
@@ -54,6 +57,7 @@ const BOOKMARK_A = {
 
 const BOOKMARK_B = {
   id: "q2",
+  topic_id: "t-traffic-laws",
   question_he: "מה הגיל המינימלי?",
   option_a: "16",
   option_b: "17",
@@ -74,6 +78,10 @@ describe("BookmarksPage", () => {
     vi.clearAllMocks();
     mockCreateClient.mockResolvedValue(makeClient() as never);
     mockGetBookmarks.mockResolvedValue([]);
+    mockGetTopics.mockResolvedValue([
+      { id: "t-signs", slug: "signs", name_he: "תמרורים" },
+      { id: "t-traffic-laws", slug: "traffic-laws", name_he: "חוקי התנועה" },
+    ] as never);
     vi.mocked(getTranslations).mockResolvedValue(((key: string) => key) as never);
     vi.mocked(getLocale).mockResolvedValue("he");
   });
