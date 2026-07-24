@@ -74,15 +74,19 @@ describe("database catalog audit", () => {
     expect(checksumMigrationSource(first)).toBe(checksumMigrationSource(second));
   });
 
-  it("pins every checked-in migration into the bootstrap ledger", () => {
+  it("pins bootstrap migrations in the ledger and later migrations in themselves", () => {
     const migrations = discoverMigrations();
     const ledgerSql = readFileSync("seeds/migrations/023_migration_ledger.sql", "utf8");
 
     expect(migrations.map(({ version }) => version)).toEqual(
-      Array.from({ length: 23 }, (_, index) => index + 1)
+      Array.from({ length: 24 }, (_, index) => index + 1)
     );
-    for (const migration of migrations) {
+    for (const migration of migrations.filter(({ version }) => version <= 23)) {
       expect(ledgerSql).toContain(`'${migration.filename}', '${migration.checksum}'`);
+    }
+    for (const migration of migrations.filter(({ version }) => version > 23)) {
+      const source = readFileSync(`seeds/migrations/${migration.filename}`, "utf8");
+      expect(source).toContain(`'${migration.filename}', '${migration.checksum}'`);
     }
   });
 

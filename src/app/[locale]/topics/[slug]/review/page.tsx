@@ -13,6 +13,7 @@ import type { MistakeScope, QuizMistake } from "@/lib/db";
 import { isDue } from "@/lib/srs";
 import { getTranslations, getLocale } from "next-intl/server";
 import { localizeQuestion } from "@/lib/content-locale";
+import { resolveOptionSignImage } from "@/lib/option-sign-image";
 import { shouldSuppressQuestionImage } from "@/lib/question-image";
 import styles from "./page.module.css";
 
@@ -22,12 +23,6 @@ function resolveImageUrl(url: string | null | undefined): string | null {
     if (!existsSync(join(process.cwd(), "public", url))) return "/placeholder.svg";
   }
   return url;
-}
-
-function resolveOptionSignImage(text: string): string | null {
-  if (!/^\d{2,4}$/.test(text.trim())) return null;
-  const path = join(process.cwd(), "public", "signs", `sign-${text.trim()}.png`);
-  return existsSync(path) ? `/signs/sign-${text.trim()}.png` : null;
 }
 
 function signNumberFromUrl(url: string): string | null {
@@ -58,12 +53,14 @@ function QuestionReview({
   bookmarked,
   t,
   dueBadge,
+  isSignsTopic,
 }: {
   question: QuizMistake;
   letters: string[];
   bookmarked: boolean;
   t: TranslateFn;
   dueBadge?: string;
+  isSignsTopic: boolean;
 }) {
   const qAny = question as Record<string, unknown>;
   const options: [string, string][] = [
@@ -119,7 +116,7 @@ function QuestionReview({
 
       <div className={styles.optionsList}>
         {options.map(([key, text], i) => {
-          const optionSignImg = resolveOptionSignImage(text);
+          const optionSignImg = resolveOptionSignImage(text, isSignsTopic);
           const state =
             key === question.correct_option
               ? "correct"
@@ -287,6 +284,7 @@ export default async function ReviewPage({
               bookmarked={bookmarkedIds.has(mistake.id)}
               t={tQuiz}
               dueBadge={isDue(mistake.due_at) ? t("dueBadge") : undefined}
+              isSignsTopic={topic.slug === "signs"}
             />
           ))}
           {totalPages > 1 && (

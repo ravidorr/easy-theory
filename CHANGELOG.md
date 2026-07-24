@@ -3,6 +3,14 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.201] — 2026-07-24
+
+### Fixed
+
+- Numeric answers now stay as text outside the road-sign topic, and question 1687 no longer references an unrelated sign image.
+
+---
+
 ## [0.3.200] — 2026-07-20
 
 ### Fixed
