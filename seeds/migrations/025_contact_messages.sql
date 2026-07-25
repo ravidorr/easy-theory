@@ -15,7 +15,8 @@ ALTER TABLE public.contact_messages ENABLE ROW LEVEL SECURITY;
 -- Contact messages are written only through the server route's service-role
 -- client; end users never receive a direct table policy.
 
+-- migration-ledger: checksum normalized by scripts/audit-database-metadata.ts.
 INSERT INTO public.schema_migrations (version, filename, checksum)
-VALUES (25, '025_contact_messages.sql', 'dc6523b1a67de32083fe6c2a163094143891c08d066bde27856a40bbc05298a1');
+VALUES (25, '025_contact_messages.sql', '5578a47115319b1dddb1bd4ae612afa96a9451e9cf19da30e53be55be79a51b3');
 
 COMMIT;
