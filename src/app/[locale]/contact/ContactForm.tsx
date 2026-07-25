@@ -83,8 +83,6 @@ export function ContactForm() {
         </div>
       </section>
 
-      {topic === "question" && <p className={styles.questionHint}>{t("questionHint")}</p>}
-
       <section className={styles.section} aria-labelledby="contact-message-title">
         <h2 id="contact-message-title">{t("messageTitle")}</h2>
         <textarea

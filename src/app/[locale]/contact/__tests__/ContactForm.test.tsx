@@ -10,7 +10,6 @@ const messages = {
     topicBug: "topicBug",
     topicIdea: "topicIdea",
     topicGeneral: "topicGeneral",
-    questionHint: "questionHint",
     messageTitle: "messageTitle",
     messagePlaceholder: "messagePlaceholder",
     replyEmailPlaceholder: "replyEmailPlaceholder",
@@ -36,17 +35,15 @@ describe("ContactForm", () => {
   beforeEach(() => vi.clearAllMocks());
   afterEach(() => vi.unstubAllGlobals());
 
-  it("starts with the question topic and its contextual hint", () => {
+  it("starts with the question topic", () => {
     renderForm();
     expect(screen.getByRole("button", { name: "topicQuestion" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByText("questionHint")).toBeInTheDocument();
   });
 
-  it("changes topic chips and hides the question hint", () => {
+  it("changes topic chips", () => {
     renderForm();
     fireEvent.click(screen.getByRole("button", { name: "topicBug" }));
     expect(screen.getByRole("button", { name: "topicBug" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.queryByText("questionHint")).not.toBeInTheDocument();
   });
 
   it("submits the selected topic and shows the sent state", async () => {
