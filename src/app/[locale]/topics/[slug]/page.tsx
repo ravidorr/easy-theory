@@ -88,6 +88,7 @@ function QuestionSlide({
           data-question-id={question.id}
           aria-pressed={bookmarked ? "true" : "false"}
           aria-label={t("bookmarkLabel")}
+          title={t("bookmarkTooltip")}
         >
           <Icon name="bookmark" size={20} />
         </button>

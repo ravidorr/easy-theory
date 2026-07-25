@@ -138,6 +138,7 @@ describe("BookmarksPage", () => {
     const toggle = container.querySelector(".bookmark-toggle");
     expect(toggle?.getAttribute("aria-pressed")).toBe("true");
     expect(toggle?.getAttribute("data-question-id")).toBe("q1");
+    expect(toggle?.getAttribute("title")).toBe("bookmarkTooltip");
     expect(toggle?.getAttribute("type")).toBe("button");
   });
 
