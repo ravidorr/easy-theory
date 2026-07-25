@@ -104,6 +104,7 @@
     "navSchedule": "התוכנית שלך",
     "navBookmarks": "שאלות שמורות",
     "navCredits": "קרדיטים",
+    "navContact": "יצירת קשר",
     "medalsTitle": "הישגים",
     "milestone3": "3 ימים",
     "milestone7": "שבוע",
@@ -119,6 +120,27 @@
     "autoAdvance": "מעבר אוטומטי לשאלה הבאה",
     "language": "שפה",
     "logoutBtn": "יציאה מהחשבון"
+  },
+  "Contact": {
+    "pageTitle": "יצירת קשר",
+    "subtitle": "נשמח לשמוע - כל הודעה נקראת.",
+    "closeLabel": "סגירה וחזרה לחשבון",
+    "topicTitle": "על מה מדובר?",
+    "topicQuestion": "שאלה לא נכונה",
+    "topicBug": "תקלה טכנית",
+    "topicIdea": "רעיון לשיפור",
+    "topicGeneral": "משהו אחר",
+    "questionHint": "טיפ: אפשר לדווח על שאלה ספציפית ישירות מתוך התרגול - בלחיצה על ״דיווח על שאלה״ במסך השאלה. הדיווח כבר יכלול את מספר השאלה.",
+    "messageTitle": "ההודעה",
+    "messagePlaceholder": "מה רצית לספר לנו?",
+    "replyEmailPlaceholder": "אימייל לתשובה (לא חובה)",
+    "replyEmailHint": "אם השארתם אימייל, נחזור אליכם תוך יום-יומיים.",
+    "submit": "לשלוח את ההודעה",
+    "submitting": "שולחים...",
+    "sendFailed": "לא הצלחנו לשלוח את ההודעה. אפשר לנסות שוב.",
+    "sentTitle": "ההודעה נשלחה",
+    "sentMessage": "תודה שעזרתם לנו להשתפר. אם השארתם אימייל, נחזור אליכם בקרוב.",
+    "sendAnother": "לשלוח הודעה נוספת"
   },
   "Flashcards": {
     "topBarTitle": "תמרורים: חזרה",
@@ -289,7 +311,9 @@
     "scheduleUpdateFailed": "שגיאה בעדכון לוח הזמנים",
     "pushSubscribeFailed": "שגיאה בשמירת ההרשמה",
     "pushUnsubscribeFailed": "שגיאה בהסרת ההרשמה",
-    "bookmarkUpdateFailed": "שגיאה בעדכון השאלות השמורות"
+    "bookmarkUpdateFailed": "שגיאה בעדכון השאלות השמורות",
+    "contactInvalid": "יש לבדוק את פרטי ההודעה ולנסות שוב.",
+    "contactSendFailed": "לא הצלחנו לשלוח את ההודעה. אפשר לנסות שוב."
   },
   "Notify": {
     "pushTitle": "לוח הלימודים שלך להיום",

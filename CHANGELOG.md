@@ -3,6 +3,18 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.203] — 2026-07-25
+
+### Added
+
+- Added an authenticated, localized Contact page linked from More, with persisted messages and support notifications.
+
+### Changed
+
+- Contact notifications now require a configurable, Resend-verified sender address.
+
+---
+
 ## [0.3.202] — 2026-07-25
 
 ### Fixed

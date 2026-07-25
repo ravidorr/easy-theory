@@ -89,13 +89,14 @@ describe("MorePage", () => {
     expect(screen.getByText("pageSubtitle")).toBeTruthy();
   });
 
-  it("renders navigation links to exam, schedule, bookmarks, and credits", async () => {
+  it("renders navigation links to exam, schedule, bookmarks, credits, and contact", async () => {
     const jsx = await MorePage();
     const { container } = render(jsx);
     expect(container.querySelector('a[href="/exam"]')).toBeTruthy();
     expect(container.querySelector('a[href="/schedule"]')).toBeTruthy();
     expect(container.querySelector('a[href="/bookmarks"]')).toBeTruthy();
     expect(container.querySelector('a[href="/credits"]')).toBeTruthy();
+    expect(container.querySelector('a[href="/contact"]')).toBeTruthy();
     expect(container.querySelector('a[href="/videos"]')).toBeFalsy();
     expect(container.querySelector('a[href="/resources"]')).toBeFalsy();
   });
@@ -105,6 +106,13 @@ describe("MorePage", () => {
     const { container } = render(jsx);
     const row = container.querySelector('a[href="/bookmarks"]');
     expect(row?.textContent).toContain("navBookmarks");
+  });
+
+  it("labels the contact navigation row", async () => {
+    const jsx = await MorePage();
+    const { container } = render(jsx);
+    const row = container.querySelector('a[href="/contact"]');
+    expect(row?.textContent).toContain("navContact");
   });
 
   it("shows the locked label for all medals when none are earned", async () => {
