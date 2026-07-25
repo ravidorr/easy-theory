@@ -73,6 +73,7 @@ function BookmarkCard({
         data-question-id={question.id}
         aria-pressed="true"
         aria-label={t("bookmarkLabel")}
+        title={t("bookmarkTooltip")}
       >
         <Icon name="bookmark" size={20} />
       </button>

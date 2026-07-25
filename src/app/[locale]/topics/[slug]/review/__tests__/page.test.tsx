@@ -387,6 +387,7 @@ describe("ReviewPage", () => {
       expect(toggle?.getAttribute("aria-pressed")).toBe("false");
       expect(toggle?.getAttribute("data-question-id")).toBe("q1");
       expect(toggle?.getAttribute("aria-label")).toBe("bookmarkLabel");
+      expect(toggle?.getAttribute("title")).toBe("bookmarkTooltip");
     });
 
     it("renders a pressed toggle when the question is bookmarked", async () => {

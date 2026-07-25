@@ -142,6 +142,7 @@
     "optionCorrectSr": "תשובה נכונה",
     "optionWrongSr": "תשובה שגויה",
     "bookmarkLabel": "שמירת השאלה לחזרה",
+    "bookmarkTooltip": "אפשר לשמור שאלות כדי לחזור אליהן אחר כך",
     "rewardCorrect": "יפה מאוד!",
     "rewardTopicDone": "כל הכבוד! סיימנו את כל הנושא!",
     "rewardWrongPrefix": "בחרנו ב־",

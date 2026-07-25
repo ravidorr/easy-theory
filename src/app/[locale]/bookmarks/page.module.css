@@ -66,6 +66,7 @@
 
 .questionCard h3 {
   margin: 0;
+  padding-inline-end: var(--hit-min);
   font-size: var(--type-body-size);
   font-weight: var(--type-h2-weight);
   line-height: var(--line-body);

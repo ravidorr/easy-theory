@@ -142,6 +142,7 @@
     "optionCorrectSr": "إجابة صحيحة",
     "optionWrongSr": "إجابة خاطئة",
     "bookmarkLabel": "حفظ السؤال للمراجعة لاحقاً",
+    "bookmarkTooltip": "يمكنك حفظ الأسئلة للعودة إليها لاحقًا",
     "rewardCorrect": "أحسنت!",
     "rewardTopicDone": "أحسنا! أكملنا الموضوع بأكمله!",
     "rewardWrongPrefix": "اخترنا ",

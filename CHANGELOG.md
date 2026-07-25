@@ -3,6 +3,14 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.202] — 2026-07-25
+
+### Fixed
+
+- Bookmark controls no longer overlap question text, explain their purpose in Hebrew and Arabic, and keep quiz prompts right-aligned.
+
+---
+
 ## [0.3.201] — 2026-07-24
 
 ### Fixed
