@@ -84,6 +84,7 @@ async function checkSchema(): Promise<number> {
     { table: "videos", column: "youtube_id", migration: "012" },
     { table: "resources", column: "href", migration: "012" },
     { table: "quiz_answer_events", column: "answered_at", migration: "017" },
+    { table: "question_reports", column: "id", migration: "026" },
   ];
   for (const { table, column, migration } of columnProbes) {
     const { error } = await admin.from(table).select(column, { count: "exact", head: true });

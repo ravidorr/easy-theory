@@ -3,6 +3,14 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.206] — 2026-07-26
+
+### Fixed
+
+- Reconciled the question-reporting migration ledger and added its schema preflight check.
+
+---
+
 ## [0.3.205] — 2026-07-26
 
 ### Fixed
