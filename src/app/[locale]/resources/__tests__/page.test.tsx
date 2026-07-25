@@ -125,6 +125,24 @@ describe("ResourcesPage", () => {
     expect(featured!.querySelector('img[src="/signs/sign-301.png"]')).toBeTruthy();
   });
 
+  it("renders character featured resources and sign icons in the remaining resource list", async () => {
+    mockGetResources.mockResolvedValue([
+      makeResource({ id: "featured-char", icon_type: "char", icon_value: "★" }),
+      makeResource({
+        id: "listed-sign",
+        href: "https://example.com/sign",
+        icon_type: "sign",
+        icon_value: "/signs/sign-302.png",
+      }),
+    ]);
+
+    const jsx = await ResourcesPage();
+    const { container } = render(jsx);
+
+    expect(container.querySelector('[data-testid="featured-resource"]')).toHaveTextContent("★");
+    expect(container.querySelector('a[href="https://example.com/sign"] img[src="/signs/sign-302.png"]')).toBeTruthy();
+  });
+
   it("does not render a subtitle or external-link icon", async () => {
     const jsx = await ResourcesPage();
     const { container } = render(jsx);
