@@ -95,11 +95,28 @@
   position: relative;
 }
 
+.questionActions {
+  display: flex;
+  align-self: flex-end;
+  align-items: center;
+  gap: 4px;
+}
+
 .bookmarkCorner {
-  position: absolute;
-  top: 0;
-  inset-inline-end: 0;
-  z-index: 1;
+  position: static;
+}
+
+.reportQuestion {
+  min-height: var(--hit-min);
+  border: 0;
+  border-radius: var(--radius-pill);
+  padding: 0 10px;
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
 }
 
 .imgWide {
@@ -133,7 +150,6 @@
 .slideItem h2 {
   margin: 0;
   align-self: stretch;
-  padding-inline-end: var(--hit-min);
   font-size: var(--type-h2-size);
   font-weight: var(--type-h2-weight);
   line-height: var(--line-tight);

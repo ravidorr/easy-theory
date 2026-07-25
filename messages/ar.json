@@ -164,6 +164,17 @@
     "optionWrongSr": "إجابة خاطئة",
     "bookmarkLabel": "حفظ السؤال للمراجعة لاحقاً",
     "bookmarkTooltip": "يمكنك حفظ الأسئلة للعودة إليها لاحقًا",
+    "reportQuestionLabel": "الإبلاغ عن السؤال",
+    "reportQuestionTooltip": "الإبلاغ عن مشكلة في هذا السؤال",
+    "reportDialogLabel": "الإبلاغ عن سؤال",
+    "reportTitle": "الإبلاغ عن السؤال",
+    "reportDescription": "سنرسل تفاصيل السؤال تلقائيًا. يمكنك إضافة ملاحظة قصيرة.",
+    "reportCommentLabel": "ملاحظة (اختياري)",
+    "reportCommentPlaceholder": "ما المشكلة في السؤال؟",
+    "reportCancel": "إلغاء",
+    "reportSend": "إرسال",
+    "reportSent": "تم إرسال البلاغ. شكرًا لمساعدتنا في تحسين الأسئلة.",
+    "reportClose": "إغلاق",
     "rewardCorrect": "أحسنت!",
     "rewardTopicDone": "أحسنا! أكملنا الموضوع بأكمله!",
     "rewardWrongPrefix": "اخترنا ",
@@ -312,7 +323,9 @@
     "pushUnsubscribeFailed": "خطأ في إزالة الاشتراك",
     "bookmarkUpdateFailed": "خطأ في تحديث الأسئلة المحفوظة",
     "contactInvalid": "يُرجى التحقق من تفاصيل الرسالة والمحاولة مرة أخرى.",
-    "contactSendFailed": "لم نتمكن من إرسال الرسالة. يمكن المحاولة مرة أخرى."
+    "contactSendFailed": "لم نتمكن من إرسال الرسالة. يمكن المحاولة مرة أخرى.",
+    "questionReportInvalid": "يُرجى التحقق من تفاصيل البلاغ والمحاولة مرة أخرى.",
+    "questionReportSaveFailed": "لم نتمكن من حفظ البلاغ. يمكن المحاولة مرة أخرى."
   },
   "Notify": {
     "pushTitle": "جدولك الدراسي لليوم",
@@ -383,7 +396,18 @@
       "achievementExamPassLabel": "نجحنا في المحاكاة",
       "achievementExamPassDesc": "نجحنا في المحاكاة. عمل ممتاز!",
       "optionCorrectSr": "إجابة صحيحة",
-      "optionWrongSr": "إجابة خاطئة"
+      "optionWrongSr": "إجابة خاطئة",
+      "reportDialogLabel": "الإبلاغ عن سؤال",
+      "reportTitle": "الإبلاغ عن السؤال",
+      "reportDescription": "سنرسل تفاصيل السؤال تلقائيًا. يمكنك إضافة ملاحظة قصيرة.",
+      "reportCommentLabel": "ملاحظة (اختياري)",
+      "reportCommentPlaceholder": "ما المشكلة في السؤال؟",
+      "reportCancel": "إلغاء",
+      "reportSend": "إرسال",
+      "reportSending": "جارٍ الإرسال...",
+      "reportSent": "تم إرسال البلاغ. شكرًا لمساعدتنا في تحسين الأسئلة.",
+      "reportClose": "إغلاق",
+      "reportError": "لم نتمكن من حفظ البلاغ. يمكن المحاولة مرة أخرى."
     },
     "Schedule": {
       "daysSelected": "تم اختيار {count} أيام",

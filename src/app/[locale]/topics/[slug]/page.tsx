@@ -82,16 +82,29 @@ function QuestionSlide({
       style={{ display: index === 0 ? "flex" : "none" }}
     >
       <div className={styles.questionContainer}>
-        <button
-          type="button"
-          className={`bookmark-toggle ${styles.bookmarkCorner}`}
-          data-question-id={question.id}
-          aria-pressed={bookmarked ? "true" : "false"}
-          aria-label={t("bookmarkLabel")}
-          title={t("bookmarkTooltip")}
-        >
-          <Icon name="bookmark" size={20} />
-        </button>
+        <div className={styles.questionActions}>
+          <button
+            type="button"
+            className={`bookmark-toggle ${styles.bookmarkCorner}`}
+            data-question-id={question.id}
+            aria-pressed={bookmarked ? "true" : "false"}
+            aria-label={t("bookmarkLabel")}
+            title={t("bookmarkTooltip")}
+          >
+            <Icon name="bookmark" size={20} />
+          </button>
+          <button
+            type="button"
+            className={`report-question ${styles.reportQuestion}`}
+            data-question-id={question.id}
+            data-topic-id={topicId}
+            aria-haspopup="dialog"
+            aria-label={t("reportQuestionLabel")}
+            title={t("reportQuestionTooltip")}
+          >
+            {t("reportQuestionLabel")}
+          </button>
+        </div>
         {imageUrl && (
           isWide ? (
             <div className={styles.imgWide}>
@@ -287,6 +300,7 @@ export default async function TopicQuizPage({
       <Script src="/js/medal.js" strategy="afterInteractive" />
       <Script src="/js/quiz.js" strategy="afterInteractive" />
       <Script src="/js/bookmark.js" strategy="afterInteractive" />
+      <Script src="/js/question-report.js" strategy="afterInteractive" />
     </>
   );
 }

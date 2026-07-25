@@ -79,7 +79,7 @@ describe("database catalog audit", () => {
     const ledgerSql = readFileSync("seeds/migrations/023_migration_ledger.sql", "utf8");
 
     expect(migrations.map(({ version }) => version)).toEqual(
-      Array.from({ length: 25 }, (_, index) => index + 1)
+      Array.from({ length: 26 }, (_, index) => index + 1)
     );
     for (const migration of migrations.filter(({ version }) => version <= 23)) {
       expect(ledgerSql).toContain(`'${migration.filename}', '${migration.checksum}'`);

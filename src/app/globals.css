@@ -92,6 +92,47 @@ body {
   width: 100%;
 }
 
+.question-report-dialog {
+  gap: 16px;
+}
+
+.question-report-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  color: var(--text);
+  font-size: var(--type-small-size);
+  font-weight: var(--type-caption-weight);
+  text-align: start;
+}
+
+.question-report-field textarea {
+  box-sizing: border-box;
+  width: 100%;
+  resize: vertical;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 10px;
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+}
+
+.question-report-error {
+  width: 100%;
+  margin: 0;
+  color: var(--danger);
+  font-size: var(--type-small-size);
+  text-align: start;
+}
+
+.question-report-success {
+  margin: 0;
+  color: var(--text);
+  line-height: var(--line-body);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .modal-card {
     animation: none;

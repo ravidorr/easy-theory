@@ -1,4 +1,4 @@
-const VERSION = "v3";
+const VERSION = "v4";
 const CACHE_PREFIX = "clearroad-";
 const STATIC_CACHE = `${CACHE_PREFIX}static-${VERSION}`;
 const PAGES_CACHE = `${CACHE_PREFIX}pages-${VERSION}`;
@@ -18,6 +18,7 @@ const PRECACHE_URLS = [
   "/js/flashcard.js",
   "/js/more.js",
   "/js/push.js",
+  "/js/question-report.js",
   "/js/quiz.js",
   "/js/schedule.js",
 ];

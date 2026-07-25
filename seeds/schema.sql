@@ -113,6 +113,18 @@ CREATE TABLE IF NOT EXISTS contact_messages (
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS question_reports (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  question_id UUID NOT NULL REFERENCES questions(id),
+  comment     TEXT CHECK (comment IS NULL OR char_length(comment) BETWEEN 1 AND 1000),
+  locale      TEXT NOT NULL CHECK (locale IN ('he', 'ar')),
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (user_id, question_id)
+);
+
+ALTER TABLE question_reports ENABLE ROW LEVEL SECURITY;
+
 -- Added in migration 014 — SM-2 spaced-repetition state per (user, sign) or
 -- (user, question); exactly one of sign_id/question_id is set.
 CREATE TABLE IF NOT EXISTS user_srs_cards (
