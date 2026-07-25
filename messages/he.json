@@ -164,6 +164,17 @@
     "optionWrongSr": "תשובה שגויה",
     "bookmarkLabel": "שמירת השאלה לחזרה",
     "bookmarkTooltip": "אפשר לשמור שאלות כדי לחזור אליהן אחר כך",
+    "reportQuestionLabel": "דיווח על שאלה",
+    "reportQuestionTooltip": "דיווח על בעיה בשאלה הזו",
+    "reportDialogLabel": "דיווח על שאלה",
+    "reportTitle": "דיווח על השאלה",
+    "reportDescription": "נשלח את פרטי השאלה אוטומטית. אפשר להוסיף הערה קצרה.",
+    "reportCommentLabel": "הערה (לא חובה)",
+    "reportCommentPlaceholder": "מה לא תקין בשאלה?",
+    "reportCancel": "ביטול",
+    "reportSend": "שליחה",
+    "reportSent": "הדיווח נשלח. תודה שעזרת לנו לשפר את השאלות.",
+    "reportClose": "סגירה",
     "rewardCorrect": "יפה מאוד!",
     "rewardTopicDone": "כל הכבוד! סיימנו את כל הנושא!",
     "rewardWrongPrefix": "בחרנו ב־",
@@ -312,7 +323,9 @@
     "pushUnsubscribeFailed": "שגיאה בהסרת ההרשמה",
     "bookmarkUpdateFailed": "שגיאה בעדכון השאלות השמורות",
     "contactInvalid": "יש לבדוק את פרטי ההודעה ולנסות שוב.",
-    "contactSendFailed": "לא הצלחנו לשלוח את ההודעה. אפשר לנסות שוב."
+    "contactSendFailed": "לא הצלחנו לשלוח את ההודעה. אפשר לנסות שוב.",
+    "questionReportInvalid": "יש לבדוק את פרטי הדיווח ולנסות שוב.",
+    "questionReportSaveFailed": "לא הצלחנו לשמור את הדיווח. אפשר לנסות שוב."
   },
   "Notify": {
     "pushTitle": "לוח הלימודים שלך להיום",
@@ -383,7 +396,18 @@
       "achievementExamPassLabel": "עברנו סימולציה",
       "achievementExamPassDesc": "עברנו את הסימולציה. עבודה מצוינת!",
       "optionCorrectSr": "תשובה נכונה",
-      "optionWrongSr": "תשובה שגויה"
+      "optionWrongSr": "תשובה שגויה",
+      "reportDialogLabel": "דיווח על שאלה",
+      "reportTitle": "דיווח על השאלה",
+      "reportDescription": "נשלח את פרטי השאלה אוטומטית. אפשר להוסיף הערה קצרה.",
+      "reportCommentLabel": "הערה (לא חובה)",
+      "reportCommentPlaceholder": "מה לא תקין בשאלה?",
+      "reportCancel": "ביטול",
+      "reportSend": "שליחה",
+      "reportSending": "שולחים...",
+      "reportSent": "הדיווח נשלח. תודה שעזרת לנו לשפר את השאלות.",
+      "reportClose": "סגירה",
+      "reportError": "לא הצלחנו לשמור את הדיווח. אפשר לנסות שוב."
     },
     "Schedule": {
       "daysSelected": "נבחרו {count} ימים",

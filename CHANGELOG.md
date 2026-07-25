@@ -3,6 +3,14 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.204] — 2026-07-26
+
+### Added
+
+- Added authenticated question reporting from practice and retry questions. (#268)
+
+---
+
 ## [0.3.203] — 2026-07-25
 
 ### Added

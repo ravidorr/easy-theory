@@ -117,6 +117,7 @@ describe("RetryMistakesPage", () => {
       "/js/medal.js",
       "/js/quiz.js",
       "/js/bookmark.js",
+      "/js/question-report.js",
     ]);
   });
 
@@ -322,5 +323,14 @@ describe("RetryMistakesPage", () => {
         container.querySelector('.bookmark-toggle[aria-pressed="true"]')
       ).toBeTruthy();
     });
+  });
+
+  it("renders a report control with the exact question and topic IDs", async () => {
+    const jsx = await RetryMistakesPage({ params: Promise.resolve({ slug: "signs" }) });
+    const { container } = render(jsx);
+    const report = container.querySelector(".report-question");
+    expect(report?.getAttribute("data-question-id")).toBe("q1");
+    expect(report?.getAttribute("data-topic-id")).toBe("t1");
+    expect(report?.getAttribute("aria-haspopup")).toBe("dialog");
   });
 });
