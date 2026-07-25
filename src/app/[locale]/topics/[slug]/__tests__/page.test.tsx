@@ -149,6 +149,25 @@ describe("TopicQuizPage", () => {
     expect(options).toHaveLength(4);
   });
 
+  it("uses display option text when supplied", async () => {
+    vi.mocked(getLocale).mockResolvedValue("ar" as never);
+    const q = {
+      ...QUESTION,
+      option_a_ar: "عرض أ",
+      option_b_ar: "عرض ب",
+      option_c_ar: "عرض ج",
+      option_d_ar: "عرض د",
+    };
+    mockGetQuestions.mockResolvedValue([q] as never);
+
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "ar" }) });
+    const { container } = render(jsx);
+
+    for (const [option, text] of Object.entries({ a: "عرض أ", b: "عرض ب", c: "عرض ج", d: "عرض د" })) {
+      expect(container.querySelector(`[data-option="${option}"]`)?.textContent).toContain(text);
+    }
+  });
+
   it("shows link to review mistakes page", async () => {
     mockGetQuestions.mockResolvedValue([QUESTION] as never);
     const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "he" }) });

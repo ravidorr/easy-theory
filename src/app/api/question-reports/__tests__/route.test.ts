@@ -96,11 +96,70 @@ describe("POST /api/question-reports", () => {
     }
   });
 
+  it("rejects malformed and empty JSON with a localized validation error", async () => {
+    const requests = [
+      new Request("http://localhost/api/question-reports", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Cookie: "NEXT_LOCALE=he" },
+        body: "{",
+      }),
+      new Request("http://localhost/api/question-reports", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Cookie: "NEXT_LOCALE=he" },
+      }),
+    ];
+
+    for (const request of requests) {
+      const response = await POST(request);
+      expect(response.status).toBe(400);
+      expect(await response.json()).toEqual({ error: "יש לבדוק את פרטי הדיווח ולנסות שוב." });
+    }
+    expect(mockCreateClient).not.toHaveBeenCalled();
+  });
+
   it("rejects a topic that does not own the reported question", async () => {
     const admin = makeAdminClient({ question: { data: { topic_id: "other-topic" }, error: null } });
     mockCreateAdminClient.mockReturnValue(admin as never);
     expect((await POST(makeRequest(validBody()))).status).toBe(400);
     expect(mockCheckRateLimit).not.toHaveBeenCalled();
+  });
+
+  it("returns a localized failure when validating report ownership fails", async () => {
+    const cases = [
+      {
+        admin: makeAdminClient({ question: { data: null, error: { message: "questions unavailable" } } }),
+        message: "question lookup failed",
+        context: { userId: "u1", questionId: QUESTION_ID },
+      },
+      {
+        admin: makeAdminClient({ topic: { data: null, error: { message: "topics unavailable" } } }),
+        message: "topic lookup failed",
+        context: { userId: "u1", topicId: TOPIC_ID },
+      },
+      {
+        admin: makeAdminClient({ topic: { data: null, error: null } }),
+        message: null,
+        context: null,
+      },
+      {
+        admin: makeAdminClient({ existing: { data: null, error: { message: "reports unavailable" } } }),
+        message: "existing report lookup failed",
+        context: { userId: "u1", questionId: QUESTION_ID },
+      },
+    ];
+
+    for (const { admin, message, context } of cases) {
+      mockCreateAdminClient.mockReturnValue(admin as never);
+      const response = await POST(makeRequest(validBody()));
+
+      expect(response.status).toBe(message ? 500 : 400);
+      expect(await response.json()).toEqual({
+        error: message ? "לא הצלחנו לשמור את הדיווח. אפשר לנסות שוב." : "יש לבדוק את פרטי הדיווח ולנסות שוב.",
+      });
+      if (message) {
+        expect(reportError).toHaveBeenCalledWith("question-reports", message, expect.anything(), context);
+      }
+    }
   });
 
   it("rate limits new reports per authenticated user", async () => {

@@ -76,6 +76,24 @@ describe("ContactForm", () => {
     expect(screen.getByPlaceholderText("messagePlaceholder")).toHaveValue("Need help");
   });
 
+  it("falls back to the generic error when the API error payload is not text", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, json: async () => ({ error: null }) }));
+    renderForm();
+    fireEvent.change(screen.getByPlaceholderText("messagePlaceholder"), { target: { value: "Need help" } });
+    fireEvent.submit(screen.getByRole("button", { name: "submit" }).closest("form")!);
+
+    await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("sendFailed"));
+  });
+
+  it("falls back to the generic error when submission rejects with a non-Error value", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue("network unavailable"));
+    renderForm();
+    fireEvent.change(screen.getByPlaceholderText("messagePlaceholder"), { target: { value: "Need help" } });
+    fireEvent.submit(screen.getByRole("button", { name: "submit" }).closest("form")!);
+
+    await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("sendFailed"));
+  });
+
   it("resets the sent state to the default form", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ok: true }) }));
     renderForm();
