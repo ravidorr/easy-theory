@@ -103,6 +103,16 @@ CREATE TABLE IF NOT EXISTS user_question_bookmarks (
   PRIMARY KEY (user_id, question_id)
 );
 
+CREATE TABLE IF NOT EXISTS contact_messages (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  topic       TEXT NOT NULL CHECK (topic IN ('question', 'bug', 'idea', 'general')),
+  message     TEXT NOT NULL CHECK (char_length(message) BETWEEN 1 AND 2000),
+  reply_email TEXT,
+  locale      TEXT NOT NULL CHECK (locale IN ('he', 'ar')),
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- Added in migration 014 — SM-2 spaced-repetition state per (user, sign) or
 -- (user, question); exactly one of sign_id/question_id is set.
 CREATE TABLE IF NOT EXISTS user_srs_cards (
@@ -179,6 +189,10 @@ ALTER TABLE user_question_bookmarks ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "own select" ON user_question_bookmarks FOR SELECT USING (user_id = auth.uid());
 CREATE POLICY "own insert" ON user_question_bookmarks FOR INSERT WITH CHECK (user_id = auth.uid());
 CREATE POLICY "own delete" ON user_question_bookmarks FOR DELETE USING (user_id = auth.uid());
+
+-- Contact messages are created only by the authenticated server route using
+-- the service-role client. No client policy is intentionally granted.
+ALTER TABLE contact_messages ENABLE ROW LEVEL SECURITY;
 
 ALTER TABLE user_srs_cards ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "own select" ON user_srs_cards FOR SELECT USING (user_id = auth.uid());

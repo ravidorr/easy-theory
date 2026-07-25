@@ -39,7 +39,7 @@ auth. Decisions made:
   (shell wins over `.env.local`), but any var **missing** from the shell falls back to
   the production `.env.local`. So `.env.qa` must define ALL vars the app reads
   (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
-  `SUPABASE_SERVICE_ROLE_KEY` real; `RESEND_API_KEY`, `CRON_SECRET`,
+  `SUPABASE_SERVICE_ROLE_KEY` real; `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `CRON_SECRET`,
   `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_CONTACT_EMAIL` dummies),
   and scripts guard against pointing at prod.
 - **Quiz oracles** (`public/js/quiz.js`): POST `/api/quiz` per confirmed answer, POST

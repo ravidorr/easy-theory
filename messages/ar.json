@@ -104,6 +104,7 @@
     "navSchedule": "خطتك",
     "navBookmarks": "الأسئلة المحفوظة",
     "navCredits": "عن التطبيق",
+    "navContact": "تواصل معنا",
     "medalsTitle": "الإنجازات",
     "milestone3": "3 أيام",
     "milestone7": "أسبوع",
@@ -119,6 +120,26 @@
     "autoAdvance": "الانتقال التلقائي إلى السؤال التالي",
     "language": "اللغة",
     "logoutBtn": "تسجيل الخروج"
+  },
+  "Contact": {
+    "pageTitle": "تواصل معنا",
+    "subtitle": "يسرّنا أن نسمع منك، فكل رسالة تُقرأ.",
+    "closeLabel": "إغلاق والعودة إلى الحساب",
+    "topicTitle": "ما الموضوع؟",
+    "topicQuestion": "سؤال غير صحيح",
+    "topicBug": "مشكلة تقنية",
+    "topicIdea": "فكرة للتحسين",
+    "topicGeneral": "شيء آخر",
+    "messageTitle": "الرسالة",
+    "messagePlaceholder": "ما الذي تريد إخبارنا به؟",
+    "replyEmailPlaceholder": "بريد إلكتروني للرد (اختياري)",
+    "replyEmailHint": "إذا تركت بريدًا إلكترونيًا، سنعود إليك خلال يوم أو يومين.",
+    "submit": "إرسال الرسالة",
+    "submitting": "جارٍ الإرسال...",
+    "sendFailed": "لم نتمكن من إرسال الرسالة. يمكن المحاولة مرة أخرى.",
+    "sentTitle": "تم إرسال الرسالة",
+    "sentMessage": "شكرًا لمساعدتنا على التحسن. إذا تركت بريدًا إلكترونيًا، سنعود إليك قريبًا.",
+    "sendAnother": "إرسال رسالة أخرى"
   },
   "Flashcards": {
     "topBarTitle": "إشارات المرور: مراجعة",
@@ -289,7 +310,9 @@
     "scheduleUpdateFailed": "خطأ في تحديث الجدول",
     "pushSubscribeFailed": "خطأ في حفظ الاشتراك",
     "pushUnsubscribeFailed": "خطأ في إزالة الاشتراك",
-    "bookmarkUpdateFailed": "خطأ في تحديث الأسئلة المحفوظة"
+    "bookmarkUpdateFailed": "خطأ في تحديث الأسئلة المحفوظة",
+    "contactInvalid": "يُرجى التحقق من تفاصيل الرسالة والمحاولة مرة أخرى.",
+    "contactSendFailed": "لم نتمكن من إرسال الرسالة. يمكن المحاولة مرة أخرى."
   },
   "Notify": {
     "pushTitle": "جدولك الدراسي لليوم",
