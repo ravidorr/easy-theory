@@ -38,6 +38,43 @@ describe("POST /api/diagnostic", () => {
     expect(await response.json()).toMatchObject({ saved: false, topic_scores: { "topic-1": { correct: 12, total: 12 } } });
   });
 
+  it("rejects malformed, duplicate, and unavailable question submissions", async () => {
+    const missing = await POST(new Request("http://localhost/api/diagnostic", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ answers: [] }),
+    }));
+    expect(missing.status).toBe(400);
+
+    const duplicateAnswers = Array.from({ length: 12 }, () => ({ question_id: questionId(0), selected_option: "a" }));
+    const duplicate = await POST(new Request("http://localhost/api/diagnostic", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ answers: duplicateAnswers }),
+    }));
+    expect(duplicate.status).toBe(400);
+
+    mockCreateAdminClient.mockReturnValue({
+      from: vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue({ in: vi.fn().mockResolvedValue({ data: [], error: null }) }) }),
+    } as never);
+    const unavailableAnswers = Array.from({ length: 12 }, (_, index) => ({ question_id: questionId(index), selected_option: "a" }));
+    const unavailable = await POST(new Request("http://localhost/api/diagnostic", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ answers: unavailableAnswers }),
+    }));
+    expect(unavailable.status).toBe(400);
+  });
+
+  it("saves authenticated diagnostics atomically and ignores invalid target dates", async () => {
+    const rpc = vi.fn().mockResolvedValue({ error: null });
+    mockCreateClient.mockResolvedValue({
+      auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: "user-1" } } }) }, rpc,
+    } as never);
+    const answers = Array.from({ length: 12 }, (_, index) => ({ question_id: questionId(index), selected_option: index === 0 ? "b" : "a" }));
+    const response = await POST(new Request("http://localhost/api/diagnostic", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ answers, target_exam_date: "not-a-date" }),
+    }));
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ saved: true, topic_scores: { "topic-1": { correct: 11, total: 12 } } });
+    expect(rpc).toHaveBeenCalledWith("complete_diagnostic", expect.objectContaining({ p_target_exam_date: null }));
+  });
+
   it("returns a failure when the atomic authenticated save fails", async () => {
     const rpc = vi.fn().mockResolvedValue({ error: { message: "write failed" } });
     mockCreateClient.mockResolvedValue({
