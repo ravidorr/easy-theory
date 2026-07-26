@@ -85,6 +85,8 @@ async function checkSchema(): Promise<number> {
     { table: "resources", column: "href", migration: "012" },
     { table: "quiz_answer_events", column: "answered_at", migration: "017" },
     { table: "question_reports", column: "id", migration: "026" },
+    { table: "content_source_releases", column: "source_checksum", migration: "028" },
+    { table: "user_exam_sessions", column: "revision", migration: "029" },
   ];
   for (const { table, column, migration } of columnProbes) {
     const { error } = await admin.from(table).select(column, { count: "exact", head: true });
@@ -121,6 +123,32 @@ async function checkSchema(): Promise<number> {
       migration: "020",
       args: { p_user_id: NIL_UUID },
       expectedError: /exam_not_passed/,
+    },
+    {
+      fn: "update_exam_session",
+      migration: "029",
+      args: {
+        p_session_id: NIL_UUID,
+        p_revision: 0,
+        p_answers: {},
+        p_current_index: 0,
+        p_marked_question_ids: [],
+      },
+    },
+    {
+      fn: "finalize_exam_session",
+      migration: "029",
+      args: { p_session_id: NIL_UUID },
+    },
+    {
+      fn: "create_exam_session",
+      migration: "031",
+      args: {},
+    },
+    {
+      fn: "complete_diagnostic",
+      migration: "032",
+      args: { p_answers: [], p_topic_scores: {}, p_target_exam_date: null },
     },
   ];
   for (const { fn, migration, args, expectedError = /not_authenticated/ } of rpcProbes) {

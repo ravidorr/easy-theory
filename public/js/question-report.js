@@ -46,6 +46,21 @@
     textarea.setAttribute("aria-describedby", "question-report-error-" + dialogId);
     field.appendChild(textarea);
 
+    const categoryField = document.createElement("label");
+    categoryField.className = "question-report-field";
+    categoryField.textContent = label("reportCategoryLabel", "סוג הבעיה");
+    const category = document.createElement("select");
+    [
+      ["unclear", label("reportCategoryUnclear", "השאלה לא ברורה")],
+      ["wrong_answer", label("reportCategoryWrong", "תשובה שגויה")],
+      ["outdated", label("reportCategoryOutdated", "מידע לא מעודכן")],
+      ["image", label("reportCategoryImage", "תמונה לא תקינה")],
+      ["wording", label("reportCategoryWording", "ניסוח בעייתי")],
+    ].forEach(function (entry) {
+      const option = document.createElement("option"); option.value = entry[0]; option.textContent = entry[1]; category.appendChild(option);
+    });
+    categoryField.appendChild(category);
+
     const error = document.createElement("p");
     error.className = "question-report-error";
     error.id = "question-report-error-" + dialogId;
@@ -64,7 +79,7 @@
     send.textContent = label("reportSend", "שליחה");
     actions.append(cancel, send);
 
-    card.append(title, description, field, error, actions);
+    card.append(title, description, categoryField, field, error, actions);
     scrim.appendChild(card);
     document.body.appendChild(scrim);
 
@@ -103,6 +118,7 @@
     function setPending(next) {
       pending = next;
       textarea.disabled = next;
+      category.disabled = next;
       cancel.disabled = next;
       send.disabled = next;
       send.textContent = next ? label("reportSending", "שולחים...") : label("reportSend", "שליחה");
@@ -137,6 +153,7 @@
             question_id: questionId,
             topic_id: topicId,
             locale,
+            category: category.value,
             ...(comment ? { comment } : {}),
           }),
         });

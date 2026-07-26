@@ -6,6 +6,10 @@
   },
   "TabBar": {
     "home": "הבית",
+    "practice": "תרגול",
+    "exam": "מבחן",
+    "mistakes": "טעויות",
+    "progress": "התקדמות",
     "videos": "סרטונים",
     "flashcards": "כרטיסיות",
     "links": "קישורים",
@@ -13,6 +17,31 @@
   },
   "Loading": {
     "label": "התוכן נטען"
+  },
+  "Diagnostic": {
+    "title": "אבחון קצר לתחילת הדרך",
+    "intro": "12 שאלות קצרות יעזרו לנו לבחור מה לתרגל קודם.",
+    "targetDate": "מתי המבחן? (לא חובה)",
+    "question": "שאלה {current} מתוך {total}",
+    "submit": "בניית התוכנית האישית"
+  },
+  "Practice": {
+    "title": "תרגול",
+    "intro": "בחרו נושא או המשיכו את התרגול המומלץ מהבית."
+  },
+  "Mistakes": {
+    "title": "טעויות לחזרה",
+    "intro": "השאלות האלו יחזרו עד שהכל ירגיש בטוח.",
+    "count": "{count} שאלות לחזרה",
+    "empty": "אין טעויות פתוחות כרגע. עבודה מצוינת."
+  },
+  "Progress": {
+    "title": "ההתקדמות שלך",
+    "empty": "אחרי סימולציה ראשונה נציג כאן הערכת מוכנות.",
+    "readiness": "מוכנות {level}; ביטחון {confidence}",
+    "streak": "רצף",
+    "answered": "שאלות שנענו",
+    "simulations": "סימולציות"
   },
   "Home": {
     "todayBadge": "המשימה להיום",
@@ -27,7 +56,7 @@
     "emptyStateBtn": "שמירת תוכנית",
     "examCtaTitle": "סימולציית מבחן",
     "examCtaDesc": "30 שאלות · 40 דק׳ · כמו במבחן האמיתי",
-    "examReadiness": "מוכנות {percent}% · {level}",
+    "examReadiness": "{level} · ביטחון {confidence}",
     "topicsHeader": "הנושאים",
     "topicCompleted": "הושלם",
     "topicInProgress": "בתרגול",
@@ -37,7 +66,15 @@
     "readinessLevelLow": "מוכנות נמוכה",
     "readinessLevelMedium": "בדרך הנכונה",
     "readinessLevelHigh": "מוכנות גבוהה - ממשיכים ככה!",
-    "readinessEmpty": "סימולציה ראשונה תיתן הערכת מוכנות למבחן."
+    "readinessEmpty": "סימולציה ראשונה תיתן הערכת מוכנות למבחן.",
+    "readinessConfidenceLow": "נמוך",
+    "readinessConfidenceMedium": "בינוני",
+    "readinessConfidenceHigh": "גבוה",
+    "publicTitle": "לימוד לתיאוריה, עם כיוון ברור",
+    "publicIntro": "אבחון קצר בונה תוכנית תרגול אישית לפי החוזקות והנושאים שכדאי לחזק.",
+    "publicDiagnostic": "לאבחון קצר",
+    "publicLogin": "כניסה לחשבון",
+    "publicSource": "מבוסס על מאגר השאלות הרשמי של משרד התחבורה"
   },
   "Login": {
     "metaTitle": "דרך ברורה - לומדים לתיאוריה בלי לחץ",
@@ -160,6 +197,10 @@
     "closeLabel": "סגירה",
     "signAlt": "תמרור {number}",
     "questionImageAlt": "תמונה המצורפת לשאלה",
+    "confidenceLabel": "עד כמה היינו בטוחים?",
+    "confidenceSure": "בטוח",
+    "confidenceUnsure": "לא בטוח",
+    "confidenceGuessed": "ניחשתי",
     "optionCorrectSr": "תשובה נכונה",
     "optionWrongSr": "תשובה שגויה",
     "bookmarkLabel": "שמירת השאלה לחזרה",
@@ -171,6 +212,12 @@
     "reportDescription": "נשלח את פרטי השאלה אוטומטית. אפשר להוסיף הערה קצרה.",
     "reportCommentLabel": "הערה (לא חובה)",
     "reportCommentPlaceholder": "מה לא תקין בשאלה?",
+    "reportCategoryLabel": "סוג הבעיה",
+    "reportCategoryUnclear": "השאלה לא ברורה",
+    "reportCategoryWrong": "תשובה שגויה",
+    "reportCategoryOutdated": "מידע לא מעודכן",
+    "reportCategoryImage": "תמונה לא תקינה",
+    "reportCategoryWording": "ניסוח בעייתי",
     "reportCancel": "ביטול",
     "reportSend": "שליחה",
     "reportSent": "הדיווח נשלח. תודה שעזרת לנו לשפר את השאלות.",
@@ -253,6 +300,7 @@
     "backToExam": "חזרה לסימולציה",
     "emptyQuestions": "אין שאלות זמינות עדיין.",
     "timerLabel": "זמן שנותר",
+    "markReview": "סימון לחזרה",
     "letters": "א,ב,ג,ד"
   },
   "Schedule": {
@@ -402,6 +450,12 @@
       "reportDescription": "נשלח את פרטי השאלה אוטומטית. אפשר להוסיף הערה קצרה.",
       "reportCommentLabel": "הערה (לא חובה)",
       "reportCommentPlaceholder": "מה לא תקין בשאלה?",
+      "reportCategoryLabel": "סוג הבעיה",
+      "reportCategoryUnclear": "השאלה לא ברורה",
+      "reportCategoryWrong": "תשובה שגויה",
+      "reportCategoryOutdated": "מידע לא מעודכן",
+      "reportCategoryImage": "תמונה לא תקינה",
+      "reportCategoryWording": "ניסוח בעייתי",
       "reportCancel": "ביטול",
       "reportSend": "שליחה",
       "reportSending": "שולחים...",
@@ -425,6 +479,11 @@
       "done": "הושלם! {total} כרטיסים",
       "allDone": "כל הכרטיסים עברו!"
     },
+    "Diagnostic": {
+      "saved": "התוכנית האישית נשמרה. עכשיו נבחר את התרגול הבא.",
+      "guestReady": "האבחון מוכן. כניסה לחשבון תשמור את התוכנית האישית.",
+      "saveError": "לא הצלחנו לשמור את האבחון. אפשר לנסות שוב."
+    },
     "Exam": {
       "examCount": "{current} מתוך {total}",
       "examAnswered": "נענו {answered} מתוך {total}",
@@ -441,6 +500,8 @@
       "examResultScore": "{score} מתוך {total} נכון (ציון עובר: {passMark})",
       "examTimeUp": "הזמן נגמר, המבחן הוגש.",
       "examSubmitError": "שגיאה בשליחה, שננסה שוב?",
+      "examSaveError": "לא הצלחנו לשמור את מצב הסימולציה.",
+      "examSaveConflict": "הסימולציה נפתחה במקום אחר. יש לרענן את הדף.",
       "examReviewMode": "סקירת תשובות",
       "examBackToResults": "חזרה לתוצאות"
     },

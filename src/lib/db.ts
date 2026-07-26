@@ -1,7 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Locale } from "@/i18n/routing";
-import { sampleIds } from "./exam";
 import { isDue, type SrsReview } from "./srs";
+import { sampleIds } from "./exam";
+import type { SourceRelease } from "./source-release";
 
 export type Topic = {
   id: string;
@@ -528,6 +529,69 @@ export type ExamAttempt = {
   duration_seconds: number | null;
   created_at: string;
 };
+
+export type ExamSession = {
+  id: string;
+  question_ids: string[];
+  answers: Record<string, "a" | "b" | "c" | "d">;
+  marked_question_ids: string[];
+  current_index: number;
+  revision: number;
+  started_at: string;
+  expires_at: string;
+  submitted_at: string | null;
+  attempt_id: string | null;
+  result: Record<string, unknown> | null;
+};
+
+export async function getLatestSourceRelease(supabase: SupabaseClient): Promise<SourceRelease | null> {
+  const { data, error } = await supabase
+    .from("content_source_releases")
+    .select("source_name, resource_url, source_checksum, importer_version, imported_at")
+    .order("imported_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  throwOnDbError(error, "getLatestSourceRelease: content_source_releases");
+  return data ?? null;
+}
+
+export async function getActiveExamSession(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<ExamSession | null> {
+  const { data, error } = await supabase
+    .from("user_exam_sessions")
+    .select("id, question_ids, answers, marked_question_ids, current_index, revision, started_at, expires_at, submitted_at, attempt_id, result")
+    .eq("user_id", userId)
+    .is("submitted_at", null)
+    .gt("expires_at", new Date().toISOString())
+    .order("started_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  throwOnDbError(error, "getActiveExamSession: user_exam_sessions");
+  return data ?? null;
+}
+
+export async function getOrCreateExamSession(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<ExamSession> {
+  const existing = await getActiveExamSession(supabase, userId);
+  if (existing) return existing;
+
+  const { data, error } = await supabase.rpc("create_exam_session");
+  throwOnDbError(error, "getOrCreateExamSession: create_exam_session");
+  if (!data) throw new Error("getOrCreateExamSession: create_exam_session returned no row");
+  return data as ExamSession;
+}
+
+export async function getQuestionsByIds(supabase: SupabaseClient, ids: string[]): Promise<Question[]> {
+  if (ids.length === 0) return [];
+  const { data, error } = await supabase.from("questions").select("*").in("id", ids);
+  throwOnDbError(error, "getQuestionsByIds: questions");
+  const byId = new Map((data ?? []).map((question) => [question.id, question]));
+  return ids.map((id) => byId.get(id)).filter((question): question is Question => question != null);
+}
 
 export async function getRandomExamQuestions(
   supabase: SupabaseClient,

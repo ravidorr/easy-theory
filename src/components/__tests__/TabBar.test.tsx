@@ -7,10 +7,10 @@ vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn().mockResolvedValue((key: string) => {
     const labels: Record<string, string> = {
       home: "הבית",
-      videos: "סרטונים",
-      flashcards: "כרטיסיות",
-      links: "קישורים",
-      more: "עוד",
+      practice: "תרגול",
+      exam: "מבחן",
+      mistakes: "טעויות",
+      progress: "התקדמות",
     };
     return labels[key] ?? key;
   }),
@@ -23,10 +23,10 @@ vi.mock("@/lib/navigation", () => ({
 
 const tabs = [
   { label: "הבית", href: "/" },
-  { label: "כרטיסיות", href: "/flashcards" },
-  { label: "סרטונים", href: "/videos" },
-  { label: "קישורים", href: "/resources" },
-  { label: "עוד", href: "/more" },
+  { label: "תרגול", href: "/practice" },
+  { label: "מבחן", href: "/exam" },
+  { label: "טעויות", href: "/mistakes" },
+  { label: "התקדמות", href: "/progress" },
 ];
 
 describe("TabBar", () => {
@@ -65,17 +65,17 @@ describe("TabBar", () => {
   });
 
   it("marks only the active tab with aria-current", async () => {
-    render(await TabBar({ active: "videos" }));
-    expect(screen.getByText("סרטונים").closest("a")).toHaveAttribute("aria-current", "page");
+    render(await TabBar({ active: "exam" }));
+    expect(screen.getByText("מבחן").closest("a")).toHaveAttribute("aria-current", "page");
     expect(screen.getByText("הבית").closest("a")).not.toHaveAttribute("aria-current");
-    expect(screen.getByText("כרטיסיות").closest("a")).not.toHaveAttribute("aria-current");
-    expect(screen.getByText("קישורים").closest("a")).not.toHaveAttribute("aria-current");
-    expect(screen.getByText("עוד").closest("a")).not.toHaveAttribute("aria-current");
+    expect(screen.getByText("תרגול").closest("a")).not.toHaveAttribute("aria-current");
+    expect(screen.getByText("טעויות").closest("a")).not.toHaveAttribute("aria-current");
+    expect(screen.getByText("התקדמות").closest("a")).not.toHaveAttribute("aria-current");
   });
 
   it("keeps a section active without marking another route as current", async () => {
-    render(await TabBar({ active: "more", current: null }));
-    expect(screen.getByText("עוד").closest("a")).toHaveAttribute("data-active", "true");
+    render(await TabBar({ active: "progress", current: null }));
+    expect(screen.getByText("התקדמות").closest("a")).toHaveAttribute("data-active", "true");
     for (const { label } of tabs) {
       expect(screen.getByText(label).closest("a")).not.toHaveAttribute("aria-current");
     }

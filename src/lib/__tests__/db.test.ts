@@ -21,6 +21,7 @@ import {
   upsertSrsCard,
   markTopicCompleted,
   getRandomExamQuestions,
+  getOrCreateExamSession,
   getExamAttempts,
   hasPassedExam,
   getTopicAccuracy,
@@ -54,6 +55,22 @@ function makeClient(data: unknown, error: { message: string } | null = null) {
 }
 
 const boom = { message: "boom" };
+
+describe("getOrCreateExamSession", () => {
+  it("creates a missing session through the protected server RPC", async () => {
+    const query = {} as Record<string, unknown>;
+    for (const method of ["select", "eq", "is", "gt", "order", "limit"]) {
+      query[method] = vi.fn().mockReturnValue(query);
+    }
+    query.maybeSingle = vi.fn().mockResolvedValue({ data: null, error: null });
+    const session = { id: "session-1", question_ids: [], answers: {}, marked_question_ids: [], current_index: 0, revision: 0 };
+    const rpc = vi.fn().mockResolvedValue({ data: session, error: null });
+    const client = { from: vi.fn().mockReturnValue(query), rpc } as unknown as SupabaseClient;
+
+    await expect(getOrCreateExamSession(client, "user-1")).resolves.toEqual(session);
+    expect(rpc).toHaveBeenCalledWith("create_exam_session");
+  });
+});
 
 // ─── Simple query helpers ────────────────────────────────────────────────────
 

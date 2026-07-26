@@ -180,6 +180,8 @@ describe("POST /api/question-reports", () => {
       question_id: QUESTION_ID,
       comment: "Incorrect answer",
       locale: "he",
+      category: "unclear",
+      source_checksum: null,
     });
     expect(mockEmailSend).toHaveBeenCalledWith(
       expect.objectContaining({
