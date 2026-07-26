@@ -3,6 +3,14 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.208] — 2026-07-27
+
+### Fixed
+
+- Restored test coverage above 95% across lines, statements, functions, and branches with targeted page and API-path tests.
+
+---
+
 ## [0.3.207] — 2026-07-26
 
 ### Added

@@ -192,6 +192,16 @@ describe("POST /api/quiz", () => {
     );
   });
 
+  it("returns an ungraded RPC result without scheduling an SRS update", async () => {
+    const client = buildClient({ result: { ...storedResult, is_correct: "unknown" } });
+    mockCreateClient.mockResolvedValue(client as never);
+
+    const response = await POST(makeRequest(defaultBody));
+
+    expect(response.status).toBe(200);
+    expect(client.from).not.toHaveBeenCalled();
+  });
+
   it("coerces an invalid session id to null", async () => {
     const client = buildClient();
     mockCreateClient.mockResolvedValue(client as never);
