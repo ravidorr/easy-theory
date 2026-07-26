@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import ExamRunPage from "../page";
 import { createClient } from "@/lib/supabase";
-import { getRandomExamQuestions, getTopics } from "@/lib/db";
+import { getOrCreateExamSession, getQuestionsByIds, getTopics } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
 
 vi.mock("next/image", () => ({
@@ -16,7 +16,7 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
-vi.mock("@/lib/db", () => ({ getRandomExamQuestions: vi.fn(), getTopics: vi.fn() }));
+vi.mock("@/lib/db", () => ({ getOrCreateExamSession: vi.fn(), getQuestionsByIds: vi.fn(), getRandomExamQuestions: vi.fn(), getTopics: vi.fn() }));
 vi.mock("@/components/SignImage", () => ({
   SignImage: ({ src, alt = "" }: { src: string; alt?: string }) =>
     React.createElement("img", { src, alt }),
@@ -42,7 +42,8 @@ vi.mock("next-intl/server", () => ({
 }));
 
 const mockCreateClient = vi.mocked(createClient);
-const mockGetQuestions = vi.mocked(getRandomExamQuestions);
+const mockGetQuestions = vi.mocked(getQuestionsByIds);
+const mockGetSession = vi.mocked(getOrCreateExamSession);
 const mockGetTopics = vi.mocked(getTopics);
 
 function makeQuestion(n: number) {
@@ -71,6 +72,7 @@ describe("ExamRunPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockCreateClient.mockResolvedValue(makeClient() as never);
+    mockGetSession.mockResolvedValue({ id: "s1", question_ids: Array.from({ length: 30 }, (_, i) => `q${i + 1}`), answers: {}, marked_question_ids: [], current_index: 0, started_at: new Date().toISOString(), expires_at: new Date(Date.now() + 2400000).toISOString(), submitted_at: null, attempt_id: null, result: null } as never);
     mockGetQuestions.mockResolvedValue(
       Array.from({ length: 30 }, (_, i) => makeQuestion(i + 1)) as never
     );

@@ -6,6 +6,10 @@
   },
   "TabBar": {
     "home": "الرئيسية",
+    "practice": "التدريب",
+    "exam": "الامتحان",
+    "mistakes": "الأخطاء",
+    "progress": "التقدم",
     "videos": "فيديوهات",
     "flashcards": "بطاقات التعلم",
     "links": "روابط",
@@ -13,6 +17,31 @@
   },
   "Loading": {
     "label": "جار تحميل المحتوى"
+  },
+  "Diagnostic": {
+    "title": "تشخيص قصير للبداية",
+    "intro": "ستساعدنا 12 سؤالاً قصيراً على اختيار ما نتدرب عليه أولاً.",
+    "targetDate": "متى الامتحان؟ (اختياري)",
+    "question": "السؤال {current} من {total}",
+    "submit": "إنشاء خطتي الشخصية"
+  },
+  "Practice": {
+    "title": "التدريب",
+    "intro": "اختاروا موضوعاً أو تابعوا التدريب الموصى به من الصفحة الرئيسية."
+  },
+  "Mistakes": {
+    "title": "أخطاء للمراجعة",
+    "intro": "ستعود هذه الأسئلة حتى تصبح الإجابة مؤكدة.",
+    "count": "{count} أسئلة للمراجعة",
+    "empty": "لا توجد أخطاء مفتوحة الآن. عمل ممتاز."
+  },
+  "Progress": {
+    "title": "تقدمك",
+    "empty": "بعد المحاكاة الأولى سنعرض هنا تقديراً للجاهزية.",
+    "readiness": "الجاهزية {level}; الثقة {confidence}",
+    "streak": "الاستمرارية",
+    "answered": "أسئلة تمت الإجابة عنها",
+    "simulations": "محاكاة"
   },
   "Home": {
     "todayBadge": "مهمة اليوم",
@@ -27,7 +56,7 @@
     "emptyStateBtn": "حفظ الخطة",
     "examCtaTitle": "محاكاة الامتحان",
     "examCtaDesc": "30 سؤالًا · 40 دقيقة · تمامًا مثل الامتحان الحقيقي",
-    "examReadiness": "الجاهزية {percent}% · {level}",
+    "examReadiness": "{level} · الثقة {confidence}",
     "topicsHeader": "الموضوعات",
     "topicCompleted": "مكتمل",
     "topicInProgress": "قيد التدريب",
@@ -37,7 +66,15 @@
     "readinessLevelLow": "جاهزية منخفضة",
     "readinessLevelMedium": "على الطريق الصحيح",
     "readinessLevelHigh": "جاهزية عالية - نواصل هكذا!",
-    "readinessEmpty": "محاكاة الامتحان الأولى ستعطي تقديرًا للجاهزية."
+    "readinessEmpty": "محاكاة الامتحان الأولى ستعطي تقديرًا للجاهزية.",
+    "readinessConfidenceLow": "منخفضة",
+    "readinessConfidenceMedium": "متوسطة",
+    "readinessConfidenceHigh": "عالية",
+    "publicTitle": "تعلم النظرية باتجاه واضح",
+    "publicIntro": "يبني التشخيص القصير خطة تدريب شخصية حسب نقاط القوة والمواضيع التي تحتاج إلى تقوية.",
+    "publicDiagnostic": "إلى التشخيص القصير",
+    "publicLogin": "تسجيل الدخول",
+    "publicSource": "يعتمد على قاعدة الأسئلة الرسمية لوزارة النقل"
   },
   "Login": {
     "metaTitle": "طريق واضح - نتعلم نظرية القيادة بدون ضغط",
@@ -160,6 +197,10 @@
     "closeLabel": "إغلاق",
     "signAlt": "إشارة {number}",
     "questionImageAlt": "صورة مرفقة بالسؤال",
+    "confidenceLabel": "ما مدى الثقة؟",
+    "confidenceSure": "متأكد",
+    "confidenceUnsure": "غير متأكد",
+    "confidenceGuessed": "خمنت",
     "optionCorrectSr": "إجابة صحيحة",
     "optionWrongSr": "إجابة خاطئة",
     "bookmarkLabel": "حفظ السؤال للمراجعة لاحقاً",
@@ -171,6 +212,12 @@
     "reportDescription": "سنرسل تفاصيل السؤال تلقائيًا. يمكنك إضافة ملاحظة قصيرة.",
     "reportCommentLabel": "ملاحظة (اختياري)",
     "reportCommentPlaceholder": "ما المشكلة في السؤال؟",
+    "reportCategoryLabel": "نوع المشكلة",
+    "reportCategoryUnclear": "السؤال غير واضح",
+    "reportCategoryWrong": "إجابة خاطئة",
+    "reportCategoryOutdated": "معلومات غير محدثة",
+    "reportCategoryImage": "صورة غير سليمة",
+    "reportCategoryWording": "صياغة إشكالية",
     "reportCancel": "إلغاء",
     "reportSend": "إرسال",
     "reportSent": "تم إرسال البلاغ. شكرًا لمساعدتنا في تحسين الأسئلة.",
@@ -253,6 +300,7 @@
     "backToExam": "العودة إلى المحاكاة",
     "emptyQuestions": "لا توجد أسئلة متاحة بعد.",
     "timerLabel": "الوقت المتبقي",
+    "markReview": "وضع علامة للمراجعة",
     "letters": "أ,ب,ج,د"
   },
   "Schedule": {
@@ -402,6 +450,12 @@
       "reportDescription": "سنرسل تفاصيل السؤال تلقائيًا. يمكنك إضافة ملاحظة قصيرة.",
       "reportCommentLabel": "ملاحظة (اختياري)",
       "reportCommentPlaceholder": "ما المشكلة في السؤال؟",
+      "reportCategoryLabel": "نوع المشكلة",
+      "reportCategoryUnclear": "السؤال غير واضح",
+      "reportCategoryWrong": "إجابة خاطئة",
+      "reportCategoryOutdated": "معلومات غير محدثة",
+      "reportCategoryImage": "صورة غير سليمة",
+      "reportCategoryWording": "صياغة إشكالية",
       "reportCancel": "إلغاء",
       "reportSend": "إرسال",
       "reportSending": "جارٍ الإرسال...",
@@ -425,6 +479,11 @@
       "done": "اكتمل! {total} بطاقات",
       "allDone": "مررت على جميع البطاقات!"
     },
+    "Diagnostic": {
+      "saved": "تم حفظ خطتك الشخصية. سنختار التدريب التالي الآن.",
+      "guestReady": "أصبح التشخيص جاهزًا. تسجيل الدخول سيحفظ خطتك الشخصية.",
+      "saveError": "لم نتمكن من حفظ التشخيص. يمكنك المحاولة مرة أخرى."
+    },
     "Exam": {
       "examCount": "{current} من {total}",
       "examAnswered": "تمت الإجابة على {answered} من {total}",
@@ -441,6 +500,8 @@
       "examResultScore": "{score} من {total} صحيح (علامة النجاح: {passMark})",
       "examTimeUp": "انتهى الوقت، تم تسليم الامتحان.",
       "examSubmitError": "خطأ في الإرسال، نحاول مرة أخرى؟",
+      "examSaveError": "لم نتمكن من حفظ حالة المحاكاة.",
+      "examSaveConflict": "فُتحت المحاكاة في مكان آخر. يُرجى تحديث الصفحة.",
       "examReviewMode": "مراجعة الإجابات",
       "examBackToResults": "العودة إلى النتائج"
     },

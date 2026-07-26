@@ -10,6 +10,12 @@
   box-sizing: border-box;
 }
 
+.publicIntro,
+.publicSource {
+  color: var(--text-muted);
+  line-height: var(--line-body);
+}
+
 .page h1,
 .page h2 {
   margin: 0;

@@ -7,7 +7,7 @@ import { SignImage } from "@/components/SignImage";
 import { QuestionImage } from "@/components/QuestionImage";
 import { TabBar } from "@/components/TabBar";
 import { createClient } from "@/lib/supabase";
-import { getRandomExamQuestions, getTopics } from "@/lib/db";
+import { getOrCreateExamSession, getQuestionsByIds, getRandomExamQuestions, getTopics } from "@/lib/db";
 import type { Question } from "@/lib/db";
 import {
   EXAM_QUESTION_COUNT,
@@ -18,6 +18,7 @@ import { getTranslations, getLocale } from "next-intl/server";
 import { localizeQuestion } from "@/lib/content-locale";
 import { resolveOptionSignImage } from "@/lib/option-sign-image";
 import { shouldSuppressQuestionImage } from "@/lib/question-image";
+import { featureEnabled } from "@/lib/feature-flags";
 import styles from "./page.module.css";
 
 function resolveImageUrl(url: string | null | undefined): string | null {
@@ -137,8 +138,11 @@ export default async function ExamRunPage() {
   const tJs = await getTranslations("JS.Exam");
   const tQuiz = await getTranslations("Quiz");
 
+  const session = featureEnabled("exam_sessions", user.id)
+    ? await getOrCreateExamSession(supabase, user.id)
+    : null;
   const [questions, topics] = await Promise.all([
-    getRandomExamQuestions(supabase, EXAM_QUESTION_COUNT),
+    session ? getQuestionsByIds(supabase, session.question_ids) : getRandomExamQuestions(supabase, EXAM_QUESTION_COUNT),
     getTopics(supabase),
   ]);
   const signTopicIds = new Set(topics.filter((topic) => topic.slug === "signs").map((topic) => topic.id));
@@ -158,6 +162,13 @@ export default async function ExamRunPage() {
         data-total={total}
         data-duration-seconds={EXAM_DURATION_SECONDS}
         data-pass-mark={EXAM_PASS_MARK}
+        data-session-id={session?.id ?? ""}
+        data-started-at={session?.started_at ?? ""}
+        data-expires-at={session?.expires_at ?? ""}
+        data-current-index={session?.current_index ?? 0}
+        data-revision={session?.revision ?? 0}
+        data-answers={JSON.stringify(session?.answers ?? {})}
+        data-marked-question-ids={JSON.stringify(session?.marked_question_ids ?? [])}
         className={styles.page}
       >
         <div className={styles.topBar}>
@@ -172,6 +183,7 @@ export default async function ExamRunPage() {
             id="exam-timer"
             className={styles.timer}
             aria-label={t("timerLabel")}
+            aria-live="off"
           >
             {formatDuration(EXAM_DURATION_SECONDS)}
           </span>
@@ -202,6 +214,9 @@ export default async function ExamRunPage() {
           <span id="exam-answered" className={styles.answeredCount} aria-live="polite">
             {t("answered", { answered: 0, total })}
           </span>
+          <button id="exam-mark-review" className="btn-secondary" type="button" aria-pressed="false">
+            {t("markReview")}
+          </button>
           <div className={styles.navButtons}>
             <button id="exam-prev" className={`btn-secondary ${styles.navBtn}`} disabled>
               {t("prevBtn")}
@@ -229,6 +244,7 @@ export default async function ExamRunPage() {
         <div id="exam-result" className={`${styles.hidden} ${styles.examFinal}`}>
           <h2 id="exam-result-title"></h2>
           <span id="exam-result-score" className={styles.finalScore}></span>
+          <p id="exam-result-summary" className={styles.resultSummary} aria-live="polite"></p>
           <button id="exam-review-btn" className={`btn-secondary ${styles.btnWide}`}>
             {t("reviewBtn")}
           </button>

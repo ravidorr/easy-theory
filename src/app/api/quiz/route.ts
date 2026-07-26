@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase";
+import { createAdminClient, createClient } from "@/lib/supabase";
 import { getApiTranslator, parseJsonBody } from "@/lib/api";
 import { upsertSrsCard } from "@/lib/db";
 import { reportError } from "@/lib/monitoring";
@@ -71,6 +71,7 @@ export async function POST(request: Request) {
     topic_id,
     session_id,
     idempotency_key,
+    confidence,
   } = body;
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -93,6 +94,10 @@ export async function POST(request: Request) {
 
   const sessionId = typeof session_id === "string" && UUID_RE.test(session_id) ? session_id : null;
   const topicId = typeof topic_id === "string" ? topic_id : null;
+  const confidenceValue: "sure" | "unsure" | "guessed" =
+    typeof confidence === "string" && ["sure", "unsure", "guessed"].includes(confidence)
+      ? confidence as "sure" | "unsure" | "guessed"
+      : "sure";
 
   const { data, error } = await supabase.rpc("submit_quiz_answer", {
     p_idempotency_key: idempotency_key,
@@ -145,7 +150,21 @@ export async function POST(request: Request) {
 
   if (typeof data?.is_correct === "boolean") {
     try {
-      await updateQuestionSrs(supabase, user.id, question_id, data.is_correct);
+      await updateQuestionSrs(
+        supabase,
+        user.id,
+        question_id,
+        data.is_correct && confidenceValue === "sure"
+      );
+      const { error: confidenceError } = await createAdminClient()
+        .from("user_answer_confidence")
+        .upsert({
+          user_id: user.id,
+          question_id,
+          confidence: confidenceValue,
+          updated_at: new Date().toISOString(),
+        });
+      if (confidenceError) throw confidenceError;
     } catch (srsError) {
       reportError("quiz", "SRS update failed", srsError);
     }

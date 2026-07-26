@@ -10,6 +10,8 @@
   if (total === 0) return;
 
   const durationSeconds = parseInt(container.dataset.durationSeconds, 10) || 2400;
+  const sessionId = container.dataset.sessionId || null;
+  const expiresAt = Date.parse(container.dataset.expiresAt || "");
   const WARNING_SECONDS = 300;
   const AUTO_ADVANCE_DELAY_MS = 900;
   const prefersReducedMotion =
@@ -20,11 +22,6 @@
     if (match) return decodeURIComponent(match[1]) !== "off";
     return !prefersReducedMotion;
   })();
-
-  const sessionId =
-    window.crypto && typeof window.crypto.randomUUID === "function"
-      ? window.crypto.randomUUID()
-      : null;
 
   const slides = Array.from(document.querySelectorAll(".quiz-slide"));
   const prevBtn = document.getElementById("exam-prev");
@@ -42,15 +39,70 @@
   const reviewBar = document.getElementById("exam-review-bar");
   const backToResultsBtn = document.getElementById("exam-back-to-results");
   const errorEl = document.getElementById("exam-error");
+  const markReviewBtn = document.getElementById("exam-mark-review");
+  const resultSummary = document.getElementById("exam-result-summary");
 
-  let currentIndex = 0;
-  const answers = {};
-  const startedAt = Date.now();
-  let remaining = durationSeconds;
+  let currentIndex = Math.max(0, Math.min(total - 1, parseInt(container.dataset.currentIndex, 10) || 0));
+  let answers = {};
+  try { answers = JSON.parse(container.dataset.answers || "{}"); } catch {}
+  let markedQuestionIds = [];
+  try { markedQuestionIds = JSON.parse(container.dataset.markedQuestionIds || "[]"); } catch {}
+  let revision = parseInt(container.dataset.revision, 10) || 0;
+  const startedAt = Date.parse(container.dataset.startedAt || "") || Date.now();
+  let remaining = Number.isFinite(expiresAt)
+    ? Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000))
+    : durationSeconds;
   let submitting = false;
   let submitted = false;
   let timerId = null;
   let autoAdvanceTimer = null;
+  let saveInFlight = false;
+  let saveQueued = false;
+
+  function persist() {
+    if (!sessionId || submitted) return;
+    saveQueued = true;
+    flushSave();
+  }
+
+  function flushSave() {
+    if (!saveQueued || saveInFlight || !sessionId || submitted) return;
+    saveQueued = false;
+    saveInFlight = true;
+    const snapshot = {
+      session_id: sessionId,
+      revision: revision,
+      answers: Object.assign({}, answers),
+      current_index: currentIndex,
+      marked_question_ids: markedQuestionIds.slice(),
+    };
+    void fetch("/api/exam/session", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(snapshot),
+    }).then(function (response) {
+      if (response.status === 409) return { conflict: true };
+      if (!response.ok) throw new Error("exam session save failed");
+      return response.json();
+    }).then(function (data) {
+      if (data && data.conflict) {
+        if (errorEl) {
+          errorEl.textContent = t.examSaveConflict || "הסימולציה נפתחה במקום אחר. יש לרענן את הדף.";
+          errorEl.hidden = false;
+        }
+        return;
+      }
+      if (typeof data.revision === "number") revision = data.revision;
+    }).catch(function () {
+      if (errorEl) {
+        errorEl.textContent = t.examSaveError || "לא הצלחנו לשמור את מצב הסימולציה.";
+        errorEl.hidden = false;
+      }
+    }).finally(function () {
+      saveInFlight = false;
+      flushSave();
+    });
+  }
 
   function answeredCount() {
     return Object.keys(answers).length;
@@ -88,7 +140,9 @@
   }
 
   function tick() {
-    remaining--;
+    remaining = Number.isFinite(expiresAt)
+      ? Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000))
+      : Math.max(0, remaining - 1);
     if (timerEl) {
       timerEl.textContent = formatTime(Math.max(remaining, 0));
       if (remaining <= WARNING_SECONDS) timerEl.setAttribute("data-warning", "");
@@ -118,6 +172,18 @@
     }
   }
 
+  function restoreAnswerSelection() {
+    slides.forEach(function (slide) {
+      const selected = answers[slide.dataset.questionId];
+      if (!selected) return;
+      slide.querySelectorAll(".quiz-option").forEach(function (option) {
+        const isSelected = option.dataset.option === selected;
+        option.dataset.state = isSelected ? "selected" : "";
+        option.setAttribute("aria-pressed", isSelected ? "true" : "false");
+      });
+    });
+  }
+
   function showSlide(index) {
     currentIndex = index;
     slides.forEach(function (s, i) {
@@ -131,6 +197,12 @@
       });
     }
     updateNav();
+    if (markReviewBtn) {
+      const questionId = slides[index] && slides[index].dataset.questionId;
+      const marked = questionId && markedQuestionIds.includes(questionId);
+      markReviewBtn.setAttribute("aria-pressed", marked ? "true" : "false");
+    }
+    persist();
   }
 
   function handleOptionClick(e) {
@@ -150,6 +222,7 @@
     updateAnswered();
     updateNav();
     scheduleAutoAdvance(currentIndex);
+    persist();
   }
 
   // Exposes the correct/wrong result to screen readers; visually it is
@@ -214,10 +287,25 @@
       });
       resultScore.textContent = text;
     }
+    if (resultSummary) {
+      const unanswered = data.unanswered_count || 0;
+      const used = data.duration_seconds || 0;
+      resultSummary.textContent = tf(t.examResultSummary || "נענו {answered} מתוך {total}; זמן: {minutes} דקות; נותרו {unanswered} ללא מענה.", {
+        answered: data.total - unanswered,
+        total: data.total,
+        minutes: Math.max(0, Math.round(used / 60)),
+        unanswered: unanswered,
+      });
+    }
   }
 
   async function submit(auto) {
     if (submitting || submitted) return;
+    if (sessionId && (saveInFlight || saveQueued)) {
+      saveQueued = true;
+      window.setTimeout(function () { void submit(auto); }, 50);
+      return;
+    }
     cancelAutoAdvance();
     if (!auto && answeredCount() < total) {
       const unanswered = total - answeredCount();
@@ -308,6 +396,20 @@
     });
   }
 
+  if (markReviewBtn) {
+    markReviewBtn.addEventListener("click", function () {
+      const questionId = slides[currentIndex] && slides[currentIndex].dataset.questionId;
+      if (!questionId) return;
+      if (markedQuestionIds.includes(questionId)) {
+        markedQuestionIds = markedQuestionIds.filter(function (id) { return id !== questionId; });
+      } else {
+        markedQuestionIds.push(questionId);
+      }
+      markReviewBtn.setAttribute("aria-pressed", markedQuestionIds.includes(questionId) ? "true" : "false");
+      persist();
+    });
+  }
+
   if (reviewBtn) {
     reviewBtn.addEventListener("click", function () {
       cancelAutoAdvance();
@@ -332,7 +434,8 @@
     });
   }
 
-  showSlide(0);
+  restoreAnswerSelection();
+  showSlide(currentIndex);
   updateAnswered();
   timerId = setInterval(tick, 1000);
 })();

@@ -3,6 +3,18 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.207] — 2026-07-26
+
+### Added
+
+- Added ClearRoad readiness foundations: verifiable source provenance, persisted exams, diagnostic-based plans, readiness guidance, public guides, and localized navigation.
+
+### Fixed
+
+- Protected exam-session creation and atomic diagnostic saves, and preserved confidence when retrying interrupted practice submissions.
+
+---
+
 ## [0.3.206] — 2026-07-26
 
 ### Fixed

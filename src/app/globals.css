@@ -361,6 +361,31 @@ button.quiz-option:active { transform: scale(0.985); }
   display: none;
 }
 
+.quiz-confidence {
+  min-height: 44px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 8px 12px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+.quiz-confidence[aria-pressed="true"] {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.simple-page {
+  min-height: 100vh;
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 24px 20px calc(88px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 .quiz-option[data-state="correct"] .quiz-option-explanation { display: block; }
 
 /* ── Bookmark toggle ─────────────────────────────────────────── */

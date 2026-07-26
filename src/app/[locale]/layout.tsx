@@ -70,6 +70,7 @@ export default async function LocaleLayout({
     ...js.Schedule,
     ...js.Flashcard,
     ...js.Exam,
+    ...js.Diagnostic,
     ...js.Bookmark,
     ...js.Modal,
   };

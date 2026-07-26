@@ -20,8 +20,11 @@ export async function POST(request: Request) {
   const body = await parseJsonBody(request);
   if (!body) return NextResponse.json({ error: t("questionReportInvalid") }, { status: 400 });
 
-  const { question_id: questionId, topic_id: topicId, locale, comment } = body;
+  const { question_id: questionId, topic_id: topicId, locale, comment, category } = body;
   const normalizedComment = typeof comment === "string" ? comment.trim() : null;
+  const reportCategory = typeof category === "string" && ["unclear", "wrong_answer", "outdated", "image", "wording"].includes(category)
+    ? category
+    : "unclear";
   if (
     !isUuid(questionId) ||
     !isUuid(topicId) ||
@@ -77,6 +80,21 @@ export async function POST(request: Request) {
   const allowed = await checkRateLimit(supabase, `question-reports:${user.id}`, 5, 3600);
   if (!allowed) return NextResponse.json({ error: t("tooManyRequests") }, { status: 429 });
 
+  let sourceRelease: { source_checksum: string } | null = null;
+  try {
+    const { data } = await admin
+      .from("content_source_releases")
+      .select("source_checksum")
+      .order("imported_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    sourceRelease = data;
+  } catch (sourceError) {
+    // Reporting must remain available if a pre-migration environment has not
+    // received source-release metadata yet.
+    reportError("question-reports", "source release lookup failed", sourceError, { userId: user.id });
+  }
+
   const { data: report, error: insertError } = await admin
     .from("question_reports")
     .insert({
@@ -84,6 +102,8 @@ export async function POST(request: Request) {
       question_id: questionId,
       comment: normalizedComment,
       locale,
+      category: reportCategory,
+      source_checksum: sourceRelease?.source_checksum ?? null,
     })
     .select("id")
     .single();
@@ -116,6 +136,8 @@ export async function POST(request: Request) {
           `Topic ID: ${topic.id}`,
           `Topic slug: ${topic.slug}`,
           `Locale: ${locale}`,
+          `Category: ${reportCategory}`,
+          `Source checksum: ${sourceRelease?.source_checksum ?? "unknown"}`,
           `Comment: ${normalizedComment ?? "not provided"}`,
         ].join("\n"),
       });

@@ -27,9 +27,9 @@ function slideHTML(index: number) {
   `;
 }
 
-function setupDOM({ total = 3, durationSeconds = 2400, translations = {} } = {}) {
+function setupDOM({ total = 3, durationSeconds = 2400, translations = {}, sessionId = "", answers = "{}", revision = 0 } = {}) {
   document.body.innerHTML = `
-    <main id="exam-container" data-total="${total}" data-duration-seconds="${durationSeconds}" data-pass-mark="26">
+    <main id="exam-container" data-total="${total}" data-duration-seconds="${durationSeconds}" data-pass-mark="26" data-session-id="${sessionId}" data-answers='${answers}' data-revision="${revision}">
       <div id="exam-progress-fill"></div>
       <span id="exam-timer"></span>
       <span id="exam-count"></span>
@@ -166,6 +166,14 @@ describe("exam.js – answering and navigation", () => {
     expect(options[0].getAttribute("aria-pressed")).toBe("false");
     expect(options[1].getAttribute("aria-pressed")).toBe("false");
     expect(options[3].getAttribute("aria-pressed")).toBe("false");
+  });
+
+  it("restores saved answer selection after a session refresh", () => {
+    setupDOM({ sessionId: "session-1", answers: JSON.stringify({ q1: "c" }), revision: 4 });
+    const options = slide(0).querySelectorAll<HTMLElement>(".quiz-option");
+    expect(options[2].dataset.state).toBe("selected");
+    expect(options[2].getAttribute("aria-pressed")).toBe("true");
+    expect(document.getElementById("exam-answered")!.textContent).toContain("1");
   });
 
   it("auto-advances 900ms after recording the selected answer by default", () => {

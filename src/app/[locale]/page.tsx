@@ -1,6 +1,5 @@
 import type { CSSProperties } from "react";
 import { unstable_noStore as noStore } from "next/cache";
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase";
@@ -20,6 +19,8 @@ import { TabBar } from "@/components/TabBar";
 import { Icon } from "@/components/Icon";
 import { getTranslations, getLocale } from "next-intl/server";
 import { localizedRecordField } from "@/lib/content-locale";
+import { readinessConfidence } from "@/lib/learner-plan";
+import { OFFICIAL_QUESTION_BANK_URL } from "@/lib/source-release";
 import styles from "./page.module.css";
 
 const MISSION_RING_RADIUS = 30;
@@ -68,7 +69,21 @@ export default async function HomePage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/login?next=/");
+  if (!user) {
+    return (
+      <main className={styles.page}>
+        <h1>{t("publicTitle")}</h1>
+        <p className={styles.publicIntro}>{t("publicIntro")}</p>
+        <Link href="/diagnostic" className="btn-primary">{t("publicDiagnostic")}</Link>
+        <Link href="/auth/login" className="btn-secondary">{t("publicLogin")}</Link>
+        <p className={styles.publicSource}>
+          <a href={OFFICIAL_QUESTION_BANK_URL} target="_blank" rel="noopener noreferrer">
+            {t("publicSource")}
+          </a>
+        </p>
+      </main>
+    );
+  }
 
   const todayWindow = dayWindow(new Date(), 0);
   const [topics, progressRows, examAttempts, topicAccuracy, questionCounts, answeredToday] =
@@ -122,8 +137,8 @@ export default async function HomePage() {
     readiness.probability === null
       ? t("readinessEmpty")
       : t("examReadiness", {
-          percent: Math.round(readiness.probability * 100),
           level: t(`readinessLevel${readiness.level[0].toUpperCase()}${readiness.level.slice(1)}`),
+          confidence: t(`readinessConfidence${readinessConfidence(readiness.attemptsUsed, Object.values(answeredMap).reduce((sum, value) => sum + value, 0))[0].toUpperCase()}${readinessConfidence(readiness.attemptsUsed, Object.values(answeredMap).reduce((sum, value) => sum + value, 0)).slice(1)}`),
         });
 
   return (

@@ -86,9 +86,11 @@ describe("HomePage", () => {
     vi.mocked(getLocale).mockResolvedValue("he");
   });
 
-  it("redirects unauthenticated visitors to login", async () => {
+  it("renders a public landing page for unauthenticated visitors", async () => {
     mockCreateClient.mockResolvedValue(makeClient(null) as never);
-    await expect(HomePage()).rejects.toThrow("redirect");
+    const jsx = await HomePage();
+    render(jsx);
+    expect(screen.getByRole("heading", { level: 1, name: "publicTitle" })).toBeInTheDocument();
   });
 
   it("leads with one daily-task heading and a capped daily-progress line", async () => {

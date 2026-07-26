@@ -99,10 +99,9 @@ describe("proxy middleware", () => {
       mockGetUser.mockResolvedValue({ data: { user: null } });
     });
 
-    it("redirects /he/ to /he/auth/login", async () => {
+    it("allows the public /he/ landing page", async () => {
       const res = await proxy(makeRequest("/he/"));
-      expect(res.status).toBe(307);
-      expect(res.headers.get("location")).toContain("/he/auth/login");
+      expect(res.status).toBe(200);
     });
 
     it("redirects /he/topics to /he/auth/login", async () => {

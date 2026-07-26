@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Icon } from "@/components/Icon";
 import styles from "./TabBar.module.css";
 
-type ActiveTab = "home" | "videos" | "cards" | "links" | "more";
+type ActiveTab = "home" | "practice" | "exam" | "mistakes" | "progress" | "videos" | "cards" | "links" | "more";
 
 export async function TabBar({
   active,
@@ -22,28 +22,28 @@ export async function TabBar({
       icon: <Icon name="home" size={22} />,
     },
     {
-      key: "cards" as ActiveTab,
-      href: "/flashcards" as const,
-      label: t("flashcards"),
+      key: "practice" as ActiveTab,
+      href: "/practice" as const,
+      label: t("practice"),
       icon: <Icon name="cards" size={22} />,
     },
     {
-      key: "videos" as ActiveTab,
-      href: "/videos" as const,
-      label: t("videos"),
-      icon: <Icon name="video" size={22} />,
+      key: "exam" as ActiveTab,
+      href: "/exam" as const,
+      label: t("exam"),
+      icon: <Icon name="timer" size={22} />,
     },
     {
-      key: "links" as ActiveTab,
-      href: "/resources" as const,
-      label: t("links"),
-      icon: <Icon name="link" size={22} />,
+      key: "mistakes" as ActiveTab,
+      href: "/mistakes" as const,
+      label: t("mistakes"),
+      icon: <Icon name="warning" size={22} />,
     },
     {
-      key: "more" as ActiveTab,
-      href: "/more" as const,
-      label: t("more"),
-      icon: <Icon name="more" size={22} />,
+      key: "progress" as ActiveTab,
+      href: "/progress" as const,
+      label: t("progress"),
+      icon: <Icon name="trophy" size={22} />,
     },
   ];
 

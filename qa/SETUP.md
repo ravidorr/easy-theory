@@ -44,7 +44,10 @@ In the project's **SQL editor**, run these files in exactly this order:
    `022_correct_signs_104_107_locales.sql`,
    `023_migration_ledger.sql`, `024_clear_question_1687_image.sql`,
    `025_contact_messages.sql`, `026_question_reports.sql`,
-   `027_reconcile_migration_ledger.sql`)
+   `027_reconcile_migration_ledger.sql`, `028_readiness_foundations.sql`,
+   `029_harden_exam_sessions.sql`, `030_allow_exam_session_insert.sql`,
+   `031_secure_exam_session_creation.sql`,
+   `032_atomic_diagnostic_completion.sql`)
 
 **Keep the QA project's schema in sync**: whenever a new file lands in
 `seeds/migrations/`, run it in the QA project's SQL editor too. The app's code assumes

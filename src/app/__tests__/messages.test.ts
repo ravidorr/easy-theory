@@ -46,8 +46,8 @@ describe("locale messages", () => {
   it("keeps progress-ring and readiness values translatable in both locales", () => {
     for (const messages of [he, ar]) {
       expect(messages.Home.topicsPercent).toContain("{percent}");
-      expect(messages.Home.examReadiness).toContain("{percent}");
       expect(messages.Home.examReadiness).toContain("{level}");
+      expect(messages.Home.examReadiness).toContain("{confidence}");
     }
   });
 

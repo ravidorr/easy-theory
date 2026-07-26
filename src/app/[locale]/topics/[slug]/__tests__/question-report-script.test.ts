@@ -75,7 +75,7 @@ describe("question-report.js", () => {
     expect(fetch).toHaveBeenCalledWith(
       "/api/question-reports",
       expect.objectContaining({
-        body: JSON.stringify({ question_id: "q1", topic_id: "t1", locale: "ar", comment: "Wrong sign" }),
+        body: JSON.stringify({ question_id: "q1", topic_id: "t1", locale: "ar", category: "unclear", comment: "Wrong sign" }),
       })
     );
     expect(document.querySelector(".question-report-success")?.textContent).toBe("Sent");

@@ -61,7 +61,11 @@ export async function proxy(request: NextRequest) {
 
   const isPublic =
     pathname.startsWith(`/${locale}/auth`) ||
-    pathname.startsWith("/auth");
+    pathname.startsWith("/auth") ||
+    pathname === `/${locale}` ||
+    pathname === `/${locale}/` ||
+    pathname.startsWith(`/${locale}/diagnostic`) ||
+    (locale === "he" && (pathname.startsWith(`/${locale}/guides`) || pathname.startsWith(`/${locale}/faq`)));
 
   if (!user && !isPublic) {
     const url = request.nextUrl.clone();
