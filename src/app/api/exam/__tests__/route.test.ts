@@ -28,6 +28,8 @@ function makeClient({
   insertError = false,
   medalSlug = null as string | null,
   medalError = null as { message: string } | null,
+  finalizeData = null as Record<string, unknown> | null,
+  finalizeError = null as { message: string } | null,
 } = {}) {
   // Chainable mock that is also directly awaitable.
   function chain(data: unknown) {
@@ -55,7 +57,11 @@ function makeClient({
         if (table === "user_exam_attempts") return { insert };
         return chain(null);
       }),
-      rpc: vi.fn().mockResolvedValue({ data: medalSlug, error: medalError }),
+      rpc: vi.fn().mockImplementation((name: string) => Promise.resolve(
+        name === "finalize_exam_session"
+          ? { data: finalizeData, error: finalizeError }
+          : { data: medalSlug, error: medalError }
+      )),
     },
     insert,
   };
@@ -99,6 +105,70 @@ describe("POST /api/exam", () => {
     expect(res.status).toBe(400);
   });
 
+  it.each([
+    ["exam_session_not_found", 404],
+    ["database unavailable", 500],
+  ])("returns %i when session finalization fails with %s", async (message, status) => {
+    const { client } = makeClient({ finalizeError: { message } });
+    mockCreateClient.mockResolvedValue(client as never);
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const res = await POST(makeRequest({ session_id: QID(1) }));
+
+    expect(res.status).toBe(status);
+    expect(await res.json()).toEqual({ error: expect.any(String) });
+    expect(client.rpc).toHaveBeenCalledWith("finalize_exam_session", { p_session_id: QID(1) });
+    errorSpy.mockRestore();
+  });
+
+  it("returns a finalized failing session without attempting an achievement award", async () => {
+    const { client } = makeClient({ finalizeData: { passed: false, score: 23, total: 30 } });
+    const { client: adminClient } = makeClient();
+    mockCreateClient.mockResolvedValue(client as never);
+    mockCreateAdminClient.mockReturnValue(adminClient as never);
+
+    const res = await POST(makeRequest({ session_id: QID(2) }));
+
+    expect(await res.json()).toEqual({ passed: false, score: 23, total: 30 });
+    expect(adminClient.rpc).not.toHaveBeenCalled();
+  });
+
+  it("adds a newly earned medal to a finalized passing session", async () => {
+    const { client: sessionClient } = makeClient({ finalizeData: { passed: true, score: 26, total: 30 } });
+    const { client: adminClient } = makeClient({ medalSlug: "exam-pass" });
+    mockCreateClient.mockResolvedValue(sessionClient as never);
+    mockCreateAdminClient.mockReturnValue(adminClient as never);
+
+    const res = await POST(makeRequest({ session_id: QID(3) }));
+
+    expect(await res.json()).toEqual({ passed: true, score: 26, total: 30, medals_earned: ["exam-pass"] });
+    expect(adminClient.rpc).toHaveBeenCalledWith("award_exam_pass_medal", { p_user_id: USER_ID });
+  });
+
+  it("returns an unchanged finalized passing session when the medal was already earned", async () => {
+    const { client: sessionClient } = makeClient({ finalizeData: { passed: true, score: 26 } });
+    const { client: adminClient } = makeClient();
+    mockCreateClient.mockResolvedValue(sessionClient as never);
+    mockCreateAdminClient.mockReturnValue(adminClient as never);
+
+    const res = await POST(makeRequest({ session_id: QID(33) }));
+
+    expect(await res.json()).toEqual({ passed: true, score: 26 });
+  });
+
+  it("keeps a finalized passing session successful when its medal award fails", async () => {
+    const { client: sessionClient } = makeClient({ finalizeData: { passed: true, score: 26 } });
+    const { client: adminClient } = makeClient({ medalError: { message: "award failed" } });
+    mockCreateClient.mockResolvedValue(sessionClient as never);
+    mockCreateAdminClient.mockReturnValue(adminClient as never);
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const res = await POST(makeRequest({ session_id: QID(4) }));
+
+    expect(await res.json()).toEqual({ passed: true, score: 26 });
+    errorSpy.mockRestore();
+  });
+
   it("returns 400 when more answers than exam questions", async () => {
     mockCreateClient.mockResolvedValue(makeClient().client as never);
     const answers = Array.from({ length: 31 }, (_, i) => ({
@@ -130,6 +200,39 @@ describe("POST /api/exam", () => {
     expect(body.score).toBe(1);
     expect(body.results).toHaveLength(1);
     expect(insert).toHaveBeenCalled();
+  });
+
+  it("builds topic breakdown from server-fetched question topics", async () => {
+    const { client } = makeClient({
+      questions: [
+        { id: QID(1), correct_option: "a", topic_id: "signs" },
+        { id: QID(2), correct_option: "b", topic_id: "signs" },
+        { id: QID(3), correct_option: "a", topic_id: "laws" },
+      ] as never,
+    });
+    mockCreateClient.mockResolvedValue(client as never);
+    mockCreateAdminClient.mockReturnValue(client as never);
+
+    const res = await POST(makeRequest({ answers: [
+      { question_id: QID(1), selected_option: "a" },
+      { question_id: QID(2), selected_option: "a" },
+      { question_id: QID(3), selected_option: "a" },
+    ] }));
+
+    expect((await res.json()).topic_breakdown).toEqual({
+      signs: { correct: 1, total: 2 },
+      laws: { correct: 1, total: 1 },
+    });
+  });
+
+  it("scores valid answers safely when the question lookup returns no rows", async () => {
+    const { client } = makeClient({ questions: null as never });
+    mockCreateClient.mockResolvedValue(client as never);
+    mockCreateAdminClient.mockReturnValue(client as never);
+
+    const res = await POST(makeRequest({ answers: [{ question_id: QID(7), selected_option: "a" }] }));
+
+    expect(await res.json()).toMatchObject({ score: 0, topic_breakdown: {} });
   });
 
   it("scores server-side and returns pass at the 26 boundary", async () => {
@@ -256,6 +359,14 @@ describe("POST /api/exam", () => {
     expect(insert).toHaveBeenCalledWith(
       expect.objectContaining({ duration_seconds: null })
     );
+  });
+
+  it("rounds a negative duration up to zero", async () => {
+    const { client, insert } = makeClient();
+    mockCreateClient.mockResolvedValue(client as never);
+    mockCreateAdminClient.mockReturnValue(client as never);
+    await POST(makeRequest({ answers: [], duration_seconds: -1.4 }));
+    expect(insert).toHaveBeenCalledWith(expect.objectContaining({ duration_seconds: 0 }));
   });
 
   it("returns 500 when the attempt insert fails", async () => {

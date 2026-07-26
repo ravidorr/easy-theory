@@ -3,8 +3,9 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import ExamRunPage from "../page";
 import { createClient } from "@/lib/supabase";
-import { getOrCreateExamSession, getQuestionsByIds, getTopics } from "@/lib/db";
+import { getOrCreateExamSession, getQuestionsByIds, getRandomExamQuestions, getTopics } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
+import { localizeQuestion } from "@/lib/content-locale";
 
 vi.mock("next/image", () => ({
   default: ({ src, alt, className }: { src: string; alt?: string; className?: string }) =>
@@ -17,6 +18,15 @@ vi.mock("next/navigation", () => ({
 }));
 vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
 vi.mock("@/lib/db", () => ({ getOrCreateExamSession: vi.fn(), getQuestionsByIds: vi.fn(), getRandomExamQuestions: vi.fn(), getTopics: vi.fn() }));
+vi.mock("@/lib/content-locale", () => ({
+  localizeQuestion: vi.fn((locale: string, question: Record<string, string>) => ({
+    question_display: locale === "ar" ? question.question_ar ?? "" : question.question_he ?? "",
+    option_a_display: locale === "ar" ? question.option_a_ar ?? "" : question.option_a ?? "",
+    option_b_display: locale === "ar" ? question.option_b_ar ?? "" : question.option_b ?? "",
+    option_c_display: locale === "ar" ? question.option_c_ar ?? "" : question.option_c ?? "",
+    option_d_display: locale === "ar" ? question.option_d_ar ?? "" : question.option_d ?? "",
+  })),
+}));
 vi.mock("@/components/SignImage", () => ({
   SignImage: ({ src, alt = "" }: { src: string; alt?: string }) =>
     React.createElement("img", { src, alt }),
@@ -43,8 +53,11 @@ vi.mock("next-intl/server", () => ({
 
 const mockCreateClient = vi.mocked(createClient);
 const mockGetQuestions = vi.mocked(getQuestionsByIds);
+const mockGetRandomQuestions = vi.mocked(getRandomExamQuestions);
 const mockGetSession = vi.mocked(getOrCreateExamSession);
 const mockGetTopics = vi.mocked(getTopics);
+const mockLocalizeQuestion = vi.mocked(localizeQuestion);
+const originalSessionFlag = process.env.FEATURE_EXAM_SESSIONS_PERCENT;
 
 function makeQuestion(n: number) {
   return {
@@ -71,11 +84,14 @@ function makeClient(user: { id: string } | null = { id: "u1" }) {
 describe("ExamRunPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    if (originalSessionFlag === undefined) delete process.env.FEATURE_EXAM_SESSIONS_PERCENT;
+    else process.env.FEATURE_EXAM_SESSIONS_PERCENT = originalSessionFlag;
     mockCreateClient.mockResolvedValue(makeClient() as never);
     mockGetSession.mockResolvedValue({ id: "s1", question_ids: Array.from({ length: 30 }, (_, i) => `q${i + 1}`), answers: {}, marked_question_ids: [], current_index: 0, started_at: new Date().toISOString(), expires_at: new Date(Date.now() + 2400000).toISOString(), submitted_at: null, attempt_id: null, result: null } as never);
     mockGetQuestions.mockResolvedValue(
       Array.from({ length: 30 }, (_, i) => makeQuestion(i + 1)) as never
     );
+    mockGetRandomQuestions.mockResolvedValue(Array.from({ length: 30 }, (_, i) => makeQuestion(i + 1)) as never);
     mockGetTopics.mockResolvedValue([
       { id: "t-signs", slug: "signs", name_he: "תמרורים" },
       { id: "t-traffic-laws", slug: "traffic-laws", name_he: "חוקי התנועה" },
@@ -96,6 +112,8 @@ describe("ExamRunPage", () => {
     expect(main?.getAttribute("data-total")).toBe("30");
     expect(main?.getAttribute("data-duration-seconds")).toBe("2400");
     expect(main?.getAttribute("data-pass-mark")).toBe("26");
+    expect(main?.getAttribute("data-session-id")).toBe("s1");
+    expect(main?.getAttribute("data-current-index")).toBe("0");
     expect(container.querySelectorAll(".quiz-slide")).toHaveLength(30);
     expect(container.querySelectorAll(".quiz-option")).toHaveLength(120);
   });
@@ -128,6 +146,37 @@ describe("ExamRunPage", () => {
     render(jsx);
     expect(screen.getByText("سؤال 1")).toBeInTheDocument();
     expect(screen.getAllByText("قف")).toHaveLength(30);
+  });
+
+  it("uses randomized questions and empty session data when exam sessions are disabled", async () => {
+    process.env.FEATURE_EXAM_SESSIONS_PERCENT = "0";
+    mockGetRandomQuestions.mockResolvedValue([makeQuestion(1)] as never);
+    const jsx = await ExamRunPage();
+    const { container } = render(jsx);
+    const main = container.querySelector("#exam-container");
+
+    expect(mockGetSession).not.toHaveBeenCalled();
+    expect(mockGetRandomQuestions).toHaveBeenCalledWith(expect.anything(), 30);
+    expect(main).toHaveAttribute("data-session-id", "");
+    expect(main).toHaveAttribute("data-started-at", "");
+    expect(main).toHaveAttribute("data-expires-at", "");
+    expect(main).toHaveAttribute("data-current-index", "0");
+    expect(main).toHaveAttribute("data-revision", "0");
+    expect(main).toHaveAttribute("data-answers", "{}");
+    expect(main).toHaveAttribute("data-marked-question-ids", "[]");
+  });
+
+  it("falls back to source fields when a localized display field is absent", async () => {
+    mockGetQuestions.mockResolvedValue([makeQuestion(1)] as never);
+    mockLocalizeQuestion.mockReturnValue({} as never);
+    const jsx = await ExamRunPage();
+    render(jsx);
+
+    expect(screen.getByText("שאלה 1")).toBeInTheDocument();
+    expect(screen.getByText("עצור")).toBeInTheDocument();
+    expect(screen.getByText("פנה ימינה")).toBeInTheDocument();
+    expect(screen.getByText("פנה שמאלה")).toBeInTheDocument();
+    expect(screen.getByText("המשך")).toBeInTheDocument();
   });
 
   it("renders footer controls and hidden result screen", async () => {
