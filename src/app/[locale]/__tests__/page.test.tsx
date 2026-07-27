@@ -57,6 +57,18 @@ const TOPIC_B = { id: "t2", slug: "priority", name_he: "זכות קדימה", ic
 const valuesT = ((key: string, values?: Record<string, unknown>) =>
   values ? `${key}|${JSON.stringify(values)}` : key) as never;
 
+const supportiveHebrewT = ((key: string, values?: Record<string, unknown>) => {
+  const messages: Record<string, string> = {
+    examReadiness: "{level} · {confidence}",
+    readinessLevelLow: "מוכנות נמוכה",
+    readinessConfidenceHigh: "יש לנו תמונה ברורה להתקדמות",
+  };
+  return Object.entries(values ?? {}).reduce(
+    (text, [name, value]) => text.replace(`{${name}}`, String(value)),
+    messages[key] ?? key
+  );
+}) as never;
+
 function makeClient(user: { id: string } | null = { id: "u1" }) {
   return { auth: { getUser: vi.fn().mockResolvedValue({ data: { user } }) } };
 }
@@ -150,6 +162,16 @@ describe("HomePage", () => {
 
     expect(screen.getByText(/examReadiness\|/)).toBeInTheDocument();
     expect(screen.queryByText("readinessEmpty")).not.toBeInTheDocument();
+  });
+
+  it("renders supportive Hebrew copy when low readiness is based on sufficient evidence", async () => {
+    mockGetExamAttempts.mockResolvedValue([examAttempt(10), examAttempt(10), examAttempt(10)] as never);
+    mockGetTopicAccuracy.mockResolvedValue([{ topic_id: "t1", correct: 30, total: 30 }] as never);
+    vi.mocked(getTranslations).mockResolvedValue(supportiveHebrewT);
+
+    render(await HomePage());
+
+    expect(screen.getByText("מוכנות נמוכה · יש לנו תמונה ברורה להתקדמות")).toBeInTheDocument();
   });
 
   it("renders one curriculum-ordered list with concise topic statuses", async () => {
