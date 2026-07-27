@@ -155,6 +155,10 @@
     "medalLockedLabel": "لم يتحقق بعد",
     "darkMode": "الوضع الداكن",
     "autoAdvance": "الانتقال التلقائي إلى السؤال التالي",
+    "autoAdvanceDelay": "سرعة الانتقال التلقائي",
+    "autoAdvanceFaster": "أسرع",
+    "autoAdvanceSlower": "أبطأ",
+    "autoAdvanceDelayValue": "{seconds} ثوانٍ",
     "language": "اللغة",
     "logoutBtn": "تسجيل الخروج"
   },

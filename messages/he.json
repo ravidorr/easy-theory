@@ -155,6 +155,10 @@
     "medalLockedLabel": "טרם הושג",
     "darkMode": "מצב כהה",
     "autoAdvance": "מעבר אוטומטי לשאלה הבאה",
+    "autoAdvanceDelay": "מהירות מעבר אוטומטי",
+    "autoAdvanceFaster": "מהר",
+    "autoAdvanceSlower": "לאט",
+    "autoAdvanceDelayValue": "{seconds} שניות",
     "language": "שפה",
     "logoutBtn": "יציאה מהחשבון"
   },

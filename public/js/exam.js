@@ -13,7 +13,10 @@
   const sessionId = container.dataset.sessionId || null;
   const expiresAt = Date.parse(container.dataset.expiresAt || "");
   const WARNING_SECONDS = 300;
-  const AUTO_ADVANCE_DELAY_MS = 900;
+  const DEFAULT_AUTO_ADVANCE_DELAY_MS = 1125;
+  const MIN_AUTO_ADVANCE_DELAY_MS = 750;
+  const MAX_AUTO_ADVANCE_DELAY_MS = 3000;
+  const AUTO_ADVANCE_DELAY_STEP_MS = 125;
   const prefersReducedMotion =
     typeof window.matchMedia === "function" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -21,6 +24,16 @@
     const match = document.cookie.match(/(?:^|;\s*)quiz-auto-advance=([^;]*)/);
     if (match) return decodeURIComponent(match[1]) !== "off";
     return !prefersReducedMotion;
+  })();
+  const AUTO_ADVANCE_DELAY_MS = (function () {
+    const match = document.cookie.match(/(?:^|;\s*)quiz-auto-advance-delay=([^;]*)/);
+    const value = match ? Number(match[1]) : NaN;
+    return Number.isInteger(value) &&
+      value >= MIN_AUTO_ADVANCE_DELAY_MS &&
+      value <= MAX_AUTO_ADVANCE_DELAY_MS &&
+      (value - MIN_AUTO_ADVANCE_DELAY_MS) % AUTO_ADVANCE_DELAY_STEP_MS === 0
+      ? value
+      : DEFAULT_AUTO_ADVANCE_DELAY_MS;
   })();
 
   const slides = Array.from(document.querySelectorAll(".quiz-slide"));

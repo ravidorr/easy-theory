@@ -1,5 +1,23 @@
 (function () {
   const THEME_COLORS = { light: "#f5f7fc", dark: "#131829" };
+  const DEFAULT_AUTO_ADVANCE_DELAY_MS = 1125;
+  const MIN_AUTO_ADVANCE_DELAY_MS = 750;
+  const MAX_AUTO_ADVANCE_DELAY_MS = 3000;
+  const AUTO_ADVANCE_DELAY_STEP_MS = 125;
+
+  function validAutoAdvanceDelay(value) {
+    const delay = Number(value);
+    return Number.isInteger(delay) &&
+      delay >= MIN_AUTO_ADVANCE_DELAY_MS &&
+      delay <= MAX_AUTO_ADVANCE_DELAY_MS &&
+      (delay - MIN_AUTO_ADVANCE_DELAY_MS) % AUTO_ADVANCE_DELAY_STEP_MS === 0
+      ? delay
+      : DEFAULT_AUTO_ADVANCE_DELAY_MS;
+  }
+
+  function writeCookie(name, value) {
+    document.cookie = name + "=" + value + "; path=/; max-age=31536000; SameSite=Lax; Secure";
+  }
 
   function syncThemeColorMeta(theme) {
     const color = THEME_COLORS[theme === "light" ? "light" : "dark"];
@@ -32,8 +50,7 @@
       const isDark = !wasDark;
       const theme = isDark ? "dark" : "light";
       document.documentElement.dataset.theme = theme;
-      document.cookie =
-        "theme=" + theme + "; path=/; max-age=31536000; SameSite=Lax; Secure";
+      writeCookie("theme", theme);
       updateSwitch(isDark);
       syncThemeColorMeta(theme);
     });
@@ -41,12 +58,22 @@
 
   const autoAdvanceToggle = document.getElementById("auto-advance-toggle");
   const autoAdvanceKnob = autoAdvanceToggle && autoAdvanceToggle.querySelector("span");
+  const autoAdvanceDelayInput = document.getElementById("auto-advance-delay");
+  const autoAdvanceDelayValue = document.getElementById("auto-advance-delay-value");
+
+  function setAutoAdvanceDelayValue(value) {
+    if (!autoAdvanceDelayValue) return;
+    const seconds = String(value / 1000);
+    const template = autoAdvanceDelayValue.dataset.template || "{seconds}";
+    autoAdvanceDelayValue.textContent = template.replace("{seconds}", seconds);
+  }
 
   function updateAutoAdvanceSwitch(isOn) {
     if (!autoAdvanceToggle || !autoAdvanceKnob) return;
     autoAdvanceToggle.setAttribute("aria-checked", isOn ? "true" : "false");
     autoAdvanceToggle.style.background = isOn ? "var(--primary)" : "var(--surface-3)";
     autoAdvanceKnob.style.insetInlineStart = isOn ? "21px" : "3px";
+    if (autoAdvanceDelayInput) autoAdvanceDelayInput.disabled = !isOn;
   }
 
   if (autoAdvanceToggle) {
@@ -64,10 +91,20 @@
     autoAdvanceToggle.addEventListener("click", function () {
       const wasOn = autoAdvanceToggle.getAttribute("aria-checked") === "true";
       const isOn = !wasOn;
-      document.cookie =
-        "quiz-auto-advance=" + (isOn ? "on" : "off") +
-        "; path=/; max-age=31536000; SameSite=Lax; Secure";
+      writeCookie("quiz-auto-advance", isOn ? "on" : "off");
       updateAutoAdvanceSwitch(isOn);
+    });
+  }
+
+  if (autoAdvanceDelayInput) {
+    const delay = validAutoAdvanceDelay(autoAdvanceDelayInput.value);
+    autoAdvanceDelayInput.value = String(delay);
+    setAutoAdvanceDelayValue(delay);
+    autoAdvanceDelayInput.addEventListener("input", function () {
+      const value = validAutoAdvanceDelay(autoAdvanceDelayInput.value);
+      autoAdvanceDelayInput.value = String(value);
+      setAutoAdvanceDelayValue(value);
+      writeCookie("quiz-auto-advance-delay", value);
     });
   }
 

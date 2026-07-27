@@ -10,9 +10,10 @@
   if (total === 0) return;
   // Matches the common upper bound for mobile double-tap recognition.
   const TOUCH_DOUBLE_TAP_SUPPRESSION_MS = 300;
-  // Matches the 900ms reward-float animation so the slide changes right as
-  // the +10 float finishes.
-  const AUTO_ADVANCE_DELAY_MS = 900;
+  const DEFAULT_AUTO_ADVANCE_DELAY_MS = 1125;
+  const MIN_AUTO_ADVANCE_DELAY_MS = 750;
+  const MAX_AUTO_ADVANCE_DELAY_MS = 3000;
+  const AUTO_ADVANCE_DELAY_STEP_MS = 125;
   const AUTO_ADVANCE_HINT_KEY = "quiz-auto-advance-hint-seen";
   // Matches the quiz-slide-exit animation (240ms in page.module.css) so the
   // final screen appears right as the last card finishes sliding away.
@@ -34,6 +35,19 @@
     if (match) return match[1] !== "off";
     return !prefersReducedMotion;
   })();
+
+  function autoAdvanceDelay() {
+    const match = document.cookie.match(/(?:^|;\s*)quiz-auto-advance-delay=([^;]*)/);
+    const value = match ? Number(match[1]) : NaN;
+    return Number.isInteger(value) &&
+      value >= MIN_AUTO_ADVANCE_DELAY_MS &&
+      value <= MAX_AUTO_ADVANCE_DELAY_MS &&
+      (value - MIN_AUTO_ADVANCE_DELAY_MS) % AUTO_ADVANCE_DELAY_STEP_MS === 0
+      ? value
+      : DEFAULT_AUTO_ADVANCE_DELAY_MS;
+  }
+
+  const AUTO_ADVANCE_DELAY_MS = autoAdvanceDelay();
 
   // Resume state is persisted per locale + user + topic so a reload continues
   // the same run without leaking rendered copy across locales. Retry sessions

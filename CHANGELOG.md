@@ -3,6 +3,14 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.210] — 2026-07-27
+
+### Changed
+
+- Slowed quiz and exam auto-advance by 25% and added a persistent, localized speed setting.
+
+---
+
 ## [0.3.209] — 2026-07-27
 
 ### Changed

@@ -44,12 +44,15 @@ checks:
   - id: CHK-MORE-07
     desc: "Auto-advance setting persists and controls the practice-quiz loop"
     oracle: "#auto-advance-toggle exposes and changes its switch state, persists the `quiz-auto-advance` cookie through reload, and when off a correct practice answer remains on feedback until manually advanced; restoring it on permits the normal automatic advance"
+  - id: CHK-MORE-08
+    desc: "Auto-advance speed persists and exposes its state"
+    oracle: "#auto-advance-delay is a labeled range input with faster/slower endpoints, 750–3000ms bounds, 125ms steps, and a live displayed value. It persists `quiz-auto-advance-delay` through reload, and is disabled without losing its selected value while auto-advance is off."
   - id: CHK-CONSOLE-01
     desc: "No console errors anywhere in the flow"
     oracle: "Browser console contains zero error-level entries across all steps (warnings triaged case by case)"
   - id: CHK-A11Y-01
     desc: "Accessibility basics on the More page"
-    oracle: "Theme, auto-advance, and language controls expose role and state (aria-checked/pressed); achievement earned-state is not color-only; rows/links have accessible names; a heading exists"
+    oracle: "Theme, auto-advance, speed, and language controls expose role, name, and state; achievement earned-state is not color-only; rows/links have accessible names; a heading exists"
   - id: CHK-COPY-RTL-01
     desc: "No hardcoded or direction-broken strings in the flow"
     oracle: "Visible strings exist in he.json (More namespace); no raw keys or unexpected English; numbers in stats render without direction breakage"
@@ -72,7 +75,8 @@ Route hints:
 - Page `/he/more`, driven by `public/js/more.js` (theme + logout) and the
   `LanguageToggle` component (locale swap in place via the router).
 - Hooks: `#dark-mode-toggle` (sets the `theme` cookie and `html[data-theme]`),
-  `#auto-advance-toggle` (sets the `quiz-auto-advance` cookie), and `#logout-btn`
+  `#auto-advance-toggle` (sets the `quiz-auto-advance` cookie),
+  `#auto-advance-delay` (sets `quiz-auto-advance-delay`), and `#logout-btn`
   (POST `/api/auth/logout` then `/auth/login`).
 - Theme default is dark; the layout reads the cookie server-side, so a reload is the
   persistence proof.

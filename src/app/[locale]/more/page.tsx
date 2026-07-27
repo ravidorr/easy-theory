@@ -23,6 +23,21 @@ import { getTranslations, getLocale } from "next-intl/server";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import styles from "./page.module.css";
 
+const DEFAULT_AUTO_ADVANCE_DELAY_MS = 1125;
+const MIN_AUTO_ADVANCE_DELAY_MS = 750;
+const MAX_AUTO_ADVANCE_DELAY_MS = 3000;
+const AUTO_ADVANCE_DELAY_STEP_MS = 125;
+
+function autoAdvanceDelay(value: string | undefined) {
+  const delay = Number(value);
+  return Number.isInteger(delay) &&
+    delay >= MIN_AUTO_ADVANCE_DELAY_MS &&
+    delay <= MAX_AUTO_ADVANCE_DELAY_MS &&
+    (delay - MIN_AUTO_ADVANCE_DELAY_MS) % AUTO_ADVANCE_DELAY_STEP_MS === 0
+    ? delay
+    : DEFAULT_AUTO_ADVANCE_DELAY_MS;
+}
+
 export default async function MorePage() {
   noStore();
   const supabase = await createClient();
@@ -58,6 +73,9 @@ export default async function MorePage() {
   const isDark = (cookieStore.get("theme")?.value ?? "dark") === "dark";
   // Default is on; more.js corrects the default for reduced-motion users.
   const autoAdvanceOn = cookieStore.get("quiz-auto-advance")?.value !== "off";
+  const autoAdvanceDelayMs = autoAdvanceDelay(
+    cookieStore.get("quiz-auto-advance-delay")?.value
+  );
 
   const MILESTONES: { slug: string; label: string; icon: IconName }[] = [
     { slug: "streak-3", label: t("milestone3"), icon: "flame" },
@@ -245,6 +263,39 @@ export default async function MorePage() {
             >
               <span className={`${styles.toggleThumb} ${isDark ? styles.toggleThumbOn : ""}`} />
             </button>
+          </div>
+
+          <div className={`${styles.settingsRow} ${styles.autoAdvanceDelayRow}`}>
+            <span className={styles.settingsIcon}>
+              <Icon name="timer" size={20} />
+            </span>
+            <div className={styles.autoAdvanceDelayControl}>
+              <label className={styles.settingsRowLabel} htmlFor="auto-advance-delay">
+                {t("autoAdvanceDelay")}
+              </label>
+              <div className={styles.autoAdvanceDelayInput}>
+                <span>{t("autoAdvanceFaster")}</span>
+                <input
+                  type="range"
+                  id="auto-advance-delay"
+                  min={MIN_AUTO_ADVANCE_DELAY_MS}
+                  max={MAX_AUTO_ADVANCE_DELAY_MS}
+                  step={AUTO_ADVANCE_DELAY_STEP_MS}
+                  defaultValue={autoAdvanceDelayMs}
+                  disabled={!autoAdvanceOn}
+                  aria-describedby="auto-advance-delay-value"
+                />
+                <span>{t("autoAdvanceSlower")}</span>
+              </div>
+              <output
+                id="auto-advance-delay-value"
+                className={styles.autoAdvanceDelayValue}
+                aria-live="polite"
+                data-template={t("autoAdvanceDelayValue", { seconds: "{seconds}" })}
+              >
+                {t("autoAdvanceDelayValue", { seconds: String(autoAdvanceDelayMs / 1000) })}
+              </output>
+            </div>
           </div>
 
           <div className={styles.settingsRow}>
