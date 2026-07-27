@@ -28,7 +28,8 @@
   },
   "Practice": {
     "title": "תרגול",
-    "intro": "בחרו נושא או המשיכו את התרגול המומלץ מהבית."
+    "intro": "בחרו נושא או המשיכו את התרגול המומלץ מהבית.",
+    "reviewMistakes": "חזרה על טעויות"
   },
   "Mistakes": {
     "title": "טעויות לחזרה",
@@ -140,6 +141,7 @@
     "statCompletionValue": "{percent}%",
     "navExam": "סימולציית מבחן",
     "navSchedule": "התוכנית שלך",
+    "navResources": "חומרי עזר",
     "navBookmarks": "שאלות שמורות",
     "navCredits": "קרדיטים",
     "navContact": "יצירת קשר",

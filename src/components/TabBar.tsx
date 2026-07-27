@@ -34,16 +34,16 @@ export async function TabBar({
       icon: <Icon name="timer" size={22} />,
     },
     {
-      key: "mistakes" as ActiveTab,
-      href: "/mistakes" as const,
-      label: t("mistakes"),
-      icon: <Icon name="warning" size={22} />,
-    },
-    {
       key: "progress" as ActiveTab,
       href: "/progress" as const,
       label: t("progress"),
       icon: <Icon name="trophy" size={22} />,
+    },
+    {
+      key: "more" as ActiveTab,
+      href: "/more" as const,
+      label: t("more"),
+      icon: <Icon name="more" size={22} />,
     },
   ];
 

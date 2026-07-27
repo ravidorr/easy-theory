@@ -31,7 +31,7 @@ checks:
     oracle: "The grid includes streak medals (3/7/14/30) and achievement tiles for first topic, 100 questions, all topics, and exam pass; earned vs locked state is visually and programmatically distinguishable, including for a zero-progress user"
   - id: CHK-MORE-03
     desc: "Navigation entries lead where they claim"
-    oracle: "Links/rows for exam, schedule, bookmarks, and credits navigate to /he/exam, /he/schedule, /he/bookmarks, and /he/credits respectively"
+    oracle: "Links/rows for exam, schedule, resources, bookmarks, and credits navigate to /he/exam, /he/schedule, /he/resources, /he/bookmarks, and /he/credits respectively"
   - id: CHK-MORE-04
     desc: "Dark-mode toggle flips the theme and persists"
     oracle: "#dark-mode-toggle flips html[data-theme] between dark and light immediately; after a full reload the chosen theme is still applied (theme cookie); toggle state matches the applied theme"
@@ -62,7 +62,7 @@ exploration_budget: "After all checks, up to 5 min within scope: browser back im
 ## Narrative
 
 Evening session on the couch: open the More tab, check your numbers match what the
-home screen told you, inspect the expanded achievements, open saved questions, switch
+home screen told you, inspect the expanded achievements, open Resources and saved questions, switch
 to dark mode, toggle quiz auto-advance, and peek at the Arabic UI before switching
 back. End the session by logging out
 and making sure the app is genuinely locked afterwards — this is a shared phone.

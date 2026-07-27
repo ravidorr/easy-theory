@@ -35,6 +35,7 @@ describe("PracticePage", () => {
 
   it("renders each practice topic and its tab bar", async () => {
     const { container } = render(await PracticePage());
+    expect(screen.getByRole("link", { name: "reviewMistakes" })).toHaveAttribute("href", "/mistakes");
     expect(screen.getByRole("link", { name: "תמרורים" })).toHaveAttribute("href", "/topics/signs");
     expect(container.querySelector('[data-testid="tabbar"]')).toBeTruthy();
   });

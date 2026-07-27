@@ -1,11 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { TabBar } from "@/components/TabBar";
-import {
-  Skeleton,
-  SkeletonCard,
-  SkeletonIconCard,
-  SkeletonScreen,
-} from "@/components/Skeleton";
+import { Skeleton, SkeletonCard, SkeletonCol, SkeletonIconCard, SkeletonRow, SkeletonScreen } from "@/components/Skeleton";
 import styles from "./page.module.css";
 
 export default async function Loading() {
@@ -22,7 +17,30 @@ export default async function Loading() {
             <Skeleton size="w60" />
             <Skeleton size="w40" />
           </SkeletonCard>
-          <SkeletonIconCard />
+          {[0, 1, 2].map((i) => (
+            <SkeletonCard key={i}>
+              <SkeletonRow>
+                <Skeleton variant="image" size="s52" />
+                <SkeletonCol>
+                  <Skeleton size="w60" />
+                  <Skeleton size="w40" />
+                </SkeletonCol>
+              </SkeletonRow>
+            </SkeletonCard>
+          ))}
+        </div>
+        <div className={styles.section}>
+          <Skeleton size="w25" />
+          {[0, 1, 2].map((i) => (
+            <SkeletonCard key={i}>
+              <SkeletonRow>
+                <Skeleton variant="image" size="s52" />
+                <SkeletonCol>
+                  <Skeleton size="w60" />
+                </SkeletonCol>
+              </SkeletonRow>
+            </SkeletonCard>
+          ))}
         </div>
         <div className={styles.section}>
           <Skeleton size="w25" />
@@ -31,7 +49,7 @@ export default async function Loading() {
           ))}
         </div>
       </SkeletonScreen>
-      <TabBar active="links" />
+      <TabBar active="more" current={null} />
     </>
   );
 }

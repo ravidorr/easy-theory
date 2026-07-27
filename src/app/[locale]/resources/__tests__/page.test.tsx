@@ -1,24 +1,22 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import ResourcesPage from "../page";
 import { createClient } from "@/lib/supabase";
-import { getResources, type Resource } from "@/lib/db";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getResources, getVideos, type Resource, type Video } from "@/lib/db";
+import { getLocale } from "next-intl/server";
 
-vi.mock("next/navigation", () => ({
-  redirect: vi.fn().mockImplementation(() => {
-    throw new Error("redirect");
-  }),
+vi.mock("next/image", () => ({
+  default: ({ src, alt, className }: { src: string; alt?: string; className?: string }) =>
+    React.createElement("img", { src, alt, className }),
 }));
+vi.mock("next/navigation", () => ({ redirect: vi.fn(() => { throw new Error("redirect"); }) }));
 vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
-vi.mock("@/lib/db", () => ({ getResources: vi.fn() }));
-vi.mock("@/components/SignImage", () => ({
-  SignImage: ({ src }: { src: string }) =>
-    React.createElement("img", { src, alt: "" }),
-}));
+vi.mock("@/lib/db", () => ({ getResources: vi.fn(), getVideos: vi.fn() }));
+vi.mock("@/components/SignImage", () => ({ SignImage: ({ src }: { src: string }) => React.createElement("img", { src, alt: "" }) }));
 vi.mock("@/components/TabBar", () => ({
-  TabBar: () => React.createElement("div", { "data-testid": "tabbar" }),
+  TabBar: ({ active, current }: { active: string; current: string | null }) =>
+    React.createElement("div", { "data-testid": "tabbar", "data-active": active, "data-current": current ?? "" }),
 }));
 vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn().mockResolvedValue((key: string) => key),
@@ -27,202 +25,76 @@ vi.mock("next-intl/server", () => ({
 
 const mockCreateClient = vi.mocked(createClient);
 const mockGetResources = vi.mocked(getResources);
+const mockGetVideos = vi.mocked(getVideos);
 
-function makeClient(user: { id: string } | null = { id: "u1" }) {
+function client(user: { id: string } | null = { id: "u1" }) {
   return { auth: { getUser: vi.fn().mockResolvedValue({ data: { user } }) } };
 }
 
-function makeResource(overrides: Partial<Resource>): Resource {
-  return {
-    id: "r0",
-    href: "https://example.com/",
-    section: "official",
-    order_index: 1,
-    title_he: "title he",
-    title_ar: "title ar",
-    description_he: "desc he",
-    description_ar: "desc ar",
-    icon_type: "char",
-    icon_value: "?",
-    icon_variant: "primary",
-    ...overrides,
-  };
+function resource(overrides: Partial<Resource>): Resource {
+  return { id: "r", href: "https://example.com", section: "official", order_index: 1, title_he: "resource he", title_ar: "resource ar", description_he: "description he", description_ar: "description ar", icon_type: "char", icon_value: "?", icon_variant: "primary", ...overrides };
 }
 
-const fixtures: Resource[] = [
-  makeResource({
-    id: "r1",
-    href: "https://www.gov.il/he/pages/tamrurim_7924_01_18",
-    order_index: 1,
-    title_he: "signs chart he",
-    title_ar: "signs chart ar",
-    icon_type: "sign",
-    icon_value: "/signs/sign-301.png",
-    icon_variant: "neutral",
-  }),
-  makeResource({
-    id: "r2",
-    href: "https://www.gov.il/he/departments/dynamiccollectors/theoryexamhe_data",
-    order_index: 2,
-    title_he: "question bank he",
-    title_ar: null,
-    icon_value: "?",
-    icon_variant: "primary",
-  }),
-  makeResource({
-    id: "r3",
-    href: "https://m.noeg.co.il/",
-    section: "practice",
-    order_index: 1,
-    title_he: "simulator he",
-    title_ar: "simulator ar",
-    icon_value: "V",
-    icon_variant: "success",
-  }),
-  makeResource({
-    id: "r4",
-    href: "https://he.wikipedia.org/wiki/%D7%AA%D7%9E%D7%A8%D7%95%D7%A8%D7%99%D7%9D_%D7%91%D7%99%D7%A9%D7%A8%D7%90%D7%9C",
-    section: "practice",
-    order_index: 2,
-    title_he: "wikipedia he",
-    title_ar: "wikipedia ar",
-    icon_value: "W",
-    icon_variant: "muted",
-  }),
-];
+function video(overrides: Partial<Video>): Video {
+  return { id: "v", youtube_id: "video-id", section: "lesson", is_featured: false, order_index: 1, title_he: "video he", title_ar: "video ar", description_he: "description he", description_ar: "description ar", tag_he: "tag he", tag_ar: "tag ar", duration_label_he: null, duration_label_ar: null, ...overrides };
+}
 
 describe("ResourcesPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockCreateClient.mockResolvedValue(makeClient() as never);
-    mockGetResources.mockResolvedValue(fixtures);
-    vi.mocked(getTranslations).mockResolvedValue(((key: string) => key) as never);
-    vi.mocked(getLocale).mockResolvedValue("he");
+    mockCreateClient.mockResolvedValue(client() as never);
+    mockGetResources.mockResolvedValue([
+      resource({ id: "official", href: "https://gov.example", icon_type: "sign", icon_value: "/signs/sign-301.png" }),
+      resource({ id: "practice", href: "https://practice.example", section: "practice" }),
+    ]);
+    mockGetVideos.mockResolvedValue([
+      video({ id: "featured", youtube_id: "featured", section: "marathon", is_featured: true, duration_label_he: "40 דקות", duration_label_ar: "40 دقيقة" }),
+      video({ id: "marathon", youtube_id: "marathon", section: "marathon" }),
+      video({ id: "lesson", youtube_id: "lesson" }),
+    ]);
   });
 
-  it("redirects to /auth/login when not authenticated", async () => {
-    mockCreateClient.mockResolvedValue(makeClient(null) as never);
+  it("redirects unauthenticated learners", async () => {
+    mockCreateClient.mockResolvedValue(client(null) as never);
     await expect(ResourcesPage()).rejects.toThrow("redirect");
   });
 
-  it("renders all four external links with target=_blank", async () => {
-    const jsx = await ResourcesPage();
-    const { container } = render(jsx);
-    const externalLinks = container.querySelectorAll("a[target='_blank']");
-    expect(externalLinks).toHaveLength(4);
-  });
+  it("renders the video lessons before the external resources", async () => {
+    const { container } = render(await ResourcesPage());
+    const links = Array.from(container.querySelectorAll("a[target='_blank']"));
 
-  it("promotes the first official resource to a featured card", async () => {
-    const jsx = await ResourcesPage();
-    const { container } = render(jsx);
-    const featured = container.querySelector('[data-testid="featured-resource"]');
-
-    expect(featured).toHaveAttribute(
-      "href",
-      "https://www.gov.il/he/pages/tamrurim_7924_01_18"
-    );
-    expect(featured).toHaveAttribute("target", "_blank");
-    expect(featured!.querySelector('img[src="/signs/sign-301.png"]')).toBeTruthy();
-  });
-
-  it("renders character featured resources and sign icons in the remaining resource list", async () => {
-    mockGetResources.mockResolvedValue([
-      makeResource({ id: "featured-char", icon_type: "char", icon_value: "★" }),
-      makeResource({
-        id: "listed-sign",
-        href: "https://example.com/sign",
-        icon_type: "sign",
-        icon_value: "/signs/sign-302.png",
-      }),
+    expect(links).toHaveLength(5);
+    expect(links.map((link) => link.getAttribute("href"))).toEqual([
+      "https://www.youtube.com/watch?v=featured",
+      "https://www.youtube.com/watch?v=marathon",
+      "https://www.youtube.com/watch?v=lesson",
+      "https://gov.example",
+      "https://practice.example",
     ]);
-
-    const jsx = await ResourcesPage();
-    const { container } = render(jsx);
-
-    expect(container.querySelector('[data-testid="featured-resource"]')).toHaveTextContent("★");
-    expect(container.querySelector('a[href="https://example.com/sign"] img[src="/signs/sign-302.png"]')).toBeTruthy();
+    links.forEach((link) => expect(link).toHaveAttribute("rel", "noopener noreferrer"));
+    expect(screen.getByText("40 דקות")).toBeInTheDocument();
   });
 
-  it("does not render a subtitle or external-link icon", async () => {
-    const jsx = await ResourcesPage();
-    const { container } = render(jsx);
-
-    expect(screen.queryByText("subtitle")).not.toBeInTheDocument();
-    expect(container.querySelectorAll("svg")).toHaveLength(0);
-  });
-
-  it("renders link to the official government signs chart with its sign icon", async () => {
-    const jsx = await ResourcesPage();
-    const { container } = render(jsx);
-    const link = container.querySelector(
-      'a[href="https://www.gov.il/he/pages/tamrurim_7924_01_18"]'
-    );
-    expect(link).toBeTruthy();
-    expect(link).toHaveAttribute("target", "_blank");
-    expect(link).toHaveAttribute("rel", "noopener noreferrer");
-    expect(link!.querySelector('img[src="/signs/sign-301.png"]')).toBeTruthy();
-  });
-
-  it("renders link to the official question bank", async () => {
-    const jsx = await ResourcesPage();
-    const { container } = render(jsx);
-    const link = container.querySelector(
-      'a[href="https://www.gov.il/he/departments/dynamiccollectors/theoryexamhe_data"]'
-    );
-    expect(link).toBeTruthy();
-  });
-
-  it("renders link to noeg.co.il practice simulator", async () => {
-    const jsx = await ResourcesPage();
-    const { container } = render(jsx);
-    const link = container.querySelector('a[href="https://m.noeg.co.il/"]');
-    expect(link).toBeTruthy();
-    expect(link).toHaveAttribute("target", "_blank");
-  });
-
-  it("renders link to Hebrew Wikipedia signs article", async () => {
-    const jsx = await ResourcesPage();
-    const { container } = render(jsx);
-    const link = container.querySelector('a[href*="wikipedia.org"]');
-    expect(link).toBeTruthy();
-    expect(link).toHaveAttribute("target", "_blank");
-  });
-
-  it("renders resource titles from the DB rows", async () => {
-    const jsx = await ResourcesPage();
-    render(jsx);
-    expect(screen.getByText("signs chart he")).toBeInTheDocument();
-    expect(screen.getByText("question bank he")).toBeInTheDocument();
-    expect(screen.getByText("simulator he")).toBeInTheDocument();
-    expect(screen.getByText("wikipedia he")).toBeInTheDocument();
-  });
-
-  it("renders Arabic fields for the ar locale without Hebrew fallback", async () => {
+  it("uses Arabic content without Hebrew fallback", async () => {
     vi.mocked(getLocale).mockResolvedValue("ar");
-    const jsx = await ResourcesPage();
-    render(jsx);
-    expect(screen.getByText("signs chart ar")).toBeInTheDocument();
-    expect(screen.getByText("simulator ar")).toBeInTheDocument();
-    expect(screen.queryByText("question bank he")).not.toBeInTheDocument();
-    expect(screen.queryByText("signs chart he")).not.toBeInTheDocument();
+    render(await ResourcesPage());
+
+    expect(screen.getAllByText("video ar")).toHaveLength(3);
+    expect(screen.getAllByText("resource ar")).toHaveLength(2);
+    expect(screen.queryByText("video he")).not.toBeInTheDocument();
+    expect(screen.queryByText("resource he")).not.toBeInTheDocument();
   });
 
-  it("renders no resource links when the table is empty", async () => {
+  it("renders safely when both content collections are empty", async () => {
     mockGetResources.mockResolvedValue([]);
-    const jsx = await ResourcesPage();
-    const { container } = render(jsx);
+    mockGetVideos.mockResolvedValue([]);
+    const { container } = render(await ResourcesPage());
     expect(container.querySelectorAll("a[target='_blank']")).toHaveLength(0);
   });
 
-  it("renders the TabBar", async () => {
-    const jsx = await ResourcesPage();
-    const { container } = render(jsx);
-    expect(container.querySelector('[data-testid="tabbar"]')).toBeTruthy();
-  });
-
-  it("renders page heading (pageTitle key)", async () => {
-    const jsx = await ResourcesPage();
-    render(jsx);
-    expect(screen.getByText("pageTitle")).toBeInTheDocument();
+  it("groups the page under More without marking More as the current route", async () => {
+    render(await ResourcesPage());
+    expect(screen.getByTestId("tabbar")).toHaveAttribute("data-active", "more");
+    expect(screen.getByTestId("tabbar")).toHaveAttribute("data-current", "");
   });
 });
