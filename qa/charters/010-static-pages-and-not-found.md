@@ -12,7 +12,7 @@ environment:
   viewport: { width: 390, height: 844 }
   auth:
     required: true
-    user: "qa-user@clearroad.test"
+    user: "qa-user@easy-in-theory.test"
     mint: "pnpm qa:mint"
   data_assumptions: "Static content pages are code-defined (no DB dependency); seeded topics are signs / traffic-laws / safety / vehicle, so any other slug is invalid"
 timebox_minutes: 20

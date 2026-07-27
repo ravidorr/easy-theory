@@ -392,7 +392,7 @@
     }
     try {
       sessionStorage.setItem(
-        "clearroad:stats",
+        "easyInTheory:stats",
         JSON.stringify({
           streak_days: data.streak_days,
           star_points: data.new_total_stars,

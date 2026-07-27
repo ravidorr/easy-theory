@@ -12,7 +12,7 @@ environment:
   viewport: { width: 390, height: 844 }
   auth:
     required: true
-    user: "qa-user@clearroad.test"
+    user: "qa-user@easy-in-theory.test"
     mint: "pnpm qa:mint"
   data_assumptions: "Seeded test DB; test user has some progress/streak from earlier runs (stats cross-check is home-vs-more within the same run, not absolute values)"
 timebox_minutes: 25

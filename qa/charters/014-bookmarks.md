@@ -12,8 +12,8 @@ environment:
   viewport: { width: 390, height: 844 }
   auth:
     required: true
-    user: "isolated qa-bookmarks-<run-id>@clearroad.test"
-    mint: "pnpm qa:mint --email qa-bookmarks-<run-id>@clearroad.test"
+    user: "isolated qa-bookmarks-<run-id>@easy-in-theory.test"
+    mint: "pnpm qa:mint --email qa-bookmarks-<run-id>@easy-in-theory.test"
   data_assumptions: "Seeded test DB: 1273 questions, 277 signs, and migration 013 user_question_bookmarks applied; use a new isolated QA user so its bookmark list starts empty"
 timebox_minutes: 20
 out_of_scope:
@@ -55,7 +55,7 @@ exploration_budget: "After all checks, up to 5 min within scope: bookmark severa
 You find a question that deserves a second look, save it, and later return through
 More to study the saved list. The feature is a persistent list, not a visual toggle:
 the state must survive navigation and a fresh tab, and removal must be reflected at
-the source and in the list. Mint a unique `qa-bookmarks-<run-id>@clearroad.test`
+the source and in the list. Mint a unique `qa-bookmarks-<run-id>@easy-in-theory.test`
 account for this run; do not use the shared `qa-user`, because the empty-state
 assertion needs a known-empty bookmark list. Keep a note of the question text or id
 selected so the cross-page assertion is unambiguous. Remove every bookmark created by

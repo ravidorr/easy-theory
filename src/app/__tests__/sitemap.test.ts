@@ -27,13 +27,13 @@ describe("sitemap", () => {
   });
 
   it("uses the configured URL for every non-home sitemap entry", async () => {
-    process.env.NEXT_PUBLIC_SITE_URL = "https://clearroad.example";
+    process.env.NEXT_PUBLIC_SITE_URL = "https://easy-in-theory.example";
     const entries = (await loadSitemap())();
 
     expect(entries.slice(1)).toEqual(expect.arrayContaining([
-      expect.objectContaining({ url: "https://clearroad.example/he/faq", priority: 0.7 }),
-      expect.objectContaining({ url: "https://clearroad.example/he/guides/signs", priority: 0.7 }),
-      expect.objectContaining({ url: "https://clearroad.example/he/guides/vehicle", priority: 0.7 }),
+      expect.objectContaining({ url: "https://easy-in-theory.example/he/faq", priority: 0.7 }),
+      expect.objectContaining({ url: "https://easy-in-theory.example/he/guides/signs", priority: 0.7 }),
+      expect.objectContaining({ url: "https://easy-in-theory.example/he/guides/vehicle", priority: 0.7 }),
     ]));
   });
 });

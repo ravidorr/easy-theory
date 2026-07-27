@@ -39,6 +39,11 @@ describe("LoginPage", () => {
     expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
   });
 
+  it("renders the localized brand tagline", async () => {
+    await renderPage();
+    expect(screen.getByText("tagline")).toBeInTheDocument();
+  });
+
   it("renders the login card title heading", async () => {
     await renderPage();
     expect(screen.getByText("loginCardTitle")).toBeInTheDocument();

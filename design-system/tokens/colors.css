@@ -1,4 +1,4 @@
-/* ClearRoad · דרך ברורה — color tokens
+/* Easy in theory · קל בתיאוריה — color tokens
    Direction: "לוחית נהג חדש" (new-driver plate: strong blue, white, ink)
    Primary blue derives from the נהג חדש plate sign (oklch hue ~264).
    Light is default; dark via [data-theme="dark"] on <html> or <body>. */
@@ -29,6 +29,13 @@
   --gold: oklch(0.78 0.13 85);
   --gold-soft: oklch(0.93 0.05 85);
   --gold-text: oklch(0.52 0.11 85);
+
+  /* Brand accent (logo "»" gold). Keep --gold for gamification. */
+  --accent: #f0b429;
+  --accent-strong: #d99a12;
+  --accent-soft: oklch(0.93 0.05 85);
+  --accent-text: oklch(0.52 0.11 85);
+  --brand-blue: #2749d8;
 
   /* Semantic */
   --success: oklch(0.62 0.13 155);
@@ -68,6 +75,12 @@
   --gold: oklch(0.80 0.13 85);
   --gold-soft: oklch(0.34 0.06 85);
   --gold-text: oklch(0.85 0.11 85);
+
+  --accent: #f5c451;
+  --accent-strong: #f0b429;
+  --accent-soft: oklch(0.34 0.06 85);
+  --accent-text: oklch(0.85 0.11 85);
+  --brand-blue: #4f6ef0;
 
   --success: oklch(0.68 0.13 155);
   --success-soft: oklch(0.33 0.06 155);

@@ -1,7 +1,14 @@
 # Changelog
 
-All notable changes to ClearRoad (דרך ברורה) are documented here.
+All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
+
+## [0.3.212] — 2026-07-27
+
+### Changed
+
+- Rebranded the app, design system, PWA assets, QA fixtures, and public documentation as Easy in theory (קל בתיאוריה / سهل في النظرية), with a one-time migration for legacy browser state and caches.
+- Fixed Arabic practice-topic links to render their Arabic database names rather than Hebrew names.
 
 ## [0.3.211] — 2026-07-27
 

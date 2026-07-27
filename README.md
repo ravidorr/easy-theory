@@ -1,4 +1,4 @@
-# דרך ברורה · ClearRoad
+# קל בתיאוריה · Easy in theory
 
 A Hebrew-first RTL driving theory study app for the Israeli car-B license exam. Built for a 16-year-old — warm, encouraging, no pressure.
 

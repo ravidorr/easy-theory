@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "ClearRoad QA run findings",
+  "title": "Easy in theory QA run findings",
   "description": "Structure of qa/runs/<run-id>/findings.json. Enforced mechanically by scripts/qa/validate-report.ts; this schema is the reference documentation.",
   "type": "object",
   "required": [

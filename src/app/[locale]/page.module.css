@@ -10,6 +10,36 @@
   box-sizing: border-box;
 }
 
+.publicBrand {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.brandLock {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brandMark {
+  width: 28px;
+  height: 26px;
+  flex-shrink: 0;
+}
+
+.brandName {
+  color: var(--primary-soft-text);
+  font-size: var(--type-h2-size);
+  font-weight: 800;
+}
+
+.brandTagline {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--type-small-size);
+}
+
 .publicIntro,
 .publicSource {
   color: var(--text-muted);

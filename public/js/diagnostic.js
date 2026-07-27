@@ -4,7 +4,20 @@
   const result = document.getElementById("diagnostic-result");
   if (!root || !form || !result) return;
   const t = window.__t || {};
-  const storageKey = "clearroad:diagnostic:v1";
+  const storageKey = "easyInTheory:diagnostic:v1";
+  const legacyStorageKey = "clearroad:diagnostic:v1";
+
+  function readPendingDiagnostic() {
+    const current = localStorage.getItem(storageKey);
+    if (current !== null) return current;
+
+    const legacy = localStorage.getItem(legacyStorageKey);
+    if (legacy === null) return null;
+
+    localStorage.setItem(storageKey, legacy);
+    localStorage.removeItem(legacyStorageKey);
+    return legacy;
+  }
   async function submit(payload) {
     const response = await fetch("/api/diagnostic", {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload),
@@ -31,7 +44,7 @@
   });
   if (root.dataset.authenticated === "true") {
     try {
-      const payload = JSON.parse(localStorage.getItem(storageKey) || "null");
+      const payload = JSON.parse(readPendingDiagnostic() || "null");
       if (payload && Array.isArray(payload.answers) && payload.answers.length === 12) {
         submit(payload).then(function () { localStorage.removeItem(storageKey); });
       }

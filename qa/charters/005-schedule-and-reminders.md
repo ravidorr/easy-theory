@@ -12,7 +12,7 @@ environment:
   viewport: { width: 390, height: 844 }
   auth:
     required: true
-    user: "qa-user@clearroad.test"
+    user: "qa-user@easy-in-theory.test"
     mint: "pnpm qa:mint"
   data_assumptions: "Seeded test DB; the test user may already have a saved schedule from earlier runs (the run overwrites it and compares within-run)"
 timebox_minutes: 20

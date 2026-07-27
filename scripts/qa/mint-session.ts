@@ -24,7 +24,7 @@ function arg(name: string): string | null {
 }
 
 const CHECK = process.argv.includes("--check");
-const EMAIL = arg("--email") ?? "qa-user@clearroad.test";
+const EMAIL = arg("--email") ?? "qa-user@easy-in-theory.test";
 const NEXT_PATH = arg("--next") ?? "/he";
 const BASE_URL = arg("--base") ?? "http://localhost:3100";
 

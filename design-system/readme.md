@@ -1,6 +1,6 @@
-# ClearRoad · דרך ברורה — Design System
+# Easy in theory · קל בתיאוריה — Design System
 
-Design system for **ClearRoad** (Hebrew: **דרך ברורה**), a Hebrew-first (RTL) web app that helps a 16–17 year-old student pass the Israeli driving-theory exam without feeling overwhelmed. Source: internal PRD "QuietDrive v0.1" (3.7.2026), product renamed ClearRoad. Frontend target: vanilla JS/CSS/HTML; this system ships CSS tokens + React reference components for design work.
+Design system for **Easy in theory** (Hebrew: **קל בתיאוריה**), a Hebrew-first (RTL) web app that helps a 16–17 year-old student pass the Israeli driving-theory exam without feeling overwhelmed. Source: internal PRD v0.1 (3.7.2026). Frontend target: vanilla JS/CSS/HTML; this system ships CSS tokens + React reference components for design work.
 
 **Chosen direction:** "לוחית נהג חדש" (new-driver plate) — strong plate blue on cool white, Rubik, high gamification (streaks, stars, progress paths) with a calm, quiet surface. Rebranded from the original lilac direction after user feedback that the pastels felt too blended and didn't convey the app's purpose; the primary blue now derives from the נהג חדש plate sign.
 
@@ -12,7 +12,7 @@ Design system for **ClearRoad** (Hebrew: **דרך ברורה**), a Hebrew-first 
 5. התקדמות נראית — every small step gets immediate positive reinforcement
 
 ## CONTENT FUNDAMENTALS
-- **Language:** Hebrew-first, full RTL, with Arabic as a second locale (also RTL; translations by a professional translator). English never appears in UI copy (brand name "ClearRoad" may appear in the logotype).
+- **Language:** Hebrew-first, full RTL, with Arabic as a second locale (also RTL; translations by a professional translator). English never appears in UI copy (brand name "Easy in theory" may appear in the logotype).
 - **Voice:** warm, encouraging, **gender-neutral Hebrew**: prefer infinitives and first-person plural ("להתחיל עכשיו", "יש ללחוץ", "נמשיך", "יאללה, מתחילים!"); avoid gendered second-person forms. Changed from the original feminine voice by product decision; older feminine strings need a copy pass. Short sentences. No jargon.
 - **Tone of reinforcement:** celebratory but gentle. "כל הכבוד, שלב 3 הושלם!" — never pressuring ("נשארו רק X ימים" is forbidden framing).
 - **Punctuation:** NO em-dashes (—) in copy. Use commas, periods, or restructure. Exclamation marks allowed sparingly for wins.
@@ -39,18 +39,18 @@ Design system for **ClearRoad** (Hebrew: **דרך ברורה**), a Hebrew-first 
 - **Icon set:** [Lucide](https://lucide.dev)-style stroke icons, consolidated into an **`icons.svg` SVG sprite** in the app (`<use href="/icons.svg#icon-flame">`; stroke 2, 18–24px, `currentColor`). New icons are added as sprite `<symbol>`s, never one-off inline SVGs in app code. Kit specimens keep inline SVGs for copy-paste readability.
 - **Traffic signs:** REAL official artwork extracted from the uploaded לוח התמרורים (Sept 2022, ק"ת 10328) PDF — see `assets/signs/`. 21 common signs as PNGs named `sign-<number>-<meaning>.png` (number omitted where mapping was not 100% certain). Never redraw signs by hand; extract more from `uploads/signs-chart.pdf` (94 pages) as needed.
 - **Glyphs:** star, flame, diamond, and trophy glyphs (gamification pills + medal milestones 3/7/14/30) are SVGs, gold/primary colored. No emoji in components; ticket open to replace the app's remaining medal emoji with glyphs.
-- **Favicon:** `assets/favicon/` — the ל learner-sign in brand blue (`favicon.svg` + PNG 16/32/180/512).
-- **Logo:** none provided. Render the wordmark in plain Rubik 800: "דרך ברורה" (or "ClearRoad"). Do not invent a logo mark.
+- **Favicon:** `assets/favicon/` — the “»” plate-blue mark (`favicon.svg` + PNG 16/32/180/512).
+- **Logo:** `assets/logomark.svg` for neutral surfaces and `assets/logomark-onblue.svg` for blue; pair either with the Rubik 800 wordmark “קל בתיאוריה” (or “Easy in theory”).
 
 ## Index
 - `styles.css` — global entry (imports all tokens)
 - `tokens/` — colors (light+dark), typography, spacing/radius, effects
-- `assets/signs/` — 21 official traffic-sign PNGs; `uploads/signs-chart.pdf` — full source chart; `assets/favicon/` — favicon set
+- `assets/signs/` — 21 official traffic-sign PNGs; `uploads/signs-chart.pdf` — full source chart; `assets/favicon/` — favicon set; `assets/logomark*.svg` — brand marks
 - `guidelines/` — foundation specimen cards (colors, type, spacing, radius, shadows, signs)
 - `components/core/` — Button, IconButton, Chip, Card, Input, Switch, TabBar
 - `components/learning/` — QuizOption, Flashcard, ProgressBar, PathProgress, TopicCard
 - `components/gamification/` — StreakPill, StarsPill, Medal, MedalCelebration
-- `ui_kits/clearroad/` — app screens: landing+login, home (task, readiness, weak topics), quiz, exam intro/run, review, flashcards, schedule + setup, videos, resources, more (עוד + medals grid), credits, 404, medal-earned, branded email
+- `ui_kits/easy-in-theory/` — app screens: landing+login, home (task, readiness, weak topics), quiz, exam intro/run, review, flashcards, schedule + setup, videos, resources, more (עוד + medals grid), credits, 404, medal-earned, branded email
 - `SKILL.md` — agent skill entry point (includes implementation notes aligned with the shipped app: class-based CSS + icons.svg sprite)
 
 ## Intentional additions

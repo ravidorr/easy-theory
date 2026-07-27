@@ -5,9 +5,9 @@ import { resolve } from "path";
 const swScript = readFileSync(resolve(__dirname, "../../public/sw.js"), "utf-8");
 
 const ORIGIN = "http://localhost";
-const STATIC_CACHE = "clearroad-static-v4";
-const PAGES_CACHE = "clearroad-pages-v4";
-const IMAGES_CACHE = "clearroad-images-v4";
+const STATIC_CACHE = "easy-in-theory-static-v4";
+const PAGES_CACHE = "easy-in-theory-pages-v4";
+const IMAGES_CACHE = "easy-in-theory-images-v4";
 
 interface FakeResponse {
   ok: boolean;
@@ -174,7 +174,7 @@ describe("sw.js", () => {
   });
 
   describe("activate", () => {
-    it("deletes stale clearroad caches, keeps current and foreign ones, claims clients", async () => {
+    it("deletes stale current and legacy caches, keeps current and foreign ones, claims clients", async () => {
       cachesMock.stores.set("clearroad-images-v2", new Map());
       cachesMock.stores.set(STATIC_CACHE, new Map());
       cachesMock.stores.set("some-other-app", new Map());
@@ -328,7 +328,7 @@ describe("sw.js", () => {
         waitUntil: (p: Promise<unknown>) => waits.push(p),
       });
       await Promise.all(waits);
-      expect(selfMock.registration.showNotification).toHaveBeenCalledWith("ClearRoad", {
+      expect(selfMock.registration.showNotification).toHaveBeenCalledWith("Easy in theory", {
         body: "",
         icon: "/icons/icon-192.png",
         badge: "/icons/icon-192.png",

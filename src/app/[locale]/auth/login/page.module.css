@@ -40,6 +40,24 @@
   color: var(--primary-soft-text);
 }
 
+.brandLock {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brandMark {
+  width: 28px;
+  height: 26px;
+  flex-shrink: 0;
+}
+
+.tagline {
+  margin: -8px 0 0;
+  color: var(--text-muted);
+  font-size: var(--type-small-size);
+}
+
 .heroTitle {
   margin: 0;
   font-size: var(--type-display-size);

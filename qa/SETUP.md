@@ -7,7 +7,7 @@ just `/qa-explore <charter>`.
 ## 1. Create the test Supabase project
 
 1. In the [Supabase dashboard](https://supabase.com/dashboard), create a new project
-   (free tier is fine), e.g. `clear-road-qa`.
+   (free tier is fine), e.g. `easy-in-theory-qa`.
 2. In **Authentication → Sign In / Providers**, make sure the **Email** provider is
    enabled. Nothing else is needed — the test user is created programmatically with a
    confirmed email, and login links are minted via the admin API (no emails are sent).
@@ -76,7 +76,7 @@ them.
 
 ## 4. Test user
 
-Nothing to do — `pnpm qa:mint` auto-creates `qa-user@clearroad.test` (with a confirmed
+Nothing to do — `pnpm qa:mint` auto-creates `qa-user@easy-in-theory.test` (with a confirmed
 email) on first run.
 
 ## 5. Smoke-check the setup
@@ -153,15 +153,15 @@ To start a run from a clean slate, wipe the test user's data in the SQL editor:
 
 ```sql
 delete from user_quiz_responses
-  where user_id in (select id from auth.users where email = 'qa-user@clearroad.test');
+  where user_id in (select id from auth.users where email = 'qa-user@easy-in-theory.test');
 delete from user_topic_progress
-  where user_id in (select id from auth.users where email = 'qa-user@clearroad.test');
+  where user_id in (select id from auth.users where email = 'qa-user@easy-in-theory.test');
 delete from user_stats
-  where user_id in (select id from auth.users where email = 'qa-user@clearroad.test');
+  where user_id in (select id from auth.users where email = 'qa-user@easy-in-theory.test');
 delete from user_medals
-  where user_id in (select id from auth.users where email = 'qa-user@clearroad.test');
+  where user_id in (select id from auth.users where email = 'qa-user@easy-in-theory.test');
 delete from user_schedule
-  where user_id in (select id from auth.users where email = 'qa-user@clearroad.test');
+  where user_id in (select id from auth.users where email = 'qa-user@easy-in-theory.test');
 ```
 
 Charters that assume prior progress (like `001-home-and-quiz`) work either way — they

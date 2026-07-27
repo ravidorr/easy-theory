@@ -13,7 +13,7 @@ environment:
   viewport: { width: 390, height: 844 }
   auth:
     required: true
-    user: "qa-user@clearroad.test"
+    user: "qa-user@easy-in-theory.test"
     mint: "pnpm qa:mint"
   data_assumptions: "Seeded test DB: 1273 questions, 277 signs, seeded topics; default theme is dark (theme cookie absent); the run flips the cookie via the UI and restores it at the end"
 timebox_minutes: 25

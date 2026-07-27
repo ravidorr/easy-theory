@@ -2,7 +2,7 @@
 
 ## Context
 
-We want an agent that does exploratory QA on ClearRoad: smoke-test core flows, explore UI
+We want an agent that does exploratory QA on Easy in theory: smoke-test core flows, explore UI
 states humans miss, catch obvious regressions (broken buttons, bad routing, blank states,
 console errors, layout issues), validate copy/RTL/a11y basics, and produce clear repro
 steps — as a **QA multiplier, not a replacement** for the existing Vitest suite. The #1

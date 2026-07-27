@@ -16,6 +16,19 @@ describe("locale messages", () => {
     expect(flattenKeys(ar).sort()).toEqual(flattenKeys(he).sort());
   });
 
+  it("defines the localized Easy in theory metadata", () => {
+    expect(he.Metadata).toMatchObject({
+      rootTitle: "קל בתיאוריה",
+      shortName: "קל בתיאוריה",
+      tagline: "מנה אחת בכל פעם, בלי להילחץ.",
+    });
+    expect(ar.Metadata).toMatchObject({
+      rootTitle: "سهل في النظرية",
+      shortName: "سهل في النظرية",
+      tagline: "جرعة واحدة كل مرة، بدون ضغط.",
+    });
+  });
+
   it("keeps duplicate quiz feedback copy aligned with the runtime messages", () => {
     for (const messages of [he, ar]) {
       expect(messages.Quiz.rewardTopicDone).toBe(messages.JS.Quiz.rewardTopicDone);

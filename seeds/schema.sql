@@ -1,4 +1,4 @@
--- ClearRoad · דרך ברורה — Supabase schema
+-- Easy in theory · קל בתיאוריה — Supabase schema
 -- Run this in the Supabase SQL editor before seeding data.
 
 -- ── Content tables (publicly readable) ───────────────────────
