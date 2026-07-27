@@ -3,6 +3,14 @@
 All notable changes to ClearRoad (דרך ברורה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.209] — 2026-07-27
+
+### Changed
+
+- Reworded Hebrew mock-exam readiness evidence as supportive coaching copy, rather than learner confidence.
+
+---
+
 ## [0.3.208] — 2026-07-27
 
 ### Fixed
