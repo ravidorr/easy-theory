@@ -537,7 +537,7 @@ describe("quiz.js – rejected answer persistence", () => {
     clickOption(0, "a");
     await flushAsyncWork();
 
-    expect(JSON.parse(sessionStorage.getItem("clearroad:stats")!)).toEqual({
+    expect(JSON.parse(sessionStorage.getItem("easyInTheory:stats")!)).toEqual({
       streak_days: 1,
       star_points: 10,
       savedAt: expect.any(Number),

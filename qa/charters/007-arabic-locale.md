@@ -13,7 +13,7 @@ environment:
   viewport: { width: 390, height: 844 }
   auth:
     required: true
-    user: "qa-user@clearroad.test"
+    user: "qa-user@easy-in-theory.test"
     mint: "pnpm qa:mint --next /ar"
   data_assumptions: "Seeded test DB with Arabic columns from migration 005 and Arabic content imported separately; migration 015 supplements question 15 in the signs topic. Arabic routes never fall back to Hebrew when an _ar value is missing"
 timebox_minutes: 25

@@ -35,12 +35,20 @@ export default async function LoginPage({
       : "/";
 
   const t = await getTranslations("Login");
+  const brand = await getTranslations("Metadata");
 
   return (
     <>
       <main className={styles.page}>
         <header className={styles.hero}>
-          <span className={styles.wordmark}>{t("heroH1")}</span>
+          <span className={styles.brandLock}>
+            <svg viewBox="0 0 76 72" aria-hidden="true" className={styles.brandMark}>
+              <path d="M12 20l16 16-16 16" fill="none" stroke="var(--accent)" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M34 20l16 16-16 16" fill="none" stroke="var(--primary)" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span className={styles.wordmark}>{t("heroH1")}</span>
+          </span>
+          <p className={styles.tagline}>{brand("tagline")}</p>
           <h1 className={styles.heroTitle}>
             {t("heroH2").split("\n").map((line, i) => (
               <span key={i}>

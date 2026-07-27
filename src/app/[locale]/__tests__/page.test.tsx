@@ -103,6 +103,8 @@ describe("HomePage", () => {
     const jsx = await HomePage();
     render(jsx);
     expect(screen.getByRole("heading", { level: 1, name: "publicTitle" })).toBeInTheDocument();
+    expect(screen.getByText("shortName")).toBeInTheDocument();
+    expect(screen.getByText("tagline")).toBeInTheDocument();
   });
 
   it("leads with one daily-task heading and a capped daily-progress line", async () => {

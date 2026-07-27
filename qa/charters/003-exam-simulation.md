@@ -12,7 +12,7 @@ environment:
   viewport: { width: 390, height: 844 }
   auth:
     required: true
-    user: "qa-user@clearroad.test"
+    user: "qa-user@easy-in-theory.test"
     mint: "pnpm qa:mint"
   data_assumptions: "Seeded test DB: 1273 questions, 277 signs, seeded topics; exam pulls 30 random questions; prior attempts may exist from earlier runs (history checks compare within-run)"
 timebox_minutes: 30

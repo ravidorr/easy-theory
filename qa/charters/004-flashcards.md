@@ -12,7 +12,7 @@ environment:
   viewport: { width: 390, height: 844 }
   auth:
     required: true
-    user: "qa-user@clearroad.test"
+    user: "qa-user@easy-in-theory.test"
     mint: "pnpm qa:mint"
   data_assumptions: "Seeded test DB: 277 signs with images under /signs/; flashcards page loads all of them into #fc-data; migration 014 adds user_srs_cards for persisted SM-2 grades"
 timebox_minutes: 20

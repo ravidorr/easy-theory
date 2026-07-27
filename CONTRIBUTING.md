@@ -1,6 +1,6 @@
-# Contributing to ClearRoad
+# Contributing to Easy in theory
 
-Thanks for your interest in contributing. ClearRoad is a Hebrew-first RTL driving theory study app built with Next.js 15.
+Thanks for your interest in contributing. Easy in theory is a Hebrew-first RTL driving theory study app built with Next.js 15.
 
 ## Getting started
 

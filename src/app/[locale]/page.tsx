@@ -64,6 +64,7 @@ export default async function HomePage() {
   noStore();
   const locale = await getLocale();
   const t = await getTranslations("Home");
+  const brand = await getTranslations("Metadata");
 
   const supabase = await createClient();
   const {
@@ -72,6 +73,16 @@ export default async function HomePage() {
   if (!user) {
     return (
       <main className={styles.page}>
+        <header className={styles.publicBrand}>
+          <span className={styles.brandLock}>
+            <svg viewBox="0 0 76 72" aria-hidden="true" className={styles.brandMark}>
+              <path d="M12 20l16 16-16 16" fill="none" stroke="var(--accent)" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M34 20l16 16-16 16" fill="none" stroke="var(--primary)" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span className={styles.brandName}>{brand("shortName")}</span>
+          </span>
+          <p className={styles.brandTagline}>{brand("tagline")}</p>
+        </header>
         <h1>{t("publicTitle")}</h1>
         <p className={styles.publicIntro}>{t("publicIntro")}</p>
         <Link href="/diagnostic" className="btn-primary">{t("publicDiagnostic")}</Link>

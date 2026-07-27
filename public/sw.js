@@ -1,5 +1,6 @@
 const VERSION = "v4";
-const CACHE_PREFIX = "clearroad-";
+const CACHE_PREFIX = "easy-in-theory-";
+const LEGACY_CACHE_PREFIX = "clearroad-";
 const STATIC_CACHE = `${CACHE_PREFIX}static-${VERSION}`;
 const PAGES_CACHE = `${CACHE_PREFIX}pages-${VERSION}`;
 const IMAGES_CACHE = `${CACHE_PREFIX}images-${VERSION}`;
@@ -79,7 +80,11 @@ self.addEventListener("activate", function (event) {
       .then((keys) =>
         Promise.all(
           keys
-            .filter((key) => key.startsWith(CACHE_PREFIX) && !ALL_CACHES.includes(key))
+            .filter(
+              (key) =>
+                (key.startsWith(CACHE_PREFIX) && !ALL_CACHES.includes(key)) ||
+                key.startsWith(LEGACY_CACHE_PREFIX)
+            )
             .map((key) => caches.delete(key))
         )
       )
@@ -132,7 +137,7 @@ self.addEventListener("fetch", function (event) {
 self.addEventListener("push", function (event) {
   const data = event.data ? event.data.json() : {};
   event.waitUntil(
-    self.registration.showNotification(data.title || "ClearRoad", {
+    self.registration.showNotification(data.title || "Easy in theory", {
       body: data.body || "",
       icon: "/icons/icon-192.png",
       badge: "/icons/icon-192.png",

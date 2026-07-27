@@ -12,8 +12,8 @@ environment:
   viewport: { width: 390, height: 844 }
   auth:
     required: true
-    user: "qa-fresh-<run-ts>@clearroad.test"
-    mint: "pnpm qa:mint --email qa-fresh-<run-ts>@clearroad.test"
+    user: "qa-fresh-<run-ts>@easy-in-theory.test"
+    mint: "pnpm qa:mint --email qa-fresh-<run-ts>@easy-in-theory.test"
   data_assumptions: "Seeded test DB (4 topics, 1273 questions, 277 signs); the minted user is auto-created and MUST be brand new — substitute a unique <run-ts> per run, never reuse an address"
 timebox_minutes: 25
 out_of_scope:
@@ -72,7 +72,7 @@ points 10) — the moment where empty-state code hands over to real-data code is
 classic breakage point. Keep it to one answer so the before/after is unambiguous.
 
 Freshness is the whole charter: mint with a UNIQUE email
-(`pnpm qa:mint --email qa-fresh-<run-ts>@clearroad.test`, substituting a timestamp).
+(`pnpm qa:mint --email qa-fresh-<run-ts>@easy-in-theory.test`, substituting a timestamp).
 In preflight, verify the pills actually show zero — if they do not, the user is not
 fresh; mint another rather than reporting false findings.
 

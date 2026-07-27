@@ -54,6 +54,20 @@ describe("stats-pills.js", () => {
 
   it("counts the pills up to the stored stats and clears the cache", () => {
     sessionStorage.setItem(
+      "easyInTheory:stats",
+      JSON.stringify({ streak_days: 4, star_points: 70 })
+    );
+
+    eval(statsPillsScript);
+    settle();
+
+    expect(statText("streak")).toBe("4");
+    expect(statText("points")).toBe("70");
+    expect(sessionStorage.getItem("easyInTheory:stats")).toBeNull();
+  });
+
+  it("consumes legacy stats once and clears both keys", () => {
+    sessionStorage.setItem(
       "clearroad:stats",
       JSON.stringify({ streak_days: 4, star_points: 70 })
     );
@@ -63,12 +77,13 @@ describe("stats-pills.js", () => {
 
     expect(statText("streak")).toBe("4");
     expect(statText("points")).toBe("70");
+    expect(sessionStorage.getItem("easyInTheory:stats")).toBeNull();
     expect(sessionStorage.getItem("clearroad:stats")).toBeNull();
   });
 
   it("eases from the rendered value, not from zero", () => {
     sessionStorage.setItem(
-      "clearroad:stats",
+      "easyInTheory:stats",
       JSON.stringify({ streak_days: 3, star_points: 1040 })
     );
 
@@ -96,7 +111,7 @@ describe("stats-pills.js", () => {
       <span data-stat="points">0</span>
     `;
     sessionStorage.setItem(
-      "clearroad:stats",
+      "easyInTheory:stats",
       JSON.stringify({ streak_days: 4, star_points: 70 })
     );
 
@@ -117,7 +132,7 @@ describe("stats-pills.js", () => {
       <span data-zero-note="points">earn points</span>
     `;
     sessionStorage.setItem(
-      "clearroad:stats",
+      "easyInTheory:stats",
       JSON.stringify({ streak_days: 1, star_points: 0 })
     );
 
@@ -131,7 +146,7 @@ describe("stats-pills.js", () => {
 
   it("skips stats that are missing or not numbers", () => {
     sessionStorage.setItem(
-      "clearroad:stats",
+      "easyInTheory:stats",
       JSON.stringify({ streak_days: "bad" })
     );
 
@@ -140,13 +155,13 @@ describe("stats-pills.js", () => {
 
     expect(statText("streak")).toBe("3");
     expect(statText("points")).toBe("40");
-    expect(sessionStorage.getItem("clearroad:stats")).toBeNull();
+    expect(sessionStorage.getItem("easyInTheory:stats")).toBeNull();
   });
 
   it("sets final values immediately under reduced motion", () => {
     vi.stubGlobal("matchMedia", vi.fn().mockReturnValue({ matches: true }));
     sessionStorage.setItem(
-      "clearroad:stats",
+      "easyInTheory:stats",
       JSON.stringify({ streak_days: 4, star_points: 70 })
     );
 
@@ -159,7 +174,7 @@ describe("stats-pills.js", () => {
   it("sets final values immediately when requestAnimationFrame is unavailable", () => {
     vi.stubGlobal("requestAnimationFrame", undefined);
     sessionStorage.setItem(
-      "clearroad:stats",
+      "easyInTheory:stats",
       JSON.stringify({ streak_days: 4, star_points: 70 })
     );
 
@@ -178,7 +193,7 @@ describe("stats-pills.js", () => {
     });
     try {
       sessionStorage.setItem(
-        "clearroad:stats",
+        "easyInTheory:stats",
         JSON.stringify({ streak_days: 4, star_points: 70 })
       );
 
@@ -186,7 +201,7 @@ describe("stats-pills.js", () => {
 
       expect(statText("streak")).toBe("4");
       expect(statText("points")).toBe("70");
-      expect(sessionStorage.getItem("clearroad:stats")).toBeNull();
+      expect(sessionStorage.getItem("easyInTheory:stats")).toBeNull();
     } finally {
       delete (document as { visibilityState?: string }).visibilityState;
     }
@@ -201,7 +216,7 @@ describe("stats-pills.js", () => {
       caption: "עוד 10 נקודות לרמה הבאה",
     });
     sessionStorage.setItem(
-      "clearroad:stats",
+      "easyInTheory:stats",
       JSON.stringify({ streak_days: 3, star_points: 130 })
     );
 
@@ -222,7 +237,7 @@ describe("stats-pills.js", () => {
       caption: "עוד 80 נקודות לרמה הבאה",
     });
     sessionStorage.setItem(
-      "clearroad:stats",
+      "easyInTheory:stats",
       JSON.stringify({ streak_days: 3, star_points: 90 })
     );
 
@@ -241,7 +256,7 @@ describe("stats-pills.js", () => {
       <div data-level-unit="60"><span data-stat="level">1</span></div>
     `;
     sessionStorage.setItem(
-      "clearroad:stats",
+      "easyInTheory:stats",
       JSON.stringify({ streak_days: 3, star_points: 130 })
     );
 
@@ -262,7 +277,7 @@ describe("stats-pills.js", () => {
       caption: "עוד 10 נקודות לרמה הבאה",
     });
     sessionStorage.setItem(
-      "clearroad:stats",
+      "easyInTheory:stats",
       JSON.stringify({ streak_days: 3, star_points: 130 })
     );
 
@@ -284,7 +299,7 @@ describe("stats-pills.js", () => {
         caption: "עוד 0 נקודות לרמה הבאה",
       });
       sessionStorage.setItem(
-        "clearroad:stats",
+        "easyInTheory:stats",
         JSON.stringify({ streak_days: 1, star_points: points })
       );
 
@@ -310,7 +325,7 @@ describe("stats-pills.js", () => {
       caption: "עוד 10 נקודות לרמה הבאה",
     });
     sessionStorage.setItem(
-      "clearroad:stats",
+      "easyInTheory:stats",
       JSON.stringify({ streak_days: 3, star_points: 130 })
     );
 

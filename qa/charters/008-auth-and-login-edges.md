@@ -13,9 +13,9 @@ environment:
   viewport: { width: 390, height: 844 }
   auth:
     required: false
-    user: "qa-user@clearroad.test"
+    user: "qa-user@easy-in-theory.test"
     mint: "pnpm qa:mint"
-  data_assumptions: "Seeded test DB; send-otp is rate-limited 3 per 15 min per email — use unique plus-tag emails (qa-user+<run-ts>@clearroad.test) so re-runs never inherit an exhausted limit"
+  data_assumptions: "Seeded test DB; send-otp is rate-limited 3 per 15 min per email — use unique plus-tag emails (qa-user+<run-ts>@easy-in-theory.test) so re-runs never inherit an exhausted limit"
 timebox_minutes: 25
 out_of_scope:
   - "Receiving real email / completing the magic link (authed flows use pnpm qa:mint instead)"
@@ -35,7 +35,7 @@ checks:
     oracle: "Submitting an invalid email (e.g. 'not-an-email') does not POST /api/auth/send-otp; a localized validation message appears; the form stays usable"
   - id: CHK-LOGIN-04
     desc: "Valid email sends the OTP and shows the sent banner"
-    oracle: "Submitting qa-user+<run-ts>@clearroad.test POSTs /api/auth/send-otp with 2xx; #sent-banner becomes visible with the localized sent copy; #login-error stays hidden"
+    oracle: "Submitting qa-user+<run-ts>@easy-in-theory.test POSTs /api/auth/send-otp with 2xx; #sent-banner becomes visible with the localized sent copy; #login-error stays hidden"
   - id: CHK-LOGIN-05
     desc: "Resend is throttled client-side"
     oracle: "After sending, #resend-btn is disabled or refuses action for ~60s with feedback in #resend-msg; after the window it allows one resend which POSTs send-otp again"
@@ -69,7 +69,7 @@ magic-link completion is proven separately by the mint script, so focus on every
 around it.
 
 Sequencing matters for rate limits: send-otp allows 3 sends per 15 minutes per email.
-Use a fresh `qa-user+<run-ts>@clearroad.test` address for the happy-path checks, and a
+Use a fresh `qa-user+<run-ts>@easy-in-theory.test` address for the happy-path checks, and a
 second dedicated plus-tag address for CHK-LOGIN-08 (which intentionally exhausts the
 limit). Never burn the limit on the plain qa-user address other runs depend on.
 

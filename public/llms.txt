@@ -1,4 +1,4 @@
-# ClearRoad (דרך ברורה)
+# Easy in theory (קל בתיאוריה)
 
 > Hebrew-first driving theory study app for the Israeli car-B license exam, designed for 16-year-olds.
 
@@ -9,6 +9,6 @@
 - [Resources](/resources): Additional study resources
 
 ## About
-ClearRoad helps Israeli learners prepare for the official car-B driving theory exam. The interface is fully in Hebrew (RTL) with a warm, encouraging feminine tone throughout. Progress tracking, streaks, star points, and a weekly study schedule are built in.
+Easy in theory helps Israeli learners prepare for the official car-B driving theory exam. The interface is fully in Hebrew (RTL) with a warm, encouraging feminine tone throughout. Progress tracking, streaks, star points, and a weekly study schedule are built in.
 
 Authentication is magic-link (email only, no password). Most content requires a free account.

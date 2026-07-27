@@ -17,7 +17,7 @@ The skill does everything itself:
    points at the production Supabase project), starts the QA dev server on port 3100 if
    it's down, and verifies the seeded data (`pnpm qa:mint --check`).
 2. **Auth** — verifies the unauthed login redirect, then mints a one-time login link for
-   `qa-user@clearroad.test` via the Supabase admin API (no email involved) and logs the
+   `qa-user@easy-in-theory.test` via the Supabase admin API (no email involved) and logs the
    browser in.
 3. **Execution** — works through every charter check in persona, capturing screenshots,
    console errors, and failed network requests as evidence, then spends the charter's

@@ -1,6 +1,6 @@
 {
-  "name": "clear-road",
-  "version": "0.3.211",
+  "name": "easy-in-theory",
+  "version": "0.3.212",
   "private": true,
   "scripts": {
     "dev": "next dev",

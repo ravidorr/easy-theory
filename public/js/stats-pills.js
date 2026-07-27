@@ -105,7 +105,10 @@
   }
 
   try {
-    var raw = sessionStorage.getItem("clearroad:stats");
+    var statsKey = "easyInTheory:stats";
+    var legacyStatsKey = "clearroad:stats";
+    var raw = sessionStorage.getItem(statsKey);
+    if (!raw) raw = sessionStorage.getItem(legacyStatsKey);
     if (!raw) return;
     var stats = JSON.parse(raw);
     if (typeof stats.streak_days === "number") {
@@ -115,6 +118,7 @@
       animateStat("points", stats.star_points);
       updateLevelTiles(stats.star_points);
     }
-    sessionStorage.removeItem("clearroad:stats");
+    sessionStorage.removeItem(statsKey);
+    sessionStorage.removeItem(legacyStatsKey);
   } catch {}
 })();
