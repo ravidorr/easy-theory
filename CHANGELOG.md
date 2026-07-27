@@ -7,7 +7,7 @@ One version bump and one entry per PR (enforced by the pre-push hook); individua
 
 ### Fixed
 
-- Removed the inert practice-answer confidence selector and its unused persistence.
+- Removed the practice-answer confidence selector and its persistence. Correct answers now always advance SRS scheduling.
 
 ---
 
