@@ -5,6 +5,8 @@ import { createClient } from "@/lib/supabase";
 import { getTopics } from "@/lib/db";
 import { localizedRecordField } from "@/lib/content-locale";
 import { getLocale, getTranslations } from "next-intl/server";
+import { Icon } from "@/components/Icon";
+import styles from "./page.module.css";
 
 export default async function PracticePage() {
   const supabase = await createClient();
@@ -15,9 +17,29 @@ export default async function PracticePage() {
     getTranslations("Practice"),
     getLocale(),
   ]);
-  return <><main className="simple-page"><h1>{t("title")}</h1><p>{t("intro")}</p><Link className="pressable-row" href="/mistakes">{t("reviewMistakes")}</Link>{topics.map((topic) => (
-    <Link className="pressable-row" key={topic.id} href={`/topics/${topic.slug}`}>
-      {localizedRecordField(locale, topic, "name_he", "name_ar")}
-    </Link>
-  ))}</main><TabBar active="practice" /></>;
+  return <>
+    <main className={styles.page}>
+      <header className={styles.header}>
+        <h1>{t("title")}</h1>
+        <p>{t("intro")}</p>
+      </header>
+
+      <Link className={`pressable-card ${styles.reviewCard}`} href="/mistakes">
+        <span className={styles.reviewIcon}><Icon name="warning" size={22} /></span>
+        <span className={styles.reviewLabel}>{t("reviewMistakes")}</span>
+        <Icon name="chevron-left" size={20} className={styles.chevron} />
+      </Link>
+
+      <div className={styles.topicList}>
+        {topics.map((topic) => (
+          <Link className={`pressable-row ${styles.topicRow}`} key={topic.id} href={`/topics/${topic.slug}`}>
+            <span className={styles.topicIcon}><Icon name="cards" size={22} /></span>
+            <span className={styles.topicLabel}>{localizedRecordField(locale, topic, "name_he", "name_ar")}</span>
+            <Icon name="chevron-left" size={20} className={styles.chevron} />
+          </Link>
+        ))}
+      </div>
+    </main>
+    <TabBar active="practice" />
+  </>;
 }
