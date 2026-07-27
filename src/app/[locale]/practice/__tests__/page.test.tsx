@@ -9,7 +9,10 @@ vi.mock("next/navigation", () => ({ redirect: vi.fn(() => { throw new Error("red
 vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
 vi.mock("@/lib/db", () => ({ getTopics: vi.fn() }));
 vi.mock("@/components/TabBar", () => ({ TabBar: () => React.createElement("div", { "data-testid": "tabbar" }) }));
-vi.mock("next/link", () => ({ default: ({ href, children }: React.ComponentProps<"a">) => React.createElement("a", { href }, children) }));
+vi.mock("next/link", () => ({
+  default: ({ href, children, ...props }: React.ComponentProps<"a">) =>
+    React.createElement("a", { href, ...props }, children),
+}));
 vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn().mockResolvedValue((key: string) => key),
   getLocale: vi.fn().mockResolvedValue("he"),
@@ -35,8 +38,13 @@ describe("PracticePage", () => {
 
   it("renders each practice topic and its tab bar", async () => {
     const { container } = render(await PracticePage());
-    expect(screen.getByRole("link", { name: "reviewMistakes" })).toHaveAttribute("href", "/mistakes");
-    expect(screen.getByRole("link", { name: "תמרורים" })).toHaveAttribute("href", "/topics/signs");
+    const reviewLink = screen.getByRole("link", { name: "reviewMistakes" });
+    const topicLink = screen.getByRole("link", { name: "תמרורים" });
+
+    expect(reviewLink).toHaveAttribute("href", "/mistakes");
+    expect(reviewLink.querySelector("svg")).toBeTruthy();
+    expect(topicLink).toHaveAttribute("href", "/topics/signs");
+    expect(topicLink.querySelector("svg")).toBeTruthy();
     expect(container.querySelector('[data-testid="tabbar"]')).toBeTruthy();
   });
 

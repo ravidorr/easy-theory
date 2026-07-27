@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.215] — 2026-07-27
+
+### Fixed
+
+- Restored the Practice topic picker with visible, accessible topic rows and a distinct mistake-review action.
+
+---
+
 ## [0.3.214] — 2026-07-27
 
 ### Changed

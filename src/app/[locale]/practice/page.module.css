@@ -1,0 +1,109 @@
+.page {
+  min-height: 100vh;
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 24px 20px calc(88px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.header h1 {
+  font-size: var(--type-h1-size);
+  font-weight: var(--type-h1-weight);
+  line-height: var(--line-tight);
+  color: var(--text);
+}
+
+.header p {
+  color: var(--text-muted);
+  font-size: var(--type-body-size);
+  line-height: var(--line-normal);
+}
+
+.reviewCard,
+.topicRow {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--text);
+}
+
+.reviewCard {
+  min-height: 76px;
+  padding: 16px;
+  background: var(--primary-soft);
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+}
+
+.reviewIcon,
+.topicIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.reviewIcon {
+  background: var(--primary);
+  color: var(--text-on-primary);
+}
+
+.reviewLabel,
+.topicLabel {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--type-body-size);
+  font-weight: 700;
+}
+
+.topicList {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.topicRow {
+  min-height: 76px;
+  padding: 16px;
+}
+
+.topicRow + .topicRow {
+  border-top: 1px solid var(--border);
+}
+
+.topicIcon {
+  background: var(--surface-2);
+  color: var(--primary-soft-text);
+}
+
+.topicLabel {
+  font-weight: 600;
+}
+
+.chevron {
+  color: var(--text-faint);
+  flex-shrink: 0;
+}
+
+.reviewCard:focus-visible,
+.topicRow:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 3px;
+}
