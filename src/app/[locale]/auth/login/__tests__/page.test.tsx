@@ -1,7 +1,9 @@
-import { describe, it, expect, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import LoginPage, { generateMetadata } from "../page";
+
+const mockCookies = vi.hoisted(() => vi.fn());
 
 vi.mock("next/image", () => ({
   default: ({ src, alt, className }: { src: string; alt?: string; className?: string }) =>
@@ -10,17 +12,27 @@ vi.mock("next/image", () => ({
 vi.mock("next/script", () => ({
   default: () => React.createElement("div", null),
 }));
+vi.mock("next/headers", () => ({
+  cookies: mockCookies,
+}));
 vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn().mockResolvedValue((key: string) => key),
   getLocale: vi.fn().mockResolvedValue("he"),
 }));
 
-async function renderPage(next?: string) {
-  const jsx = await LoginPage({ searchParams: Promise.resolve(next ? { next } : {}) });
+async function renderPage(next?: string, locale = "he") {
+  const jsx = await LoginPage({
+    params: Promise.resolve({ locale }),
+    searchParams: Promise.resolve(next ? { next } : {}),
+  });
   return render(jsx);
 }
 
 describe("LoginPage", () => {
+  beforeEach(() => {
+    mockCookies.mockResolvedValue({ get: () => undefined });
+  });
+
   it("renders the email input", async () => {
     await renderPage();
     const emailInput = screen.getByRole("textbox");
@@ -80,7 +92,10 @@ describe("LoginPage", () => {
   });
 
   it("shows the link-expired alert when error=1", async () => {
-    const jsx = await LoginPage({ searchParams: Promise.resolve({ error: "1" }) });
+    const jsx = await LoginPage({
+      params: Promise.resolve({ locale: "he" }),
+      searchParams: Promise.resolve({ error: "1" }),
+    });
     render(jsx);
     expect(screen.getByText("linkExpired")).toBeInTheDocument();
   });
@@ -94,6 +109,36 @@ describe("LoginPage", () => {
     await renderPage();
     expect(screen.getByText("trustBadge")).toBeInTheDocument();
     expect(screen.getByAltText("screenshotHomeAlt")).toBeInTheDocument();
+  });
+
+  it("uses screenshot assets for the current locale", async () => {
+    const { unmount } = await renderPage();
+    for (const screenName of ["Home", "Quiz", "Cards"] as const) {
+      expect(screen.getByAltText(`screenshot${screenName}Alt`)).toHaveAttribute(
+        "src",
+        `/landing/screenshot-${screenName.toLowerCase()}-he-dark.png`
+      );
+    }
+    unmount();
+
+    await renderPage(undefined, "ar");
+    for (const screenName of ["Home", "Quiz", "Cards"] as const) {
+      expect(screen.getByAltText(`screenshot${screenName}Alt`)).toHaveAttribute(
+        "src",
+        `/landing/screenshot-${screenName.toLowerCase()}-ar-dark.png`
+      );
+    }
+  });
+
+  it("uses light screenshot assets when the light theme is active", async () => {
+    mockCookies.mockResolvedValue({ get: () => ({ value: "light" }) });
+    await renderPage(undefined, "ar");
+    for (const screenName of ["Home", "Quiz", "Cards"] as const) {
+      expect(screen.getByAltText(`screenshot${screenName}Alt`)).toHaveAttribute(
+        "src",
+        `/landing/screenshot-${screenName.toLowerCase()}-ar-light.png`
+      );
+    }
   });
 
   it("renders the three outcome-first feature cards, plan first", async () => {

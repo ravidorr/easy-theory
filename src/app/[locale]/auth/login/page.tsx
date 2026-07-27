@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import Script from "next/script";
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
@@ -24,15 +25,26 @@ export async function generateMetadata({
 }
 
 export default async function LoginPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<{ next?: string; error?: string }>;
 }) {
-  const { next, error } = await searchParams;
+  const [{ locale }, { next, error }, cookieStore] = await Promise.all([
+    params,
+    searchParams,
+    cookies(),
+  ]);
   const safeNext =
     typeof next === "string" && next.startsWith("/") && !next.startsWith("//")
       ? next
       : "/";
+  const screenshotLocale = locale === "ar" ? "ar" : "he";
+  const screenshotTheme =
+    cookieStore.get("theme")?.value === "light" ? "light" : "dark";
+  const screenshotSrc = (screen: "home" | "quiz" | "cards") =>
+    `/landing/screenshot-${screen}-${screenshotLocale}-${screenshotTheme}.png`;
 
   const t = await getTranslations("Login");
   const brand = await getTranslations("Metadata");
@@ -137,7 +149,7 @@ export default async function LoginPage({
           </div>
           <div className={styles.phoneFrame}>
             <Image
-              src="/landing/screenshot-home.png"
+              src={screenshotSrc("home")}
               alt={t("screenshotHomeAlt")}
               width={230}
               height={400}
@@ -188,7 +200,7 @@ export default async function LoginPage({
           <div className={styles.peekRow}>
             <div className={styles.phoneFrameSmall}>
               <Image
-                src="/landing/screenshot-quiz.png"
+                src={screenshotSrc("quiz")}
                 alt={t("screenshotQuizAlt")}
                 width={170}
                 height={300}
@@ -197,7 +209,7 @@ export default async function LoginPage({
             </div>
             <div className={styles.phoneFrameSmall}>
               <Image
-                src="/landing/screenshot-cards.png"
+                src={screenshotSrc("cards")}
                 alt={t("screenshotCardsAlt")}
                 width={170}
                 height={300}
