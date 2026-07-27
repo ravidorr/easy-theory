@@ -67,12 +67,6 @@
 
   let legacyMigrationWritten = false;
 
-  function normalizeConfidence(confidence) {
-    return ["sure", "unsure", "guessed"].includes(confidence)
-      ? confidence
-      : "sure";
-  }
-
   function migrateLegacySubmission(submission, acknowledged) {
     if (!submission || typeof submission !== "object") return null;
     const slide = Array.from(container.querySelectorAll(".quiz-slide")).find(
@@ -85,7 +79,6 @@
       selectedOption: submission.selectedOption,
       isCorrect:
         Boolean(slide) && submission.selectedOption === slide.dataset.correct,
-      confidence: normalizeConfidence(submission.confidence),
       idempotencyKey: submission.idempotencyKey,
     };
     if (acknowledged) {
@@ -293,7 +286,6 @@
   }
 
   let selectedOption = null;
-  let selectedConfidence = "sure";
   let confirmed = false;
   let answerPersistence = "idle";
   let answerFeedback = "";
@@ -503,7 +495,6 @@
     });
     updateProgress(index);
     selectedOption = null;
-    selectedConfidence = "sure";
     confirmed = false;
     answerPersistence = "idle";
     answerFeedback = "";
@@ -513,21 +504,6 @@
       actionBtn.textContent = t.nextBtn || "לשאלה הבאה";
     }
     if (rewardMessage) rewardMessage.textContent = "";
-    const activeSlide = slides[index];
-    const activeSubmission =
-      (pendingSubmission && pendingSubmission.questionId === activeSlide?.dataset.questionId
-        ? pendingSubmission
-        : null) ||
-      (acknowledgedSubmission && acknowledgedSubmission.questionId === activeSlide?.dataset.questionId
-        ? acknowledgedSubmission
-        : null);
-    selectedConfidence = normalizeConfidence(activeSubmission?.confidence);
-    activeSlide?.querySelectorAll(".quiz-confidence").forEach(function (button) {
-      button.setAttribute(
-        "aria-pressed",
-        button.dataset.confidence === selectedConfidence ? "true" : "false"
-      );
-    });
   }
 
   function lockOptions(slide) {
@@ -696,13 +672,9 @@
         questionId: questionId,
         selectedOption: selectedOption,
         isCorrect: selectedOption === slide.dataset.correct,
-        confidence: normalizeConfidence(selectedConfidence),
         idempotencyKey: submissionSessionKey + ":" + questionId,
       };
     }
-    // Resumes written before confidence tracking did not contain this field.
-    // Canonicalize them before retrying so the retry payload and saved state agree.
-    pendingSubmission.confidence = normalizeConfidence(pendingSubmission.confidence);
     acknowledgedSubmission = null;
     persistResume();
     const idempotencyKey = pendingSubmission.idempotencyKey;
@@ -712,7 +684,7 @@
       request = fetch("/api/quiz", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question_id: questionId, selected_option: selectedOption, confidence: pendingSubmission.confidence, topic_id: topicId, session_id: sessionId, idempotency_key: idempotencyKey }),
+        body: JSON.stringify({ question_id: questionId, selected_option: selectedOption, topic_id: topicId, session_id: sessionId, idempotency_key: idempotencyKey }),
       });
     } catch {
       if (!scheduleAutoRetry(slide)) {
@@ -764,7 +736,6 @@
         questionId: acknowledged.questionId,
         selectedOption: acknowledged.selectedOption,
         isCorrect: acknowledged.isCorrect,
-        confidence: acknowledged.confidence,
         idempotencyKey: acknowledged.idempotencyKey,
         topicCompleted: data.topic_completed === true,
       };
@@ -816,7 +787,6 @@
     }
 
     selectedOption = restoredSubmission.selectedOption;
-    selectedConfidence = normalizeConfidence(restoredSubmission.confidence);
     confirmed = true;
     lockOptions(slide);
     showAnswerFeedback(slide, false, restoredSubmission.isCorrect);
@@ -887,15 +857,6 @@
   slides.forEach(function (slide) {
     slide.querySelectorAll(".quiz-option").forEach(function (btn) {
       btn.addEventListener("click", handleOptionClick);
-    });
-    slide.querySelectorAll(".quiz-confidence").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        if (confirmed) return;
-        selectedConfidence = btn.dataset.confidence || "sure";
-        slide.querySelectorAll(".quiz-confidence").forEach(function (choice) {
-          choice.setAttribute("aria-pressed", choice === btn ? "true" : "false");
-        });
-      });
     });
   });
 

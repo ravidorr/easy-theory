@@ -163,21 +163,6 @@
   gap: 10px;
 }
 
-.confidence {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-.confidence legend {
-  width: 100%;
-  color: var(--text-muted);
-  font-size: var(--type-small-size);
-}
-
 .optionSignContent {
   display: flex;
   align-items: center;

@@ -292,11 +292,11 @@ describe("POST /api/quiz", () => {
     });
   });
 
-  it("advances the question's SRS card after a correct answer", async () => {
+  it("advances the question's SRS card after a correct answer, ignoring obsolete confidence", async () => {
     const client = buildClient({ result: { ...storedResult, is_correct: true } });
     mockCreateClient.mockResolvedValue(client as never);
 
-    const response = await POST(makeRequest(defaultBody));
+    const response = await POST(makeRequest({ ...defaultBody, confidence: "guessed" }));
 
     expect(response.status).toBe(200);
     expect(client.from).toHaveBeenCalledWith("user_srs_cards");

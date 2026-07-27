@@ -28,14 +28,6 @@ function slideHTML(index: number, correct: string) {
         </button>`
         )
         .join("")}
-      <div class="quiz-confidence-group">
-        ${["sure", "unsure", "guessed"]
-          .map(
-            (confidence) =>
-              `<button class="quiz-confidence" data-confidence="${confidence}" aria-pressed="${confidence === "sure"}">${confidence}</button>`
-          )
-          .join("")}
-      </div>
     </div>
   `;
 }
@@ -124,15 +116,6 @@ function slideDisplay(index: number) {
 function clickOption(slideIndex: number, option: string) {
   const slide = document.querySelectorAll(".quiz-slide")[slideIndex]!;
   (slide.querySelector(`[data-option="${option}"]`) as HTMLButtonElement).click();
-}
-
-function clickConfidence(slideIndex: number, confidence: string) {
-  const slide = document.querySelectorAll(".quiz-slide")[slideIndex]!;
-  (
-    slide.querySelector(
-      `[data-confidence="${confidence}"]`
-    ) as HTMLButtonElement
-  ).click();
 }
 
 function clickAction() {
@@ -1435,11 +1418,11 @@ describe("quiz.js – resume", () => {
     vi.stubGlobal("fetch", fetchMock);
     setupDOM({ userId: "u1" });
 
-    clickConfidence(0, "guessed");
     clickOption(0, "a");
     await flushAsyncWork();
 
     const firstBody = JSON.parse(fetchCalls("/api/quiz")[0][1].body);
+    expect(firstBody).not.toHaveProperty("confidence");
     const pendingState = JSON.parse(localStorage.getItem(KEY)!);
     expect(pendingState).toMatchObject({
       i: 0,
@@ -1448,7 +1431,6 @@ describe("quiz.js – resume", () => {
       pendingSubmission: {
         questionId: "q1",
         selectedOption: "a",
-        confidence: "guessed",
         idempotencyKey: firstBody.idempotency_key,
       },
     });
@@ -1458,17 +1440,12 @@ describe("quiz.js – resume", () => {
     expect(scoreText()).toBe("10");
     expect(actionButton().textContent).toBe("ננסה שוב");
     expect(actionButton().disabled).toBe(false);
-    expect(
-      document.querySelector('[data-confidence="guessed"]')?.getAttribute(
-        "aria-pressed"
-      )
-    ).toBe("true");
     clickAction();
     await flushAsyncWork();
 
     const secondBody = JSON.parse(fetchCalls("/api/quiz")[1][1].body);
     expect(secondBody.selected_option).toBe(firstBody.selected_option);
-    expect(secondBody.confidence).toBe("guessed");
+    expect(secondBody).not.toHaveProperty("confidence");
     expect(secondBody.idempotency_key).toBe(firstBody.idempotency_key);
     expect(scoreText()).toBe("10");
     expect(actionButton().textContent).toBe("לשאלה הבאה");
@@ -1557,6 +1534,7 @@ describe("quiz.js – resume", () => {
         acknowledgedSubmission: {
           questionId: "q1",
           selectedOption: "a",
+          confidence: "guessed",
           idempotencyKey: "legacy-session:q1",
           feedbackMessage: "legacy rendered feedback",
         },
@@ -1570,7 +1548,6 @@ describe("quiz.js – resume", () => {
       questionId: "q1",
       selectedOption: "a",
       isCorrect: true,
-      confidence: "sure",
       idempotencyKey: "legacy-session:q1",
       topicCompleted: false,
     });

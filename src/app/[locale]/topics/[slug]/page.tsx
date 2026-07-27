@@ -145,20 +145,6 @@ function QuestionSlide({
           );
         })}
       </div>
-      <fieldset className={styles.confidence}>
-        <legend>{t("confidenceLabel")}</legend>
-        {(["sure", "unsure", "guessed"] as const).map((confidence) => (
-          <button
-            key={confidence}
-            type="button"
-            className="quiz-confidence"
-            data-confidence={confidence}
-            aria-pressed={confidence === "sure" ? "true" : "false"}
-          >
-            {t(`confidence${confidence[0].toUpperCase()}${confidence.slice(1)}`)}
-          </button>
-        ))}
-      </fieldset>
     </div>
   );
 }
