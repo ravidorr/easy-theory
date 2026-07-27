@@ -267,6 +267,12 @@ describe("MorePage", () => {
     expect(toggle).toHaveAttribute("aria-checked", "true");
     expect(toggle?.tagName).toBe("BUTTON");
     expect(toggle).toHaveAttribute("type", "button");
+    const delay = container.querySelector("#auto-advance-delay") as HTMLInputElement;
+    expect(delay.value).toBe("1125");
+    expect(delay.disabled).toBe(false);
+    expect(delay).toHaveAttribute("min", "750");
+    expect(delay).toHaveAttribute("max", "3000");
+    expect(delay).toHaveAttribute("step", "125");
   });
 
   it("uses the shared destructive button for logout", async () => {
@@ -289,6 +295,29 @@ describe("MorePage", () => {
       "aria-checked",
       "true"
     );
+    expect(container.querySelector("#auto-advance-delay")).toBeDisabled();
+  });
+
+  it("renders a valid saved auto-advance delay", async () => {
+    mockCookies.mockResolvedValue({
+      get: vi.fn((name: string) =>
+        name === "quiz-auto-advance-delay" ? { value: "2000" } : undefined
+      ),
+    } as never);
+    const jsx = await MorePage();
+    const { container } = render(jsx);
+    expect((container.querySelector("#auto-advance-delay") as HTMLInputElement).value).toBe("2000");
+  });
+
+  it("falls back to the default for an invalid saved auto-advance delay", async () => {
+    mockCookies.mockResolvedValue({
+      get: vi.fn((name: string) =>
+        name === "quiz-auto-advance-delay" ? { value: "1100" } : undefined
+      ),
+    } as never);
+    const jsx = await MorePage();
+    const { container } = render(jsx);
+    expect((container.querySelector("#auto-advance-delay") as HTMLInputElement).value).toBe("1125");
   });
 
   it("formats earned-medal dates with the ar-IL locale for ar", async () => {

@@ -9,7 +9,7 @@ const moreScript = readFileSync(
   "utf-8"
 );
 
-function setupDOM(theme?: string, autoAdvanceChecked = "true") {
+function setupDOM(theme?: string, autoAdvanceChecked = "true", autoAdvanceDelay = "1125") {
   if (theme === undefined) {
     delete document.documentElement.dataset.theme;
   } else {
@@ -19,6 +19,8 @@ function setupDOM(theme?: string, autoAdvanceChecked = "true") {
   document.body.innerHTML = `
     <button id="dark-mode-toggle" role="switch"><span></span></button>
     <button id="auto-advance-toggle" role="switch" aria-checked="${autoAdvanceChecked}"><span></span></button>
+    <input id="auto-advance-delay" type="range" min="750" max="3000" step="125" value="${autoAdvanceDelay}">
+    <output id="auto-advance-delay-value" data-template="{seconds} seconds"></output>
     <button id="logout-btn"></button>
   `;
   eval(moreScript);
@@ -40,6 +42,14 @@ function autoAdvanceKnob() {
   return autoAdvanceToggle().querySelector("span") as HTMLSpanElement;
 }
 
+function autoAdvanceDelayInput() {
+  return document.getElementById("auto-advance-delay") as HTMLInputElement;
+}
+
+function autoAdvanceDelayValue() {
+  return document.getElementById("auto-advance-delay-value") as HTMLOutputElement;
+}
+
 function stubLocation() {
   const loc = { href: "" };
   Object.defineProperty(window, "location", {
@@ -55,6 +65,7 @@ describe("more.js", () => {
     delete document.documentElement.dataset.theme;
     document.cookie = "theme=; path=/; max-age=0";
     document.cookie = "quiz-auto-advance=; path=/; max-age=0";
+    document.cookie = "quiz-auto-advance-delay=; path=/; max-age=0";
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
@@ -148,6 +159,29 @@ describe("more.js", () => {
     setupDOM("dark");
 
     expect(autoAdvanceToggle().getAttribute("aria-checked")).toBe("true");
+  });
+
+  it("updates and persists the auto-advance delay", () => {
+    setupDOM("dark");
+    autoAdvanceDelayInput().value = "2000";
+    autoAdvanceDelayInput().dispatchEvent(new Event("input", { bubbles: true }));
+
+    expect(document.cookie).toContain("quiz-auto-advance-delay=2000");
+    expect(autoAdvanceDelayValue().textContent).toBe("2 seconds");
+  });
+
+  it("initializes the default auto-advance delay value", () => {
+    setupDOM("dark");
+    expect(autoAdvanceDelayInput().value).toBe("1125");
+    expect(autoAdvanceDelayValue().textContent).toBe("1.125 seconds");
+  });
+
+  it("disables the delay slider when auto-advance is turned off", () => {
+    setupDOM("dark");
+    autoAdvanceToggle().click();
+    expect(autoAdvanceDelayInput().disabled).toBe(true);
+    autoAdvanceToggle().click();
+    expect(autoAdvanceDelayInput().disabled).toBe(false);
   });
 
   it("logs out via the API and redirects to the login page", async () => {

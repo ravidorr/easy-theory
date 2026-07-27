@@ -257,6 +257,41 @@
   color: var(--text);
 }
 
+.autoAdvanceDelayRow {
+  align-items: flex-start;
+}
+
+.autoAdvanceDelayControl {
+  flex: 1;
+  min-width: 0;
+}
+
+.autoAdvanceDelayInput {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: var(--type-caption-size);
+}
+
+.autoAdvanceDelayInput input {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--primary);
+}
+
+.autoAdvanceDelayInput input:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.autoAdvanceDelayValue {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: var(--type-caption-size);
+}
+
 .toggle {
   width: 46px;
   height: 28px;

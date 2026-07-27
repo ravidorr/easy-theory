@@ -11,7 +11,7 @@ const medalScript = readFileSync(
   "utf-8"
 );
 const TOUCH_DOUBLE_TAP_SUPPRESSION_MS = 300;
-const AUTO_ADVANCE_DELAY_MS = 900;
+const AUTO_ADVANCE_DELAY_MS = 1125;
 const AUTO_RETRY_DELAY_MS = 1200;
 const FINAL_EXIT_MS = 240;
 const COUNT_UP_MS = 700;
@@ -214,12 +214,13 @@ async function flushAsyncWork() {
   await Promise.resolve();
 }
 
-// Fake timers keep the 900ms auto-advance countdown deterministic and stop
+// Fake timers keep the auto-advance countdown deterministic and stop
 // timers armed in one test from firing during a later one.
 function resetTestState() {
   localStorage.clear();
   sessionStorage.clear();
   document.cookie = "quiz-auto-advance=; path=/; max-age=0";
+  document.cookie = "quiz-auto-advance-delay=; path=/; max-age=0";
   vi.useFakeTimers();
 }
 
@@ -229,6 +230,7 @@ function restoreTestState() {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
   document.cookie = "quiz-auto-advance=; path=/; max-age=0";
+  document.cookie = "quiz-auto-advance-delay=; path=/; max-age=0";
 }
 
 describe("quiz.js – rejected answer persistence", () => {
@@ -711,6 +713,30 @@ describe("quiz.js – auto-advance", () => {
 
     expect(slideDisplay(0)).toBe("flex");
     vi.advanceTimersByTime(AUTO_ADVANCE_DELAY_MS);
+    expect(slideDisplay(1)).toBe("flex");
+  });
+
+  it("uses a valid saved auto-advance delay", async () => {
+    document.cookie = "quiz-auto-advance-delay=2000; path=/";
+    setupDOM();
+    clickOption(0, "a");
+    await flushAsyncWork();
+
+    vi.advanceTimersByTime(1999);
+    expect(slideDisplay(0)).toBe("flex");
+    vi.advanceTimersByTime(1);
+    expect(slideDisplay(1)).toBe("flex");
+  });
+
+  it("falls back to the default for an invalid auto-advance delay", async () => {
+    document.cookie = "quiz-auto-advance-delay=1100; path=/";
+    setupDOM();
+    clickOption(0, "a");
+    await flushAsyncWork();
+
+    vi.advanceTimersByTime(AUTO_ADVANCE_DELAY_MS - 1);
+    expect(slideDisplay(0)).toBe("flex");
+    vi.advanceTimersByTime(1);
     expect(slideDisplay(1)).toBe("flex");
   });
 

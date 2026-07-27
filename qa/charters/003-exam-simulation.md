@@ -35,7 +35,7 @@ checks:
     oracle: "#exam-prev is disabled on question 1; #exam-prev/#exam-next preserve selections; #exam-answered increments once per distinct answered question"
   - id: CHK-EXAM-03A
     desc: "Auto-advance respects the More-page preference"
-    oracle: "With quiz-auto-advance on (default), a selected option visibly enters its selected state then advances after about 900ms; after turning it off in /he/more, the selection remains on the current question until #exam-next is used"
+    oracle: "With quiz-auto-advance on, a selected option visibly enters its selected state then advances after the delay selected in /he/more (1125ms by default); after turning it off, the selection remains on the current question until #exam-next is used"
   - id: CHK-EXAM-03B
     desc: "Shared navigation remains visible during the run"
     oracle: "The fixed TabBar is visible and its links are usable; no redundant top close/X control appears"
@@ -90,7 +90,8 @@ Route hints:
   answers up front; verify the DOM to prove it.
 - The shared TabBar remains visible during the run. The More-page auto-advance
   preference is stored in the `quiz-auto-advance` cookie and defaults to on;
-  when enabled, exam selections advance after 900ms.
+  its `quiz-auto-advance-delay` companion defaults to 1125ms and accepts
+  750–3000ms in 125ms steps.
 - Copy sources: `messages/he.json`, namespaces `Exam`, `JS.Exam`.
 - Meaningful-step screenshots: landing with rules, first question, answered-counter
   mid-run, unanswered-submit confirm dialog, result screen, answer-review mode,

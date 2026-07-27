@@ -10,6 +10,7 @@ const medalScript = readFileSync(
   resolve(__dirname, "../../../../../../public/js/medal.js"),
   "utf-8"
 );
+const AUTO_ADVANCE_DELAY_MS = 1125;
 
 function slideHTML(index: number) {
   return `
@@ -140,6 +141,7 @@ describe("exam.js – answering and navigation", () => {
     vi.useRealTimers();
     vi.unstubAllGlobals();
     document.cookie = "quiz-auto-advance=; path=/; max-age=0";
+    document.cookie = "quiz-auto-advance-delay=; path=/; max-age=0";
   });
 
   it("marks the clicked option as selected and updates the answered counter", () => {
@@ -176,10 +178,30 @@ describe("exam.js – answering and navigation", () => {
     expect(document.getElementById("exam-answered")!.textContent).toContain("1");
   });
 
-  it("auto-advances 900ms after recording the selected answer by default", () => {
+  it("auto-advances after 1125ms by default", () => {
     clickOption(0, "a");
     expect(slide(0).querySelector('[data-option="a"]')!.getAttribute("aria-pressed")).toBe("true");
-    vi.advanceTimersByTime(899);
+    vi.advanceTimersByTime(AUTO_ADVANCE_DELAY_MS - 1);
+    expect(slide(0).style.display).toBe("flex");
+    vi.advanceTimersByTime(1);
+    expect(slide(1).style.display).toBe("flex");
+  });
+
+  it("uses a valid saved auto-advance delay", () => {
+    document.cookie = "quiz-auto-advance-delay=2000; path=/";
+    setupDOM();
+    clickOption(0, "a");
+    vi.advanceTimersByTime(1999);
+    expect(slide(0).style.display).toBe("flex");
+    vi.advanceTimersByTime(1);
+    expect(slide(1).style.display).toBe("flex");
+  });
+
+  it("falls back to the default for an invalid auto-advance delay", () => {
+    document.cookie = "quiz-auto-advance-delay=1100; path=/";
+    setupDOM();
+    clickOption(0, "a");
+    vi.advanceTimersByTime(AUTO_ADVANCE_DELAY_MS - 1);
     expect(slide(0).style.display).toBe("flex");
     vi.advanceTimersByTime(1);
     expect(slide(1).style.display).toBe("flex");
@@ -209,17 +231,17 @@ describe("exam.js – answering and navigation", () => {
     vi.stubGlobal("matchMedia", vi.fn().mockReturnValue({ matches: true }));
     setupDOM();
     clickOption(0, "a");
-    vi.advanceTimersByTime(900);
+    vi.advanceTimersByTime(AUTO_ADVANCE_DELAY_MS);
     expect(slide(1).style.display).toBe("flex");
   });
 
   it("restarts auto-advance after replacing an answer", () => {
     clickOption(0, "a");
-    vi.advanceTimersByTime(800);
+    vi.advanceTimersByTime(AUTO_ADVANCE_DELAY_MS - 125);
     clickOption(0, "c");
-    vi.advanceTimersByTime(100);
+    vi.advanceTimersByTime(125);
     expect(slide(0).style.display).toBe("flex");
-    vi.advanceTimersByTime(800);
+    vi.advanceTimersByTime(AUTO_ADVANCE_DELAY_MS - 125);
     expect(slide(1).style.display).toBe("flex");
   });
 

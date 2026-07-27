@@ -61,6 +61,9 @@ checks:
   - id: CHK-QUIZ-07
     desc: "Same-browser reload resumes mid-quiz in the locale-scoped localStorage state"
     oracle: "Answer at least one question, reload mid-quiz without clearing storage: quiz restores the saved slide/index (including a pending retry state when applicable); `quiz-resume:v1:<locale>:<userId>:<topicId>` matches the visible slide. If a legacy non-locale key existed, it is migrated and removed after a valid resume."
+  - id: CHK-QUIZ-08
+    desc: "A saved auto-advance delay controls correct-answer pacing"
+    oracle: "After setting a non-default speed in /he/more, a correct answer remains visible until the selected delay elapses, then advances automatically; wrong answers remain manual. Reloading the topic retains the selected delay."
   - id: CHK-CONSOLE-01
     desc: "No console errors anywhere in the flow"
     oracle: "Browser console contains zero error-level entries across all steps (warnings triaged case by case)"
@@ -95,6 +98,9 @@ Route hints:
   reload still wins via `quiz-resume:v1:<locale>:<userId>:<topicId>` in localStorage;
   a valid legacy key is migrated once. If a quiz batch is long,
   answer efficiently — the goal is the loop and its persistence, not deliberation.
+- Auto-advance is controlled by the shared `quiz-auto-advance` and
+  `quiz-auto-advance-delay` cookies. The default delay is 1125ms; More permits
+  750–3000ms in 125ms steps.
 - Copy sources: `messages/he.json`, namespaces `Home`, `Quiz`, `TabBar`. Compare what you
   see against these when something reads oddly.
 - Meaningful-step screenshots: login redirect, authed dashboard, quiz first question,
