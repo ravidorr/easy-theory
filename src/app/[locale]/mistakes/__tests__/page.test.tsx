@@ -8,7 +8,7 @@ import { getMistakesForTopic, getTopics } from "@/lib/db";
 vi.mock("next/navigation", () => ({ redirect: vi.fn(() => { throw new Error("redirect"); }) }));
 vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
 vi.mock("@/lib/db", () => ({ getMistakesForTopic: vi.fn(), getTopics: vi.fn() }));
-vi.mock("@/components/TabBar", () => ({ TabBar: () => React.createElement("div", { "data-testid": "tabbar" }) }));
+vi.mock("@/components/TabBar", () => ({ TabBar: ({ active, current }: { active: string; current: string | null }) => React.createElement("div", { "data-testid": "tabbar", "data-active": active, "data-current": current ?? "" }) }));
 vi.mock("next/link", () => ({ default: ({ href, children }: React.ComponentProps<"a">) => React.createElement("a", { href }, children) }));
 vi.mock("next-intl/server", () => ({ getTranslations: vi.fn().mockResolvedValue((key: string) => key) }));
 
@@ -40,7 +40,8 @@ describe("MistakesPage", () => {
 
     expect(screen.getByRole("link", { name: /תמרורים/ })).toHaveAttribute("href", "/topics/signs/review");
     expect(screen.queryByText("empty")).toBeNull();
-    expect(container.querySelector('[data-testid="tabbar"]')).toBeTruthy();
+    expect(container.querySelector('[data-testid="tabbar"]')).toHaveAttribute("data-active", "practice");
+    expect(container.querySelector('[data-testid="tabbar"]')).toHaveAttribute("data-current", "");
   });
 
   it("shows the empty state when every topic has no mistakes", async () => {

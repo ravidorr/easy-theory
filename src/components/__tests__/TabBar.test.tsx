@@ -9,8 +9,8 @@ vi.mock("next-intl/server", () => ({
       home: "הבית",
       practice: "תרגול",
       exam: "מבחן",
-      mistakes: "טעויות",
       progress: "התקדמות",
+      more: "עוד",
     };
     return labels[key] ?? key;
   }),
@@ -25,8 +25,8 @@ const tabs = [
   { label: "הבית", href: "/" },
   { label: "תרגול", href: "/practice" },
   { label: "מבחן", href: "/exam" },
-  { label: "טעויות", href: "/mistakes" },
   { label: "התקדמות", href: "/progress" },
+  { label: "עוד", href: "/more" },
 ];
 
 describe("TabBar", () => {
@@ -69,8 +69,8 @@ describe("TabBar", () => {
     expect(screen.getByText("מבחן").closest("a")).toHaveAttribute("aria-current", "page");
     expect(screen.getByText("הבית").closest("a")).not.toHaveAttribute("aria-current");
     expect(screen.getByText("תרגול").closest("a")).not.toHaveAttribute("aria-current");
-    expect(screen.getByText("טעויות").closest("a")).not.toHaveAttribute("aria-current");
     expect(screen.getByText("התקדמות").closest("a")).not.toHaveAttribute("aria-current");
+    expect(screen.getByText("עוד").closest("a")).not.toHaveAttribute("aria-current");
   });
 
   it("keeps a section active without marking another route as current", async () => {

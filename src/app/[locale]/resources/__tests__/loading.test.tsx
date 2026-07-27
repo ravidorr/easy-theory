@@ -19,14 +19,14 @@ describe("resources loading skeleton", () => {
     expect(container.querySelector("main")).toHaveAttribute("aria-busy", "true");
   });
 
-  it("mirrors the featured resource and compact resource rows", async () => {
+  it("mirrors video and resource content sections", async () => {
     const { container } = render(await Loading());
-    expect(container.querySelectorAll('[data-skeleton="image"]')).toHaveLength(1);
-    expect(container.querySelectorAll('[data-skeleton="card"]')).toHaveLength(4);
+    expect(container.querySelectorAll('[data-skeleton="image"]')).toHaveLength(7);
+    expect(container.querySelectorAll('[data-skeleton="card"]')).toHaveLength(9);
   });
 
-  it("keeps the links tab bar visible", async () => {
+  it("keeps the More tab bar visible without marking it current", async () => {
     render(await Loading());
-    expect(screen.getByTestId("tabbar")).toHaveAttribute("data-active", "links");
+    expect(screen.getByTestId("tabbar")).toHaveAttribute("data-active", "more");
   });
 });

@@ -1,7 +1,7 @@
 ---
 id: "010-static-pages-and-not-found"
-title: "Videos, resources, credits + 404 handling for bad routes"
-flow: "Videos → resources → credits (content + link hygiene) → bad topic slug → arbitrary bad path → localized 404 recovery"
+title: "Resources, credits + 404 handling for bad routes"
+flow: "More → resources → legacy videos redirect → credits (content + link hygiene) → bad topic slug → arbitrary bad path → localized 404 recovery"
 persona: >
   Hebrew-speaking learner rounding out their study plan with the app's
   curated extras: video lessons and official links. Occasionally follows a
@@ -14,7 +14,7 @@ environment:
     required: true
     user: "qa-user@easy-in-theory.test"
     mint: "pnpm qa:mint"
-  data_assumptions: "Static content pages are code-defined (no DB dependency); seeded topics are signs / traffic-laws / safety / vehicle, so any other slug is invalid"
+  data_assumptions: "The QA database has video and resource rows; seeded topics are signs / traffic-laws / safety / vehicle, so any other slug is invalid"
 timebox_minutes: 20
 out_of_scope:
   - "Following external links off-origin beyond a status/href sanity probe (YouTube, gov.il content correctness)"
@@ -24,11 +24,11 @@ out_of_scope:
 known_issues: []
 checks:
   - id: CHK-STATIC-01
-    desc: "Videos page renders its curated list"
-    oracle: "/he/videos shows a non-empty list of lessons/marathons with titles from the Videos namespace; every link has a valid https href to the expected video domain and opens in a new tab"
+    desc: "More leads to the unified Resources page"
+    oracle: "The More tab opens /he/more, whose Resources row opens /he/resources; it shows lessons/marathons followed by official and practice links, and every external link has a valid https href and opens in a new tab"
   - id: CHK-STATIC-02
-    desc: "Resources page renders its external links"
-    oracle: "/he/resources shows a non-empty list with copy from the Resources namespace; every link has a valid https href and opens in a new tab"
+    desc: "Legacy Videos URL redirects to Resources"
+    oracle: "Opening /he/videos lands on /he/resources without rendering a separate Videos page"
   - id: CHK-STATIC-03
     desc: "Credits page renders attributions"
     oracle: "/he/credits shows data-source and technology attributions from the Credits namespace with valid https hrefs"
@@ -58,8 +58,8 @@ exploration_budget: "After all checks, up to 5 min within scope: unauthed visit 
 
 ## Narrative
 
-You are padding out your study routine: skim the videos list for tonight's lesson,
-check the official links, and see who is behind the app. Then play the clumsy user:
+You are padding out your study routine: use More to skim the video lessons for
+tonight, check the official links, and see who is behind the app. Then play the clumsy user:
 follow a dead bookmark and mistype a URL. The product promise here is modest but
 real — content pages that are complete and trustworthy, and dead ends that keep you
 inside the app.
@@ -71,8 +71,9 @@ YouTube rate-limited a HEAD request.
 
 Route hints:
 
-- Pages `/he/videos`, `/he/resources`, `/he/credits` — static, code-defined lists
-  with copy in the `Videos`, `Resources`, `Credits` namespaces.
+- `/he/resources` combines video lessons and external links, using the `Videos`
+  and `Resources` namespaces; `/he/videos` permanently redirects there.
+- `/he/credits` contains the app attributions.
 - 404 machinery: unknown topic slugs call notFound() in the topic pages; any other
   unknown path hits the [...rest] catch-all; both render the localized
   `not-found.tsx` (NotFound namespace) inside the locale layout.

@@ -15,7 +15,7 @@ export default async function PracticePage() {
     getTranslations("Practice"),
     getLocale(),
   ]);
-  return <><main className="simple-page"><h1>{t("title")}</h1><p>{t("intro")}</p>{topics.map((topic) => (
+  return <><main className="simple-page"><h1>{t("title")}</h1><p>{t("intro")}</p><Link className="pressable-row" href="/mistakes">{t("reviewMistakes")}</Link>{topics.map((topic) => (
     <Link className="pressable-row" key={topic.id} href={`/topics/${topic.slug}`}>
       {localizedRecordField(locale, topic, "name_he", "name_ar")}
     </Link>
