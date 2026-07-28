@@ -54,7 +54,9 @@
     "readinessHighHigh": "تشير النتائج إلى استعداد جيد. واصلوا التدريب حتى الاختبار للحفاظ عليه.",
     "streak": "الاستمرارية",
     "answered": "أسئلة تمت الإجابة عنها",
-    "simulations": "محاكاة"
+    "simulations": "محاكاة",
+    "practiceCta": "ابدأ التدريب",
+    "simulationCta": "ابدأ محاكاة الامتحان"
   },
   "Home": {
     "todayBadge": "مهمة اليوم",

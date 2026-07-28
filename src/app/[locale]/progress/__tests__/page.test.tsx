@@ -50,7 +50,24 @@ describe("ProgressPage", () => {
     expect(screen.getByText("4").tagName).toBe("DD");
     expect(screen.getByText("8").tagName).toBe("DD");
     expect(screen.getByText("0").tagName).toBe("DD");
+    expect(screen.getByRole("link", { name: "Progress.practiceCta" })).toHaveAttribute("href", "/practice");
     expect(screen.getByTestId("tabbar")).toBeInTheDocument();
+  });
+
+  it("starts a simulation when readiness and evidence are both high", async () => {
+    mockGetExamAttempts.mockResolvedValue([
+      { score: 30, total: 30, passed: true },
+      { score: 30, total: 30, passed: true },
+      { score: 30, total: 30, passed: true },
+    ] as never);
+    mockGetTopicAccuracy.mockResolvedValue([{ total: 30 }, { total: 30 }] as never);
+    mockComputeReadiness.mockReturnValue({ level: "high", probability: 0.9, attemptsUsed: 3 } as never);
+    mockReadinessConfidence.mockReturnValue("high");
+
+    render(await ProgressPage());
+
+    expect(screen.getByRole("link", { name: "Progress.simulationCta" })).toHaveAttribute("href", "/exam/run");
+    expect(screen.queryByRole("link", { name: "Progress.practiceCta" })).not.toBeInTheDocument();
   });
 
   it.each([
