@@ -257,7 +257,7 @@ export default async function ExamRunPage() {
         </div>
       </main>
 
-      <TabBar active="home" current={null} />
+      <TabBar active="exam" current={null} />
 
       <Script src="/js/modal.js" strategy="afterInteractive" />
       <Script src="/js/medal.js" strategy="afterInteractive" />

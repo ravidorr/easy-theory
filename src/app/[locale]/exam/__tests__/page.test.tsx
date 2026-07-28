@@ -97,10 +97,10 @@ describe("ExamPage", () => {
     expect(container.textContent).toContain("٢٠٢٦");
   });
 
-  it("renders the home TabBar without a top-level close control", async () => {
+  it("renders the Exam TabBar without a top-level close control", async () => {
     const jsx = await ExamPage();
     const { container } = render(jsx);
-    expect(screen.getByTestId("tabbar")).toHaveAttribute("data-active", "home");
+    expect(screen.getByTestId("tabbar")).toHaveAttribute("data-active", "exam");
     expect(container.querySelector("a[aria-label='closeLabel']")).toBeNull();
   });
 });

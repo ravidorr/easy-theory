@@ -22,9 +22,9 @@ describe("exam run loading skeleton", () => {
     expect(container.querySelectorAll('[data-skeleton="pill"]')).toHaveLength(1);
   });
 
-  it("keeps the Home section TabBar visible without a false current page", async () => {
+  it("keeps the Exam section TabBar visible without a false current page", async () => {
     const { container } = render(await Loading());
-    expect(container.querySelector("[data-tab-bar]")).toHaveAttribute("data-active", "home");
+    expect(container.querySelector("[data-tab-bar]")).toHaveAttribute("data-active", "exam");
     expect(container.querySelector("[data-tab-bar]")).toHaveAttribute("data-current", "");
   });
 });

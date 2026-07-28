@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.223] — 2026-07-29
+
+### Fixed
+
+- Corrected bottom-navigation selection for exam and flashcard flows, with route-wide coverage for all tab-bar pages.
+
+---
+
 ## [0.3.222] — 2026-07-29
 
 ### Fixed
