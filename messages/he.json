@@ -141,6 +141,10 @@
   "More": {
     "pageTitle": "החשבון שלי",
     "pageSubtitle": "ההגדרות וההתקדמות שלך במקום אחד",
+    "progressTitle": "ההתקדמות שלך",
+    "accountAppTitle": "חשבון ואפליקציה",
+    "quickLinksTitle": "קישורים מהירים",
+    "preferencesTitle": "העדפות",
     "statStreak": "יום רצף",
     "statPoints": "נקודות",
     "statLevel": "רמה",
