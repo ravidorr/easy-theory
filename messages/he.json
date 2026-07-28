@@ -54,7 +54,9 @@
     "readinessHighHigh": "הנתונים מצביעים על מוכנות טובה. המשיכו לתרגל עד המבחן כדי לשמור עליה.",
     "streak": "רצף",
     "answered": "שאלות שנענו",
-    "simulations": "סימולציות"
+    "simulations": "סימולציות",
+    "practiceCta": "התחל תרגול",
+    "simulationCta": "התחל מבחן סימולציה"
   },
   "Home": {
     "todayBadge": "המשימה להיום",

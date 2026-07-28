@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.220] — 2026-07-28
+
+### Added
+
+- Added a contextual Progress-page CTA that starts practice by default and starts a mock exam when readiness is well supported.
+
+---
+
 ## [0.3.219] — 2026-07-28
 
 ### Fixed

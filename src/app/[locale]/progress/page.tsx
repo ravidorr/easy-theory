@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { TabBar } from "@/components/TabBar";
 import { Icon } from "@/components/Icon";
 import { createClient } from "@/lib/supabase";
@@ -26,6 +27,10 @@ export default async function ProgressPage() {
     : t(
         `readiness${readiness.level[0].toUpperCase()}${readiness.level.slice(1)}${confidence[0].toUpperCase()}${confidence.slice(1)}`
       );
+  const isReadyForSimulation = readiness.level === "high" && confidence === "high";
+  const nextStep = isReadyForSimulation
+    ? { href: "/exam/run", label: t("simulationCta") }
+    : { href: "/practice", label: t("practiceCta") };
 
   return (
     <>
@@ -43,6 +48,10 @@ export default async function ProgressPage() {
             <p>{readinessText}</p>
           </div>
         </section>
+
+        <Link href={nextStep.href} className="btn-primary">
+          {nextStep.label}
+        </Link>
 
         <dl className={styles.statGrid}>
           <div className={styles.statTile}>
