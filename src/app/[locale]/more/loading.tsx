@@ -15,14 +15,16 @@ export default async function Loading() {
     <>
       <SkeletonScreen label={t("label")} className={styles.page}>
         <Skeleton variant="lineLg" size="w40" />
-        <div className={styles.statsCard}>
-          {[0, 1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className={styles.statCell}>
-              <Skeleton variant="circle" />
-              <Skeleton size="w40" />
-              <Skeleton size="w60" />
-            </div>
-          ))}
+        <div className={styles.progressCard}>
+          <div className={styles.statsGrid}>
+            {[0, 1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className={styles.statCell}>
+                <Skeleton variant="circle" />
+                <Skeleton size="w40" />
+                <Skeleton size="w60" />
+              </div>
+            ))}
+          </div>
         </div>
         <SkeletonCard>
           {[0, 1, 2, 3].map((i) => (

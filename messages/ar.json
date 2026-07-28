@@ -141,6 +141,10 @@
   "More": {
     "pageTitle": "حسابي",
     "pageSubtitle": "إعداداتك وتقدمك في مكان واحد",
+    "progressTitle": "تقدمك",
+    "accountAppTitle": "الحساب والتطبيق",
+    "quickLinksTitle": "روابط سريعة",
+    "preferencesTitle": "التفضيلات",
     "statStreak": "يوم متتالٍ",
     "statPoints": "نقاط",
     "statLevel": "المستوى",

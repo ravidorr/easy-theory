@@ -89,6 +89,17 @@ describe("MorePage", () => {
     expect(screen.getByText("pageSubtitle")).toBeTruthy();
   });
 
+  it("groups progress and account controls into labelled sections", async () => {
+    const jsx = await MorePage();
+    const { container } = render(jsx);
+    expect(screen.getByRole("heading", { level: 2, name: "progressTitle" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: "accountAppTitle" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 3, name: "quickLinksTitle" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 3, name: "preferencesTitle" })).toBeInTheDocument();
+    expect(container.querySelector('[aria-labelledby="progress-heading"]')).toBeTruthy();
+    expect(container.querySelector('[aria-labelledby="account-app-heading"]')).toBeTruthy();
+  });
+
   it("renders navigation links to exam, schedule, resources, bookmarks, credits, and contact", async () => {
     const jsx = await MorePage();
     const { container } = render(jsx);
@@ -280,6 +291,14 @@ describe("MorePage", () => {
     expect(delay).toHaveAttribute("min", "750");
     expect(delay).toHaveAttribute("max", "3000");
     expect(delay).toHaveAttribute("step", "125");
+  });
+
+  it("places the auto-advance switch before its dependent speed control", async () => {
+    const jsx = await MorePage();
+    const { container } = render(jsx);
+    const toggle = container.querySelector("#auto-advance-toggle")!;
+    const delay = container.querySelector("#auto-advance-delay")!;
+    expect(toggle.compareDocumentPosition(delay) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   it("uses the shared destructive button for logout", async () => {

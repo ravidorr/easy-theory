@@ -3,6 +3,18 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.218] — 2026-07-28
+
+### Changed
+
+- Grouped More into distinct progress and account-and-app sections, with preferences ordered around their dependent controls.
+
+### Fixed
+
+- Restored the More loading screen's stats card grid and padding.
+
+---
+
 ## [0.3.217] — 2026-07-28
 
 ### Fixed

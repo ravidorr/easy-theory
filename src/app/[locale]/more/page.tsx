@@ -130,64 +130,94 @@ export default async function MorePage() {
         <h1>{t("pageTitle")}</h1>
         <p className={styles.subtitle}>{t("pageSubtitle")}</p>
 
-        <div className={styles.statsCard}>
-          <div className={styles.statCell}>
-            <span className={`${styles.statIcon} ${styles.statIconStreak}`}>
-              <Icon name="flame" size={18} />
-            </span>
-            <span className={styles.statValue} data-stat="streak">{stats.streak_days}</span>
-            <span className={styles.statLabel}>{t("statStreak")}</span>
-          </div>
-          <div className={styles.statCell}>
-            <span className={`${styles.statIcon} ${styles.statIconPoints}`}>
-              <Icon name="star" size={18} />
-            </span>
-            <span className={styles.statValue} data-stat="points">{stats.star_points}</span>
-            <span className={styles.statLabel}>{t("statPoints")}</span>
-          </div>
-          <div className={styles.statCell} data-level-unit={LEVEL_CURVE_UNIT}>
-            <span className={`${styles.statIcon} ${styles.statIconLevel}`}>
-              <Icon name="gem" size={18} />
-            </span>
-            <span className={styles.statValue} data-stat="level">{levelInfo.level}</span>
-            <span className={styles.statLabel}>{t("statLevel")}</span>
-          </div>
-          <div className={styles.statCell}>
-            <span className={`${styles.statIcon} ${styles.statIconNeutral}`}>
-              <Icon name="check" size={18} />
-            </span>
-            <span
-              className={
-                accuracy === null
-                  ? `${styles.statValue} ${styles.statValueEmpty}`
-                  : styles.statValue
-              }
-            >
-              {accuracy === null
-                ? t("statAccuracyEmpty")
-                : t("statAccuracyValue", { percent: accuracy })}
-            </span>
-            <span className={styles.statLabel}>{t("statAccuracy")}</span>
-          </div>
-          <div className={styles.statCell}>
-            <span className={`${styles.statIcon} ${styles.statIconNeutral}`}>
-              <Icon name="cards" size={18} />
-            </span>
-            <span className={styles.statValue}>{completion.answeredQuestions}</span>
-            <span className={styles.statLabel}>{t("statAnswered")}</span>
-          </div>
-          <div className={styles.statCell}>
-            <span className={`${styles.statIcon} ${styles.statIconNeutral}`}>
-              <Icon name="trophy" size={18} />
-            </span>
-            <span className={styles.statValue}>
-              {t("statCompletionValue", { percent: completion.percent })}
-            </span>
-            <span className={styles.statLabel}>{t("statCompletion")}</span>
-          </div>
-        </div>
+        <section className={styles.pageSection} aria-labelledby="progress-heading">
+          <h2 id="progress-heading" className={styles.sectionTitle}>{t("progressTitle")}</h2>
+          <div className={styles.progressCard}>
+            <div className={styles.statsGrid}>
+              <div className={styles.statCell}>
+                <span className={`${styles.statIcon} ${styles.statIconStreak}`}>
+                  <Icon name="flame" size={18} />
+                </span>
+                <span className={styles.statValue} data-stat="streak">{stats.streak_days}</span>
+                <span className={styles.statLabel}>{t("statStreak")}</span>
+              </div>
+              <div className={styles.statCell}>
+                <span className={`${styles.statIcon} ${styles.statIconPoints}`}>
+                  <Icon name="star" size={18} />
+                </span>
+                <span className={styles.statValue} data-stat="points">{stats.star_points}</span>
+                <span className={styles.statLabel}>{t("statPoints")}</span>
+              </div>
+              <div className={styles.statCell} data-level-unit={LEVEL_CURVE_UNIT}>
+                <span className={`${styles.statIcon} ${styles.statIconLevel}`}>
+                  <Icon name="gem" size={18} />
+                </span>
+                <span className={styles.statValue} data-stat="level">{levelInfo.level}</span>
+                <span className={styles.statLabel}>{t("statLevel")}</span>
+              </div>
+              <div className={styles.statCell}>
+                <span className={`${styles.statIcon} ${styles.statIconNeutral}`}>
+                  <Icon name="check" size={18} />
+                </span>
+                <span
+                  className={
+                    accuracy === null
+                      ? `${styles.statValue} ${styles.statValueEmpty}`
+                      : styles.statValue
+                  }
+                >
+                  {accuracy === null
+                    ? t("statAccuracyEmpty")
+                    : t("statAccuracyValue", { percent: accuracy })}
+                </span>
+                <span className={styles.statLabel}>{t("statAccuracy")}</span>
+              </div>
+              <div className={styles.statCell}>
+                <span className={`${styles.statIcon} ${styles.statIconNeutral}`}>
+                  <Icon name="cards" size={18} />
+                </span>
+                <span className={styles.statValue}>{completion.answeredQuestions}</span>
+                <span className={styles.statLabel}>{t("statAnswered")}</span>
+              </div>
+              <div className={styles.statCell}>
+                <span className={`${styles.statIcon} ${styles.statIconNeutral}`}>
+                  <Icon name="trophy" size={18} />
+                </span>
+                <span className={styles.statValue}>
+                  {t("statCompletionValue", { percent: completion.percent })}
+                </span>
+                <span className={styles.statLabel}>{t("statCompletion")}</span>
+              </div>
+            </div>
 
-        <div className={styles.navCard}>
+            <div className={styles.cardDivider} />
+
+            <section className={styles.medalsSection} aria-labelledby="medals-heading">
+              <h3 id="medals-heading" className={styles.cardSectionTitle}>{t("medalsTitle")}</h3>
+              <div className={styles.medalsGrid}>
+                {medalItems.map(({ slug, label, icon, earned, dateText }) => (
+                  <div key={slug} className={styles.medalItem}>
+                    <div className={`${styles.medal} ${earned ? styles.medalEarned : ""}`}>
+                      <Icon name={icon} size={24} />
+                    </div>
+                    <span className={`${styles.medalLabel} ${earned ? styles.medalLabelEarned : ""}`}>
+                      {label}
+                    </span>
+                    <span className={`${styles.medalDate} ${earned ? styles.medalDateEarned : ""}`}>
+                      {dateText}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section className={styles.pageSection} aria-labelledby="account-app-heading">
+          <h2 id="account-app-heading" className={styles.sectionTitle}>{t("accountAppTitle")}</h2>
+          <div className={styles.accountCard}>
+            <nav aria-labelledby="quick-links-heading">
+              <h3 id="quick-links-heading" className={styles.listSectionTitle}>{t("quickLinksTitle")}</h3>
           <Link href="/exam" className={`pressable-row ${styles.navRow} ${styles.navRowBordered}`}>
             <span className={styles.navIcon}>
               <Icon name="timer" size={20} />
@@ -235,28 +265,12 @@ export default async function MorePage() {
             <span className={styles.navRowLabel}>{t("navContact")}</span>
             <Icon name="chevron-left" size={18} className={styles.navChevron} />
           </Link>
-        </div>
+            </nav>
 
-        <div className={styles.medalsCard}>
-          <h2>{t("medalsTitle")}</h2>
-          <div className={styles.medalsGrid}>
-            {medalItems.map(({ slug, label, icon, earned, dateText }) => (
-              <div key={slug} className={styles.medalItem}>
-                <div className={`${styles.medal} ${earned ? styles.medalEarned : ""}`}>
-                  <Icon name={icon} size={24} />
-                </div>
-                <span className={`${styles.medalLabel} ${earned ? styles.medalLabelEarned : ""}`}>
-                  {label}
-                </span>
-                <span className={`${styles.medalDate} ${earned ? styles.medalDateEarned : ""}`}>
-                  {dateText}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
+            <div className={styles.cardDivider} />
 
-        <div className={styles.settingsCard}>
+            <section aria-labelledby="preferences-heading">
+              <h3 id="preferences-heading" className={styles.listSectionTitle}>{t("preferencesTitle")}</h3>
           <div className={styles.settingsRow}>
             <span className={styles.settingsIcon}>
               <Icon name="moon" size={20} />
@@ -270,6 +284,24 @@ export default async function MorePage() {
               className={`pressable ${styles.toggle} ${isDark ? styles.toggleOn : ""}`}
             >
               <span className={`${styles.toggleThumb} ${isDark ? styles.toggleThumbOn : ""}`} />
+            </button>
+          </div>
+
+          <div className={styles.settingsRow}>
+            <span className={styles.settingsIcon}>
+              <Icon name="play" size={20} />
+            </span>
+            <span className={styles.settingsRowLabel}>{t("autoAdvance")}</span>
+            <button
+              type="button"
+              id="auto-advance-toggle"
+              role="switch"
+              aria-checked={autoAdvanceOn ? "true" : "false"}
+              className={`pressable ${styles.toggle} ${autoAdvanceOn ? styles.toggleOn : ""}`}
+            >
+              <span
+                className={`${styles.toggleThumb} ${autoAdvanceOn ? styles.toggleThumbOn : ""}`}
+              />
             </button>
           </div>
 
@@ -308,30 +340,14 @@ export default async function MorePage() {
 
           <div className={styles.settingsRow}>
             <span className={styles.settingsIcon}>
-              <Icon name="play" size={20} />
-            </span>
-            <span className={styles.settingsRowLabel}>{t("autoAdvance")}</span>
-            <button
-              type="button"
-              id="auto-advance-toggle"
-              role="switch"
-              aria-checked={autoAdvanceOn ? "true" : "false"}
-              className={`pressable ${styles.toggle} ${autoAdvanceOn ? styles.toggleOn : ""}`}
-            >
-              <span
-                className={`${styles.toggleThumb} ${autoAdvanceOn ? styles.toggleThumbOn : ""}`}
-              />
-            </button>
-          </div>
-
-          <div className={styles.settingsRow}>
-            <span className={styles.settingsIcon}>
               <Icon name="globe" size={20} />
             </span>
             <span className={styles.settingsRowLabel}>{t("language")}</span>
             <LanguageToggle />
           </div>
-        </div>
+            </section>
+          </div>
+        </section>
 
         <button id="logout-btn" className={`btn-danger ${styles.logoutBtn}`}>
           {t("logoutBtn")}

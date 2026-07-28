@@ -25,11 +25,30 @@
   line-height: var(--line-normal);
 }
 
-.statsCard {
+.pageSection {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sectionTitle {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--type-caption-size);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.progressCard,
+.accountCard {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.statsGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px 8px;
@@ -97,14 +116,29 @@
   text-align: center;
 }
 
-.navCard {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-card);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+.cardDivider {
+  height: 1px;
+  background: var(--border);
+  margin: 0 16px;
+}
+
+.medalsSection {
+  padding: 20px 16px;
+}
+
+.cardSectionTitle,
+.listSectionTitle {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--type-body-size);
+  font-weight: 700;
+}
+
+.listSectionTitle {
+  padding: 16px 16px 8px;
+  color: var(--text-muted);
+  font-size: var(--type-caption-size);
+  letter-spacing: 0.02em;
 }
 
 .navRow {
@@ -144,25 +178,11 @@
   flex-shrink: 0;
 }
 
-.medalsCard {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-card);
-  padding: 20px;
-}
-
-.medalsCard h2 {
-  margin: 0 0 16px;
-  font-size: var(--type-body-size);
-  font-weight: 700;
-  color: var(--text);
-}
-
 .medalsGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 8px;
+  margin-top: 16px;
 }
 
 .medalItem {
@@ -219,16 +239,6 @@
   color: var(--text-muted);
 }
 
-.settingsCard {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-card);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
 .settingsRow {
   display: flex;
   align-items: center;
@@ -236,6 +246,10 @@
   padding: 16px;
   min-height: var(--hit-min);
   box-sizing: border-box;
+}
+
+.settingsRow + .settingsRow {
+  border-top: 1px solid var(--border);
 }
 
 .settingsIcon {

@@ -23,6 +23,8 @@ describe("more page loading skeleton", () => {
     const { container } = render(await Loading());
     expect(container.querySelectorAll('[data-skeleton="circle"]')).toHaveLength(10);
     expect(container.querySelectorAll('[data-skeleton="card"]')).toHaveLength(2);
+    expect(container.querySelector('[class*="progressCard"]')).toBeTruthy();
+    expect(container.querySelector('[class*="statsGrid"]')).toBeTruthy();
   });
 
   it("keeps the more tab bar visible", async () => {
