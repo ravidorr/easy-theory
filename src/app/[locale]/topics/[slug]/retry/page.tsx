@@ -9,7 +9,7 @@ import { Icon } from "@/components/Icon";
 import { InlineMarkdown } from "@/components/InlineMarkdown";
 import { createClient } from "@/lib/supabase";
 import { getTopicBySlug, getMistakesForTopic, getBookmarkedQuestionIds } from "@/lib/db";
-import type { Question } from "@/lib/db";
+import type { MistakeScope, Question } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
 import { localizeQuestion } from "@/lib/content-locale";
 import { resolveOptionSignImage } from "@/lib/option-sign-image";
@@ -150,15 +150,20 @@ function QuestionSlide({
 
 export default async function RetryMistakesPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ scope?: string }>;
 }) {
   const { slug } = await params;
+  const { scope: scopeParam } = (await searchParams) ?? {};
+  const scope: MistakeScope = scopeParam === "all" ? "all" : "lastSession";
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect(`/auth/login?next=/topics/${slug}/retry`);
+  const retryHref = `/topics/${slug}/retry${scope === "all" ? "?scope=all" : ""}`;
+  if (!user) redirect(`/auth/login?next=${encodeURIComponent(retryHref)}`);
 
   const locale = await getLocale();
   const tQuiz = await getTranslations("Quiz");
@@ -168,10 +173,11 @@ export default async function RetryMistakesPage({
   if (!topic) notFound();
 
   const [mistakes, bookmarkedIds] = await Promise.all([
-    getMistakesForTopic(supabase, user.id, topic.id, "lastSession"),
+    getMistakesForTopic(supabase, user.id, topic.id, scope),
     getBookmarkedQuestionIds(supabase, user.id),
   ]);
-  if (mistakes.length === 0) redirect(`/topics/${slug}/review`);
+  const reviewHref = `/topics/${slug}/review${scope === "all" ? "?scope=all" : ""}`;
+  if (mistakes.length === 0) redirect(reviewHref);
 
   const total = mistakes.length;
   const letters = tQuiz("letters").split(",");
@@ -191,7 +197,7 @@ export default async function RetryMistakesPage({
         className={styles.page}
       >
         <div className={styles.topBar}>
-          <Link href={`/topics/${slug}/review`} className={`icon-btn ${styles.closeBtn}`} aria-label={tQuiz("closeLabel")}>
+          <Link href={reviewHref} className={`icon-btn ${styles.closeBtn}`} aria-label={tQuiz("closeLabel")}>
             <Icon name="close" size={20} />
           </Link>
           <div className={styles.progressTrack}>
@@ -240,7 +246,7 @@ export default async function RetryMistakesPage({
           <span className={styles.finalScore}>
             <span id="final-score"></span>
           </span>
-          <Link href={`/topics/${slug}/review`} className={`btn-primary ${styles.btnWide}`}>
+          <Link href={reviewHref} className={`btn-primary ${styles.btnWide}`}>
             {tRetry("finalBackReview")}
           </Link>
           <Link href="/" className={`btn-secondary ${styles.btnWide}`}>

@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase";
 import { getTopicBySlug, getMistakesForTopic, getBookmarkedQuestionIds } from "@/lib/db";
 import type { QuizMistake } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
+import { redirect } from "next/navigation";
 
 vi.mock("next/image", () => ({
   default: ({ src, alt, className }: { src: string; alt?: string; className?: string }) =>
@@ -45,6 +46,7 @@ const mockCreateClient = vi.mocked(createClient);
 const mockGetTopicBySlug = vi.mocked(getTopicBySlug);
 const mockGetMistakes = vi.mocked(getMistakesForTopic);
 const mockGetBookmarkedIds = vi.mocked(getBookmarkedQuestionIds);
+const mockRedirect = vi.mocked(redirect);
 
 const TOPIC = { id: "t1", slug: "signs", name_he: "תמרורים" };
 
@@ -84,6 +86,12 @@ function makeClient(user: { id: string } | null = { id: "u1" }) {
   return { auth: { getUser: vi.fn().mockResolvedValue({ data: { user } }) } };
 }
 
+const callPage = (scope?: string, slug = "signs") =>
+  RetryMistakesPage({
+    params: Promise.resolve({ slug }),
+    searchParams: Promise.resolve(scope ? { scope } : {}),
+  });
+
 describe("RetryMistakesPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -98,19 +106,28 @@ describe("RetryMistakesPage", () => {
   it("redirects to /auth/login when not authenticated", async () => {
     mockCreateClient.mockResolvedValue(makeClient(null) as never);
     await expect(
-      RetryMistakesPage({ params: Promise.resolve({ slug: "signs" }) })
+      callPage()
     ).rejects.toThrow("redirect");
+    expect(mockRedirect).toHaveBeenCalledWith("/auth/login?next=%2Ftopics%2Fsigns%2Fretry");
+  });
+
+  it("preserves all-time scope through the login redirect", async () => {
+    mockCreateClient.mockResolvedValue(makeClient(null) as never);
+    await expect(callPage("all")).rejects.toThrow("redirect");
+    expect(mockRedirect).toHaveBeenCalledWith(
+      "/auth/login?next=%2Ftopics%2Fsigns%2Fretry%3Fscope%3Dall"
+    );
   });
 
   it("calls notFound when topic slug does not exist", async () => {
     mockGetTopicBySlug.mockResolvedValue(null as never);
     await expect(
-      RetryMistakesPage({ params: Promise.resolve({ slug: "unknown" }) })
+      callPage(undefined, "unknown")
     ).rejects.toThrow("notFound");
   });
 
   it("loads medal support before quiz interactivity", async () => {
-    const jsx = await RetryMistakesPage({ params: Promise.resolve({ slug: "signs" }) });
+    const jsx = await callPage();
     const { container } = render(jsx);
     const scripts = [...container.querySelectorAll("script")].map((script) => script.src);
     expect(scripts.map((src) => new URL(src).pathname)).toEqual([
@@ -124,25 +141,36 @@ describe("RetryMistakesPage", () => {
   it("redirects to review page when there are no mistakes", async () => {
     mockGetMistakes.mockResolvedValue([]);
     await expect(
-      RetryMistakesPage({ params: Promise.resolve({ slug: "signs" }) })
+      callPage()
     ).rejects.toThrow("redirect");
   });
 
   it("renders question text for first mistake", async () => {
-    const jsx = await RetryMistakesPage({ params: Promise.resolve({ slug: "signs" }) });
+    const jsx = await callPage();
     render(jsx);
     expect(screen.getByText("מה המשמעות של תמרור זה?")).toBeInTheDocument();
   });
 
-  it("fetches mistakes scoped to the last session", async () => {
-    await RetryMistakesPage({ params: Promise.resolve({ slug: "signs" }) });
+  it("defaults to retrying the last session's mistakes", async () => {
+    await callPage();
     expect(mockGetMistakes).toHaveBeenCalledWith(expect.anything(), "u1", "t1", "lastSession");
+  });
+
+  it("retries all outstanding mistakes when scope=all", async () => {
+    await callPage("all");
+    expect(mockGetMistakes).toHaveBeenCalledWith(expect.anything(), "u1", "t1", "all");
+  });
+
+  it("preserves all-time scope in review links", async () => {
+    const jsx = await callPage("all");
+    const { container } = render(jsx);
+    expect(container.querySelector('a[href="/topics/signs/review?scope=all"]')).toBeTruthy();
   });
 
   it("renders markdown bold in explanation as <strong> without literal asterisks", async () => {
     const m = { ...MISTAKE_A, explanation_he: "**חגורות הבטיחות** מחזיקות את הנוסע" };
     mockGetMistakes.mockResolvedValue([m] as never);
-    const jsx = await RetryMistakesPage({ params: Promise.resolve({ slug: "signs" }) });
+    const jsx = await callPage();
     const { container } = render(jsx);
     const explanation = container.querySelector(".quiz-option-explanation");
     expect(explanation?.querySelector("strong")?.textContent).toBe("חגורות הבטיחות");
@@ -152,14 +180,14 @@ describe("RetryMistakesPage", () => {
 
   it("renders all mistakes as slides", async () => {
     mockGetMistakes.mockResolvedValue([MISTAKE_A, MISTAKE_B] as never);
-    const jsx = await RetryMistakesPage({ params: Promise.resolve({ slug: "signs" }) });
+    const jsx = await callPage();
     const { container } = render(jsx);
     expect(container.querySelectorAll(".quiz-slide")).toHaveLength(2);
   });
 
   it("renders quiz count translation key", async () => {
     mockGetMistakes.mockResolvedValue([MISTAKE_A, MISTAKE_B] as never);
-    const jsx = await RetryMistakesPage({ params: Promise.resolve({ slug: "signs" }) });
+    const jsx = await callPage();
     render(jsx);
     // t("count", { current: 1, total }) returns "count"
     expect(screen.getByText("count")).toBeInTheDocument();

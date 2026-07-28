@@ -38,7 +38,7 @@ describe("MistakesPage", () => {
     mockGetMistakesForTopic.mockImplementation(async (_db, _user, topicId) => topicId === "signs" ? [{ id: "q1" }] as never : [] as never);
     const { container } = render(await MistakesPage());
 
-    expect(screen.getByRole("link", { name: /תמרורים/ })).toHaveAttribute("href", "/topics/signs/review");
+    expect(screen.getByRole("link", { name: /תמרורים/ })).toHaveAttribute("href", "/topics/signs/review?scope=all");
     expect(screen.queryByText("empty")).toBeNull();
     expect(container.querySelector('[data-testid="tabbar"]')).toHaveAttribute("data-active", "practice");
     expect(container.querySelector('[data-testid="tabbar"]')).toHaveAttribute("data-current", "");

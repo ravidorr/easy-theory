@@ -473,18 +473,18 @@ describe("ReviewPage", () => {
       expect(screen.queryByText("viewAllMistakes")).not.toBeInTheDocument();
     });
 
-    it("hides the retry link on the all-time view when the last session is clean", async () => {
+    it("retries all outstanding mistakes on the all-time view when the last session is clean", async () => {
       mockByScope({ lastSession: [], all: [MISTAKE_A] });
       const jsx = await callPage("all");
       const { container } = render(jsx);
-      expect(container.querySelector('a[href="/topics/signs/retry"]')).toBeNull();
+      expect(container.querySelector('a[href="/topics/signs/retry?scope=all"]')).toBeTruthy();
     });
 
-    it("shows the retry link on the all-time view when the last session has mistakes", async () => {
+    it("retries all outstanding mistakes on the all-time view when the last session has mistakes", async () => {
       mockByScope({ lastSession: [MISTAKE_A], all: [MISTAKE_A, MISTAKE_B] });
       const jsx = await callPage("all");
       const { container } = render(jsx);
-      expect(container.querySelector('a[href="/topics/signs/retry"]')).toBeTruthy();
+      expect(container.querySelector('a[href="/topics/signs/retry?scope=all"]')).toBeTruthy();
     });
   });
 
