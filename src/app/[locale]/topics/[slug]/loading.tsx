@@ -6,11 +6,13 @@ import {
   SkeletonScreen,
 } from "@/components/Skeleton";
 import styles from "./page.module.css";
+import { TabBar } from "@/components/TabBar";
 
 export default async function Loading() {
   const t = await getTranslations("Loading");
 
   return (
+    <>
     <SkeletonScreen label={t("label")} className={styles.page}>
       <SkeletonRow>
         <Skeleton variant="circle" size="s40" />
@@ -27,5 +29,7 @@ export default async function Loading() {
       </SkeletonCard>
       <Skeleton variant="block" />
     </SkeletonScreen>
+    <TabBar active="practice" current={null} />
+    </>
   );
 }

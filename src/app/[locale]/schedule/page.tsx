@@ -4,6 +4,7 @@ import Script from "next/script";
 import { createClient } from "@/lib/supabase";
 import { getUserSchedule } from "@/lib/db";
 import { getTranslations } from "next-intl/server";
+import { TabBar } from "@/components/TabBar";
 import styles from "./page.module.css";
 
 const DURATIONS = [30, 45, 60];
@@ -122,6 +123,8 @@ export default async function SchedulePage() {
           </button>
         </div>
       </main>
+
+      <TabBar active="more" current={null} />
 
       <Script src="/js/modal.js" strategy="afterInteractive" />
       <Script src="/js/push.js" strategy="afterInteractive" />

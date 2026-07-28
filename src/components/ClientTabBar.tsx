@@ -1,16 +1,16 @@
-import { getTranslations } from "next-intl/server";
+"use client";
+
+import { useTranslations } from "next-intl";
 import { TabBarContent, type ActiveTab } from "./TabBarContent";
 
-export type { ActiveTab } from "./TabBarContent";
-
-export async function TabBar({
+export function ClientTabBar({
   active,
   current = active,
 }: {
   active: ActiveTab;
   current?: ActiveTab | null;
 }) {
-  const t = await getTranslations("TabBar");
+  const t = useTranslations("TabBar");
 
   return (
     <TabBarContent

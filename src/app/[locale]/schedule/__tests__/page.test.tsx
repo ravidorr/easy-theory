@@ -24,6 +24,10 @@ vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn().mockResolvedValue((key: string) => key),
   getLocale: vi.fn().mockResolvedValue("he"),
 }));
+vi.mock("@/components/TabBar", () => ({
+  TabBar: ({ active, current }: { active: string; current?: string | null }) =>
+    React.createElement("nav", { "data-tab-bar": "", "data-active": active, "data-current": current ?? "" }),
+}));
 
 const mockCreateClient = vi.mocked(createClient);
 const mockGetUserSchedule = vi.mocked(getUserSchedule);
@@ -139,5 +143,12 @@ describe("SchedulePage", () => {
     const jsx = await SchedulePage();
     const { container } = render(jsx);
     expect(container.querySelector("a[aria-label='backLabel']")).toBeTruthy();
+  });
+
+  it("keeps the More section TabBar visible without a false current page", async () => {
+    const jsx = await SchedulePage();
+    const { container } = render(jsx);
+    expect(container.querySelector("[data-tab-bar]")).toHaveAttribute("data-active", "more");
+    expect(container.querySelector("[data-tab-bar]")).toHaveAttribute("data-current", "");
   });
 });

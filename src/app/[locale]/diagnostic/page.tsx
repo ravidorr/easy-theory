@@ -5,6 +5,8 @@ import { getTopics, getQuestionsForTopic } from "@/lib/db";
 import { localizeQuestion } from "@/lib/content-locale";
 import { getLocale, getTranslations } from "next-intl/server";
 import { featureEnabled } from "@/lib/feature-flags";
+import { TabBar } from "@/components/TabBar";
+import styles from "./page.module.css";
 
 export default async function DiagnosticPage() {
   const supabase = await createClient();
@@ -24,7 +26,7 @@ export default async function DiagnosticPage() {
   }));
   return (
     <>
-    <main id="diagnostic" data-authenticated={user ? "true" : "false"}>
+    <main id="diagnostic" data-authenticated={user ? "true" : "false"} className={styles.page}>
       <h1>{t("title")}</h1>
       <p>{t("intro")}</p>
       <label htmlFor="diagnostic-target-date">{t("targetDate")}</label>
@@ -45,6 +47,7 @@ export default async function DiagnosticPage() {
       </form>
       <div id="diagnostic-result" role="status" aria-live="polite" hidden />
     </main>
+    <TabBar active="practice" current={null} />
     <Script src="/js/diagnostic.js" strategy="afterInteractive" />
     </>
   );

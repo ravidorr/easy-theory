@@ -7,6 +7,7 @@ import { SignImage } from "@/components/SignImage";
 import { QuestionImage } from "@/components/QuestionImage";
 import { Icon } from "@/components/Icon";
 import { InlineMarkdown } from "@/components/InlineMarkdown";
+import { TabBar } from "@/components/TabBar";
 import { createClient } from "@/lib/supabase";
 import { getTopicBySlug, getMistakesForTopic, getBookmarkedQuestionIds } from "@/lib/db";
 import type { MistakeScope, Question } from "@/lib/db";
@@ -254,6 +255,8 @@ export default async function RetryMistakesPage({
           </Link>
         </div>
       </main>
+
+      <TabBar active="practice" current={null} />
 
       <Script src="/js/medal.js" strategy="afterInteractive" />
       <Script src="/js/quiz.js" strategy="afterInteractive" />

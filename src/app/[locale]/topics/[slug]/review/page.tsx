@@ -7,6 +7,7 @@ import { SignImage } from "@/components/SignImage";
 import { QuestionImage } from "@/components/QuestionImage";
 import { Icon } from "@/components/Icon";
 import { EmptyStateCard } from "@/components/EmptyStateCard";
+import { TabBar } from "@/components/TabBar";
 import { InlineMarkdown } from "@/components/InlineMarkdown";
 import { createClient } from "@/lib/supabase";
 import { getTopicBySlug, getMistakesForTopic, getBookmarkedQuestionIds } from "@/lib/db";
@@ -219,6 +220,7 @@ export default async function ReviewPage({
   );
 
   return (
+    <>
     <main className={styles.page}>
       <div className={styles.topBar}>
         <Link href={`/topics/${slug}`} className={`icon-btn ${styles.closeBtn}`} aria-label={tQuiz("closeLabel")}>
@@ -324,5 +326,7 @@ export default async function ReviewPage({
 
       <Script src="/js/bookmark.js" strategy="afterInteractive" />
     </main>
+    <TabBar active="practice" current={null} />
+    </>
   );
 }

@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import * as Sentry from "@sentry/nextjs";
+import { ClientTabBar } from "@/components/ClientTabBar";
 import styles from "./error.module.css";
 
 // Segment-level error boundary for everything under [locale]. Data helpers
@@ -24,6 +25,7 @@ export default function LocaleError({
   }, [error]);
 
   return (
+    <>
     <main className={styles.wrap}>
       {/* Inline svg (not the Icon component): this client error boundary is
           bundled into every page's JS, and importing Icon would ship the whole
@@ -59,5 +61,7 @@ export default function LocaleError({
         {t("backHome")}
       </Link>
     </main>
+    <ClientTabBar active="home" current={null} />
+    </>
   );
 }
