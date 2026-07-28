@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.221] — 2026-07-28
+
+### Fixed
+
+- Mistake review now opens and retries the full unresolved set, retaining all-time scope through login and review navigation.
+
+---
+
 ## [0.3.220] — 2026-07-28
 
 ### Added

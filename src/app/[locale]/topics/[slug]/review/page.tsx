@@ -189,8 +189,8 @@ export default async function ReviewPage({
     getBookmarkedQuestionIds(supabase, user.id),
   ]);
 
-  // Retry always practices the LAST session's mistakes — hide the button when that
-  // session is clean so it can't bounce straight back to an empty review.
+  // Retry the same set shown by the review page. The all-time view is the
+  // unresolved-mistakes entry point, so it must not drop older mistakes.
   let showRetry: boolean;
   let hasOlderMistakes = false;
   if (scope === "lastSession") {
@@ -200,9 +200,7 @@ export default async function ReviewPage({
         (await getMistakesForTopic(supabase, user.id, topic.id, "all")).length > 0;
     }
   } else {
-    showRetry =
-      mistakes.length > 0 &&
-      (await getMistakesForTopic(supabase, user.id, topic.id, "lastSession")).length > 0;
+    showRetry = mistakes.length > 0;
   }
 
   const dueMistakeCount = mistakes.filter((m) => isDue(m.due_at)).length;
@@ -276,7 +274,7 @@ export default async function ReviewPage({
             <p className={styles.dueCount}>{t("dueCount", { count: dueMistakeCount })}</p>
           )}
           {showRetry && (
-            <Link href={`/topics/${slug}/retry`} className={`btn-primary ${styles.btnFull}`}>
+            <Link href={`/topics/${slug}/retry${scope === "all" ? "?scope=all" : ""}`} className={`btn-primary ${styles.btnFull}`}>
               {t("retryBtn")}
             </Link>
           )}
