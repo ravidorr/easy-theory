@@ -39,8 +39,8 @@ vi.mock("@/components/TabBar", () => ({
       "data-current": current ?? "none",
     }),
 }));
-vi.mock("next/link", () => ({
-  default: ({ href, children, ...rest }: { href: string; children: unknown }) =>
+vi.mock("@/lib/navigation", () => ({
+  Link: ({ href, children, ...rest }: { href: string; children: unknown }) =>
     React.createElement("a", { href, ...rest }, children as React.ReactNode),
 }));
 vi.mock("next/script", () => ({
@@ -284,7 +284,11 @@ describe("ExamRunPage", () => {
   it("shows the empty state when no questions exist", async () => {
     mockGetQuestions.mockResolvedValue([] as never);
     const jsx = await ExamRunPage();
-    render(jsx);
+    const { container } = render(jsx);
     expect(screen.getByText("emptyQuestions")).toBeInTheDocument();
+    expect(screen.getByText("emptyQuestionsTitle")).toBeInTheDocument();
+    expect(container.querySelector('[data-empty-state]')).toHaveAttribute("data-tone", "warning");
+    expect(screen.getByRole("link", { name: "emptyQuestionsCta" })).toHaveAttribute("href", "/practice");
+    expect(container.querySelector("#exam-footer")).toBeNull();
   });
 });

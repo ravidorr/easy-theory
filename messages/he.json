@@ -35,7 +35,9 @@
     "title": "טעויות לחזרה",
     "intro": "השאלות האלו יחזרו עד שהכל ירגיש בטוח.",
     "count": "{count} שאלות לחזרה",
-    "empty": "אין טעויות פתוחות כרגע. עבודה מצוינת."
+    "empty": "אין טעויות פתוחות כרגע. אפשר להמשיך לתרגל ולחזק את הבטחון.",
+    "emptyTitle": "כל הכבוד, אין טעויות לחזרה",
+    "emptyCta": "לתרגול"
   },
   "Progress": {
     "title": "ההתקדמות שלך",
@@ -207,6 +209,8 @@
   "Quiz": {
     "count": "{current} מתוך {total}",
     "emptyQuestions": "אין שאלות זמינות לנושא זה עדיין.",
+    "emptyQuestionsTitle": "אין שאלות זמינות כרגע",
+    "emptyQuestionsCta": "לבחירת נושא",
     "nextBtn": "לשאלה הבאה",
     "autoAdvanceHint": "אחרי תשובה נכונה עוברים אוטומטית לשאלה הבאה. אפשר לכבות במסך \"עוד\".",
     "scoreLabel": "ניקוד",
@@ -267,6 +271,8 @@
   "Review": {
     "topBarTitle": "סקירת טעויות",
     "emptyHint": "אין טעויות! עשית הכל נכון",
+    "emptyTitle": "מעולה, הכל נכון",
+    "backToTopic": "חזרה לנושא",
     "backHome": "חזרה לבית",
     "mistakeCountOne": "שאלה אחת שגויה",
     "mistakeCountMany": "{count} שאלות שגויות",
@@ -287,7 +293,9 @@
     "topBarTitle": "שאלות שמורות",
     "countOne": "שאלה שמורה אחת",
     "countMany": "{count} שאלות שמורות",
-    "emptyHint": "עוד אין שאלות שמורות. אפשר לשמור שאלות בזמן התרגול."
+    "emptyTitle": "עוד לא שמרנו שאלות",
+    "emptyHint": "אפשר לשמור שאלות בזמן התרגול ולחזור אליהן כאן.",
+    "emptyCta": "לתרגול"
   },
   "Exam": {
     "pageTitle": "סימולציית מבחן",
@@ -311,6 +319,8 @@
     "reviewBtn": "נעבור על התשובות",
     "backToExam": "חזרה לסימולציה",
     "emptyQuestions": "אין שאלות זמינות עדיין.",
+    "emptyQuestionsTitle": "אין סימולציה זמינה כרגע",
+    "emptyQuestionsCta": "לבחירת נושא",
     "timerLabel": "זמן שנותר",
     "markReview": "סימון לחזרה",
     "letters": "א,ב,ג,ד"

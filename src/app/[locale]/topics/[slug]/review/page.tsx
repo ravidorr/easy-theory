@@ -1,11 +1,12 @@
 import { notFound, redirect } from "next/navigation";
-import Link from "next/link";
+import { Link } from "@/lib/navigation";
 import Script from "next/script";
 import { existsSync } from "fs";
 import { join } from "path";
 import { SignImage } from "@/components/SignImage";
 import { QuestionImage } from "@/components/QuestionImage";
 import { Icon } from "@/components/Icon";
+import { EmptyStateCard } from "@/components/EmptyStateCard";
 import { InlineMarkdown } from "@/components/InlineMarkdown";
 import { createClient } from "@/lib/supabase";
 import { getTopicBySlug, getMistakesForTopic, getBookmarkedQuestionIds } from "@/lib/db";
@@ -248,20 +249,22 @@ export default async function ReviewPage({
       </div>
 
       {localizedMistakes.length === 0 ? (
-        <div className={styles.emptyState}>
-          <Icon name="check" size={48} className={styles.emptyIcon} />
-          <p className={styles.emptyHint}>
-            {hasOlderMistakes ? t("emptyHintLastSession") : t("emptyHint")}
-          </p>
-          {hasOlderMistakes && (
-            <Link href={`/topics/${slug}/review?scope=all`} className={`btn-secondary ${styles.btnWide}`}>
-              {t("viewAllMistakes")}
+        <EmptyStateCard
+          icon="check"
+          tone="success"
+          title={t("emptyTitle")}
+          description={hasOlderMistakes ? t("emptyHintLastSession") : t("emptyHint")}
+          actions={<>
+            {hasOlderMistakes && (
+              <Link href={`/topics/${slug}/review?scope=all`} className="btn-secondary">
+                {t("viewAllMistakes")}
+              </Link>
+            )}
+            <Link href={`/topics/${slug}`} className="btn-primary">
+              {t("backToTopic")}
             </Link>
-          )}
-          <Link href="/" className={`btn-primary ${styles.btnWide}`}>
-            {t("backHome")}
-          </Link>
-        </div>
+          </>}
+        />
       ) : (
         <>
           <p className={styles.mistakeCount}>

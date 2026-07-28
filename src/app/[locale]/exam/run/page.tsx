@@ -1,11 +1,12 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
+import { Link } from "@/lib/navigation";
 import Script from "next/script";
 import { existsSync } from "fs";
 import { join } from "path";
 import { SignImage } from "@/components/SignImage";
 import { QuestionImage } from "@/components/QuestionImage";
 import { TabBar } from "@/components/TabBar";
+import { EmptyStateCard } from "@/components/EmptyStateCard";
 import { createClient } from "@/lib/supabase";
 import { getOrCreateExamSession, getQuestionsByIds, getRandomExamQuestions, getTopics } from "@/lib/db";
 import type { Question } from "@/lib/db";
@@ -193,9 +194,13 @@ export default async function ExamRunPage() {
         </div>
 
         {total === 0 ? (
-          <div className={styles.emptyQuestions}>
-            <p>{t("emptyQuestions")}</p>
-          </div>
+          <EmptyStateCard
+            icon="warning"
+            tone="warning"
+            title={t("emptyQuestionsTitle")}
+            description={t("emptyQuestions")}
+            actions={<Link href="/practice" className="btn-primary">{t("emptyQuestionsCta")}</Link>}
+          />
         ) : (
           localizedQuestions.map((q, i) => (
             <ExamSlide
@@ -209,30 +214,28 @@ export default async function ExamRunPage() {
           ))
         )}
 
-        <div id="exam-footer" className={styles.examFooter}>
-          <div id="exam-error" className={styles.examError} aria-live="polite" hidden></div>
-          <span id="exam-answered" className={styles.answeredCount} aria-live="polite">
-            {t("answered", { answered: 0, total })}
-          </span>
-          <button id="exam-mark-review" className="btn-secondary" type="button" aria-pressed="false">
-            {t("markReview")}
-          </button>
-          <div className={styles.navButtons}>
-            <button id="exam-prev" className={`btn-secondary ${styles.navBtn}`} disabled>
-              {t("prevBtn")}
+        {total > 0 && (
+          <div id="exam-footer" className={styles.examFooter}>
+            <div id="exam-error" className={styles.examError} aria-live="polite" hidden></div>
+            <span id="exam-answered" className={styles.answeredCount} aria-live="polite">
+              {t("answered", { answered: 0, total })}
+            </span>
+            <button id="exam-mark-review" className="btn-secondary" type="button" aria-pressed="false">
+              {t("markReview")}
             </button>
-            <button id="exam-next" className={`btn-primary ${styles.navBtn}`}>
-              {t("nextBtn")}
+            <div className={styles.navButtons}>
+              <button id="exam-prev" className={`btn-secondary ${styles.navBtn}`} disabled>
+                {t("prevBtn")}
+              </button>
+              <button id="exam-next" className={`btn-primary ${styles.navBtn}`}>
+                {t("nextBtn")}
+              </button>
+            </div>
+            <button id="exam-submit" className={`btn-primary ${styles.hidden}`}>
+              {t("submitBtn")}
             </button>
           </div>
-          <button
-            id="exam-submit"
-            className={`btn-primary ${total === 0 ? "" : styles.hidden}`}
-            disabled={total === 0}
-          >
-            {t("submitBtn")}
-          </button>
-        </div>
+        )}
 
         <div id="exam-review-bar" className={styles.reviewBar} hidden>
           <span className={styles.reviewLabel}>{tJs("examReviewMode")}</span>

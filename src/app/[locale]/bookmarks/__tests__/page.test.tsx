@@ -32,6 +32,10 @@ vi.mock("next/script", () => ({
   default: ({ src }: { src: string }) =>
     React.createElement("script", { "data-src": src }),
 }));
+vi.mock("@/lib/navigation", () => ({
+  Link: ({ href, children, ...rest }: { href: string; children: unknown }) =>
+    React.createElement("a", { href, ...rest }, children as React.ReactNode),
+}));
 vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn().mockResolvedValue((key: string) => key),
   getLocale: vi.fn().mockResolvedValue("he"),
@@ -91,11 +95,13 @@ describe("BookmarksPage", () => {
     await expect(BookmarksPage()).rejects.toThrow("redirect");
   });
 
-  it("shows emptyHint without a return-home CTA when there are no bookmarks", async () => {
+  it("shows an actionable empty state when there are no bookmarks", async () => {
     const jsx = await BookmarksPage();
-    render(jsx);
+    const { container } = render(jsx);
     expect(screen.getByText("emptyHint")).toBeInTheDocument();
-    expect(screen.queryByText("backHome")).not.toBeInTheDocument();
+    expect(screen.getByText("emptyTitle")).toBeInTheDocument();
+    expect(container.querySelector('[data-empty-state]')).toHaveAttribute("data-tone", "primary");
+    expect(screen.getByRole("link", { name: "emptyCta" })).toHaveAttribute("href", "/practice");
   });
 
   it("shows countOne for a single bookmark", async () => {
