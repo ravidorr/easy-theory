@@ -1,0 +1,136 @@
+.page {
+  min-height: 100vh;
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 20px 20px calc(96px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.header h1,
+.readinessContent h2 {
+  margin: 0;
+  color: var(--text);
+  line-height: var(--line-tight);
+}
+
+.header h1 {
+  font-size: var(--type-h1-size);
+  font-weight: var(--type-h1-weight);
+}
+
+.readinessCard,
+.statTile {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-card);
+}
+
+.readinessCard {
+  border-color: var(--primary);
+  border-radius: var(--radius-xl);
+  background: var(--primary-soft);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.readinessIcon,
+.statIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+}
+
+.readinessIcon {
+  width: 48px;
+  height: 48px;
+  color: var(--text-on-primary);
+  background: var(--primary);
+}
+
+.readinessContent {
+  min-width: 0;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.readinessContent h2 {
+  font-size: var(--type-body-size);
+  font-weight: 700;
+}
+
+.readinessContent p {
+  margin: 0;
+  color: var(--primary-soft-text);
+  font-size: var(--type-small-size);
+  line-height: var(--line-body);
+}
+
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.statTile {
+  min-height: 148px;
+  padding: 16px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.statTileWide {
+  grid-column: 1 / -1;
+  min-height: 124px;
+}
+
+.statIcon {
+  width: 40px;
+  height: 40px;
+}
+
+.statIconStreak {
+  color: var(--gold-text);
+  background: var(--gold-soft);
+}
+
+.statIconAnswered {
+  color: var(--primary-soft-text);
+  background: var(--primary-soft);
+}
+
+.statIconSimulations {
+  color: var(--success-text);
+  background: var(--success-soft);
+}
+
+.statTile dt {
+  margin-top: auto;
+  color: var(--text-muted);
+  font-size: var(--type-small-size);
+  font-weight: 600;
+}
+
+.statTile dd {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--type-h1-size);
+  font-weight: var(--type-h1-weight);
+  line-height: 1;
+}
+
+@media (width >= 600px) {
+  .page {
+    padding-top: 32px;
+  }
+}

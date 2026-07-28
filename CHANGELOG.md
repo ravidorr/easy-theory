@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.216] — 2026-07-28
+
+### Fixed
+
+- Rebuilt the Progress dashboard with a responsive readiness card and clear learner statistics. Readiness guidance is now localized, supportive, and tailored to every readiness-and-evidence combination.
+
+---
+
 ## [0.3.215] — 2026-07-27
 
 ### Fixed
