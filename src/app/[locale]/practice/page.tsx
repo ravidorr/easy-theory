@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { TabBar } from "@/components/TabBar";
 import { createClient } from "@/lib/supabase";
 import { getTopics } from "@/lib/db";
@@ -33,7 +34,13 @@ export default async function PracticePage() {
       <div className={styles.topicList}>
         {topics.map((topic) => (
           <Link className={`pressable-row ${styles.topicRow}`} key={topic.id} href={`/topics/${topic.slug}`}>
-            <span className={styles.topicIcon}><Icon name="cards" size={22} /></span>
+            <span className={styles.topicIcon}>
+              {topic.icon ? (
+                <Image src={topic.icon} alt="" width={34} height={34} className={styles.topicIconImg} />
+              ) : (
+                <Icon name="cards" size={22} />
+              )}
+            </span>
             <span className={styles.topicLabel}>{localizedRecordField(locale, topic, "name_he", "name_ar")}</span>
             <Icon name="chevron-left" size={20} className={styles.chevron} />
           </Link>
