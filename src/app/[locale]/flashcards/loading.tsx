@@ -29,7 +29,7 @@ export default async function Loading() {
           <Skeleton variant="block" />
         </SkeletonRow>
       </SkeletonScreen>
-      <TabBar active="cards" />
+      <TabBar active="practice" current={null} />
     </>
   );
 }

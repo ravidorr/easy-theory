@@ -189,10 +189,10 @@ describe("ExamRunPage", () => {
     expect(container.querySelector('a[href="/exam"]')).toBeTruthy();
   });
 
-  it("renders shared Home navigation without the redundant close control", async () => {
+  it("renders shared Exam navigation without the redundant close control", async () => {
     const jsx = await ExamRunPage();
     const { container } = render(jsx);
-    expect(screen.getByTestId("tabbar")).toHaveAttribute("data-active", "home");
+    expect(screen.getByTestId("tabbar")).toHaveAttribute("data-active", "exam");
     expect(screen.getByTestId("tabbar")).toHaveAttribute("data-current", "none");
     expect(container.querySelector(".icon-btn")).toBeNull();
   });

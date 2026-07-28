@@ -85,7 +85,7 @@ export default async function ExamPage() {
           )}
         </div>
       </main>
-      <TabBar active="home" />
+      <TabBar active="exam" />
     </>
   );
 }

@@ -7,8 +7,8 @@ vi.mock("next-intl/server", () => ({
 }));
 
 vi.mock("@/components/TabBar", () => ({
-  TabBar: ({ active }: { active: string }) => (
-    <div data-testid="tabbar" data-active={active} />
+  TabBar: ({ active, current }: { active: string; current?: string | null }) => (
+    <div data-testid="tabbar" data-active={active} data-current={current ?? ""} />
   ),
 }));
 
@@ -25,8 +25,9 @@ describe("flashcards loading skeleton", () => {
     expect(container.querySelectorAll('[data-skeleton="block"]')).toHaveLength(2);
   });
 
-  it("keeps the flashcards tab bar visible", async () => {
+  it("groups the flashcards loading state under Practice without a false current page", async () => {
     render(await Loading());
-    expect(screen.getByTestId("tabbar")).toHaveAttribute("data-active", "cards");
+    expect(screen.getByTestId("tabbar")).toHaveAttribute("data-active", "practice");
+    expect(screen.getByTestId("tabbar")).toHaveAttribute("data-current", "");
   });
 });

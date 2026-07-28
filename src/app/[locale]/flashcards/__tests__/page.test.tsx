@@ -21,8 +21,8 @@ vi.mock("next/script", () => ({
   default: () => React.createElement("div", null),
 }));
 vi.mock("@/components/TabBar", () => ({
-  TabBar: ({ active }: { active: string }) =>
-    React.createElement("div", { "data-testid": "tabbar", "data-active": active }),
+  TabBar: ({ active, current }: { active: string; current?: string | null }) =>
+    React.createElement("div", { "data-testid": "tabbar", "data-active": active, "data-current": current ?? "" }),
 }));
 // Echo keys, except signBadge which interpolates so the numeric-name
 // fallback test can verify the sign number is threaded through.
@@ -158,11 +158,12 @@ describe("FlashcardsPage", () => {
     expect(container.querySelector("#fc-name")!.textContent).toContain("…");
   });
 
-  it("renders the flashcards TabBar as active", async () => {
+  it("groups flashcards under Practice without a false current page", async () => {
     mockGetSigns.mockResolvedValue([SIGN_1] as never);
     const jsx = await FlashcardsPage();
     render(jsx);
-    expect(screen.getByTestId("tabbar")).toHaveAttribute("data-active", "cards");
+    expect(screen.getByTestId("tabbar")).toHaveAttribute("data-active", "practice");
+    expect(screen.getByTestId("tabbar")).toHaveAttribute("data-current", "");
   });
 
   it("does not render a top-level back link", async () => {

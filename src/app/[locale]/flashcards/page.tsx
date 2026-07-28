@@ -176,7 +176,7 @@ export default async function FlashcardsPage() {
       </main>
 
       <Script src="/js/flashcard.js" strategy="afterInteractive" />
-      <TabBar active="cards" />
+      <TabBar active="practice" current={null} />
     </>
   );
 }

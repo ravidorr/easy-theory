@@ -31,7 +31,7 @@ export default async function Loading() {
         <Skeleton variant="block" />
       </SkeletonRow>
     </SkeletonScreen>
-    <TabBar active="home" current={null} />
+    <TabBar active="exam" current={null} />
     </>
   );
 }

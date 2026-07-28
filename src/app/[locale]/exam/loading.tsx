@@ -28,7 +28,7 @@ export default async function Loading() {
           <Skeleton size="w60" />
         </SkeletonCard>
       </SkeletonScreen>
-      <TabBar active="home" />
+      <TabBar active="exam" />
     </>
   );
 }

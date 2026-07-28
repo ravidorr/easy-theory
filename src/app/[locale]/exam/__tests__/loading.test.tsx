@@ -22,8 +22,8 @@ describe("exam intro loading skeleton", () => {
     expect(container.querySelectorAll('[data-skeleton="block"]')).toHaveLength(1);
   });
 
-  it("keeps the home TabBar visible", async () => {
+  it("keeps the Exam TabBar visible", async () => {
     render(await Loading());
-    expect(screen.getByTestId("tabbar")).toHaveAttribute("data-active", "home");
+    expect(screen.getByTestId("tabbar")).toHaveAttribute("data-active", "exam");
   });
 });
