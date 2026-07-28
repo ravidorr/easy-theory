@@ -7,6 +7,7 @@ import { SignImage } from "@/components/SignImage";
 import { QuestionImage } from "@/components/QuestionImage";
 import { Icon } from "@/components/Icon";
 import { EmptyStateCard } from "@/components/EmptyStateCard";
+import { TabBar } from "@/components/TabBar";
 import { InlineMarkdown } from "@/components/InlineMarkdown";
 import { createClient } from "@/lib/supabase";
 import { getQuestionsForTopic, getBookmarkedQuestionIds, getAnsweredQuestionIdsForTopic, getTopics, getTopicProgress } from "@/lib/db";
@@ -296,6 +297,8 @@ export default async function TopicQuizPage({
           </Link>
         </div>
       </main>
+
+      <TabBar active="practice" current={null} />
 
       <Script src="/js/medal.js" strategy="afterInteractive" />
       <Script src="/js/quiz.js" strategy="afterInteractive" />

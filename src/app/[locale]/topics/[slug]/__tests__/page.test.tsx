@@ -42,6 +42,10 @@ vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn().mockResolvedValue((key: string) => key),
   getLocale: vi.fn().mockResolvedValue("he"),
 }));
+vi.mock("@/components/TabBar", () => ({
+  TabBar: ({ active, current }: { active: string; current?: string | null }) =>
+    React.createElement("nav", { "data-tab-bar": "", "data-active": active, "data-current": current ?? "" }),
+}));
 
 const mockCreateClient = vi.mocked(createClient);
 const mockGetQuestions = vi.mocked(getQuestionsForTopic);
@@ -549,5 +553,12 @@ describe("TopicQuizPage", () => {
     expect(report?.getAttribute("data-question-id")).toBe("q1");
     expect(report?.getAttribute("data-topic-id")).toBe("t1");
     expect(report?.getAttribute("aria-haspopup")).toBe("dialog");
+  });
+
+  it("keeps the Practice section TabBar visible without a false current page", async () => {
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "he" }) });
+    const { container } = render(jsx);
+    expect(container.querySelector("[data-tab-bar]")).toHaveAttribute("data-active", "practice");
+    expect(container.querySelector("[data-tab-bar]")).toHaveAttribute("data-current", "");
   });
 });

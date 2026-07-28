@@ -15,6 +15,9 @@ vi.mock("next-intl/server", () => ({
   getLocale: vi.fn(),
   getTranslations: vi.fn(),
 }));
+vi.mock("@/components/TabBar", () => ({
+  TabBar: ({ active, current }: { active: string; current?: string | null }) => <nav data-tab-bar data-active={active} data-current={current ?? ""} />,
+}));
 
 const mockCreateClient = vi.mocked(createClient);
 const mockGetTopics = vi.mocked(getTopics);
@@ -74,5 +77,10 @@ describe("DiagnosticPage", () => {
     const { container } = render(await DiagnosticPage());
 
     expect(container.querySelector("#diagnostic")).toHaveAttribute("data-authenticated", "true");
+  });
+
+  it("keeps the Practice section TabBar visible", async () => {
+    const { container } = render(await DiagnosticPage());
+    expect(container.querySelector("[data-tab-bar]")).toHaveAttribute("data-active", "practice");
   });
 });

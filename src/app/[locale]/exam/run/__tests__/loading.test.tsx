@@ -5,6 +5,9 @@ import Loading from "../loading";
 vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn().mockResolvedValue((key: string) => key),
 }));
+vi.mock("@/components/TabBar", () => ({
+  TabBar: ({ active, current }: { active: string; current?: string | null }) => <nav data-tab-bar data-active={active} data-current={current ?? ""} />,
+}));
 
 describe("exam run loading skeleton", () => {
   it("announces loading and marks the content busy", async () => {
@@ -17,5 +20,11 @@ describe("exam run loading skeleton", () => {
     const { container } = render(await Loading());
     expect(container.querySelectorAll('[data-skeleton="block"]')).toHaveLength(6);
     expect(container.querySelectorAll('[data-skeleton="pill"]')).toHaveLength(1);
+  });
+
+  it("keeps the Home section TabBar visible without a false current page", async () => {
+    const { container } = render(await Loading());
+    expect(container.querySelector("[data-tab-bar]")).toHaveAttribute("data-active", "home");
+    expect(container.querySelector("[data-tab-bar]")).toHaveAttribute("data-current", "");
   });
 });

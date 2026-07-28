@@ -16,6 +16,9 @@ vi.mock("next/link", () => ({
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
+vi.mock("@/components/ClientTabBar", () => ({
+  ClientTabBar: ({ active, current }: { active: string; current?: string | null }) => <nav data-tab-bar data-active={active} data-current={current ?? ""} />,
+}));
 
 describe("LocaleError ([locale] error boundary)", () => {
   const error = Object.assign(new Error("boom"), { digest: "d1" });
@@ -47,5 +50,11 @@ describe("LocaleError ([locale] error boundary)", () => {
     render(<LocaleError error={error} reset={reset} />);
     fireEvent.click(screen.getByRole("button", { name: "retry" }));
     expect(reset).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the Home section TabBar visible without a false current page", () => {
+    const { container } = render(<LocaleError error={error} reset={reset} />);
+    expect(container.querySelector("[data-tab-bar]")).toHaveAttribute("data-active", "home");
+    expect(container.querySelector("[data-tab-bar]")).toHaveAttribute("data-current", "");
   });
 });
