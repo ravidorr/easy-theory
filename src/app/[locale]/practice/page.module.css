@@ -93,6 +93,12 @@
   color: var(--primary-soft-text);
 }
 
+.topicIconImg {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+}
+
 .topicLabel {
   font-weight: 600;
 }

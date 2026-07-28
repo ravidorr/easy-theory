@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.219] — 2026-07-28
+
+### Fixed
+
+- Practice topic rows now use their existing topic-specific sign images instead of a generic cards icon.
+
+---
+
 ## [0.3.218] — 2026-07-28
 
 ### Changed

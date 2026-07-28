@@ -5,6 +5,10 @@ import PracticePage from "../page";
 import { createClient } from "@/lib/supabase";
 import { getTopics } from "@/lib/db";
 
+vi.mock("next/image", () => ({
+  default: ({ src, alt, className }: { src: string; alt?: string; className?: string }) =>
+    React.createElement("img", { src, alt, className }),
+}));
 vi.mock("next/navigation", () => ({ redirect: vi.fn(() => { throw new Error("redirect"); }) }));
 vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
 vi.mock("@/lib/db", () => ({ getTopics: vi.fn() }));
@@ -27,7 +31,13 @@ describe("PracticePage", () => {
     vi.clearAllMocks();
     mockCreateClient.mockResolvedValue(client() as never);
     mockGetTopics.mockResolvedValue([
-      { id: "signs", slug: "signs", name_he: "תמרורים", name_ar: "إشارات المرور" },
+      {
+        id: "signs",
+        slug: "signs",
+        name_he: "תמרורים",
+        name_ar: "إشارات المرور",
+        icon: "/signs/sign-302.png",
+      },
     ] as never);
   });
 
@@ -44,7 +54,7 @@ describe("PracticePage", () => {
     expect(reviewLink).toHaveAttribute("href", "/mistakes");
     expect(reviewLink.querySelector("svg")).toBeTruthy();
     expect(topicLink).toHaveAttribute("href", "/topics/signs");
-    expect(topicLink.querySelector("svg")).toBeTruthy();
+    expect(topicLink.querySelector('img[src="/signs/sign-302.png"]')).toBeTruthy();
     expect(container.querySelector('[data-testid="tabbar"]')).toBeTruthy();
   });
 
