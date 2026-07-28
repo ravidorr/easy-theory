@@ -32,8 +32,8 @@ vi.mock("@/components/SignImage", () => ({
   SignImage: ({ src, alt = "" }: { src: string; alt?: string }) =>
     React.createElement("img", { src, alt, "data-testid": "sign-img" }),
 }));
-vi.mock("next/link", () => ({
-  default: ({ href, children, ...rest }: { href: string; children: unknown }) =>
+vi.mock("@/lib/navigation", () => ({
+  Link: ({ href, children, ...rest }: { href: string; children: unknown }) =>
     React.createElement("a", { href, ...rest }, children as React.ReactNode),
 }));
 vi.mock("next-intl/server", () => ({
@@ -115,8 +115,11 @@ describe("ReviewPage", () => {
   it("shows emptyHint key when there are no mistakes", async () => {
     mockGetMistakes.mockResolvedValue([]);
     const jsx = await callPage();
-    render(jsx);
+    const { container } = render(jsx);
     expect(screen.getByText("emptyHint")).toBeInTheDocument();
+    expect(screen.getByText("emptyTitle")).toBeInTheDocument();
+    expect(container.querySelector('[data-empty-state]')).toHaveAttribute("data-tone", "success");
+    expect(screen.getByRole("link", { name: "backToTopic" })).toHaveAttribute("href", "/topics/signs");
   });
 
   it("shows mistakeCountOne for one mistake", async () => {
@@ -124,6 +127,7 @@ describe("ReviewPage", () => {
     const jsx = await callPage();
     render(jsx);
     expect(screen.getByText("mistakeCountOne")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "backHome" })).toHaveAttribute("href", "/");
   });
 
   it("shows retry link when there are mistakes", async () => {

@@ -5,6 +5,7 @@ import { join } from "path";
 import { SignImage } from "@/components/SignImage";
 import { QuestionImage } from "@/components/QuestionImage";
 import { Icon } from "@/components/Icon";
+import { EmptyStateCard } from "@/components/EmptyStateCard";
 import { TabBar } from "@/components/TabBar";
 import { InlineMarkdown } from "@/components/InlineMarkdown";
 import { createClient } from "@/lib/supabase";
@@ -14,6 +15,7 @@ import { getTranslations, getLocale } from "next-intl/server";
 import { localizeQuestion } from "@/lib/content-locale";
 import { resolveOptionSignImage } from "@/lib/option-sign-image";
 import { shouldSuppressQuestionImage } from "@/lib/question-image";
+import { Link } from "@/lib/navigation";
 import styles from "./page.module.css";
 
 function resolveImageUrl(url: string | null | undefined): string | null {
@@ -161,9 +163,13 @@ export default async function BookmarksPage() {
         <h1>{t("topBarTitle")}</h1>
 
         {localizedBookmarks.length === 0 ? (
-          <div className={styles.emptyState}>
-            <p className={styles.emptyHint}>{t("emptyHint")}</p>
-          </div>
+          <EmptyStateCard
+            icon="bookmark"
+            tone="primary"
+            title={t("emptyTitle")}
+            description={t("emptyHint")}
+            actions={<Link href="/practice" className="btn-primary">{t("emptyCta")}</Link>}
+          />
         ) : (
           <>
             <p className={styles.bookmarkCount}>

@@ -53,12 +53,6 @@
   flex-shrink: 0;
 }
 
-.emptyQuestions {
-  text-align: center;
-  color: var(--text-muted);
-  padding: 40px 0;
-}
-
 .slideItem {
   flex-direction: column;
   gap: 20px;

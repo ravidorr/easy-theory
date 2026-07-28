@@ -1,0 +1,80 @@
+.card {
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-block: clamp(32px, 12vh, 96px) 0;
+  padding: var(--space-6) var(--space-5);
+  text-align: center;
+}
+
+.card[data-tone="primary"] {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+}
+
+.card[data-tone="success"] {
+  background: var(--success-soft);
+  border-color: var(--success);
+}
+
+.card[data-tone="warning"] {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.icon {
+  align-items: center;
+  background: var(--surface);
+  border-radius: 50%;
+  display: inline-flex;
+  height: 56px;
+  justify-content: center;
+  width: 56px;
+}
+
+.card[data-tone="primary"] .icon {
+  color: var(--primary-soft-text);
+}
+
+.card[data-tone="success"] .icon {
+  color: var(--success-text);
+}
+
+.card[data-tone="warning"] .icon {
+  color: var(--accent-text);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.content h2,
+.content p {
+  margin: 0;
+}
+
+.content h2 {
+  color: var(--text);
+  font-size: var(--type-h2-size);
+  font-weight: var(--type-h2-weight);
+  line-height: var(--line-tight);
+}
+
+.content p {
+  color: var(--text-muted);
+  font-size: var(--type-body-size);
+  line-height: var(--line-body);
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+}

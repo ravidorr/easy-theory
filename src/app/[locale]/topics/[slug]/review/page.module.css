@@ -123,29 +123,6 @@
   flex: 1;
 }
 
-.emptyState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  padding: 60px 0;
-  text-align: center;
-}
-
-.emptyIcon {
-  color: var(--success-text);
-}
-
-.emptyHint {
-  margin: 0;
-  font-size: var(--type-body-size);
-  color: var(--text-muted);
-}
-
-.btnWide {
-  min-width: 180px;
-}
-
 .mistakeCount {
   margin: 0;
   font-size: var(--type-small-size);

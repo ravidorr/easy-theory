@@ -9,7 +9,7 @@ vi.mock("next/navigation", () => ({ redirect: vi.fn(() => { throw new Error("red
 vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
 vi.mock("@/lib/db", () => ({ getMistakesForTopic: vi.fn(), getTopics: vi.fn() }));
 vi.mock("@/components/TabBar", () => ({ TabBar: ({ active, current }: { active: string; current: string | null }) => React.createElement("div", { "data-testid": "tabbar", "data-active": active, "data-current": current ?? "" }) }));
-vi.mock("next/link", () => ({ default: ({ href, children }: React.ComponentProps<"a">) => React.createElement("a", { href }, children) }));
+vi.mock("@/lib/navigation", () => ({ Link: ({ href, children }: React.ComponentProps<"a">) => React.createElement("a", { href }, children) }));
 vi.mock("next-intl/server", () => ({ getTranslations: vi.fn().mockResolvedValue((key: string) => key) }));
 
 const mockCreateClient = vi.mocked(createClient);
@@ -45,7 +45,10 @@ describe("MistakesPage", () => {
   });
 
   it("shows the empty state when every topic has no mistakes", async () => {
-    render(await MistakesPage());
+    const { container } = render(await MistakesPage());
     expect(screen.getByText("empty")).toBeInTheDocument();
+    expect(screen.getByText("emptyTitle")).toBeInTheDocument();
+    expect(container.querySelector('[data-empty-state]')).toHaveAttribute("data-tone", "success");
+    expect(screen.getByRole("link", { name: "emptyCta" })).toHaveAttribute("href", "/practice");
   });
 });

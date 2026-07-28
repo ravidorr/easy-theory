@@ -1,11 +1,12 @@
 import { notFound, redirect } from "next/navigation";
-import Link from "next/link";
+import { Link } from "@/lib/navigation";
 import Script from "next/script";
 import { existsSync } from "fs";
 import { join } from "path";
 import { SignImage } from "@/components/SignImage";
 import { QuestionImage } from "@/components/QuestionImage";
 import { Icon } from "@/components/Icon";
+import { EmptyStateCard } from "@/components/EmptyStateCard";
 import { InlineMarkdown } from "@/components/InlineMarkdown";
 import { createClient } from "@/lib/supabase";
 import { getQuestionsForTopic, getBookmarkedQuestionIds, getAnsweredQuestionIdsForTopic, getTopics, getTopicProgress } from "@/lib/db";
@@ -216,9 +217,13 @@ export default async function TopicQuizPage({
         </div>
 
         {total === 0 ? (
-          <div className={styles.emptyQuestions}>
-            <p>{t("emptyQuestions")}</p>
-          </div>
+          <EmptyStateCard
+            icon="warning"
+            tone="warning"
+            title={t("emptyQuestionsTitle")}
+            description={t("emptyQuestions")}
+            actions={<Link href="/practice" className="btn-primary">{t("emptyQuestionsCta")}</Link>}
+          />
         ) : (
           localizedQuestions.map((q, i) => (
             <QuestionSlide
@@ -234,31 +239,26 @@ export default async function TopicQuizPage({
           ))
         )}
 
-        <div id="quiz-footer" className={styles.quizFooter}>
-          <div id="reward-banner" className={styles.rewardBanner}>
-            <span className={styles.rewardPill} aria-label={t("scoreLabel")}>
-              <Icon name="star" size={12} />
-              <span id="reward-score">0</span>
-              <span id="reward-float" className={styles.rewardFloat} aria-hidden="true">+10</span>
-            </span>
-            <span id="reward-message" className={styles.rewardMsg} aria-live="polite"></span>
+        {total > 0 && (
+          <div id="quiz-footer" className={styles.quizFooter}>
+            <div id="reward-banner" className={styles.rewardBanner}>
+              <span className={styles.rewardPill} aria-label={t("scoreLabel")}>
+                <Icon name="star" size={12} />
+                <span id="reward-score">0</span>
+                <span id="reward-float" className={styles.rewardFloat} aria-hidden="true">+10</span>
+              </span>
+              <span id="reward-message" className={styles.rewardMsg} aria-live="polite"></span>
+            </div>
+
+            <button id="quiz-next" className="btn-primary" disabled>
+              {t("nextBtn")}
+            </button>
+
+            <p id="quiz-auto-advance-hint" className={`${styles.hidden} ${styles.autoAdvanceHint}`}>
+              {t("autoAdvanceHint")}
+            </p>
           </div>
-
-          <button
-            id="quiz-next"
-            className={`btn-primary${total === 0 ? ` ${styles.hidden}` : ""}`}
-            disabled
-          >
-            {t("nextBtn")}
-          </button>
-
-          <p
-            id="quiz-auto-advance-hint"
-            className={`${styles.hidden} ${styles.autoAdvanceHint}`}
-          >
-            {t("autoAdvanceHint")}
-          </p>
-        </div>
+        )}
 
         <div id="quiz-final" className={`${styles.hidden} ${styles.quizFinal}`} tabIndex={-1}>
           <span className={styles.confetti} aria-hidden="true">
