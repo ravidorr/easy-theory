@@ -49,7 +49,7 @@
     if (summaryText) {
       summaryText.textContent = selectedDays.size > 0
         ? tf(t.summarySessions || '{count} מפגשים בשבוע, {duration} דק׳ כל אחד', { count: selectedDays.size, duration: selectedDuration })
-        : (t.summaryChoose || "נבחר ימים כדי להתחיל");
+        : (t.summaryChoose || "בחרו ימים כדי להתחיל");
     }
   }
 
@@ -103,12 +103,12 @@
 
   saveBtn.addEventListener("click", async function () {
     if (selectedDays.size === 0) {
-      await showAlert(t.needDay || "נבחר לפחות יום אחד ללימוד.");
+      await showAlert(t.needDay || "בחרו לפחות יום אחד ללימוד.");
       return;
     }
 
     saveBtn.disabled = true;
-    saveBtn.textContent = t.saving || "שומרים...";
+    saveBtn.textContent = t.saving || "התוכנית נשמרת...";
 
     try {
       const res = await fetch("/api/schedule", {
@@ -144,7 +144,7 @@
       saveBtn.disabled = false;
       saveBtn.textContent = originalSaveBtnText;
       saveBtn.focus();
-      await showAlert(t.saveError || "שגיאה בשמירה, שננסה שוב?");
+      await showAlert(t.saveError || "שגיאה בשמירה, נסו שוב?");
     }
   });
 })();

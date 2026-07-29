@@ -448,7 +448,7 @@ describe("exam.js – submit", () => {
   it("keeps the pass title for passing scores", async () => {
     await expect(
       submitForResultTitle(passResponse({ score: 26, total: 30, pass_mark: 26 }))
-    ).resolves.toBe("עברנו!");
+    ).resolves.toBe("עברתם!");
   });
 
   it("uses near-miss copy one or two points below the pass mark", async () => {

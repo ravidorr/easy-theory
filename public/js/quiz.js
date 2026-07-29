@@ -82,11 +82,16 @@
       idempotencyKey: submission.idempotencyKey,
     };
     if (acknowledged) {
-      const topicDoneMessage = t.rewardTopicDone || "כל הכבוד! סיימנו את כל הנושא!";
+      const topicDoneMessage = t.rewardTopicDone || "כל הכבוד! סיימתם את כל הנושא!";
+      const legacyTopicDoneMessages = [
+        "כל הכבוד! סיימתם את כל הנושא!",
+        "כל הכבוד! סיימנו את כל הנושא!",
+        "أحسنا! أكملنا الموضوع بأكمله!",
+      ];
       migrated.topicCompleted =
         typeof submission.feedbackMessage === "string" &&
         (submission.feedbackMessage === topicDoneMessage ||
-          submission.feedbackMessage === "כל הכבוד! סיימנו את כל הנושא!");
+          legacyTopicDoneMessages.includes(submission.feedbackMessage));
     }
     return migrated;
   }
@@ -578,7 +583,7 @@
       const badge = wrongBtn?.querySelector(".quiz-option-badge")?.textContent?.trim() || "";
       const signNum = wrongBtn?.querySelector("span:not(.quiz-option-badge):not(.quiz-option-explanation) span")?.textContent?.trim() || "";
       const suffix = signNum ? tf(t.rewardSignSuffix || ' (תמרור {number})', { number: signNum }) : "";
-      rewardMessage.textContent = (t.rewardWrongPrefix || "בחרנו ב־") + badge + suffix + (t.rewardWrongSuffix || " - לא נורא, ננסה שוב בפעם הבאה.");
+      rewardMessage.textContent = (t.rewardWrongPrefix || "בחרתם ב־") + badge + suffix + (t.rewardWrongSuffix || " - לא נורא, נסו שוב בפעם הבאה.");
     }
 
     return isCorrect;
@@ -589,7 +594,7 @@
       typeof data.error === "string" &&
       data.error.trim().length > 0
       ? data.error
-      : t.saveAnswerError || "לא הצלחנו לשמור את התשובה. ננסה שוב.";
+      : t.saveAnswerError || "לא ניתן לשמור את התשובה. נסו שוב.";
   }
 
   function setSubmissionErrorState() {
@@ -606,7 +611,7 @@
     setSubmissionErrorState();
     if (rewardMessage) rewardMessage.textContent = message;
     if (actionBtn) {
-      actionBtn.textContent = t.retryAnswerBtn || "לנסות שוב";
+      actionBtn.textContent = t.retryAnswerBtn || "נסו שוב";
       setActionAvailable(true);
     }
   }
@@ -620,7 +625,7 @@
     setSubmissionErrorState();
     if (rewardMessage) rewardMessage.textContent = message;
     if (actionBtn) {
-      actionBtn.textContent = t.restartQuizBtn || "נתחיל מחדש";
+      actionBtn.textContent = t.restartQuizBtn || "התחילו מחדש";
       setActionAvailable(true);
     }
   }
@@ -650,7 +655,7 @@
         actionBtn.textContent = t.nextBtn || "לשאלה הבאה";
         setActionAvailable(true);
       } else {
-        actionBtn.textContent = t.savingAnswer || "שומרים...";
+        actionBtn.textContent = t.savingAnswer || "התשובה נשמרת...";
         actionBtn.disabled = true;
       }
     }
@@ -664,7 +669,7 @@
     ) {
       if (!submissionSessionKey) {
         showPermanentSubmissionFailure(
-          t.saveAnswerError || "לא הצלחנו לשמור את התשובה. ננסה שוב."
+          t.saveAnswerError || "לא ניתן לשמור את התשובה. נסו שוב."
         );
         return;
       }
@@ -689,7 +694,7 @@
     } catch {
       if (!scheduleAutoRetry(slide)) {
         showRetryableSubmissionFailure(
-          t.saveAnswerError || "לא הצלחנו לשמור את התשובה. ננסה שוב."
+          t.saveAnswerError || "לא ניתן לשמור את התשובה. נסו שוב."
         );
       }
       return;
@@ -729,7 +734,7 @@
       const acknowledged = pendingSubmission;
       if (rewardMessage) rewardMessage.textContent = answerFeedback;
       if (data.topic_completed && rewardMessage) {
-        rewardMessage.textContent = t.rewardTopicDone || "כל הכבוד! סיימנו את כל הנושא!";
+        rewardMessage.textContent = t.rewardTopicDone || "כל הכבוד! סיימתם את כל הנושא!";
       }
       pendingSubmission = null;
       acknowledgedSubmission = {
@@ -760,7 +765,7 @@
       if (generation !== submissionGeneration) return;
       if (scheduleAutoRetry(slide)) return;
       showRetryableSubmissionFailure(
-        t.saveAnswerError || "לא הצלחנו לשמור את התשובה. ננסה שוב."
+        t.saveAnswerError || "לא ניתן לשמור את התשובה. נסו שוב."
       );
     });
   }
@@ -796,16 +801,16 @@
       answerPersistence = "failed";
       setSubmissionErrorState();
       if (rewardMessage) {
-        rewardMessage.textContent = t.saveAnswerError || "לא הצלחנו לשמור את התשובה. ננסה שוב.";
+        rewardMessage.textContent = t.saveAnswerError || "לא ניתן לשמור את התשובה. נסו שוב.";
       }
       if (actionBtn) {
-        actionBtn.textContent = t.retryAnswerBtn || "ננסה שוב";
+        actionBtn.textContent = t.retryAnswerBtn || "נסו שוב";
         setActionAvailable(true);
       }
     } else {
       answerPersistence = "succeeded";
       if (rewardMessage && acknowledgedSubmission.topicCompleted) {
-        rewardMessage.textContent = t.rewardTopicDone || "כל הכבוד! סיימנו את כל הנושא!";
+        rewardMessage.textContent = t.rewardTopicDone || "כל הכבוד! סיימתם את כל הנושא!";
       }
       if (actionBtn) {
         actionBtn.textContent = t.nextBtn || "לשאלה הבאה";
@@ -891,7 +896,7 @@
         // Skip requested while the submission is still in flight: advance as
         // soon as it persists.
         advanceRequested = true;
-        actionBtn.textContent = t.savingAnswer || "שומרים...";
+        actionBtn.textContent = t.savingAnswer || "התשובה נשמרת...";
         actionBtn.disabled = true;
       } else if (answerPersistence === "succeeded" && event.detail <= 1) {
         handleAdvance();

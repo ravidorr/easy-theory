@@ -108,7 +108,7 @@
       if (typeof data.revision === "number") revision = data.revision;
     }).catch(function () {
       if (errorEl) {
-        errorEl.textContent = t.examSaveError || "לא הצלחנו לשמור את מצב הסימולציה.";
+        errorEl.textContent = t.examSaveError || "לא ניתן לשמור את מצב הסימולציה.";
         errorEl.hidden = false;
       }
     }).finally(function () {
@@ -282,14 +282,14 @@
     container.setAttribute("data-passed", data.passed ? "true" : "false");
     if (resultTitle) {
       if (data.passed) {
-        resultTitle.textContent = t.examPassTitle || "עברנו!";
+        resultTitle.textContent = t.examPassTitle || "עברתם!";
       } else {
         const scoreGap = data.pass_mark - data.score;
         resultTitle.textContent = scoreGap <= 2
           ? (t.examFailNearTitle || t.examFailTitle || "לא נורא, כמעט שם.")
           : scoreGap <= 5
-            ? (t.examFailMidTitle || "יש לנו בסיס טוב, נתרגל עוד קצת.")
-            : (t.examFailFarTitle || "נתחיל לתרגל, ונשתפר עם הזמן.");
+            ? (t.examFailMidTitle || "יש לכם בסיס טוב, התאמנו עוד קצת.")
+            : (t.examFailFarTitle || "התחילו לתרגל, ותשתפרו עם הזמן.");
       }
     }
     if (resultScore) {
@@ -336,7 +336,7 @@
     if (errorEl) errorEl.hidden = true;
     if (submitBtn) {
       submitBtn.disabled = true;
-      submitBtn.textContent = t.examSubmitting || "שולחים...";
+      submitBtn.textContent = t.examSubmitting || "המבחן נשלח...";
     }
 
     const payload = {
@@ -367,7 +367,7 @@
     }).catch(function () {
       submitting = false;
       if (errorEl) {
-        errorEl.textContent = t.examSubmitError || "שגיאה בשליחה, שננסה שוב?";
+        errorEl.textContent = t.examSubmitError || "שגיאה בשליחה, נסו שוב?";
         errorEl.hidden = false;
       }
       if (submitBtn) {

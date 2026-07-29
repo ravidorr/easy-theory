@@ -86,7 +86,7 @@ describe("schedule.js – save failure handling", () => {
 
     const btn = document.getElementById("save-schedule-btn") as HTMLButtonElement;
     expect(btn.disabled).toBe(true);
-    expect(btn.textContent).toBe("שומרים...");
+    expect(btn.textContent).toBe("התוכנית נשמרת...");
   });
 
   it("restores button text, re-enables, and shows a modal alert after a non-OK response", async () => {
@@ -104,7 +104,7 @@ describe("schedule.js – save failure handling", () => {
     expect(btn.textContent).toBe("שמרי");
     // Refocused before the alert so the modal restores focus to it on dismiss.
     expect(document.activeElement).toBe(btn);
-    expect(modal.alert).toHaveBeenCalledWith({ message: "שגיאה בשמירה, שננסה שוב?" });
+    expect(modal.alert).toHaveBeenCalledWith({ message: "שגיאה בשמירה, נסו שוב?" });
   });
 
   it("restores button text and re-enables after a network failure", async () => {
@@ -117,7 +117,7 @@ describe("schedule.js – save failure handling", () => {
     const btn = document.getElementById("save-schedule-btn") as HTMLButtonElement;
     expect(btn.disabled).toBe(false);
     expect(btn.textContent).toBe("שמרי");
-    expect(modal.alert).toHaveBeenCalledWith({ message: "שגיאה בשמירה, שננסה שוב?" });
+    expect(modal.alert).toHaveBeenCalledWith({ message: "שגיאה בשמירה, נסו שוב?" });
   });
 
   it("falls back to window.alert on save failure when modal.js is not loaded", async () => {
@@ -130,7 +130,7 @@ describe("schedule.js – save failure handling", () => {
     const btn = document.getElementById("save-schedule-btn") as HTMLButtonElement;
     expect(btn.disabled).toBe(false);
     expect(btn.textContent).toBe("שמרי");
-    expect(alertSpy).toHaveBeenCalledWith("שגיאה בשמירה, שננסה שוב?");
+    expect(alertSpy).toHaveBeenCalledWith("שגיאה בשמירה, נסו שוב?");
     alertSpy.mockRestore();
   });
 });
@@ -155,7 +155,7 @@ describe("schedule.js – pickers and notify toggle", () => {
       "טרם נבחרו ימים"
     );
     expect(document.getElementById("summary-text")!.textContent).toBe(
-      "נבחר ימים כדי להתחיל"
+      "בחרו ימים כדי להתחיל"
     );
   });
 
@@ -226,7 +226,7 @@ describe("schedule.js – successful save", () => {
     dayBtn(0).click();
     clickSave();
 
-    expect(modal.alert).toHaveBeenCalledWith({ message: "נבחר לפחות יום אחד ללימוד." });
+    expect(modal.alert).toHaveBeenCalledWith({ message: "בחרו לפחות יום אחד ללימוד." });
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
@@ -238,7 +238,7 @@ describe("schedule.js – successful save", () => {
     dayBtn(0).click();
     clickSave();
 
-    expect(alertSpy).toHaveBeenCalledWith("נבחר לפחות יום אחד ללימוד.");
+    expect(alertSpy).toHaveBeenCalledWith("בחרו לפחות יום אחד ללימוד.");
     expect(fetchMock).not.toHaveBeenCalled();
     alertSpy.mockRestore();
   });
