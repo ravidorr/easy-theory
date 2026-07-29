@@ -92,12 +92,20 @@ describe("MorePage", () => {
   it("groups progress and account controls into labelled sections", async () => {
     const jsx = await MorePage();
     const { container } = render(jsx);
-    expect(screen.getByRole("heading", { level: 2, name: "progressTitle" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: "progressSectionTitle" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 2, name: "accountAppTitle" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 3, name: "progressTitle" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 3, name: "medalsTitle" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 3, name: "quickLinksTitle" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 3, name: "preferencesTitle" })).toBeInTheDocument();
-    expect(container.querySelector('[aria-labelledby="progress-heading"]')).toBeTruthy();
+    expect(container.querySelector('[aria-labelledby="progress-section-heading"]')).toBeTruthy();
     expect(container.querySelector('[aria-labelledby="account-app-heading"]')).toBeTruthy();
+    expect(
+      screen.getByRole("heading", { level: 3, name: "progressTitle" }).closest('[class*="progressCard"]')
+    ).toBeTruthy();
+    expect(
+      screen.getByRole("heading", { level: 3, name: "medalsTitle" }).closest('[class*="medalsSection"]')
+    ).toBeTruthy();
   });
 
   it("renders navigation links to exam, schedule, resources, bookmarks, credits, and contact", async () => {
@@ -165,6 +173,8 @@ describe("MorePage", () => {
     const { container } = render(jsx);
     const medalIcons = container.querySelectorAll('[class*="medal"] svg');
     expect(medalIcons).toHaveLength(8);
+    expect(medalIcons[0]).toHaveAttribute("width", "18");
+    expect(medalIcons[0]).toHaveAttribute("height", "18");
     expect(screen.getByText("achFirstTopic")).toBeInTheDocument();
     expect(screen.getByText("achQuestions100")).toBeInTheDocument();
     expect(screen.getByText("achAllTopics")).toBeInTheDocument();

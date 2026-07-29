@@ -143,6 +143,7 @@
   "More": {
     "pageTitle": "حسابك",
     "pageSubtitle": "تقدمك وإعداداتك في مكان واحد",
+    "progressSectionTitle": "التقدم والإنجازات",
     "progressTitle": "تقدمك",
     "accountAppTitle": "إعداداتك",
     "quickLinksTitle": "روابط سريعة",
@@ -162,7 +163,7 @@
     "navBookmarks": "الأسئلة المحفوظة",
     "navCredits": "عن التطبيق",
     "navContact": "تواصل معنا",
-    "medalsTitle": "الإنجازات",
+    "medalsTitle": "إنجازاتك",
     "milestone3": "3 أيام",
     "milestone7": "أسبوع",
     "milestone14": "أسبوعان",

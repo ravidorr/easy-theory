@@ -16,6 +16,9 @@ export default async function Loading() {
       <SkeletonScreen label={t("label")} className={styles.page}>
         <Skeleton variant="lineLg" size="w40" />
         <div className={styles.progressCard}>
+          <div className={styles.progressCardTitleSkeleton}>
+            <Skeleton variant="lineLg" size="w40" />
+          </div>
           <div className={styles.statsGrid}>
             {[0, 1, 2, 3, 4, 5].map((i) => (
               <div key={i} className={styles.statCell}>
