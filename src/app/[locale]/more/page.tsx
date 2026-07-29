@@ -221,14 +221,6 @@ export default async function MorePage() {
           <div className={styles.accountCard}>
             <nav aria-labelledby="quick-links-heading">
               <h3 id="quick-links-heading" className={styles.listSectionTitle}>{t("quickLinksTitle")}</h3>
-          <Link href="/exam" className={`pressable-row ${styles.navRow} ${styles.navRowBordered}`}>
-            <span className={styles.navIcon}>
-              <Icon name="timer" size={20} />
-            </span>
-            <span className={styles.navRowLabel}>{t("navExam")}</span>
-            <Icon name="chevron-left" size={18} className={styles.navChevron} />
-          </Link>
-
           <Link href="/schedule" className={`pressable-row ${styles.navRow} ${styles.navRowBordered}`}>
             <span className={styles.navIcon}>
               <Icon name="calendar" size={20} />

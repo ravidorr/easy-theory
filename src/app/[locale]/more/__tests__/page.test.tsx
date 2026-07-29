@@ -108,10 +108,9 @@ describe("MorePage", () => {
     ).toBeTruthy();
   });
 
-  it("renders navigation links to exam, schedule, resources, bookmarks, credits, and contact", async () => {
+  it("renders navigation links to schedule, resources, bookmarks, credits, and contact", async () => {
     const jsx = await MorePage();
     const { container } = render(jsx);
-    expect(container.querySelector('a[href="/exam"]')).toBeTruthy();
     expect(container.querySelector('a[href="/schedule"]')).toBeTruthy();
     expect(container.querySelector('a[href="/resources"]')).toBeTruthy();
     expect(container.querySelector('a[href="/bookmarks"]')).toBeTruthy();
