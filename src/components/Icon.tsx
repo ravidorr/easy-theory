@@ -97,6 +97,15 @@ const ICONS = {
       </g>
     ),
   },
+  chart: {
+    viewBox: "0 0 24 24",
+    content: (
+      <g {...stroke}>
+        <path d="M3 3v18h18" />
+        <path d="m7 15 4-4 3 3 5-6" />
+      </g>
+    ),
+  },
   link: {
     viewBox: "0 0 24 24",
     content: (
@@ -136,6 +145,25 @@ const ICONS = {
         d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
         {...stroke}
       />
+    ),
+  },
+  "circle-info": {
+    viewBox: "0 0 24 24",
+    content: (
+      <g {...stroke}>
+        <circle cx="12" cy="12" r="10" />
+        <path d="M12 16v-4" />
+        <path d="M12 8h.01" />
+      </g>
+    ),
+  },
+  mail: {
+    viewBox: "0 0 24 24",
+    content: (
+      <g {...stroke}>
+        <rect x="3" y="5" width="18" height="14" rx="2" />
+        <path d="m3 7 9 6 9-6" />
+      </g>
     ),
   },
   globe: {
@@ -230,6 +258,7 @@ export function Icon({
       viewBox={def.viewBox}
       aria-hidden="true"
       focusable="false"
+      data-icon={name}
       className={className}
     >
       {def.content}

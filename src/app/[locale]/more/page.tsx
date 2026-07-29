@@ -252,7 +252,7 @@ export default async function MorePage() {
 
           <Link href="/credits" className={`pressable-row ${styles.navRow} ${styles.navRowBordered}`}>
             <span className={styles.navIcon}>
-              <Icon name="heart" size={20} />
+              <Icon name="circle-info" size={20} />
             </span>
             <span className={styles.navRowLabel}>{t("navCredits")}</span>
             <Icon name="chevron-left" size={18} className={styles.navChevron} />
@@ -260,7 +260,7 @@ export default async function MorePage() {
 
           <Link href="/contact" className={`pressable-row ${styles.navRow}`}>
             <span className={styles.navIcon}>
-              <Icon name="heart" size={20} />
+              <Icon name="mail" size={20} />
             </span>
             <span className={styles.navRowLabel}>{t("navContact")}</span>
             <Icon name="chevron-left" size={18} className={styles.navChevron} />

@@ -16,6 +16,16 @@ describe("Icon", () => {
     expect(container.querySelector("svg")).toHaveAttribute("viewBox", "0 0 24 24");
   });
 
+  it("renders chart, circle-info, and mail as 24x24 stroke icons", () => {
+    for (const name of ["chart", "circle-info", "mail"] as const) {
+      const { container } = render(<Icon name={name} />);
+      const svg = container.querySelector("svg");
+      expect(svg).toHaveAttribute("viewBox", "0 0 24 24");
+      expect(svg).toHaveAttribute("data-icon", name);
+      expect(svg!.querySelector("[stroke='currentColor']")).not.toBeNull();
+    }
+  });
+
   it("renders the YouTube icon as a 24x24 currentColor glyph", () => {
     const { container } = render(<Icon name="youtube" />);
     const svg = container.querySelector("svg");

@@ -133,6 +133,13 @@ describe("MorePage", () => {
     expect(row?.textContent).toContain("navContact");
   });
 
+  it("uses distinct semantic icons for credits and contact", async () => {
+    const jsx = await MorePage();
+    const { container } = render(jsx);
+    expect(container.querySelector('a[href="/credits"] [data-icon="circle-info"]')).toBeTruthy();
+    expect(container.querySelector('a[href="/contact"] [data-icon="mail"]')).toBeTruthy();
+  });
+
   it("shows the locked label for all medals when none are earned", async () => {
     mockGetMedals.mockResolvedValue([]);
     const jsx = await MorePage();

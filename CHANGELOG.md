@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.224] — 2026-07-29
+
+### Changed
+
+- Standardized navigation icons, using a progress chart plus distinct Credits and Contact symbols.
+
+---
+
 ## [0.3.223] — 2026-07-29
 
 ### Fixed
