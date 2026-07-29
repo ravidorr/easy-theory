@@ -17,6 +17,9 @@ function setupDOM(theme?: string, autoAdvanceChecked = "true", autoAdvanceDelay 
   }
   document.head.innerHTML = '<meta name="theme-color" content="#131829">';
   document.body.innerHTML = `
+    <span id="theme-dark-icon"></span>
+    <span id="theme-light-icon"></span>
+    <span id="theme-mode-label" data-dark-label="Dark mode" data-light-label="Light mode"></span>
     <button id="dark-mode-toggle" role="switch"><span></span></button>
     <button id="auto-advance-toggle" role="switch" aria-checked="${autoAdvanceChecked}"><span></span></button>
     <input id="auto-advance-delay" type="range" min="750" max="3000" step="125" value="${autoAdvanceDelay}">
@@ -32,6 +35,18 @@ function toggle() {
 
 function knob() {
   return toggle().querySelector("span") as HTMLSpanElement;
+}
+
+function themeModeLabel() {
+  return document.getElementById("theme-mode-label") as HTMLSpanElement;
+}
+
+function darkThemeIcon() {
+  return document.getElementById("theme-dark-icon") as HTMLSpanElement;
+}
+
+function lightThemeIcon() {
+  return document.getElementById("theme-light-icon") as HTMLSpanElement;
 }
 
 function autoAdvanceToggle() {
@@ -75,6 +90,9 @@ describe("more.js", () => {
     expect(toggle().getAttribute("aria-checked")).toBe("true");
     expect(toggle().style.background).toBe("var(--primary)");
     expect(knob().style.insetInlineStart).toBe("21px");
+    expect(themeModeLabel()).toHaveTextContent("Dark mode");
+    expect(darkThemeIcon().hidden).toBe(false);
+    expect(lightThemeIcon().hidden).toBe(true);
   });
 
   it("syncs the switch to light theme on load", () => {
@@ -82,6 +100,9 @@ describe("more.js", () => {
     expect(toggle().getAttribute("aria-checked")).toBe("false");
     expect(toggle().style.background).toBe("var(--surface-3)");
     expect(knob().style.insetInlineStart).toBe("3px");
+    expect(themeModeLabel()).toHaveTextContent("Light mode");
+    expect(darkThemeIcon().hidden).toBe(true);
+    expect(lightThemeIcon().hidden).toBe(false);
   });
 
   it("defaults to dark when no theme is set", () => {
@@ -97,6 +118,9 @@ describe("more.js", () => {
     expect(document.cookie).toContain("theme=light");
     expect(toggle().getAttribute("aria-checked")).toBe("false");
     expect(knob().style.insetInlineStart).toBe("3px");
+    expect(themeModeLabel()).toHaveTextContent("Light mode");
+    expect(darkThemeIcon().hidden).toBe(true);
+    expect(lightThemeIcon().hidden).toBe(false);
     expect(
       document.querySelector('meta[name="theme-color"]')!.getAttribute("content")
     ).toBe("#f5f7fc");
@@ -118,6 +142,9 @@ describe("more.js", () => {
     expect(document.cookie).toContain("theme=dark");
     expect(toggle().getAttribute("aria-checked")).toBe("true");
     expect(knob().style.insetInlineStart).toBe("21px");
+    expect(themeModeLabel()).toHaveTextContent("Dark mode");
+    expect(darkThemeIcon().hidden).toBe(false);
+    expect(lightThemeIcon().hidden).toBe(true);
   });
 
   it("does not throw when the dark mode toggle is missing", () => {
