@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.231] — 2026-07-29
+
+### Removed
+
+- Removed duplicate wrong-question counts from Hebrew and Arabic mistake reviews, keeping only the review count.
+
+---
+
 ## [0.3.230] — 2026-07-29
 
 ### Removed
