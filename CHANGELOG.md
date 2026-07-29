@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.227] — 2026-07-29
+
+### Changed
+
+- Aligned More-page progress and achievements subsections with localized in-card headings, compact matching icons, accessible stat values, and a matching loading skeleton.
+
+---
+
 ## [0.3.226] — 2026-07-29
 
 ### Changed

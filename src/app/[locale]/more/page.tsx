@@ -130,9 +130,12 @@ export default async function MorePage() {
         <h1>{t("pageTitle")}</h1>
         <p className={styles.subtitle}>{t("pageSubtitle")}</p>
 
-        <section className={styles.pageSection} aria-labelledby="progress-heading">
-          <h2 id="progress-heading" className={styles.sectionTitle}>{t("progressTitle")}</h2>
+        <section className={styles.pageSection} aria-labelledby="progress-section-heading">
+          <h2 id="progress-section-heading" className={styles.sectionTitle}>
+            {t("progressSectionTitle")}
+          </h2>
           <div className={styles.progressCard}>
+            <h3 id="progress-heading" className={styles.cardSectionTitle}>{t("progressTitle")}</h3>
             <div className={styles.statsGrid}>
               <div className={styles.statCell}>
                 <span className={`${styles.statIcon} ${styles.statIconStreak}`}>
@@ -198,7 +201,7 @@ export default async function MorePage() {
                 {medalItems.map(({ slug, label, icon, earned, dateText }) => (
                   <div key={slug} className={styles.medalItem}>
                     <div className={`${styles.medal} ${earned ? styles.medalEarned : ""}`}>
-                      <Icon name={icon} size={24} />
+                      <Icon name={icon} size={18} />
                     </div>
                     <span className={`${styles.medalLabel} ${earned ? styles.medalLabelEarned : ""}`}>
                       {label}

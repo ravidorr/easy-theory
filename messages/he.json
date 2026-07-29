@@ -143,6 +143,7 @@
   "More": {
     "pageTitle": "החשבון שלך",
     "pageSubtitle": "ההתקדמות וההגדרות שלך במקום אחד",
+    "progressSectionTitle": "התקדמות והישגים",
     "progressTitle": "ההתקדמות שלך",
     "accountAppTitle": "ההגדרות שלך",
     "quickLinksTitle": "קישורים מהירים",
@@ -162,7 +163,7 @@
     "navBookmarks": "שאלות שמורות",
     "navCredits": "קרדיטים",
     "navContact": "יצירת קשר",
-    "medalsTitle": "הישגים",
+    "medalsTitle": "הישגים שלך",
     "milestone3": "3 ימים",
     "milestone7": "שבוע",
     "milestone14": "שבועיים",
