@@ -1,0 +1,107 @@
+.page {
+  min-height: 100vh;
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 24px 20px calc(88px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.header h1 {
+  font-size: var(--type-h1-size);
+  font-weight: var(--type-h1-weight);
+  line-height: var(--line-tight);
+  color: var(--text);
+}
+
+.header p {
+  color: var(--text-muted);
+  font-size: var(--type-body-size);
+  line-height: var(--line-normal);
+}
+
+.topicList {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.topicRow {
+  min-height: 76px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.topicRow + .topicRow {
+  border-top: 1px solid var(--border);
+}
+
+.topicIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--danger-soft);
+  color: var(--danger-text);
+}
+
+.topicIconImg {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+}
+
+.topicContent {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.topicLabel {
+  font-size: var(--type-body-size);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mistakeCount {
+  align-self: flex-start;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--danger-soft);
+  color: var(--danger-text);
+  font-size: var(--type-small-size);
+  font-weight: var(--type-caption-weight);
+  line-height: var(--line-normal);
+}
+
+.chevron {
+  color: var(--text-faint);
+  flex-shrink: 0;
+}
+
+.topicRow:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: -3px;
+}
