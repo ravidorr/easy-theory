@@ -57,6 +57,11 @@ describe("TabBar", () => {
     expect(pills).toHaveLength(tabs.length);
   });
 
+  it("uses the chart icon for the progress tab", async () => {
+    const { container } = render(await TabBar({ active: "home" }));
+    expect(container.querySelector('a[href="/progress"] svg')).toHaveAttribute("data-icon", "chart");
+  });
+
   it("gives every tab the shared press-feedback class", async () => {
     render(await TabBar({ active: "home" }));
     for (const { label } of tabs) {
