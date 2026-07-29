@@ -1,6 +1,6 @@
 {
   "name": "easy-in-theory",
-  "version": "0.3.228",
+  "version": "0.3.229",
   "private": true,
   "scripts": {
     "dev": "next dev",

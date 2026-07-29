@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.229] — 2026-07-29
+
+### Changed
+
+- Shortened the More-page account heading in Hebrew and Arabic.
+
+---
+
 ## [0.3.228] — 2026-07-29
 
 ### Fixed
