@@ -32,12 +32,22 @@
 
   const toggle = document.getElementById("dark-mode-toggle");
   const knob = toggle && toggle.querySelector("span");
+  const themeModeLabel = document.getElementById("theme-mode-label");
+  const darkThemeIcon = document.getElementById("theme-dark-icon");
+  const lightThemeIcon = document.getElementById("theme-light-icon");
 
   function updateSwitch(isDark) {
     if (!toggle || !knob) return;
     toggle.setAttribute("aria-checked", isDark ? "true" : "false");
     toggle.style.background = isDark ? "var(--primary)" : "var(--surface-3)";
     knob.style.insetInlineStart = isDark ? "21px" : "3px";
+    if (themeModeLabel) {
+      themeModeLabel.textContent = isDark
+        ? themeModeLabel.dataset.darkLabel
+        : themeModeLabel.dataset.lightLabel;
+    }
+    if (darkThemeIcon) darkThemeIcon.hidden = !isDark;
+    if (lightThemeIcon) lightThemeIcon.hidden = isDark;
   }
 
   if (toggle) {

@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.226] — 2026-07-29
+
+### Changed
+
+- Unified More-page navigation and preference icon styling, and made the theme setting show its current light or dark state in Hebrew and Arabic.
+
+---
+
 ## [0.3.225] — 2026-07-29
 
 ### Changed

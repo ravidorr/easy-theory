@@ -274,6 +274,20 @@ describe("MorePage", () => {
     expect(toggle).toHaveAttribute("aria-checked", "true");
     expect(toggle?.tagName).toBe("BUTTON");
     expect(toggle).toHaveAttribute("type", "button");
+    expect(screen.getByText("darkMode")).toBeInTheDocument();
+    expect(container.querySelector("#theme-dark-icon [data-icon='moon']")).toBeTruthy();
+    expect(container.querySelector("#theme-light-icon")).toHaveAttribute("hidden");
+  });
+
+  it("renders the light theme label and sun icon when the cookie selects light mode", async () => {
+    mockCookies.mockResolvedValue({ get: vi.fn().mockReturnValue({ value: "light" }) } as never);
+    const jsx = await MorePage();
+    const { container } = render(jsx);
+
+    expect(container.querySelector("#dark-mode-toggle")).toHaveAttribute("aria-checked", "false");
+    expect(screen.getByText("lightMode")).toBeInTheDocument();
+    expect(container.querySelector("#theme-light-icon [data-icon='sun']")).toBeTruthy();
+    expect(container.querySelector("#theme-dark-icon")).toHaveAttribute("hidden");
   });
 
   it("defaults to dark mode when theme cookie is absent", async () => {

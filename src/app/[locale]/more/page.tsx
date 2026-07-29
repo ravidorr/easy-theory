@@ -273,9 +273,21 @@ export default async function MorePage() {
               <h3 id="preferences-heading" className={styles.listSectionTitle}>{t("preferencesTitle")}</h3>
           <div className={styles.settingsRow}>
             <span className={styles.settingsIcon}>
-              <Icon name="moon" size={20} />
+              <span id="theme-dark-icon" hidden={!isDark}>
+                <Icon name="moon" size={20} />
+              </span>
+              <span id="theme-light-icon" hidden={isDark}>
+                <Icon name="sun" size={20} />
+              </span>
             </span>
-            <span className={styles.settingsRowLabel}>{t("darkMode")}</span>
+            <span
+              id="theme-mode-label"
+              className={styles.settingsRowLabel}
+              data-dark-label={t("darkMode")}
+              data-light-label={t("lightMode")}
+            >
+              {t(isDark ? "darkMode" : "lightMode")}
+            </span>
             <button
               type="button"
               id="dark-mode-toggle"
@@ -289,7 +301,7 @@ export default async function MorePage() {
 
           <div className={styles.settingsRow}>
             <span className={styles.settingsIcon}>
-              <Icon name="play" size={20} />
+              <Icon name="play-circle" size={20} />
             </span>
             <span className={styles.settingsRowLabel}>{t("autoAdvance")}</span>
             <button
