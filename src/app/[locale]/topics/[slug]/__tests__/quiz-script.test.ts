@@ -513,7 +513,7 @@ describe("quiz.js – rejected answer persistence", () => {
     vi.advanceTimersByTime(AUTO_RETRY_DELAY_MS);
     await flushAsyncWork();
 
-    expect(messageText()).toBe("כל הכבוד! סיימנו את כל הנושא!");
+    expect(messageText()).toBe("כל הכבוד! סיימתם את כל הנושא!");
     expect(document.querySelector('[role="dialog"]')).not.toBeNull();
     expect(scoreText()).toBe("10");
     expect(fetchCalls("/api/quiz")[1][1].body).toBe(
@@ -831,7 +831,7 @@ describe("quiz.js – auto-advance", () => {
     vi.advanceTimersByTime(AUTO_ADVANCE_DELAY_MS);
 
     expect(slideDisplay(0)).toBe("flex");
-    expect(messageText()).toBe("כל הכבוד! סיימנו את כל הנושא!");
+    expect(messageText()).toBe("כל הכבוד! סיימתם את כל הנושא!");
   });
 
   it("shows the final screen and posts progress when the last question auto-advances", async () => {
@@ -1028,7 +1028,7 @@ describe("quiz.js – reward score and feedback", () => {
   it("keeps the score and shows the wrong-answer message on a wrong answer", () => {
     clickOption(0, "b");
     expect(scoreText()).toBe("0");
-    expect(messageText()).toContain("בחרנו ב־");
+    expect(messageText()).toContain("בחרתם ב־");
     expect(floatEl().hasAttribute("data-animate")).toBe(false);
   });
 
@@ -1566,7 +1566,10 @@ describe("quiz.js – resume", () => {
     expect(fetchCalls("/api/quiz")).toHaveLength(1);
   });
 
-  it("recognizes a legacy topic-complete message and localizes it on restore", () => {
+  it.each([
+    "כל הכבוד! סיימנו את כל הנושא!",
+    "أحسنا! أكملنا الموضوع بأكمله!",
+  ])("recognizes a legacy topic-complete message and localizes it on restore", (feedbackMessage) => {
     (window as unknown as { __t: Record<string, string> }).__t = {
       rewardCorrect: "إجابة صحيحة",
       rewardTopicDone: "أكملنا الموضوع",
@@ -1583,7 +1586,7 @@ describe("quiz.js – resume", () => {
           questionId: "q1",
           selectedOption: "a",
           idempotencyKey: "legacy-session:q1",
-          feedbackMessage: "כל הכבוד! סיימנו את כל הנושא!",
+          feedbackMessage,
         },
       })
     );
@@ -1691,7 +1694,7 @@ describe("quiz.js – resume", () => {
     setupDOM({ userId: "u1" });
 
     expect(scoreText()).toBe("0");
-    expect(messageText()).toContain("בחרנו ב־");
+    expect(messageText()).toContain("בחרתם ב־");
     expect(actionButton().textContent).toBe("לשאלה הבאה");
     expect(actionButton().disabled).toBe(false);
     expect(fetchCalls("/api/quiz")).toHaveLength(1);
@@ -1794,7 +1797,7 @@ describe("quiz.js – skip answered", () => {
     setupDOM({ userId: "u1", answeredIds: ["q1"] });
     expect(slideDisplay(0)).toBe("flex");
     expect(slideDisplay(1)).toBe("none");
-    expect(actionButton().textContent).toBe("ננסה שוב");
+    expect(actionButton().textContent).toBe("נסו שוב");
   });
 
   it("bumps a stale resume forward when the saved slide was already answered", () => {

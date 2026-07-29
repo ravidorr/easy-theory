@@ -66,9 +66,9 @@ describe("locale messages", () => {
 
   it("uses supportive Hebrew copy for readiness-estimate evidence", () => {
     expect(he.Home.examReadiness).toBe("{level} · {confidence}");
-    expect(he.Home.readinessConfidenceLow).toBe("נמשיך להתאמן כדי לדייק את התמונה");
+    expect(he.Home.readinessConfidenceLow).toBe("המשיכו להתאמן כדי לדייק את התמונה");
     expect(he.Home.readinessConfidenceMedium).toBe("התמונה כבר מתבהרת");
-    expect(he.Home.readinessConfidenceHigh).toBe("יש לנו תמונה ברורה להתקדמות");
+    expect(he.Home.readinessConfidenceHigh).toBe("יש לכם תמונה ברורה להתקדמות");
   });
 
   it("defines concise topic states in both locales", () => {

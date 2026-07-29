@@ -60,7 +60,7 @@
     const nextPath = document.getElementById("next-path")?.value || "/";
 
     btn.disabled = true;
-    btn.innerHTML = '<span class="btn-spinner"></span>' + (t.sending || "שולחים...");
+    btn.innerHTML = '<span class="btn-spinner"></span>' + (t.sending || "שליחת הקישור מתבצעת...");
 
     try {
       const res = await fetch("/api/auth/send-otp", {
@@ -93,7 +93,7 @@
       if (!lastEmail) return;
 
       resendBtn.disabled = true;
-      resendBtn.textContent = t.sending || "שולחים...";
+      resendBtn.textContent = t.sending || "שליחת הקישור מתבצעת...";
       hideResendMsg();
 
       try {

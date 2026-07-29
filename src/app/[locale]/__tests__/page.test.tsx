@@ -61,7 +61,7 @@ const supportiveHebrewT = ((key: string, values?: Record<string, unknown>) => {
   const messages: Record<string, string> = {
     examReadiness: "{level} · {confidence}",
     readinessLevelLow: "מוכנות נמוכה",
-    readinessConfidenceHigh: "יש לנו תמונה ברורה להתקדמות",
+    readinessConfidenceHigh: "יש לכם תמונה ברורה להתקדמות",
   };
   return Object.entries(values ?? {}).reduce(
     (text, [name, value]) => text.replace(`{${name}}`, String(value)),
@@ -173,7 +173,7 @@ describe("HomePage", () => {
 
     render(await HomePage());
 
-    expect(screen.getByText("מוכנות נמוכה · יש לנו תמונה ברורה להתקדמות")).toBeInTheDocument();
+    expect(screen.getByText("מוכנות נמוכה · יש לכם תמונה ברורה להתקדמות")).toBeInTheDocument();
   });
 
   it("renders one curriculum-ordered list with concise topic statuses", async () => {

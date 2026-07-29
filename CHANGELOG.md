@@ -3,6 +3,18 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.225] — 2026-07-29
+
+### Changed
+
+- Standardized Hebrew and Arabic learner-facing UI and runtime fallback copy to second-person language.
+
+### Fixed
+
+- Preserved legacy Hebrew and Arabic topic-completion feedback when restoring quiz progress.
+
+---
+
 ## [0.3.224] — 2026-07-29
 
 ### Changed

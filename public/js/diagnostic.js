@@ -36,10 +36,10 @@
       if (!data.saved) localStorage.setItem(storageKey, JSON.stringify(payload));
       result.hidden = false;
       result.textContent = data.saved
-        ? (t.saved || "התוכנית האישית נשמרה. עכשיו נבחר את התרגול הבא.")
+        ? (t.saved || "התוכנית האישית נשמרה. עכשיו בחרו את התרגול הבא.")
         : (t.guestReady || "האבחון מוכן. כניסה לחשבון תשמור את התוכנית האישית.");
     }).catch(function () {
-      result.hidden = false; result.textContent = t.saveError || "לא הצלחנו לשמור את האבחון. אפשר לנסות שוב.";
+      result.hidden = false; result.textContent = t.saveError || "לא ניתן לשמור את האבחון. אפשר לנסות שוב.";
     });
   });
   if (root.dataset.authenticated === "true") {

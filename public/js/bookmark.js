@@ -49,7 +49,7 @@
       if (!res.ok) throw new Error("bookmark save failed: " + res.status);
     } catch {
       setPressed(btn, !next);
-      announce(t.bookmarkSaveError || "שגיאה בשמירה, שננסה שוב?");
+      announce(t.bookmarkSaveError || "שגיאה בשמירה, נסו שוב?");
     } finally {
       delete btn.dataset.busy;
     }

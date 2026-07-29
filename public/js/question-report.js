@@ -34,7 +34,7 @@
 
     const description = document.createElement("p");
     description.className = "modal-message";
-    description.textContent = label("reportDescription", "נשלח את פרטי השאלה אוטומטית.");
+    description.textContent = label("reportDescription", "פרטי השאלה יישלחו אוטומטית.");
 
     const field = document.createElement("label");
     field.className = "question-report-field";
@@ -111,7 +111,7 @@
     }
 
     function showError(message) {
-      error.textContent = message || label("reportError", "לא הצלחנו לשמור את הדיווח. אפשר לנסות שוב.");
+      error.textContent = message || label("reportError", "לא ניתן לשמור את הדיווח. אפשר לנסות שוב.");
       error.hidden = false;
     }
 
@@ -121,7 +121,7 @@
       category.disabled = next;
       cancel.disabled = next;
       send.disabled = next;
-      send.textContent = next ? label("reportSending", "שולחים...") : label("reportSend", "שליחה");
+      send.textContent = next ? label("reportSending", "הדיווח נשלח...") : label("reportSend", "שליחה");
     }
 
     function showSuccess() {

@@ -154,7 +154,7 @@ describe("POST /api/question-reports", () => {
 
       expect(response.status).toBe(message ? 500 : 400);
       expect(await response.json()).toEqual({
-        error: message ? "לא הצלחנו לשמור את הדיווח. אפשר לנסות שוב." : "יש לבדוק את פרטי הדיווח ולנסות שוב.",
+        error: message ? "לא ניתן לשמור את הדיווח. אפשר לנסות שוב." : "יש לבדוק את פרטי הדיווח ולנסות שוב.",
       });
       if (message) {
         expect(reportError).toHaveBeenCalledWith("question-reports", message, expect.anything(), context);

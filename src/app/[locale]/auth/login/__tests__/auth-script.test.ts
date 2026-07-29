@@ -49,14 +49,13 @@ describe("auth.js – send button loading state", () => {
     expect(btn.querySelector(".btn-spinner")).not.toBeNull();
   });
 
-  it("shows שולחים... (not נשלח...) while loading", () => {
+  it("shows the neutral sending status while loading", () => {
     vi.stubGlobal("fetch", vi.fn(() => new Promise(() => {})));
 
     submitForm();
 
     const btn = document.getElementById("send-btn") as HTMLButtonElement;
-    expect(btn.textContent).toContain("שולחים...");
-    expect(btn.innerHTML).not.toContain("נשלח");
+    expect(btn.textContent).toContain("שליחת הקישור מתבצעת...");
   });
 
   it("resets button text and removes spinner after a fetch error", async () => {
