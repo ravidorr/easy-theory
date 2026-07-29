@@ -267,11 +267,6 @@ export default async function ReviewPage({
         />
       ) : (
         <>
-          <p className={styles.mistakeCount}>
-            {localizedMistakes.length === 1
-              ? t("mistakeCountOne")
-              : t("mistakeCountMany", { count: localizedMistakes.length })}
-          </p>
           {dueMistakeCount > 0 && (
             <p className={styles.dueCount}>{t("dueCount", { count: dueMistakeCount })}</p>
           )}

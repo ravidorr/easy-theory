@@ -123,12 +123,6 @@
   flex: 1;
 }
 
-.mistakeCount {
-  margin: 0;
-  font-size: var(--type-small-size);
-  color: var(--text-muted);
-}
-
 .dueCount {
   margin: 0;
   font-size: var(--type-small-size);

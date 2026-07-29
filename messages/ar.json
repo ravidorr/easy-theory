@@ -281,8 +281,6 @@
     "emptyTitle": "رائع، كل الإجابات صحيحة",
     "backToTopic": "العودة إلى الموضوع",
     "backHome": "العودة للرئيسية",
-    "mistakeCountOne": "سؤال واحد أخطأت فيه",
-    "mistakeCountMany": "{count} أسئلة أخطأت فيها",
     "retryBtn": "راجعوا الأخطاء",
     "scopeLabel": "نطاق الأخطاء",
     "scopeLastSession": "آخر تدريب",

@@ -126,12 +126,14 @@ describe("ReviewPage", () => {
     expect(screen.getByRole("link", { name: "backToTopic" })).toHaveAttribute("href", "/topics/signs");
   });
 
-  it("shows mistakeCountOne for one mistake", async () => {
-    mockGetMistakes.mockResolvedValue([MISTAKE_A] as never);
+  it("does not request a standalone mistake count", async () => {
+    const translate = vi.fn((key: string) => key);
+    vi.mocked(getTranslations).mockResolvedValue(translate as never);
+    mockGetMistakes.mockResolvedValue([MISTAKE_A, MISTAKE_B] as never);
     const jsx = await callPage();
     render(jsx);
-    expect(screen.getByText("mistakeCountOne")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "backHome" })).toHaveAttribute("href", "/");
+    expect(translate).not.toHaveBeenCalledWith("mistakeCountOne");
+    expect(translate).not.toHaveBeenCalledWith("mistakeCountMany", { count: 2 });
   });
 
   it("shows retry link when there are mistakes", async () => {
@@ -146,13 +148,6 @@ describe("ReviewPage", () => {
     const jsx = await callPage();
     const { container } = render(jsx);
     expect(container.querySelector('a[href="/topics/signs/retry"]')).toBeNull();
-  });
-
-  it("shows mistakeCountMany with count for multiple mistakes", async () => {
-    mockGetMistakes.mockResolvedValue([MISTAKE_A, MISTAKE_B] as never);
-    const jsx = await callPage();
-    render(jsx);
-    expect(screen.getByText("mistakeCountMany")).toBeInTheDocument();
   });
 
   it("marks correct option with data-state=correct", async () => {
@@ -510,7 +505,6 @@ describe("ReviewPage", () => {
       expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(20);
       expect(screen.getByText("שאלה 1")).toBeInTheDocument();
       expect(screen.queryByText("שאלה 21")).not.toBeInTheDocument();
-      expect(translate).toHaveBeenCalledWith("mistakeCountMany", { count: 41 });
       expect(translate).toHaveBeenCalledWith("dueCount", { count: 41 });
     });
 
