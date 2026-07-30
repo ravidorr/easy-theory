@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.237] — 2026-07-30
+
+### Changed
+
+- Made standalone secondary CTAs fill their action rows while retaining compact controls.
+
+---
+
 ## [0.3.236] — 2026-07-30
 
 ### Fixed

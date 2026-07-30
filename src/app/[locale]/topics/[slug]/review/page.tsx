@@ -256,7 +256,7 @@ export default async function ReviewPage({
           description={hasOlderMistakes ? t("emptyHintLastSession") : t("emptyHint")}
           actions={<>
             {hasOlderMistakes && (
-              <Link href={`/topics/${slug}/review?scope=all`} className="btn-secondary">
+              <Link href={`/topics/${slug}/review?scope=all`} className="btn-secondary btn-full">
                 {t("viewAllMistakes")}
               </Link>
             )}
