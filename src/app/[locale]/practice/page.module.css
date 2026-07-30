@@ -47,8 +47,8 @@
 
 .reviewIcon,
 .topicIcon {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: var(--radius-md);
   display: inline-flex;
   align-items: center;
@@ -94,8 +94,8 @@
 }
 
 .topicIconImg {
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
 }
 

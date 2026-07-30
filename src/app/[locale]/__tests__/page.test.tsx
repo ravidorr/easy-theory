@@ -14,8 +14,8 @@ import {
 import { getTranslations, getLocale } from "next-intl/server";
 
 vi.mock("next/image", () => ({
-  default: ({ src, alt, className }: { src: string; alt?: string; className?: string }) =>
-    React.createElement("img", { src, alt, className }),
+  default: ({ src, alt, className, width, height }: { src: string; alt?: string; className?: string; width?: number; height?: number }) =>
+    React.createElement("img", { src, alt, className, width, height }),
 }));
 vi.mock("next/navigation", () => ({
   redirect: vi.fn().mockImplementation(() => {
@@ -155,6 +155,16 @@ describe("HomePage", () => {
     expect(container.querySelectorAll('a[href="/exam"]')).toHaveLength(1);
     expect(screen.getByText("readinessEmpty")).toBeInTheDocument();
     expect(screen.queryByText("readinessTitle")).not.toBeInTheDocument();
+  });
+
+  it("uses the shared icon scale for navigation and traffic-sign topic cards", async () => {
+    mockGetTopics.mockResolvedValue([{ ...TOPIC_A, icon: "/signs/sign-302.png" }] as never);
+
+    const { container } = render(await HomePage());
+
+    expect(container.querySelector('a[href="/exam"] [data-icon="timer"]')).toHaveAttribute("width", "20");
+    expect(container.querySelector('img[src="/signs/sign-302.png"]')).toHaveAttribute("width", "32");
+    expect(container.querySelector('img[src="/signs/sign-302.png"]')).toHaveAttribute("height", "32");
   });
 
   it("shows computed readiness inline in the simulation card", async () => {

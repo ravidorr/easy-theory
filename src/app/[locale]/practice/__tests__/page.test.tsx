@@ -6,8 +6,8 @@ import { createClient } from "@/lib/supabase";
 import { getTopics } from "@/lib/db";
 
 vi.mock("next/image", () => ({
-  default: ({ src, alt, className }: { src: string; alt?: string; className?: string }) =>
-    React.createElement("img", { src, alt, className }),
+  default: ({ src, alt, className, width, height }: { src: string; alt?: string; className?: string; width?: number; height?: number }) =>
+    React.createElement("img", { src, alt, className, width, height }),
 }));
 vi.mock("next/navigation", () => ({ redirect: vi.fn(() => { throw new Error("redirect"); }) }));
 vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
@@ -54,8 +54,17 @@ describe("PracticePage", () => {
     expect(reviewLink).toHaveAttribute("href", "/mistakes");
     expect(reviewLink.querySelector("svg")).toBeTruthy();
     expect(topicLink).toHaveAttribute("href", "/topics/signs");
-    expect(topicLink.querySelector('img[src="/signs/sign-302.png"]')).toBeTruthy();
+    expect(topicLink.querySelector('img[src="/signs/sign-302.png"]')).toHaveAttribute("width", "32");
+    expect(topicLink.querySelector('img[src="/signs/sign-302.png"]')).toHaveAttribute("height", "32");
     expect(container.querySelector('[data-testid="tabbar"]')).toBeTruthy();
+  });
+
+  it("uses a 20px cards icon when a topic has no sign artwork", async () => {
+    mockGetTopics.mockResolvedValue([{ id: "laws", slug: "laws", name_he: "חוקים", name_ar: "قوانين", icon: null }] as never);
+
+    const { container } = render(await PracticePage());
+
+    expect(container.querySelector('[data-icon="cards"]')).toHaveAttribute("width", "20");
   });
 
   it("renders Arabic topic names without Hebrew fallback", async () => {

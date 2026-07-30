@@ -39,9 +39,9 @@ export default async function MistakesPage() {
             >
               <span className={styles.topicIcon}>
                 {topic.icon ? (
-                  <Image src={topic.icon} alt="" width={34} height={34} className={styles.topicIconImg} />
+                  <Image src={topic.icon} alt="" width={32} height={32} className={styles.topicIconImg} />
                 ) : (
-                  <Icon name="warning" size={22} />
+                  <Icon name="warning" size={20} />
                 )}
               </span>
               <span className={styles.topicContent}>
