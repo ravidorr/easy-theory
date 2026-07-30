@@ -39,7 +39,7 @@ export default async function LoginPage({
   const safeNext =
     typeof next === "string" && next.startsWith("/") && !next.startsWith("//")
       ? next
-      : "/";
+      : "/schedule";
   const screenshotLocale = locale === "ar" ? "ar" : "he";
   const screenshotTheme =
     cookieStore.get("theme")?.value === "light" ? "light" : "dark";

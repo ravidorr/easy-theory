@@ -133,28 +133,28 @@ describe("POST /api/auth/send-otp", () => {
     expect(res.headers.get("set-cookie")).toMatch(/auth_redirect=.*topics.*signs.*review/);
   });
 
-  it("sets auth_redirect cookie to / when next is omitted", async () => {
+  it("sets auth_redirect cookie to /schedule when next is omitted", async () => {
     const client = makeClient();
     mockCreateClient.mockResolvedValue(client as never);
     const res = await POST(makeRequest({ email: "user@example.com" }));
-    expect(res.headers.get("set-cookie")).toMatch(/auth_redirect=%2F/);
+    expect(res.headers.get("set-cookie")).toMatch(/auth_redirect=%2Fschedule/);
   });
 
-  it("ignores next when it does not start with / and defaults cookie to /", async () => {
+  it("ignores next when it does not start with / and defaults cookie to /schedule", async () => {
     const client = makeClient();
     mockCreateClient.mockResolvedValue(client as never);
     const res = await POST(makeRequest({ email: "user@example.com", next: "https://evil.com" }));
     const call = client.auth.signInWithOtp.mock.calls[0][0];
     expect(call.options.emailRedirectTo).not.toContain("evil");
-    expect(res.headers.get("set-cookie")).toMatch(/auth_redirect=%2F/);
+    expect(res.headers.get("set-cookie")).toMatch(/auth_redirect=%2Fschedule/);
   });
 
-  it("ignores next when it starts with // and defaults cookie to /", async () => {
+  it("ignores next when it starts with // and defaults cookie to /schedule", async () => {
     const client = makeClient();
     mockCreateClient.mockResolvedValue(client as never);
     const res = await POST(makeRequest({ email: "user@example.com", next: "//evil.com/path" }));
     const call = client.auth.signInWithOtp.mock.calls[0][0];
     expect(call.options.emailRedirectTo).not.toContain("evil");
-    expect(res.headers.get("set-cookie")).toMatch(/auth_redirect=%2F/);
+    expect(res.headers.get("set-cookie")).toMatch(/auth_redirect=%2Fschedule/);
   });
 });

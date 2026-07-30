@@ -9,8 +9,8 @@ export async function GET(request: Request) {
   const cookieStore = await cookies();
 
   const nextRaw =
-    searchParams.get("next") ?? cookieStore.get("auth_redirect")?.value ?? "/";
-  const safeNext = nextRaw.startsWith("/") && !nextRaw.startsWith("//") ? nextRaw : "/";
+    searchParams.get("next") ?? cookieStore.get("auth_redirect")?.value ?? "/schedule";
+  const safeNext = nextRaw.startsWith("/") && !nextRaw.startsWith("//") ? nextRaw : "/schedule";
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

@@ -15,7 +15,7 @@ export async function POST(request: Request) {
   const safeNext =
     typeof next === "string" && next.startsWith("/") && !next.startsWith("//")
       ? next
-      : "/";
+      : "/schedule";
   const callbackOrigin =
     process.env.AUTH_CALLBACK_ORIGIN?.replace(/\/$/, "") || requestUrl.origin;
   const emailRedirectTo = `${callbackOrigin}/auth/callback`;
