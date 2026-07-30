@@ -163,6 +163,7 @@ describe("PUT /api/schedule", () => {
       p_duration_minutes: 45,
       p_notify: true,
       p_locale: "he",
+      p_time_zone: "Asia/Jerusalem",
     });
   });
 
@@ -178,6 +179,7 @@ describe("PUT /api/schedule", () => {
       p_duration_minutes: 30,
       p_notify: false,
       p_locale: "he",
+      p_time_zone: "Asia/Jerusalem",
     });
   });
 
@@ -192,6 +194,27 @@ describe("PUT /api/schedule", () => {
       "replace_user_schedule",
       expect.objectContaining({ p_locale: "ar" })
     );
+  });
+
+  it("stores a valid IANA timezone", async () => {
+    const client = makeClient();
+    mockCreateClient.mockResolvedValue(client as never);
+    const res = await PUT(
+      makePutRequest({ days: [2], start_time: "10:00", time_zone: "America/Los_Angeles" })
+    );
+    expect(res.status).toBe(200);
+    expect(client.rpc).toHaveBeenCalledWith(
+      "replace_user_schedule",
+      expect.objectContaining({ p_time_zone: "America/Los_Angeles" })
+    );
+  });
+
+  it("returns 400 for an invalid timezone", async () => {
+    mockCreateClient.mockResolvedValue(makeClient() as never);
+    const res = await PUT(
+      makePutRequest({ days: [2], start_time: "10:00", time_zone: "Not/A_Timezone" })
+    );
+    expect(res.status).toBe(400);
   });
 
   it("succeeds with empty days array (clears schedule)", async () => {

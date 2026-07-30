@@ -88,6 +88,7 @@ export type Schedule = {
   start_time: string;
   duration_minutes: number;
   notify: boolean;
+  time_zone: string;
 };
 
 // Failed queries throw instead of pretending the result is empty — a silent
@@ -221,25 +222,66 @@ export async function getUserSchedule(
 
 export type ScheduleWithUser = {
   user_id: string;
+  day_of_week: number;
   start_time: string;
   duration_minutes: number;
   locale: Locale;
+  time_zone: string;
 };
 
-export async function getUsersScheduledForDay(
-  supabase: SupabaseClient,
-  dayOfWeek: number
+export async function getUsersWithEnabledNotifications(
+  supabase: SupabaseClient
 ): Promise<ScheduleWithUser[]> {
   // A swallowed error here made the notify cron "succeed" with zero
   // notifications sent — throwing turns that into a visible HTTP 500 for the
   // cron caller.
   const { data, error } = await supabase
     .from("user_schedule")
-    .select("user_id, start_time, duration_minutes, locale")
-    .eq("day_of_week", dayOfWeek)
+    .select("user_id, day_of_week, start_time, duration_minutes, locale, time_zone")
     .eq("notify", true);
-  throwOnDbError(error, "getUsersScheduledForDay: user_schedule");
+  throwOnDbError(error, "getUsersWithEnabledNotifications: user_schedule");
   return data ?? [];
+}
+
+/** Atomically reserve a user's daily reminder before dispatching it. */
+export async function claimScheduleNotification(
+  supabase: SupabaseClient,
+  userId: string,
+  localDate: string
+): Promise<boolean> {
+  const { data, error } = await supabase.rpc("claim_schedule_notification", {
+    p_user_id: userId,
+    p_local_date: localDate,
+  });
+  throwOnDbError(error, "claimScheduleNotification: schedule_notification_deliveries");
+  return data ?? false;
+}
+
+export async function completeScheduleNotification(
+  supabase: SupabaseClient,
+  userId: string,
+  localDate: string
+): Promise<void> {
+  const { error } = await supabase
+    .from("schedule_notification_deliveries")
+    .update({ status: "sent", sent_at: new Date().toISOString() })
+    .eq("user_id", userId)
+    .eq("local_date", localDate);
+  throwOnDbError(error, "completeScheduleNotification: schedule_notification_deliveries");
+}
+
+export async function releaseScheduleNotification(
+  supabase: SupabaseClient,
+  userId: string,
+  localDate: string
+): Promise<void> {
+  const { error } = await supabase
+    .from("schedule_notification_deliveries")
+    .delete()
+    .eq("user_id", userId)
+    .eq("local_date", localDate)
+    .eq("status", "pending");
+  throwOnDbError(error, "releaseScheduleNotification: schedule_notification_deliveries");
 }
 
 export async function getUserMedals(

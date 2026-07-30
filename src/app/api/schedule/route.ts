@@ -4,6 +4,20 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { getApiTranslator, getRequestLocale, parseJsonBody } from "@/lib/api";
 import { reportError } from "@/lib/monitoring";
 
+const DEFAULT_TIME_ZONE = "Asia/Jerusalem";
+
+function getTimeZone(value: unknown): string | null {
+  if (value === undefined) return DEFAULT_TIME_ZONE;
+  if (typeof value !== "string" || value.length === 0) return null;
+
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: value }).format();
+    return value;
+  } catch {
+    return null;
+  }
+}
+
 export async function GET(request: Request) {
   const t = getApiTranslator(request);
   const supabase = await createClient();
@@ -38,7 +52,7 @@ export async function PUT(request: Request) {
   if (!body) {
     return NextResponse.json({ error: t("invalidParams") }, { status: 400 });
   }
-  const { days, start_time, duration_minutes, notify } = body;
+  const { days, start_time, duration_minutes, notify, time_zone } = body;
 
   if (!Array.isArray(days) || !start_time) {
     return NextResponse.json({ error: t("invalidParams") }, { status: 400 });
@@ -52,6 +66,10 @@ export async function PUT(request: Request) {
   if (typeof start_time !== "string" || !/^\d{2}:\d{2}$/.test(start_time)) {
     return NextResponse.json({ error: t("invalidTime") }, { status: 400 });
   }
+  const timeZone = getTimeZone(time_zone);
+  if (!timeZone) {
+    return NextResponse.json({ error: t("invalidParams") }, { status: 400 });
+  }
 
   // Replace the schedule atomically (delete + insert in one transaction, migration 008).
   // The locale is stored per row so cron notifications go out in the user's language
@@ -62,6 +80,7 @@ export async function PUT(request: Request) {
     p_duration_minutes: duration_minutes ?? 45,
     p_notify: notify ?? true,
     p_locale: getRequestLocale(request),
+    p_time_zone: timeZone,
   });
 
   if (error) {

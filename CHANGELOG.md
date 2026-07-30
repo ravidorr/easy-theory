@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.235] — 2026-07-30
+
+### Changed
+
+- Schedule reminders now use the saved browser timezone to match each user's local study day, prevent duplicate sends, and allow failed delivery attempts to retry. The schedule UI now accurately describes a daily reminder instead of a session-time alert.
+
+---
+
 ## [0.3.234] — 2026-07-30
 
 ### Changed

@@ -81,6 +81,7 @@ async function checkSchema(): Promise<number> {
     { table: "user_quiz_responses", column: "session_id", migration: "006" },
     { table: "user_exam_attempts", column: "id", migration: "007" },
     { table: "user_schedule", column: "locale", migration: "009" },
+    { table: "user_schedule", column: "time_zone", migration: "034" },
     { table: "videos", column: "youtube_id", migration: "012" },
     { table: "resources", column: "href", migration: "012" },
     { table: "quiz_answer_events", column: "answered_at", migration: "017" },
@@ -104,8 +105,15 @@ async function checkSchema(): Promise<number> {
   const rpcProbes = [
     {
       fn: "replace_user_schedule",
-      migration: "008/009",
-      args: { p_days: [], p_start_time: "00:00", p_duration_minutes: 45, p_notify: true, p_locale: "he" },
+      migration: "008/009/034",
+      args: {
+        p_days: [],
+        p_start_time: "00:00",
+        p_duration_minutes: 45,
+        p_notify: true,
+        p_locale: "he",
+        p_time_zone: "Asia/Jerusalem",
+      },
     },
     {
       fn: "submit_quiz_answer",
