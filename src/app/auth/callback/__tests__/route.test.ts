@@ -45,10 +45,10 @@ describe("GET /auth/callback", () => {
     expect(res.headers.get("location")).toContain("/auth/login?error=1");
   });
 
-  it("redirects to / on successful code exchange with no next param", async () => {
+  it("redirects to /schedule on successful code exchange with no next param", async () => {
     const res = await GET(makeRequest({ code: "abc123" }));
     expect(res.status).toBe(307);
-    expect(res.headers.get("location")).toBe("http://localhost/");
+    expect(res.headers.get("location")).toBe("http://localhost/schedule");
   });
 
   it("redirects to the next param on success when it is a safe path", async () => {
@@ -57,10 +57,10 @@ describe("GET /auth/callback", () => {
     expect(res.headers.get("location")).toBe("http://localhost/topics");
   });
 
-  it("sanitises next to / when it starts with //", async () => {
+  it("sanitises next to /schedule when it starts with //", async () => {
     const res = await GET(makeRequest({ code: "abc123", next: "//evil.com" }));
     expect(res.status).toBe(307);
-    expect(res.headers.get("location")).toBe("http://localhost/");
+    expect(res.headers.get("location")).toBe("http://localhost/schedule");
   });
 
   it("redirects to /auth/login?error=1 when code exchange fails", async () => {
@@ -95,7 +95,7 @@ describe("GET /auth/callback", () => {
     const res = await GET(makeRequest({ token_hash: "abc", type: "email" }));
     expect(mockVerifyOtp).toHaveBeenCalledWith({ token_hash: "abc", type: "email" });
     expect(res.status).toBe(307);
-    expect(res.headers.get("location")).toBe("http://localhost/");
+    expect(res.headers.get("location")).toBe("http://localhost/schedule");
   });
 
   it("redirects to /auth/login?error=1 when verifyOtp fails", async () => {

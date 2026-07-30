@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.232] — 2026-07-30
+
+### Changed
+
+- Send generic magic-link sign-ins to the study schedule while preserving requested deep-link returns.
+
+---
+
 ## [0.3.231] — 2026-07-29
 
 ### Removed

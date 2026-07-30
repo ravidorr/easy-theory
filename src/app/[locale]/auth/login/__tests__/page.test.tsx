@@ -79,16 +79,16 @@ describe("LoginPage", () => {
     expect(input?.value).toBe("/topics/signs/review");
   });
 
-  it("defaults hidden input to / when next is absent", async () => {
+  it("defaults hidden input to /schedule when next is absent", async () => {
     const { container } = await renderPage();
     const input = container.querySelector<HTMLInputElement>("#next-path");
-    expect(input?.value).toBe("/");
+    expect(input?.value).toBe("/schedule");
   });
 
-  it("defaults hidden input to / when next is not a relative path", async () => {
+  it("defaults hidden input to /schedule when next is not a relative path", async () => {
     const { container } = await renderPage("https://evil.com");
     const input = container.querySelector<HTMLInputElement>("#next-path");
-    expect(input?.value).toBe("/");
+    expect(input?.value).toBe("/schedule");
   });
 
   it("shows the link-expired alert when error=1", async () => {
