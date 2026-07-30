@@ -22,10 +22,10 @@ const expectedPromptImages = new Map([
 ]);
 
 const questionsSql = readFileSync(resolve(__dirname, "../../../seeds/questions.sql"), "utf-8");
-const migrationSql = readFileSync(
-  resolve(__dirname, "../../../seeds/migrations/016_fix_prompt_sign_images.sql"),
-  "utf-8",
-);
+const migrationSqls = [
+  "016_fix_prompt_sign_images.sql",
+  "035_repair_prompt_sign_images.sql",
+].map((filename) => readFileSync(resolve(__dirname, `../../../seeds/migrations/${filename}`), "utf-8"));
 
 describe("prompt sign image data", () => {
   it("points every audited seed question at the sign named in its prompt", () => {
@@ -39,12 +39,14 @@ describe("prompt sign image data", () => {
   });
 
   it("migrates every audited existing question to the same prompt image", () => {
-    for (const [questionNumber, signNumber] of expectedPromptImages) {
-      expect(migrationSql).toContain(
-        `WHEN ${questionNumber} THEN '/signs/sign-${signNumber}.png'`,
-      );
+    for (const migrationSql of migrationSqls) {
+      for (const [questionNumber, signNumber] of expectedPromptImages) {
+        expect(migrationSql).toContain(
+          `WHEN ${questionNumber} THEN '/signs/sign-${signNumber}.png'`,
+        );
+      }
+      expect(migrationSql).toMatch(/WHERE question_number IN[\s\S]+slug = 'signs'/);
     }
-    expect(migrationSql).toMatch(/WHERE question_number IN[\s\S]+slug = 'signs'/);
   });
 
   it("has a PNG asset for every corrected prompt sign", () => {
