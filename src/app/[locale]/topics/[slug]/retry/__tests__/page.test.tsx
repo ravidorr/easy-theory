@@ -239,16 +239,15 @@ describe("RetryMistakesPage", () => {
     expect(optionA?.textContent).not.toContain("قف");
   });
 
-  it("hides the question image but shows sign options for sign questions", async () => {
-    // Sign question: /signs/ image + numeric options → question image suppressed,
-    // numeric options render as sign images (sign-100.png exists in public/signs)
+  it("renders the question image and sign options for sign questions", async () => {
     const m = { ...MISTAKE_A, image_url: "/signs/sign-100.png", option_a: "100" };
     mockGetMistakes.mockResolvedValue([m] as never);
     const jsx = await RetryMistakesPage({ params: Promise.resolve({ slug: "signs" }) });
     const { container } = render(jsx);
     const signImgs = container.querySelectorAll("img[src='/signs/sign-100.png']");
-    expect(signImgs).toHaveLength(1);
-    expect(signImgs[0].closest(".quiz-option")).toBeTruthy();
+    expect(signImgs).toHaveLength(2);
+    expect(signImgs[0].closest(".quiz-option")).toBeNull();
+    expect(signImgs[1].closest(".quiz-option")).toBeTruthy();
     expect(signImgs[0].getAttribute("alt")).toBe("signAlt");
   });
 

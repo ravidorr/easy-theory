@@ -211,16 +211,19 @@ describe("ExamRunPage", () => {
       { ...makeQuestion(1), image_url: "/questions/does-not-exist.jpg" },
       // Existing question photo → wide <img> with the real path.
       { ...makeQuestion(2), image_url: "/questions/3012.jpg" },
-      // Sign question (sign image + numeric option) → no question image, option rendered as sign.
+      // Sign question (sign image + numeric option) → both prompt and option render as signs.
       { ...makeQuestion(3), topic_id: "t-signs", image_url: "/signs/sign-101.png", option_a: "101" },
-      // Prompt sign does not match the numeric answer option → question image remains visible.
+      // Prompt sign with a distinct numeric answer option also remains visible.
       { ...makeQuestion(4), image_url: "/signs/sign-126.png", option_a: "123" },
     ] as never);
     const jsx = await ExamRunPage();
     const { container } = render(jsx);
     expect(container.querySelector('img[src="/placeholder.svg"]')).toBeTruthy();
     expect(container.querySelector('img[src="/questions/3012.jpg"]')).toBeTruthy();
-    expect(container.querySelector('img[src="/signs/sign-101.png"]')).toBeTruthy();
+    const matchingSigns = container.querySelectorAll('img[src="/signs/sign-101.png"]');
+    expect(matchingSigns).toHaveLength(2);
+    expect(matchingSigns[0].closest(".quiz-option")).toBeNull();
+    expect(matchingSigns[1].closest(".quiz-option")).toBeTruthy();
     expect(container.querySelector('img[src="/signs/sign-126.png"]')).toBeTruthy();
   });
 
