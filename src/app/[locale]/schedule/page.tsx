@@ -105,7 +105,10 @@ export default async function SchedulePage() {
             >
               <span className={`${styles.toggleThumb} ${notify ? styles.toggleThumbOn : ""}`} />
             </span>
-            <span className={styles.notifyText}>{t("notifyLabel")}</span>
+            <span className={styles.notifyText}>
+              {t("notifyLabel")}
+              <span className={styles.notifyHint}>{t("notifyHint")}</span>
+            </span>
           </label>
         </div>
 

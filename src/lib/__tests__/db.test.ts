@@ -9,7 +9,10 @@ import {
   getVideos,
   getResources,
   getUserSchedule,
-  getUsersScheduledForDay,
+  getUsersWithEnabledNotifications,
+  claimScheduleNotification,
+  completeScheduleNotification,
+  releaseScheduleNotification,
   getUserMedals,
   getPushSubscriptionsForUsers,
   getMistakesForTopic,
@@ -35,7 +38,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 // Builds a chainable Supabase query mock that resolves to `result`.
 function chain(result: { data: unknown; error?: unknown }) {
   const mock: Record<string, unknown> = {};
-  for (const m of ["select", "eq", "order", "limit", "in", "range", "not", "upsert"]) {
+  for (const m of ["select", "eq", "order", "limit", "in", "range", "not", "upsert", "insert", "update", "delete"]) {
     mock[m] = vi.fn().mockReturnValue(mock);
   }
   mock.single = vi.fn().mockResolvedValue(result);
@@ -48,9 +51,10 @@ function chain(result: { data: unknown; error?: unknown }) {
   return mock;
 }
 
-function makeClient(data: unknown, error: { message: string } | null = null) {
+function makeClient(data: unknown, error: { message: string; code?: string } | null = null) {
   return {
     from: vi.fn().mockReturnValue(chain({ data: error ? null : data, error })),
+    rpc: vi.fn().mockResolvedValue({ data: error ? null : data, error }),
   } as unknown as SupabaseClient;
 }
 
@@ -233,20 +237,52 @@ describe("getUserSchedule", () => {
   });
 });
 
-describe("getUsersScheduledForDay", () => {
-  it("returns users scheduled for the given day", async () => {
-    const users = [{ user_id: "u1", start_time: "08:00", duration_minutes: 45, locale: "he" }];
-    expect(await getUsersScheduledForDay(makeClient(users), 0)).toEqual(users);
+describe("getUsersWithEnabledNotifications", () => {
+  it("returns users with enabled notifications", async () => {
+    const users = [{ user_id: "u1", day_of_week: 0, start_time: "08:00", duration_minutes: 45, locale: "he", time_zone: "Asia/Jerusalem" }];
+    expect(await getUsersWithEnabledNotifications(makeClient(users))).toEqual(users);
   });
 
   it("returns [] on null", async () => {
-    expect(await getUsersScheduledForDay(makeClient(null), 0)).toEqual([]);
+    expect(await getUsersWithEnabledNotifications(makeClient(null))).toEqual([]);
   });
 
   it("throws when the query fails instead of silently notifying nobody", async () => {
-    await expect(getUsersScheduledForDay(makeClient(null, boom), 0)).rejects.toThrow(
-      /getUsersScheduledForDay: user_schedule query failed: boom/
+    await expect(getUsersWithEnabledNotifications(makeClient(null, boom))).rejects.toThrow(
+      /getUsersWithEnabledNotifications: user_schedule query failed: boom/
     );
+  });
+});
+
+describe("claimScheduleNotification", () => {
+  it("claims a daily notification", async () => {
+    await expect(claimScheduleNotification(makeClient(true), "u1", "2026-07-30")).resolves.toBe(true);
+  });
+
+  it("returns false when the day has already been claimed", async () => {
+    await expect(
+      claimScheduleNotification(makeClient(false), "u1", "2026-07-30")
+    ).resolves.toBe(false);
+  });
+
+  it("throws for an unexpected claim failure", async () => {
+    await expect(
+      claimScheduleNotification(makeClient(null, boom), "u1", "2026-07-30")
+    ).rejects.toThrow(/claimScheduleNotification: schedule_notification_deliveries query failed: boom/);
+  });
+});
+
+describe("schedule notification delivery state", () => {
+  it("marks a successful delivery as sent", async () => {
+    await expect(
+      completeScheduleNotification(makeClient(null), "u1", "2026-07-30")
+    ).resolves.toBeUndefined();
+  });
+
+  it("releases a pending claim after a failed delivery", async () => {
+    await expect(
+      releaseScheduleNotification(makeClient(null), "u1", "2026-07-30")
+    ).resolves.toBeUndefined();
   });
 });
 

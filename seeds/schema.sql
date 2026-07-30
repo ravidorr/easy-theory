@@ -59,7 +59,8 @@ CREATE TABLE IF NOT EXISTS user_schedule (
   day_of_week      INT CHECK (day_of_week BETWEEN 0 AND 6),
   start_time       TIME NOT NULL,
   duration_minutes INT DEFAULT 45,
-  notify           BOOLEAN DEFAULT TRUE
+  notify           BOOLEAN DEFAULT TRUE,
+  time_zone        TEXT NOT NULL DEFAULT 'Asia/Jerusalem'
 );
 
 CREATE TABLE IF NOT EXISTS user_topic_progress (

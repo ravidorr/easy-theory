@@ -267,6 +267,7 @@ describe("schedule.js – successful save", () => {
         start_time: "17:00",
         duration_minutes: 60,
         notify: true,
+        time_zone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       }),
     });
     const btn = document.getElementById("save-schedule-btn") as HTMLButtonElement;

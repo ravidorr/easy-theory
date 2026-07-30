@@ -34,6 +34,14 @@
     return "/" + locale + "/more";
   }
 
+  function detectedTimeZone() {
+    try {
+      return Intl.DateTimeFormat().resolvedOptions().timeZone;
+    } catch {
+      return undefined;
+    }
+  }
+
   function showAlert(message) {
     if (window.modal) return window.modal.alert({ message: message });
     alert(message);
@@ -119,6 +127,7 @@
           start_time: timeInput ? timeInput.value : "17:00",
           duration_minutes: selectedDuration,
           notify: notifyOn,
+          time_zone: detectedTimeZone(),
         }),
       });
 

@@ -1,24 +1,35 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { GET } from "../route";
 import { createAdminClient } from "@/lib/supabase";
-import { getUsersScheduledForDay, getPushSubscriptionsForUsers } from "@/lib/db";
+import webpush from "web-push";
+import {
+  claimScheduleNotification,
+  completeScheduleNotification,
+  getPushSubscriptionsForUsers,
+  getUsersWithEnabledNotifications,
+  releaseScheduleNotification,
+} from "@/lib/db";
 import { reportError } from "@/lib/monitoring";
 import heMessages from "../../../../../../messages/he.json";
 import arMessages from "../../../../../../messages/ar.json";
 
 // vi.hoisted ensures these are initialised before the vi.mock factories run.
 const mockSendNotification = vi.hoisted(() => vi.fn().mockResolvedValue({}));
+const mockSetVapidDetails = vi.hoisted(() => vi.fn());
 const mockEmailSend = vi.hoisted(() => vi.fn().mockResolvedValue({ id: "email-id" }));
 
 vi.mock("@/lib/supabase", () => ({ createAdminClient: vi.fn() }));
 vi.mock("@/lib/db", () => ({
-  getUsersScheduledForDay: vi.fn(),
+  claimScheduleNotification: vi.fn(),
+  completeScheduleNotification: vi.fn(),
   getPushSubscriptionsForUsers: vi.fn(),
+  getUsersWithEnabledNotifications: vi.fn(),
+  releaseScheduleNotification: vi.fn(),
 }));
 vi.mock("@/lib/monitoring", () => ({ reportError: vi.fn() }));
 vi.mock("web-push", () => ({
   default: {
-    setVapidDetails: vi.fn(),
+    setVapidDetails: mockSetVapidDetails,
     sendNotification: mockSendNotification,
   },
 }));
@@ -30,8 +41,12 @@ vi.mock("resend", () => ({
 }));
 
 const mockCreateAdminClient = vi.mocked(createAdminClient);
-const mockGetSchedules = vi.mocked(getUsersScheduledForDay);
+const mockClaimScheduleNotification = vi.mocked(claimScheduleNotification);
+const mockCompleteScheduleNotification = vi.mocked(completeScheduleNotification);
+const mockGetSchedules = vi.mocked(getUsersWithEnabledNotifications);
 const mockGetPushSubs = vi.mocked(getPushSubscriptionsForUsers);
+const mockReleaseScheduleNotification = vi.mocked(releaseScheduleNotification);
+const mockSetVapid = vi.mocked(webpush.setVapidDetails);
 
 
 function makeRequest(headers: Record<string, string> = { authorization: "Bearer secret123" }) {
@@ -60,20 +75,32 @@ function makeAdminClient() {
 
 const SCHEDULE = {
   user_id: "u1",
+  day_of_week: 4,
   start_time: "08:00:00",
   duration_minutes: 45,
   locale: "he" as const,
+  time_zone: "Asia/Jerusalem",
 };
 const SCHEDULE_AR = { ...SCHEDULE, locale: "ar" as const };
 const PUSH_SUB = { user_id: "u1", endpoint: "https://push.example.com", auth: "auth", p256dh: "p256" };
 
 describe("GET /api/cron/notify", () => {
   beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-30T05:00:00Z"));
     vi.clearAllMocks();
     process.env.CRON_SECRET = "secret123";
     mockCreateAdminClient.mockReturnValue(makeAdminClient() as never);
     mockGetSchedules.mockResolvedValue([]);
     mockGetPushSubs.mockResolvedValue([]);
+    mockClaimScheduleNotification.mockResolvedValue(true);
+    mockCompleteScheduleNotification.mockResolvedValue();
+    mockReleaseScheduleNotification.mockResolvedValue();
+    mockSetVapid.mockReturnValue(undefined);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("returns 500 and does no work when CRON_SECRET is not set", async () => {
@@ -100,7 +127,7 @@ describe("GET /api/cron/notify", () => {
     expect(res.status).toBe(200);
   });
 
-  it("returns { sent: 0 } when no users are scheduled today", async () => {
+  it("returns { sent: 0 } when no users have enabled notifications", async () => {
     mockGetSchedules.mockResolvedValue([]);
     const res = await GET(makeRequest());
     expect(res.status).toBe(200);
@@ -117,6 +144,11 @@ describe("GET /api/cron/notify", () => {
     expect(mockSendNotification).toHaveBeenCalledWith(
       expect.objectContaining({ endpoint: PUSH_SUB.endpoint }),
       expect.any(String)
+    );
+    expect(mockCompleteScheduleNotification).toHaveBeenCalledWith(
+      expect.anything(),
+      SCHEDULE.user_id,
+      "2026-07-30"
     );
     expect(body).toEqual({ sent: 1 });
   });
@@ -189,6 +221,11 @@ describe("GET /api/cron/notify", () => {
 
     expect(admin.from).toHaveBeenCalledWith("user_push_subscriptions");
     expect(reportError).not.toHaveBeenCalled();
+    expect(mockReleaseScheduleNotification).toHaveBeenCalledWith(
+      expect.anything(),
+      SCHEDULE.user_id,
+      "2026-07-30"
+    );
     expect(body).toEqual({ sent: 0 });
   });
 
@@ -229,6 +266,11 @@ describe("GET /api/cron/notify", () => {
     const body = await res.json();
 
     expect(admin.from).not.toHaveBeenCalled();
+    expect(mockReleaseScheduleNotification).toHaveBeenCalledWith(
+      expect.anything(),
+      SCHEDULE.user_id,
+      "2026-07-30"
+    );
     expect(reportError).toHaveBeenCalledWith(
       "notify",
       "push send failed",
@@ -263,39 +305,100 @@ describe("GET /api/cron/notify", () => {
     expect(await res.json()).toEqual({ sent: 0 });
   });
 
-  it("defaults to Sunday when Intl returns no weekday part", async () => {
-    // Intl.DateTimeFormat is called with `new`, so the mock must be a class
-    const dtfSpy = vi.spyOn(Intl, "DateTimeFormat").mockImplementation(
-      class {
-        constructor() {
-          return { formatToParts: () => [] };
-        }
-      } as never
+  it("uses each user's local weekday, not the cron's UTC weekday", async () => {
+    const losAngelesSchedule = {
+      ...SCHEDULE,
+      user_id: "u-la",
+      day_of_week: 3,
+      time_zone: "America/Los_Angeles",
+    };
+    mockGetSchedules.mockResolvedValue([SCHEDULE, losAngelesSchedule]);
+    mockGetPushSubs.mockResolvedValue([PUSH_SUB]);
+
+    const res = await GET(makeRequest());
+
+    expect(mockClaimScheduleNotification).toHaveBeenCalledWith(
+      expect.anything(),
+      SCHEDULE.user_id,
+      "2026-07-30"
     );
-    try {
-      const res = await GET(makeRequest());
-      expect(res.status).toBe(200);
-      expect(mockGetSchedules).toHaveBeenCalledWith(expect.anything(), 0);
-    } finally {
-      dtfSpy.mockRestore();
-    }
+    expect(mockClaimScheduleNotification).toHaveBeenCalledWith(
+      expect.anything(),
+      losAngelesSchedule.user_id,
+      "2026-07-29"
+    );
+    expect(await res.json()).toEqual({ sent: 2 });
   });
 
-  it("defaults to day 0 when Intl returns an unknown weekday", async () => {
-    const dtfSpy = vi.spyOn(Intl, "DateTimeFormat").mockImplementation(
-      class {
-        constructor() {
-          return { formatToParts: () => [{ type: "weekday", value: "Xxx" }] };
-        }
-      } as never
+  it("skips a schedule when its local weekday is not selected", async () => {
+    mockGetSchedules.mockResolvedValue([{ ...SCHEDULE, day_of_week: 3 }]);
+
+    const res = await GET(makeRequest());
+
+    expect(mockClaimScheduleNotification).not.toHaveBeenCalled();
+    expect(mockGetPushSubs).not.toHaveBeenCalled();
+    expect(await res.json()).toEqual({ sent: 0 });
+  });
+
+  it("matches the local Sunday after the Los Angeles DST transition", async () => {
+    vi.setSystemTime(new Date("2026-03-08T10:00:00Z"));
+    const dstSchedule = { ...SCHEDULE, day_of_week: 0, time_zone: "America/Los_Angeles" };
+    mockGetSchedules.mockResolvedValue([dstSchedule]);
+    mockGetPushSubs.mockResolvedValue([PUSH_SUB]);
+
+    const res = await GET(makeRequest());
+
+    expect(mockClaimScheduleNotification).toHaveBeenCalledWith(
+      expect.anything(),
+      dstSchedule.user_id,
+      "2026-03-08"
     );
-    try {
-      const res = await GET(makeRequest());
-      expect(res.status).toBe(200);
-      expect(mockGetSchedules).toHaveBeenCalledWith(expect.anything(), 0);
-    } finally {
-      dtfSpy.mockRestore();
-    }
+    expect(await res.json()).toEqual({ sent: 1 });
+  });
+
+  it("does not send a duplicate when the daily delivery was already claimed", async () => {
+    mockGetSchedules.mockResolvedValue([SCHEDULE]);
+    mockClaimScheduleNotification.mockResolvedValue(false);
+
+    const res = await GET(makeRequest());
+
+    expect(mockSendNotification).not.toHaveBeenCalled();
+    expect(mockGetPushSubs).toHaveBeenCalledWith(expect.anything(), [SCHEDULE.user_id]);
+    expect(await res.json()).toEqual({ sent: 0 });
+  });
+
+  it("does not claim reminders when subscription lookup fails", async () => {
+    mockGetSchedules.mockResolvedValue([SCHEDULE]);
+    mockGetPushSubs.mockRejectedValueOnce(new Error("database unavailable"));
+
+    await expect(GET(makeRequest())).rejects.toThrow("database unavailable");
+
+    expect(mockClaimScheduleNotification).not.toHaveBeenCalled();
+  });
+
+  it("does not claim reminders when VAPID setup fails", async () => {
+    mockGetSchedules.mockResolvedValue([SCHEDULE]);
+    mockSetVapid.mockImplementationOnce(() => {
+      throw new Error("invalid VAPID key");
+    });
+
+    await expect(GET(makeRequest())).rejects.toThrow("invalid VAPID key");
+
+    expect(mockClaimScheduleNotification).not.toHaveBeenCalled();
+  });
+
+  it("releases the claim when email delivery fails", async () => {
+    mockGetSchedules.mockResolvedValue([SCHEDULE]);
+    mockGetPushSubs.mockResolvedValue([]);
+    mockEmailSend.mockRejectedValueOnce(new Error("Resend unavailable"));
+
+    await expect(GET(makeRequest())).rejects.toThrow("Resend unavailable");
+
+    expect(mockReleaseScheduleNotification).toHaveBeenCalledWith(
+      expect.anything(),
+      SCHEDULE.user_id,
+      "2026-07-30"
+    );
   });
 
   it("skips email when user has no email address", async () => {

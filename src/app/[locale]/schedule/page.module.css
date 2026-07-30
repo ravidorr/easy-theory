@@ -224,6 +224,13 @@
   color: var(--text);
 }
 
+.notifyHint {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: var(--type-small-size);
+}
+
 .saveArea {
   margin-top: auto;
   display: flex;
