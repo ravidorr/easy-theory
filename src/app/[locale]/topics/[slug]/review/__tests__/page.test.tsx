@@ -287,7 +287,7 @@ describe("ReviewPage", () => {
     ).toBeTruthy();
   });
 
-  it("suppresses a question sign when its number is an answer option", async () => {
+  it("renders a question sign when its number is an answer option", async () => {
     const m = {
       ...MISTAKE_A,
       image_url: "/signs/sign-101.png",
@@ -300,8 +300,9 @@ describe("ReviewPage", () => {
     const jsx = await callPage();
     const { container } = render(jsx);
     const matchingImages = container.querySelectorAll("img[src='/signs/sign-101.png']");
-    expect(matchingImages).toHaveLength(1);
-    expect(matchingImages[0].closest(".quiz-option")).toBeTruthy();
+    expect(matchingImages).toHaveLength(2);
+    expect(matchingImages[0].closest(".quiz-option")).toBeNull();
+    expect(matchingImages[1].closest(".quiz-option")).toBeTruthy();
   });
 
   it("renders text for digit option when sign file does not exist", async () => {

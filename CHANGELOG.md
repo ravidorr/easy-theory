@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.238] — 2026-07-30
+
+### Fixed
+
+- Always render prompt traffic signs, even when a matching sign is an answer option.
+
+---
+
 ## [0.3.237] — 2026-07-30
 
 ### Changed
