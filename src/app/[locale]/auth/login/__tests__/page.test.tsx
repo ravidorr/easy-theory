@@ -48,7 +48,8 @@ describe("LoginPage", () => {
 
   it("renders the login page heading", async () => {
     await renderPage();
-    expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("heroH1");
+    expect(screen.getByText("heroH2").tagName).toBe("H2");
   });
 
   it("renders the localized brand tagline", async () => {
@@ -65,6 +66,7 @@ describe("LoginPage", () => {
     const { container } = await renderPage();
     const footer = container.querySelector("footer");
     expect(footer).toBeTruthy();
+    expect(footer?.querySelector("svg")).toBeTruthy();
   });
 
   it("renders the login form", async () => {
@@ -106,9 +108,15 @@ describe("LoginPage", () => {
   });
 
   it("renders the trust badge and hero screenshot", async () => {
-    await renderPage();
+    const { container } = await renderPage();
     expect(screen.getByText("trustBadge")).toBeInTheDocument();
     expect(screen.getByAltText("screenshotHomeAlt")).toBeInTheDocument();
+    const preview = container.querySelector("section[aria-label='previewSectionLabel']");
+    const phoneFrame = preview?.querySelector("img[alt='screenshotHomeAlt']")?.parentElement;
+    const trustBadge = screen.getByText("trustBadge").parentElement;
+    expect(phoneFrame?.compareDocumentPosition(trustBadge!)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
   });
 
   it("uses screenshot assets for the current locale", async () => {

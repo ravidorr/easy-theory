@@ -12,7 +12,7 @@ function setupDOM() {
     <div id="login-header"></div>
     <form id="login-form">
       <input id="email-input" type="email" value="test@example.com" />
-      <button id="send-btn" type="submit">לשלוח לי קישור</button>
+      <button id="send-btn" type="submit">שלח לי קישור</button>
       <div id="login-error" style="display:none"></div>
     </form>
     <div id="sent-banner" style="display:none">
@@ -69,7 +69,7 @@ describe("auth.js – send button loading state", () => {
 
     const btn = document.getElementById("send-btn") as HTMLButtonElement;
     expect(btn.disabled).toBe(false);
-    expect(btn.textContent).toBe("לשלוח לי קישור");
+    expect(btn.textContent).toBe("שלח לי קישור");
     expect(btn.querySelector(".btn-spinner")).toBeNull();
   });
 
@@ -81,7 +81,7 @@ describe("auth.js – send button loading state", () => {
 
     const btn = document.getElementById("send-btn") as HTMLButtonElement;
     expect(btn.disabled).toBe(false);
-    expect(btn.textContent).toBe("לשלוח לי קישור");
+    expect(btn.textContent).toBe("שלח לי קישור");
     expect(btn.querySelector(".btn-spinner")).toBeNull();
   });
 
