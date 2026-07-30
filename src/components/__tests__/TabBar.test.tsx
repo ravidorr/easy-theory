@@ -57,6 +57,14 @@ describe("TabBar", () => {
     expect(pills).toHaveLength(tabs.length);
   });
 
+  it("uses the shared 20px icon size for every tab", async () => {
+    const { container } = render(await TabBar({ active: "home" }));
+    for (const icon of container.querySelectorAll("nav > a > span:first-child > svg")) {
+      expect(icon).toHaveAttribute("width", "20");
+      expect(icon).toHaveAttribute("height", "20");
+    }
+  });
+
   it("uses the chart icon for the progress tab", async () => {
     const { container } = render(await TabBar({ active: "home" }));
     expect(container.querySelector('a[href="/progress"] svg')).toHaveAttribute("data-icon", "chart");

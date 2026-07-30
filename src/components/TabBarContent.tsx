@@ -16,11 +16,11 @@ export function TabBarContent({
   labels: TabBarLabels;
 }) {
   const tabs = [
-    { key: "home" as ActiveTab, href: "/" as const, label: labels.home, icon: <Icon name="home" size={22} /> },
-    { key: "practice" as ActiveTab, href: "/practice" as const, label: labels.practice, icon: <Icon name="cards" size={22} /> },
-    { key: "exam" as ActiveTab, href: "/exam" as const, label: labels.exam, icon: <Icon name="timer" size={22} /> },
-    { key: "progress" as ActiveTab, href: "/progress" as const, label: labels.progress, icon: <Icon name="chart" size={22} /> },
-    { key: "more" as ActiveTab, href: "/more" as const, label: labels.more, icon: <Icon name="more" size={22} /> },
+    { key: "home" as ActiveTab, href: "/" as const, label: labels.home, icon: <Icon name="home" size={20} /> },
+    { key: "practice" as ActiveTab, href: "/practice" as const, label: labels.practice, icon: <Icon name="cards" size={20} /> },
+    { key: "exam" as ActiveTab, href: "/exam" as const, label: labels.exam, icon: <Icon name="timer" size={20} /> },
+    { key: "progress" as ActiveTab, href: "/progress" as const, label: labels.progress, icon: <Icon name="chart" size={20} /> },
+    { key: "more" as ActiveTab, href: "/more" as const, label: labels.more, icon: <Icon name="more" size={20} /> },
   ];
 
   return (

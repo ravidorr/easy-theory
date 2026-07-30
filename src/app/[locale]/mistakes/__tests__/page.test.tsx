@@ -7,6 +7,10 @@ import { getMistakesForTopic, getTopics } from "@/lib/db";
 import { getLocale } from "next-intl/server";
 
 vi.mock("next/navigation", () => ({ redirect: vi.fn(() => { throw new Error("redirect"); }) }));
+vi.mock("next/image", () => ({
+  default: ({ src, alt, className, width, height }: { src: string; alt?: string; className?: string; width?: number; height?: number }) =>
+    React.createElement("img", { src, alt, className, width, height }),
+}));
 vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
 vi.mock("@/lib/db", () => ({ getMistakesForTopic: vi.fn(), getTopics: vi.fn() }));
 vi.mock("@/components/TabBar", () => ({ TabBar: ({ active, current }: { active: string; current: string | null }) => React.createElement("div", { "data-testid": "tabbar", "data-active": active, "data-current": current ?? "" }) }));
@@ -21,7 +25,7 @@ const mockGetTopics = vi.mocked(getTopics);
 const mockGetMistakesForTopic = vi.mocked(getMistakesForTopic);
 const mockGetLocale = vi.mocked(getLocale);
 const topics = [
-  { id: "signs", slug: "signs", name_he: "תמרורים", name_ar: "إشارات المرور" },
+  { id: "signs", slug: "signs", name_he: "תמרורים", name_ar: "إشارات المرور", icon: "/signs/sign-302.png" },
   { id: "laws", slug: "traffic-laws", name_he: "חוקי תנועה", name_ar: "قوانين المرور" },
 ];
 
@@ -48,9 +52,19 @@ describe("MistakesPage", () => {
     const { container } = render(await MistakesPage());
 
     expect(screen.getByRole("link", { name: /תמרורים/ })).toHaveAttribute("href", "/topics/signs/review?scope=all");
+    expect(container.querySelector('img[src="/signs/sign-302.png"]')).toHaveAttribute("width", "32");
     expect(screen.queryByText("empty")).toBeNull();
     expect(container.querySelector('[data-testid="tabbar"]')).toHaveAttribute("data-active", "practice");
     expect(container.querySelector('[data-testid="tabbar"]')).toHaveAttribute("data-current", "");
+  });
+
+  it("uses a 20px warning icon when a topic has no sign artwork", async () => {
+    mockGetTopics.mockResolvedValue([{ id: "laws", slug: "laws", name_he: "חוקים", name_ar: "قوانين", icon: null }] as never);
+    mockGetMistakesForTopic.mockResolvedValue([{ id: "q1" }] as never);
+
+    const { container } = render(await MistakesPage());
+
+    expect(container.querySelector('[data-icon="warning"]')).toHaveAttribute("width", "20");
   });
 
   it("shows the empty state when every topic has no mistakes", async () => {

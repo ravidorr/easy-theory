@@ -26,7 +26,7 @@ export default async function PracticePage() {
       </header>
 
       <Link className={`pressable-card ${styles.reviewCard}`} href="/mistakes">
-        <span className={styles.reviewIcon}><Icon name="warning" size={22} /></span>
+        <span className={styles.reviewIcon}><Icon name="warning" size={20} /></span>
         <span className={styles.reviewLabel}>{t("reviewMistakes")}</span>
         <Icon name="chevron-left" size={20} className={styles.chevron} />
       </Link>
@@ -36,9 +36,9 @@ export default async function PracticePage() {
           <Link className={`pressable-row ${styles.topicRow}`} key={topic.id} href={`/topics/${topic.slug}`}>
             <span className={styles.topicIcon}>
               {topic.icon ? (
-                <Image src={topic.icon} alt="" width={34} height={34} className={styles.topicIconImg} />
+                <Image src={topic.icon} alt="" width={32} height={32} className={styles.topicIconImg} />
               ) : (
-                <Icon name="cards" size={22} />
+                <Icon name="cards" size={20} />
               )}
             </span>
             <span className={styles.topicLabel}>{localizedRecordField(locale, topic, "name_he", "name_ar")}</span>

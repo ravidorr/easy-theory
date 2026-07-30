@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.234] — 2026-07-30
+
+### Changed
+
+- Aligned bottom navigation and topic-card icon sizing with the More-page standard, while retaining traffic-sign artwork.
+
+---
+
 ## [0.3.233] — 2026-07-30
 
 ### Changed

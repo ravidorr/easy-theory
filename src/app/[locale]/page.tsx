@@ -200,7 +200,7 @@ export default async function HomePage() {
         <Link href="/exam" className={styles.noUnderline}>
           <section className={`pressable-card ${styles.examCta}`}>
             <span className={styles.examCtaIcon}>
-              <Icon name="timer" size={22} />
+              <Icon name="timer" size={20} />
             </span>
             <div className={styles.examCtaBody}>
               <span className={styles.examCtaTitle}>{t("examCtaTitle")}</span>
@@ -233,7 +233,7 @@ export default async function HomePage() {
                 <div className={`pressable-card ${styles.topicLink}`} data-complete={meta.done || undefined}>
                   {topic.icon && (
                     <div className={styles.topicIconWrap}>
-                      <Image src={topic.icon} alt="" width={34} height={34} className={styles.topicIconImg} />
+                      <Image src={topic.icon} alt="" width={32} height={32} className={styles.topicIconImg} />
                     </div>
                   )}
                   <div className={styles.topicBody}>
