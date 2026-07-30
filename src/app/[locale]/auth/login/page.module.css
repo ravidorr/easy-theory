@@ -25,6 +25,22 @@
   color: var(--text-faint);
 }
 
+.footerBrand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  color: var(--text-faint);
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+}
+
+.footerMark {
+  width: 16px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
 .hero {
   display: flex;
   flex-direction: column;
@@ -35,12 +51,14 @@
 }
 
 .wordmark {
-  font-weight: 800;
-  font-size: var(--type-h2-size);
+  font-weight: var(--type-display-weight);
+  font-size: var(--type-display-size);
+  line-height: var(--line-tight);
   color: var(--primary-soft-text);
 }
 
 .brandLock {
+  margin: 0;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -56,19 +74,22 @@
   margin: -8px 0 0;
   color: var(--text-muted);
   font-size: var(--type-small-size);
+  font-weight: var(--type-body-weight);
 }
 
 .heroTitle {
   margin: 0;
-  font-size: var(--type-display-size);
-  font-weight: var(--type-display-weight);
+  font-size: var(--type-h1-size);
+  font-weight: var(--type-h1-weight);
   line-height: var(--line-tight);
   color: var(--text);
+  white-space: nowrap;
 }
 
 .heroDesc {
   margin: 0;
   font-size: var(--type-body-size);
+  font-weight: var(--type-body-weight);
   color: var(--text-muted);
   line-height: var(--line-body);
   max-width: 320px;
@@ -218,14 +239,9 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-pill);
-  padding: 8px 16px;
-  box-shadow: var(--shadow-card);
-  font-size: var(--type-small-size);
+  font-size: var(--type-caption-size);
   font-weight: 600;
-  color: var(--text);
+  color: var(--text-muted);
 }
 
 .trustBadgeIcon {

@@ -29,6 +29,19 @@ describe("locale messages", () => {
     });
   });
 
+  it("defines the refreshed localized landing copy", () => {
+    expect(he.Login).toMatchObject({
+      heroH2: "לימוד לתיאוריה, בלי לחץ.",
+      sendBtn: "שלח לי קישור",
+      closeCta: "יאללה, נתחיל",
+    });
+    expect(ar.Login).toMatchObject({
+      heroH2: "تعلّموا نظرية القيادة، بدون ضغط.",
+      sendBtn: "أرسلوا لي رابطًا",
+      closeCta: "هيا لنبدأ",
+    });
+  });
+
   it("keeps duplicate quiz feedback copy aligned with the runtime messages", () => {
     for (const messages of [he, ar]) {
       expect(messages.Quiz.rewardTopicDone).toBe(messages.JS.Quiz.rewardTopicDone);

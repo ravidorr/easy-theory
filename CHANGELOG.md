@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.233] — 2026-07-30
+
+### Changed
+
+- Refined the landing hierarchy and localized CTAs, added footer branding, and refreshed Hebrew and Arabic app previews in light and dark modes.
+
+---
+
 ## [0.3.232] — 2026-07-30
 
 ### Changed

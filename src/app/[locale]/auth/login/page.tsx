@@ -6,6 +6,15 @@ import { getTranslations } from "next-intl/server";
 import { Icon } from "@/components/Icon";
 import styles from "./page.module.css";
 
+function BrandMark({ className }: { className: string }) {
+  return (
+    <svg viewBox="0 0 76 72" aria-hidden="true" className={className}>
+      <path d="M12 20l16 16-16 16" fill="none" stroke="var(--accent)" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M34 20l16 16-16 16" fill="none" stroke="var(--primary)" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -53,22 +62,12 @@ export default async function LoginPage({
     <>
       <main className={styles.page}>
         <header className={styles.hero}>
-          <span className={styles.brandLock}>
-            <svg viewBox="0 0 76 72" aria-hidden="true" className={styles.brandMark}>
-              <path d="M12 20l16 16-16 16" fill="none" stroke="var(--accent)" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M34 20l16 16-16 16" fill="none" stroke="var(--primary)" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+          <h1 className={styles.brandLock}>
+            <BrandMark className={styles.brandMark} />
             <span className={styles.wordmark}>{t("heroH1")}</span>
-          </span>
-          <p className={styles.tagline}>{brand("tagline")}</p>
-          <h1 className={styles.heroTitle}>
-            {t("heroH2").split("\n").map((line, i) => (
-              <span key={i}>
-                {line}
-                {i === 0 && <br />}
-              </span>
-            ))}
           </h1>
+          <p className={styles.tagline}>{brand("tagline")}</p>
+          <h2 className={styles.heroTitle}>{t("heroH2")}</h2>
           <p className={styles.heroDesc}>{t("heroDesc")}</p>
         </header>
 
@@ -141,12 +140,6 @@ export default async function LoginPage({
           aria-label={t("previewSectionLabel")}
           className={styles.previewSection}
         >
-          <div className={styles.trustBadge}>
-            <span className={styles.trustBadgeIcon}>
-              <Icon name="check" size={16} />
-            </span>
-            <span>{t("trustBadge")}</span>
-          </div>
           <div className={styles.phoneFrame}>
             <Image
               src={screenshotSrc("home")}
@@ -155,6 +148,12 @@ export default async function LoginPage({
               height={400}
               className={styles.screenshot}
             />
+          </div>
+          <div className={styles.trustBadge}>
+            <span className={styles.trustBadgeIcon}>
+              <Icon name="check" size={16} />
+            </span>
+            <span>{t("trustBadge")}</span>
           </div>
         </section>
 
@@ -248,7 +247,10 @@ export default async function LoginPage({
         </section>
 
         <footer>
-          <p>{t("footerLine1")}</p>
+          <div className={styles.footerBrand}>
+            <BrandMark className={styles.footerMark} />
+            <span>{t("footerLine1")}</span>
+          </div>
           <p>{t("footerLine2")}</p>
         </footer>
       </main>
