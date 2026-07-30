@@ -48,7 +48,7 @@ In the project's **SQL editor**, run these files in exactly this order:
    `029_harden_exam_sessions.sql`, `030_allow_exam_session_insert.sql`,
    `031_secure_exam_session_creation.sql`,
    `032_atomic_diagnostic_completion.sql`, `033_remove_answer_confidence.sql`,
-   `034_schedule_time_zones.sql`)
+   `034_schedule_time_zones.sql`, `035_repair_prompt_sign_images.sql`)
 
 **Keep the QA project's schema in sync**: whenever a new file lands in
 `seeds/migrations/`, run it in the QA project's SQL editor too. The app's code assumes

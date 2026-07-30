@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.236] — 2026-07-30
+
+### Fixed
+
+- Restored the referenced prompt signs for audited traffic-sign questions in deployments with stale question data.
+
+---
+
 ## [0.3.235] — 2026-07-30
 
 ### Changed
