@@ -484,6 +484,11 @@ button.quiz-option:active { transform: scale(0.985); }
   background: var(--surface-3);
 }
 
+/* Standalone CTAs fill their existing action row without affecting controls. */
+.btn-full {
+  width: 100%;
+}
+
 .btn-danger {
   font-family: var(--font-ui);
   font-weight: 700;

@@ -292,7 +292,7 @@ export default async function TopicQuizPage({
           <a href={`/${locale}`} className={`btn-primary ${styles.btnWide}`}>
             {t("finalBackHome")}
           </a>
-          <Link href={`/topics/${slug}/review`} className={`btn-secondary ${styles.btnWide}`}>
+          <Link href={`/topics/${slug}/review`} className={`btn-secondary btn-full ${styles.btnWide}`}>
             {t("finalReview")}
           </Link>
         </div>

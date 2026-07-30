@@ -250,7 +250,7 @@ export default async function RetryMistakesPage({
           <Link href={reviewHref} className={`btn-primary ${styles.btnWide}`}>
             {tRetry("finalBackReview")}
           </Link>
-          <Link href="/" className={`btn-secondary ${styles.btnWide}`}>
+          <Link href="/" className={`btn-secondary btn-full ${styles.btnWide}`}>
             {tRetry("finalBackHome")}
           </Link>
         </div>

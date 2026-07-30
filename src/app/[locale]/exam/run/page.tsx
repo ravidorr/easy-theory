@@ -248,7 +248,7 @@ export default async function ExamRunPage() {
           <h2 id="exam-result-title"></h2>
           <span id="exam-result-score" className={styles.finalScore}></span>
           <p id="exam-result-summary" className={styles.resultSummary} aria-live="polite"></p>
-          <button id="exam-review-btn" className={`btn-secondary ${styles.btnWide}`}>
+          <button id="exam-review-btn" className={`btn-secondary btn-full ${styles.btnWide}`}>
             {t("reviewBtn")}
           </button>
           <Link href="/exam" className={`btn-primary ${styles.btnWide}`}>

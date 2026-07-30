@@ -86,7 +86,7 @@ export default async function HomePage() {
         <h1>{t("publicTitle")}</h1>
         <p className={styles.publicIntro}>{t("publicIntro")}</p>
         <Link href="/diagnostic" className="btn-primary">{t("publicDiagnostic")}</Link>
-        <Link href="/auth/login" className="btn-secondary">{t("publicLogin")}</Link>
+        <Link href="/auth/login" className="btn-secondary btn-full">{t("publicLogin")}</Link>
         <p className={styles.publicSource}>
           <a href={OFFICIAL_QUESTION_BANK_URL} target="_blank" rel="noopener noreferrer">
             {t("publicSource")}
