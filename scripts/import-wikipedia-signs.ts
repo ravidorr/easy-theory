@@ -43,11 +43,12 @@ function categoryForHeading(heading: string): string | null {
 }
 
 function cleanWikitext(value: string): string {
+  // Import output is data-only JSON, never HTML. Preserve markup literally
+  // instead of attempting incomplete HTML sanitization with a regex.
   return value
     .replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, "$2")
     .replace(/\[\[([^\]]+)\]\]/g, "$1")
     .replace(/'{2,}/g, "")
-    .replace(/<[^>]+>/g, "")
     .replace(/\s+/g, " ")
     .trim();
 }

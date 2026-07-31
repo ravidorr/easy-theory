@@ -27,6 +27,12 @@ describe("Wikipedia sign importer", () => {
     expect(result.duplicateSignNumbers).toEqual(["112"]);
   });
 
+  it("preserves markup as inert source text instead of regex-sanitizing HTML", () => {
+    const result = parseWikipediaSignWikitext(`=== תמרורי רמזורים ובקרת נתיבים 701–729 ===
+קובץ:one.svg|תמרור 701 - <script>alert(1)</script>`);
+    expect(result.signs[0].nameHe).toBe("<script>alert(1)</script>");
+  });
+
   it("uses an immutable oldid URL", () => {
     expect(permanentWikipediaUrl(43643480)).toContain("oldid=43643480");
   });
