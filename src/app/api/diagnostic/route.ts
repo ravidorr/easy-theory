@@ -23,7 +23,8 @@ export async function POST(request: Request) {
   const { data: questions, error } = await admin
     .from("questions")
     .select("id, topic_id, correct_option")
-    .in("id", answers.map((answer) => answer.question_id));
+    .in("id", answers.map((answer) => answer.question_id))
+    .eq("is_active", true);
   if (error || (questions ?? []).length !== 12) {
     return NextResponse.json({ error: t("missingParams") }, { status: 400 });
   }

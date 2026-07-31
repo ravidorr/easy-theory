@@ -3,6 +3,18 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.239] — 2026-07-31
+
+### Changed
+
+- Added reviewed, source-pinned content release validation for Ministry questions and Israeli traffic signs, with active-content cutover safeguards.
+
+### Fixed
+
+- Prevented concurrent exam creation and invalidated unfinished exams at content cutover so retired questions cannot be finalized.
+
+---
+
 ## [0.3.238] — 2026-07-30
 
 ### Fixed

@@ -16,7 +16,7 @@ describe("POST /api/diagnostic", () => {
     }));
     mockCreateAdminClient.mockReturnValue({
       from: vi.fn().mockReturnValue({
-        select: vi.fn().mockReturnValue({ in: vi.fn().mockResolvedValue({ data: questions, error: null }) }),
+        select: vi.fn().mockReturnValue({ in: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ data: questions, error: null }) }) }),
       }),
     } as never);
     mockCreateClient.mockResolvedValue({
@@ -51,7 +51,7 @@ describe("POST /api/diagnostic", () => {
     expect(duplicate.status).toBe(400);
 
     mockCreateAdminClient.mockReturnValue({
-      from: vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue({ in: vi.fn().mockResolvedValue({ data: [], error: null }) }) }),
+      from: vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue({ in: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ data: [], error: null }) }) }) }),
     } as never);
     const unavailableAnswers = Array.from({ length: 12 }, (_, index) => ({ question_id: questionId(index), selected_option: "a" }));
     const unavailable = await POST(new Request("http://localhost/api/diagnostic", {

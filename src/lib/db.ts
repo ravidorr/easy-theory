@@ -27,6 +27,11 @@ export type Question = {
   correct_option: "a" | "b" | "c" | "d";
   image_url: string | null;
   explanation_he: string | null;
+  explanation_ar?: string | null;
+  explanation_he_source_url?: string | null;
+  explanation_ar_source_url?: string | null;
+  is_active?: boolean;
+  source_release_id?: string | null;
 };
 
 export type Sign = {
@@ -36,6 +41,9 @@ export type Sign = {
   meaning_he: string | null;
   image_path: string;
   category: string;
+  source_release_id?: string | null;
+  source_url?: string | null;
+  is_active?: boolean;
 };
 
 export type Video = {
@@ -137,6 +145,7 @@ export async function getQuestionsForTopic(
     .from("questions")
     .select("*")
     .eq("topic_id", topicId)
+    .eq("is_active", true)
     .order("question_number");
   throwOnDbError(error, "getQuestionsForTopic: questions");
   return data ?? [];
@@ -201,6 +210,7 @@ export async function getSigns(
   const { data, error } = await supabase
     .from("signs")
     .select("*")
+    .eq("is_active", true)
     .order("sign_number")
     .limit(limit);
   throwOnDbError(error, "getSigns: signs");
@@ -343,7 +353,8 @@ async function fetchQuestionsByIds(
       const { data, error } = await supabase
         .from("questions")
         .select("*")
-        .in("id", chunk);
+        .in("id", chunk)
+        .eq("is_active", true);
       throwOnDbError(error, "fetchQuestionsByIds: questions");
       return data ?? [];
     })
@@ -446,6 +457,7 @@ export async function getMistakesForTopic(
     )
     .eq("user_id", userId)
     .eq("questions.topic_id", topicId)
+    .eq("questions.is_active", true)
     .order("answered_at", { ascending: false });
 
   throwOnDbError(error, "getMistakesForTopic: responses");
@@ -511,7 +523,8 @@ export async function getAnsweredQuestionIdsForTopic(
     .from("user_quiz_responses")
     .select("question_id, questions!inner(topic_id)")
     .eq("user_id", userId)
-    .eq("questions.topic_id", topicId);
+    .eq("questions.topic_id", topicId)
+    .eq("questions.is_active", true);
   throwOnDbError(error, "getAnsweredQuestionIdsForTopic: user_quiz_responses");
   return new Set((data ?? []).map((row) => row.question_id));
 }
@@ -631,7 +644,11 @@ export async function getOrCreateExamSession(
 
 export async function getQuestionsByIds(supabase: SupabaseClient, ids: string[]): Promise<Question[]> {
   if (ids.length === 0) return [];
-  const { data, error } = await supabase.from("questions").select("*").in("id", ids);
+  const { data, error } = await supabase
+    .from("questions")
+    .select("*")
+    .in("id", ids)
+    .eq("is_active", true);
   throwOnDbError(error, "getQuestionsByIds: questions");
   const byId = new Map((data ?? []).map((question) => [question.id, question]));
   return ids.map((id) => byId.get(id)).filter((question): question is Question => question != null);
@@ -643,7 +660,8 @@ export async function getRandomExamQuestions(
 ): Promise<Question[]> {
   const { data: idRows, error: idsError } = await supabase
     .from("questions")
-    .select("id");
+    .select("id")
+    .eq("is_active", true);
   throwOnDbError(idsError, "getRandomExamQuestions: question ids");
   if (!idRows?.length) return [];
 
@@ -655,7 +673,8 @@ export async function getRandomExamQuestions(
   const { data: questions, error: questionsError } = await supabase
     .from("questions")
     .select("*")
-    .in("id", pickedIds);
+    .in("id", pickedIds)
+    .eq("is_active", true);
   throwOnDbError(questionsError, "getRandomExamQuestions: questions");
   if (!questions?.length) return [];
 
@@ -714,8 +733,9 @@ export async function getTopicAccuracy(
   for (let from = 0; ; from += TOPIC_ACCURACY_PAGE_SIZE) {
     const { data, error } = await supabase
       .from("user_quiz_responses")
-      .select("is_correct, questions(topic_id)")
+      .select("is_correct, questions!inner(topic_id)")
       .eq("user_id", userId)
+      .eq("questions.is_active", true)
       .order("question_id")
       .range(from, from + TOPIC_ACCURACY_PAGE_SIZE - 1);
 
@@ -804,6 +824,7 @@ export async function getQuestionNumbersForTopic(
     .from("questions")
     .select("id, question_number")
     .eq("topic_id", topicId)
+    .eq("is_active", true)
     .order("question_number");
   throwOnDbError(error, "getQuestionNumbersForTopic: questions");
   return data ?? [];
@@ -814,7 +835,8 @@ export async function getTopicQuestionCounts(
 ): Promise<Record<string, number>> {
   const { data, error } = await supabase
     .from("topics")
-    .select("id, questions(count)");
+    .select("id, questions!inner(count)")
+    .eq("questions.is_active", true);
   throwOnDbError(error, "getTopicQuestionCounts: topics");
 
   const counts: Record<string, number> = {};

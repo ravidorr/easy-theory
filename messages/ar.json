@@ -225,6 +225,7 @@
     "signAlt": "إشارة {number}",
     "questionImageAlt": "صورة مرفقة بالسؤال",
     "optionCorrectSr": "إجابة صحيحة",
+    "explanationSource": "المصدر",
     "optionWrongSr": "إجابة خاطئة",
     "bookmarkLabel": "حفظ السؤال للمراجعة لاحقاً",
     "bookmarkTooltip": "يمكنك حفظ الأسئلة للعودة إليها لاحقًا",

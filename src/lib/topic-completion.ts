@@ -8,7 +8,8 @@ export async function checkTopicCompletion(
   const { data: questions, error: qError } = await supabase
     .from("questions")
     .select("id")
-    .eq("topic_id", topicId);
+    .eq("topic_id", topicId)
+    .eq("is_active", true);
 
   if (qError || !questions || questions.length === 0) return false;
 

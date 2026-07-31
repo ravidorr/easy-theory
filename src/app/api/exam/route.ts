@@ -39,7 +39,9 @@ export async function POST(request: Request) {
     const admin = createAdminClient();
     const { data, error } = await supabase.rpc("finalize_exam_session", { p_session_id: session_id });
     if (error) {
-      const status = error.message === "exam_session_not_found" ? 404 : 500;
+      const status = error.message === "exam_session_not_found" ? 404
+        : error.message === "exam_session_invalidated" ? 409
+        : 500;
       reportError("exam", "session finalization failed", error, { userId: user.id, sessionId: session_id });
       return NextResponse.json({ error: t("examSaveFailed") }, { status });
     }
@@ -79,7 +81,8 @@ export async function POST(request: Request) {
     const { data: questions } = await supabase
       .from("questions")
       .select("id, correct_option, topic_id")
-      .in("id", allowedQuestionIds);
+      .in("id", allowedQuestionIds)
+      .eq("is_active", true);
     correctById = new Map((questions ?? []).map((q) => [q.id, q.correct_option]));
     topicByQuestionId = new Map((questions ?? []).map((q) => [q.id, q.topic_id]));
   }

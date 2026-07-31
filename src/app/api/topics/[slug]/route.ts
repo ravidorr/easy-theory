@@ -25,6 +25,7 @@ export async function GET(
     .from("questions")
     .select("id, question_number, question_he, option_a, option_b, option_c, option_d, image_url")
     .eq("topic_id", topic.id)
+    .eq("is_active", true)
     .order("question_number");
 
   if (error) {
