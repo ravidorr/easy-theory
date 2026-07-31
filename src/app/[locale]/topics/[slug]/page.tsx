@@ -8,7 +8,7 @@ import { QuestionImage } from "@/components/QuestionImage";
 import { Icon } from "@/components/Icon";
 import { EmptyStateCard } from "@/components/EmptyStateCard";
 import { TabBar } from "@/components/TabBar";
-import { InlineMarkdown } from "@/components/InlineMarkdown";
+import { ApprovedExplanation } from "@/components/ApprovedExplanation";
 import { createClient } from "@/lib/supabase";
 import { getQuestionsForTopic, getBookmarkedQuestionIds, getAnsweredQuestionIdsForTopic, getTopics, getTopicProgress } from "@/lib/db";
 import type { Question } from "@/lib/db";
@@ -66,6 +66,7 @@ function QuestionSlide({
 
   const questionText = (qAny.question_display as string) ?? question.question_he;
   const explanationText = (qAny.explanation_display as string) ?? question.explanation_he;
+  const explanationSourceUrl = qAny.explanation_source_url_display as string | undefined;
 
   return (
     <div
@@ -131,10 +132,12 @@ function QuestionSlide({
               ) : (
                 <span className={styles.optionTextContent}>{text}</span>
               )}
-              {explanationText && (
-                <span className="quiz-option-explanation">
-                  <InlineMarkdown>{explanationText}</InlineMarkdown>
-                </span>
+              {explanationText && explanationSourceUrl && (
+                <ApprovedExplanation
+                  text={explanationText}
+                  sourceUrl={explanationSourceUrl}
+                  sourceLabel={t("explanationSource")}
+                />
               )}
             </button>
           );

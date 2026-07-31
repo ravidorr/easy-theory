@@ -43,7 +43,7 @@ export async function POST(request: Request) {
   const admin = createAdminClient();
   const { data: question, error: questionError } = await admin
     .from("questions")
-    .select("topic_id")
+    .select("topic_id, source_release_id")
     .eq("id", questionId)
     .maybeSingle();
   if (questionError) {
@@ -81,12 +81,11 @@ export async function POST(request: Request) {
   if (!allowed) return NextResponse.json({ error: t("tooManyRequests") }, { status: 429 });
 
   let sourceRelease: { source_checksum: string } | null = null;
-  try {
+  if (question.source_release_id) try {
     const { data } = await admin
       .from("content_source_releases")
       .select("source_checksum")
-      .order("imported_at", { ascending: false })
-      .limit(1)
+      .eq("id", question.source_release_id)
       .maybeSingle();
     sourceRelease = data;
   } catch (sourceError) {

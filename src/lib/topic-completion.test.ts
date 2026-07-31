@@ -10,7 +10,8 @@ const Q2 = "q2-uuid";
 function makeQuestionChain(result: { data: unknown; error: unknown }) {
   return {
     select: vi.fn().mockReturnThis(),
-    eq: vi.fn().mockReturnValue(Promise.resolve(result)),
+    eq: vi.fn().mockReturnThis(),
+    then: (resolve: (value: typeof result) => unknown) => Promise.resolve(result).then(resolve),
   };
 }
 

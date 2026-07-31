@@ -38,6 +38,8 @@ describe("localizeQuestion", () => {
     question_ar: "سؤال",
     explanation_he: "הסבר",
     explanation_ar: "شرح",
+    explanation_he_source_url: "https://example.test/he",
+    explanation_ar_source_url: "https://example.test/ar",
     option_a: "עצור",
     option_a_ar: "قف",
     option_b: "ימינה",
@@ -52,6 +54,7 @@ describe("localizeQuestion", () => {
     expect(localizeQuestion("he", question)).toEqual({
       question_display: "שאלה",
       explanation_display: "הסבר",
+      explanation_source_url_display: "https://example.test/he",
       option_a_display: "עצור",
       option_b_display: "ימינה",
       option_c_display: "שמאלה",
@@ -63,6 +66,7 @@ describe("localizeQuestion", () => {
     expect(localizeQuestion("ar", question)).toEqual({
       question_display: "سؤال",
       explanation_display: "شرح",
+      explanation_source_url_display: "https://example.test/ar",
       option_a_display: "قف",
       option_b_display: "",
       option_c_display: "يسار",

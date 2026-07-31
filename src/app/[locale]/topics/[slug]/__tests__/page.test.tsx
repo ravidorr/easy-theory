@@ -184,7 +184,7 @@ describe("TopicQuizPage", () => {
   });
 
   it("renders explanation text when explanation_he is present", async () => {
-    const q = { ...QUESTION, explanation_he: "תמרור זה משמעותו עצור" };
+    const q = { ...QUESTION, explanation_he: "תמרור זה משמעותו עצור", explanation_he_source_url: "https://example.test/source" };
     mockGetQuestions.mockResolvedValue([q] as never);
     const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "he" }) });
     render(jsx);
@@ -192,7 +192,7 @@ describe("TopicQuizPage", () => {
   });
 
   it("renders markdown bold in explanation as <strong> without literal asterisks", async () => {
-    const q = { ...QUESTION, explanation_he: "**חגורות הבטיחות** מחזיקות את הנוסע" };
+    const q = { ...QUESTION, explanation_he: "**חגורות הבטיחות** מחזיקות את הנוסע", explanation_he_source_url: "https://example.test/source" };
     mockGetQuestions.mockResolvedValue([q] as never);
     const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "he" }) });
     const { container } = render(jsx);
@@ -200,6 +200,14 @@ describe("TopicQuizPage", () => {
     expect(explanation?.querySelector("strong")?.textContent).toBe("חגורות הבטיחות");
     expect(explanation?.textContent).toContain("מחזיקות את הנוסע");
     expect(explanation?.textContent).not.toContain("**");
+  });
+
+  it("suppresses an uncited explanation", async () => {
+    const q = { ...QUESTION, explanation_he: "לא מוצג ללא מקור" };
+    mockGetQuestions.mockResolvedValue([q] as never);
+    const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "he" }) });
+    render(jsx);
+    expect(screen.queryByText("לא מוצג ללא מקור")).toBeNull();
   });
 
   it("renders image when /questions/ file exists on disk", async () => {

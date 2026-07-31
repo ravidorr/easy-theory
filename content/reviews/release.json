@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "status": "draft",
+  "sources": [
+    {
+      "kind": "question_bank",
+      "sourceChecksum": "2e62afd833a5615eb16348b98df3b81e9498084f743d05d5990cf6c27c70e1b7",
+      "sourceUrl": "https://data.gov.il/dataset/618dd157-8df3-43e7-bf9a-00974b4919e9/resource/8c0f314f-583d-48b6-9f5f-4483d95f6848/download/theoryexamhe-data.xml"
+    },
+    {
+      "kind": "sign_catalog",
+      "sourceChecksum": "530abd18fc8ee89d98554ff3f7be98eba48e726f5006ad0d68c3c333c25d0f4f",
+      "revisionId": 43643480,
+      "sourceSha1": "e151b785f1d270507888424e33f1730f6e7f3086",
+      "sourceUrl": "https://he.wikipedia.org/w/index.php?title=%D7%AA%D7%9E%D7%A8%D7%95%D7%A8%D7%99%D7%9D_%D7%91%D7%99%D7%A9%D7%A8%D7%90%D7%9C&oldid=43643480#%D7%9C%D7%95%D7%97_%D7%94%D7%AA%D7%9E%D7%A8%D7%95%D7%A8%D7%99%D7%9D_%D7%91%D7%99%D7%A9%D7%A8%D7%90%D7%9C"
+    }
+  ],
+  "questions": [],
+  "signs": [],
+  "explanations": []
+}

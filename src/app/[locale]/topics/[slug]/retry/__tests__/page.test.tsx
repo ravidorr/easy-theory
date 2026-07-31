@@ -66,6 +66,7 @@ const MISTAKE_A: QuizMistake = {
   correct_option: "a",
   selected_option: "b",
   explanation_he: "תמרור זה משמעותו עצור",
+  explanation_he_source_url: "https://example.test/source",
   image_url: null,
   due_at: null,
 };
@@ -172,7 +173,7 @@ describe("RetryMistakesPage", () => {
   });
 
   it("renders markdown bold in explanation as <strong> without literal asterisks", async () => {
-    const m = { ...MISTAKE_A, explanation_he: "**חגורות הבטיחות** מחזיקות את הנוסע" };
+    const m = { ...MISTAKE_A, explanation_he: "**חגורות הבטיחות** מחזיקות את הנוסע", explanation_he_source_url: "https://example.test/source" };
     mockGetMistakes.mockResolvedValue([m] as never);
     const jsx = await callPage();
     const { container } = render(jsx);

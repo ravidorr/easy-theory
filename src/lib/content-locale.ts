@@ -34,6 +34,11 @@ export function localizeQuestion(locale: string, q: Record<string, unknown>) {
       q.explanation_he as string,
       q.explanation_ar as string
     ),
+    explanation_source_url_display: localizedContent(
+      locale,
+      q.explanation_he_source_url as string,
+      q.explanation_ar_source_url as string
+    ),
     option_a_display: localizedContent(locale, q.option_a as string, q.option_a_ar as string),
     option_b_display: localizedContent(locale, q.option_b as string, q.option_b_ar as string),
     option_c_display: localizedContent(locale, q.option_c as string, q.option_c_ar as string),

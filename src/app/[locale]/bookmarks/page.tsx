@@ -7,7 +7,7 @@ import { QuestionImage } from "@/components/QuestionImage";
 import { Icon } from "@/components/Icon";
 import { EmptyStateCard } from "@/components/EmptyStateCard";
 import { TabBar } from "@/components/TabBar";
-import { InlineMarkdown } from "@/components/InlineMarkdown";
+import { ApprovedExplanation } from "@/components/ApprovedExplanation";
 import { createClient } from "@/lib/supabase";
 import { getBookmarkedQuestions, getTopics } from "@/lib/db";
 import type { BookmarkedQuestion } from "@/lib/db";
@@ -59,6 +59,7 @@ function BookmarkCard({
 
   const questionText = (qAny.question_display as string) ?? question.question_he;
   const explanationText = (qAny.explanation_display as string) ?? question.explanation_he;
+  const explanationSourceUrl = qAny.explanation_source_url_display as string | undefined;
 
   return (
     <div className={styles.questionCard}>
@@ -110,10 +111,12 @@ function BookmarkCard({
               ) : (
                 <span className={styles.optionTextContent}>{text}</span>
               )}
-              {state === "correct" && explanationText && (
-                <span className="quiz-option-explanation">
-                  <InlineMarkdown>{explanationText}</InlineMarkdown>
-                </span>
+              {state === "correct" && explanationText && explanationSourceUrl && (
+                <ApprovedExplanation
+                  text={explanationText}
+                  sourceUrl={explanationSourceUrl}
+                  sourceLabel={t("explanationSource")}
+                />
               )}
               {state === "correct" && (
                 <span className="sr-only">{t("optionCorrectSr")}</span>

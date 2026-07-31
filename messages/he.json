@@ -225,6 +225,7 @@
     "signAlt": "תמרור {number}",
     "questionImageAlt": "תמונה המצורפת לשאלה",
     "optionCorrectSr": "תשובה נכונה",
+    "explanationSource": "מקור",
     "optionWrongSr": "תשובה שגויה",
     "bookmarkLabel": "שמירת השאלה לחזרה",
     "bookmarkTooltip": "אפשר לשמור שאלות כדי לחזור אליהן אחר כך",

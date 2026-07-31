@@ -55,6 +55,7 @@ const BOOKMARK_A = {
   option_d: "המשך",
   correct_option: "a",
   explanation_he: "תמרור זה משמעותו עצור",
+  explanation_he_source_url: "https://example.test/source",
   image_url: null,
   bookmarked_at: "2026-01-02",
 };

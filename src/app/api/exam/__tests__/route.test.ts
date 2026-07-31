@@ -107,6 +107,7 @@ describe("POST /api/exam", () => {
 
   it.each([
     ["exam_session_not_found", 404],
+    ["exam_session_invalidated", 409],
     ["database unavailable", 500],
   ])("returns %i when session finalization fails with %s", async (message, status) => {
     const { client } = makeClient({ finalizeError: { message } });
