@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.252] — 2026-08-01
+
+### Changed
+
+- Expanded automated coverage for learner flows, API failures, and database fallbacks.
+
+---
+
 ## [0.3.251] — 2026-08-01
 
 ### Removed

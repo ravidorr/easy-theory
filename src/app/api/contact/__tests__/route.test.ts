@@ -69,6 +69,17 @@ describe("POST /api/contact", () => {
     }
   });
 
+  it("rejects malformed JSON before authenticating or sending", async () => {
+    const res = await POST(new Request("http://localhost/api/contact", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "{",
+    }));
+
+    expect(res.status).toBe(400);
+    expect(mockEmailSend).not.toHaveBeenCalled();
+  });
+
   it("rate limits contact messages per authenticated user", async () => {
     mockCheckRateLimit.mockResolvedValue(false);
     const res = await POST(makeRequest({ topic: "question", message: "Message" }));
@@ -116,6 +127,23 @@ describe("POST /api/contact", () => {
     expect(reportError).toHaveBeenCalledWith(
       "contact",
       "RESEND_FROM_EMAIL is not configured",
+      expect.anything()
+    );
+  });
+
+  it("returns 500 without persisting when the notification recipient is not configured", async () => {
+    vi.stubEnv("CONTACT_NOTIFICATION_EMAIL", "");
+    const admin = makeAdminClient();
+    mockCreateAdminClient.mockReturnValue(admin as never);
+
+    const res = await POST(makeRequest({ topic: "question", message: "Message" }));
+
+    expect(res.status).toBe(500);
+    expect(admin.insert).not.toHaveBeenCalled();
+    expect(mockEmailSend).not.toHaveBeenCalled();
+    expect(reportError).toHaveBeenCalledWith(
+      "contact",
+      "CONTACT_NOTIFICATION_EMAIL is not configured",
       expect.anything()
     );
   });

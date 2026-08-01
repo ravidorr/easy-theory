@@ -50,19 +50,21 @@ function buildClient({
   error = null,
   srsExisting = null,
   srsUpsertError = null,
+  srsSelectError = null,
 }: {
   authenticated?: boolean;
   result?: Record<string, unknown> | null;
   error?: { message: string } | null;
   srsExisting?: { ease: number; interval_days: number; repetitions: number } | null;
   srsUpsertError?: { message: string } | null;
+  srsSelectError?: { message: string } | null;
 } = {}) {
   const srsUpsert = vi.fn().mockResolvedValue({ error: srsUpsertError });
   const srsChain = {} as Record<string, unknown>;
   for (const k of ["select", "eq"]) {
     srsChain[k] = vi.fn().mockReturnValue(srsChain);
   }
-  srsChain.maybeSingle = vi.fn().mockResolvedValue({ data: srsExisting, error: null });
+  srsChain.maybeSingle = vi.fn().mockResolvedValue({ data: srsExisting, error: srsSelectError });
   return {
     auth: {
       getUser: vi.fn().mockResolvedValue({
@@ -342,6 +344,19 @@ describe("POST /api/quiz", () => {
   it("still returns the quiz result when the SRS update fails", async () => {
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const client = buildClient({ srsUpsertError: { message: "boom" } });
+    mockCreateClient.mockResolvedValue(client as never);
+
+    const response = await POST(makeRequest(defaultBody));
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(storedResult);
+    expect(errorSpy).toHaveBeenCalledWith("[quiz] SRS update failed:", expect.any(Error));
+    errorSpy.mockRestore();
+  });
+
+  it("still returns the quiz result when loading SRS state fails", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const client = buildClient({ srsSelectError: { message: "select failed" } });
     mockCreateClient.mockResolvedValue(client as never);
 
     const response = await POST(makeRequest(defaultBody));

@@ -85,6 +85,15 @@ describe("ContactForm", () => {
     await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("sendFailed"));
   });
 
+  it("falls back to the generic error when the API response cannot be decoded", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, json: async () => { throw new Error("invalid JSON"); } }));
+    renderForm();
+    fireEvent.change(screen.getByPlaceholderText("messagePlaceholder"), { target: { value: "Need help" } });
+    fireEvent.submit(screen.getByRole("button", { name: "submit" }).closest("form")!);
+
+    await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("sendFailed"));
+  });
+
   it("falls back to the generic error when submission rejects with a non-Error value", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue("network unavailable"));
     renderForm();

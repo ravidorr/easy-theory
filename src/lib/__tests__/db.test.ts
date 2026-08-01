@@ -24,11 +24,13 @@ import {
   upsertSrsCard,
   getRandomExamQuestions,
   getOrCreateExamSession,
+  getQuestionsByIds,
   getExamAttempts,
   hasPassedExam,
   getTopicAccuracy,
   getTopicQuestionCounts,
   getQuizAnswerEventCountForWindow,
+  getLatestSourceRelease,
 } from "../db";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -58,6 +60,31 @@ function makeClient(data: unknown, error: { message: string; code?: string } | n
 const boom = { message: "boom" };
 
 describe("getOrCreateExamSession", () => {
+  it("returns an existing active session without creating another", async () => {
+    const session = { id: "session-1", question_ids: [], answers: {}, marked_question_ids: [], current_index: 0, revision: 0 };
+    const query = {} as Record<string, unknown>;
+    for (const method of ["select", "eq", "is", "gt", "order", "limit"]) {
+      query[method] = vi.fn().mockReturnValue(query);
+    }
+    query.maybeSingle = vi.fn().mockResolvedValue({ data: session, error: null });
+    const rpc = vi.fn();
+    const client = { from: vi.fn().mockReturnValue(query), rpc } as unknown as SupabaseClient;
+
+    await expect(getOrCreateExamSession(client, "user-1")).resolves.toEqual(session);
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it("fails when the creation RPC returns no session", async () => {
+    const query = {} as Record<string, unknown>;
+    for (const method of ["select", "eq", "is", "gt", "order", "limit"]) {
+      query[method] = vi.fn().mockReturnValue(query);
+    }
+    query.maybeSingle = vi.fn().mockResolvedValue({ data: null, error: null });
+    const client = { from: vi.fn().mockReturnValue(query), rpc: vi.fn().mockResolvedValue({ data: null, error: null }) } as unknown as SupabaseClient;
+
+    await expect(getOrCreateExamSession(client, "user-1")).rejects.toThrow("returned no row");
+  });
+
   it("creates a missing session through the protected server RPC", async () => {
     const query = {} as Record<string, unknown>;
     for (const method of ["select", "eq", "is", "gt", "order", "limit"]) {
@@ -70,6 +97,27 @@ describe("getOrCreateExamSession", () => {
 
     await expect(getOrCreateExamSession(client, "user-1")).resolves.toEqual(session);
     expect(rpc).toHaveBeenCalledWith("create_exam_session");
+  });
+});
+
+describe("getQuestionsByIds", () => {
+  it("avoids querying when no question IDs were requested", async () => {
+    const client = makeClient([]);
+    await expect(getQuestionsByIds(client, [])).resolves.toEqual([]);
+    expect(client.from).not.toHaveBeenCalled();
+  });
+
+  it("keeps the requested order and omits IDs not returned by the database", async () => {
+    const client = makeClient([{ id: "q2" }, { id: "q1" }]);
+    await expect(getQuestionsByIds(client, ["q1", "missing", "q2"])).resolves.toEqual([{ id: "q1" }, { id: "q2" }]);
+  });
+});
+
+describe("getLatestSourceRelease", () => {
+  it("returns the latest release or null", async () => {
+    const release = { source_name: "ministry", source_checksum: "abc" };
+    await expect(getLatestSourceRelease(makeClient(release))).resolves.toEqual(release);
+    await expect(getLatestSourceRelease(makeClient(null))).resolves.toBeNull();
   });
 });
 
