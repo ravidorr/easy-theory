@@ -34,11 +34,6 @@ export default async function Loading() {
             </div>
           </section>
         ))}
-        <div className={styles.pagination}>
-          <Skeleton variant="block" />
-          <Skeleton size="w25" />
-          <Skeleton variant="block" />
-        </div>
       </SkeletonScreen>
     <TabBar active="practice" current={null} />
     </>

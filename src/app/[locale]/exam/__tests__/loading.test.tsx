@@ -16,11 +16,12 @@ describe("exam intro loading skeleton", () => {
     expect(container.querySelector("main")).toHaveAttribute("aria-busy", "true");
   });
 
-  it("mirrors the rules card, start button, and attempt-history rows", async () => {
+  it("mirrors the rules card, start button, and empty-history state", async () => {
     const { container } = render(await Loading());
     expect(container.querySelector('[class*="rulesCard"]')).toBeTruthy();
     expect(container.querySelector('[class*="historyCard"]')).toBeTruthy();
-    expect(container.querySelectorAll('[class*="attemptRow"]')).toHaveLength(4);
+    expect(container.querySelector('[class*="historyEmpty"]')).toBeTruthy();
+    expect(container.querySelectorAll('[class*="attemptRow"]')).toHaveLength(0);
     expect(container.querySelectorAll('[data-skeleton="block"]')).toHaveLength(1);
   });
 

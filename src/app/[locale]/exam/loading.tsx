@@ -23,12 +23,9 @@ export default async function Loading() {
         <Skeleton variant="block" />
         <section className={styles.historyCard}>
           <Skeleton size="w40" />
-          {[0, 1, 2, 3].map((i) => (
-            <div key={i} className={styles.attemptRow}>
-              <Skeleton size="w40" />
-              <Skeleton size="w25" />
-            </div>
-          ))}
+          <div className={styles.historyEmpty}>
+            <Skeleton size="w60" />
+          </div>
         </section>
       </SkeletonScreen>
       <TabBar active="exam" />
