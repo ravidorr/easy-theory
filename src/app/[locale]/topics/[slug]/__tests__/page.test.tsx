@@ -5,7 +5,7 @@ import TopicQuizPage from "../page";
 import { createClient } from "@/lib/supabase";
 import { getQuestionsForTopic, getBookmarkedQuestionIds, getAnsweredQuestionIdsForTopic, getTopics, getTopicProgress } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
-import { SIGNS_QUESTION_15_AR } from "@/lib/content/signs-question-15-ar";
+import { SIGNS_QUESTION_15_AR } from "@/test-fixtures/signs-question-15-ar";
 
 vi.mock("next/image", () => ({
   default: ({ src, alt, className }: { src: string; alt?: string; className?: string }) =>

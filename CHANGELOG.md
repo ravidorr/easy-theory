@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.241] — 2026-08-01
+
+### Removed
+
+- Removed unused library helpers, orphaned tests, and unreferenced maintenance scripts; retained the Arabic question fixture only for tests.
+
+---
+
 ## [0.3.240] — 2026-08-01
 
 ### Changed

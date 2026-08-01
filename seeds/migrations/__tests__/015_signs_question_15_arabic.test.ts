@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "fs";
 import { resolve } from "path";
 import { describe, expect, it } from "vitest";
-import { SIGNS_QUESTION_15_AR } from "@/lib/content/signs-question-15-ar";
+import { SIGNS_QUESTION_15_AR } from "@/test-fixtures/signs-question-15-ar";
 
 const migrationPath = resolve(
   __dirname,
