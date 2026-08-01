@@ -54,6 +54,7 @@ export function ScheduleNudge({ hasSchedule }: { hasSchedule: boolean }) {
   const primaryRef = useRef<HTMLButtonElement>(null);
   const returnFocusRef = useRef<HTMLElement | null>(null);
   const scrimPressStartedRef = useRef(false);
+  const savingRef = useRef(false);
 
   useEffect(() => {
     if (hasSchedule) return;
@@ -73,10 +74,10 @@ export function ScheduleNudge({ hasSchedule }: { hasSchedule: boolean }) {
   }, [hasSchedule]);
 
   const dismiss = useCallback(() => {
-    if (saving) return;
+    if (savingRef.current) return;
     rememberToday();
     setOpen(false);
-  }, [saving]);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -114,7 +115,13 @@ export function ScheduleNudge({ hasSchedule }: { hasSchedule: boolean }) {
     };
   }, [dismiss, open]);
 
+  useEffect(() => {
+    if (open && saving) dialogRef.current?.focus();
+  }, [open, saving]);
+
   async function saveRecommended() {
+    if (savingRef.current) return;
+    savingRef.current = true;
     setSaving(true);
     setError(null);
 
@@ -132,6 +139,7 @@ export function ScheduleNudge({ hasSchedule }: { hasSchedule: boolean }) {
     } catch {
       setError(tApi("scheduleUpdateFailed"));
     } finally {
+      savingRef.current = false;
       setSaving(false);
     }
   }
@@ -157,6 +165,7 @@ export function ScheduleNudge({ hasSchedule }: { hasSchedule: boolean }) {
       <div
         ref={dialogRef}
         className={styles.sheet}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-labelledby="schedule-nudge-title"

@@ -81,6 +81,23 @@ describe("ScheduleNudge", () => {
     expect(screen.getByRole("button", { name: "ScheduleNudge.saveRecommended" })).toBeEnabled();
   });
 
+  it("keeps focus inside the dialog while a save is in flight", async () => {
+    let resolveFetch: (response: Response) => void;
+    vi.mocked(fetch).mockReturnValue(new Promise((resolve) => {
+      resolveFetch = resolve;
+    }));
+    render(<ScheduleNudge hasSchedule={false} />);
+
+    const primary = await screen.findByRole("button", { name: "ScheduleNudge.saveRecommended" });
+    primary.focus();
+    fireEvent.click(primary);
+
+    const dialog = screen.getByRole("dialog");
+    await waitFor(() => expect(dialog).toHaveFocus());
+    resolveFetch!({ ok: false } as Response);
+    await screen.findByRole("alert");
+  });
+
   it("routes to the full schedule editor without saving", async () => {
     render(<ScheduleNudge hasSchedule={false} />);
 
