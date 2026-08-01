@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
-import { createAdminClient, createClient } from "@/lib/supabase";
-import { getApiTranslator, getRequestLocale, parseJsonBody } from "@/lib/api";
+import { createAdminClient } from "@/lib/supabase";
+import { getApiContext, getRequestLocale, parseJsonBody } from "@/lib/api";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { reportError } from "@/lib/monitoring";
 
@@ -13,7 +13,7 @@ function isTopic(value: unknown): value is (typeof TOPICS)[number] {
 }
 
 export async function POST(request: Request) {
-  const t = getApiTranslator(request);
+  const { t, supabase } = await getApiContext(request);
   const body = await parseJsonBody(request);
   if (!body) return NextResponse.json({ error: t("contactInvalid") }, { status: 400 });
 
@@ -40,7 +40,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: t("contactSendFailed") }, { status: 500 });
   }
 
-  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

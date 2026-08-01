@@ -114,7 +114,6 @@ describe("POST /api/question-reports", () => {
       expect(response.status).toBe(400);
       expect(await response.json()).toEqual({ error: "יש לבדוק את פרטי הדיווח ולנסות שוב." });
     }
-    expect(mockCreateClient).not.toHaveBeenCalled();
   });
 
   it("rejects a topic that does not own the reported question", async () => {

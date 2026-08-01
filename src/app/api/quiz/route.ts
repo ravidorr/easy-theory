@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase";
-import { getApiTranslator, parseJsonBody } from "@/lib/api";
+import { getApiContext, parseJsonBody } from "@/lib/api";
 import { upsertSrsCard } from "@/lib/db";
 import { reportError } from "@/lib/monitoring";
 import { INITIAL_SRS_STATE, reviewCard } from "@/lib/srs";
@@ -45,8 +44,7 @@ const RPC_ERROR_RESPONSES: Record<
 };
 
 export async function POST(request: Request) {
-  const t = getApiTranslator(request);
-  const supabase = await createClient();
+  const { t, supabase } = await getApiContext(request);
   const {
     data: { user },
   } = await supabase.auth.getUser();

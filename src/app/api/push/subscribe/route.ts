@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { getApiTranslator, parseJsonBody } from "@/lib/api";
+import { getApiContext, parseJsonBody } from "@/lib/api";
 import { reportError } from "@/lib/monitoring";
 
 export async function POST(request: Request) {
-  const t = getApiTranslator(request);
-  const supabase = await createClient();
+  const { t, supabase } = await getApiContext(request);
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -42,8 +40,7 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const t = getApiTranslator(request);
-  const supabase = await createClient();
+  const { t, supabase } = await getApiContext(request);
   const {
     data: { user },
   } = await supabase.auth.getUser();

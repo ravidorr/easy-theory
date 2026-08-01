@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { getApiTranslator, getRequestLocale, parseJsonBody } from "@/lib/api";
+import { getApiContext, getRequestLocale, parseJsonBody } from "@/lib/api";
 import { reportError } from "@/lib/monitoring";
 
 const DEFAULT_TIME_ZONE = "Asia/Jerusalem";
@@ -19,8 +18,7 @@ function getTimeZone(value: unknown): string | null {
 }
 
 export async function GET(request: Request) {
-  const t = getApiTranslator(request);
-  const supabase = await createClient();
+  const { t, supabase } = await getApiContext(request);
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -36,8 +34,7 @@ export async function GET(request: Request) {
 }
 
 export async function PUT(request: Request) {
-  const t = getApiTranslator(request);
-  const supabase = await createClient();
+  const { t, supabase } = await getApiContext(request);
   const {
     data: { user },
   } = await supabase.auth.getUser();

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
-import { createAdminClient, createClient } from "@/lib/supabase";
-import { getApiTranslator, parseJsonBody } from "@/lib/api";
+import { createAdminClient } from "@/lib/supabase";
+import { getApiContext, parseJsonBody } from "@/lib/api";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { reportError } from "@/lib/monitoring";
 
@@ -16,7 +16,7 @@ function isLocale(value: unknown): value is "he" | "ar" {
 }
 
 export async function POST(request: Request) {
-  const t = getApiTranslator(request);
+  const { t, supabase } = await getApiContext(request);
   const body = await parseJsonBody(request);
   if (!body) return NextResponse.json({ error: t("questionReportInvalid") }, { status: 400 });
 
@@ -34,7 +34,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: t("questionReportInvalid") }, { status: 400 });
   }
 
-  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
