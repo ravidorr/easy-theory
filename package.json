@@ -1,9 +1,10 @@
 {
   "name": "easy-in-theory",
-  "version": "0.3.246",
+  "version": "0.3.247",
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "tsx scripts/verify-migration-ledger.ts",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -19,6 +20,8 @@
     "translate-arabic": "tsx --env-file=.env.local scripts/translate_arabic.ts",
     "db:compare": "tsx scripts/compare-databases.ts",
     "db:audit": "tsx scripts/audit-database-metadata.ts",
+    "db:migrate": "tsx scripts/apply-pending-migrations.ts",
+    "db:verify-ledger": "tsx scripts/verify-migration-ledger.ts --require",
     "db:migration:checksum": "tsx scripts/checksum-migration.ts",
     "content:import-signs": "tsx scripts/import-wikipedia-signs.ts",
     "content:validate-questions": "python3 scripts/validate_question_bank.py",

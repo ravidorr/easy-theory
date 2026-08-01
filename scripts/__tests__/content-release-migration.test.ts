@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 
 const migration = readFileSync("seeds/migrations/036_content_release_provenance.sql", "utf8");
+const qaMint = readFileSync("scripts/qa/mint-session.ts", "utf8");
 
 describe("content release migration", () => {
   it("adds active/provenance fields and blocks answers to retired questions", () => {
@@ -19,5 +20,10 @@ describe("content release migration", () => {
 
   it("preserves the per-user advisory lock when creating exams", () => {
     expect(migration).toMatch(/pg_advisory_xact_lock\(hashtext\(v_user_id::TEXT\)\)/i);
+  });
+
+  it("probes both active-content columns before QA browser testing", () => {
+    expect(qaMint).toMatch(/questions", column: "is_active", migration: "036"/);
+    expect(qaMint).toMatch(/signs", column: "is_active", migration: "036"/);
   });
 });

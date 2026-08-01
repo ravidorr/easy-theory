@@ -1,0 +1,115 @@
+name: Database Release
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: database-release-main
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  qa:
+    name: QA migration and smoke test
+    runs-on: ubuntu-latest
+    environment: database-qa
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install trusted dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Apply committed QA migrations in order
+        run: pnpm db:migrate --target qa --apply
+        env:
+          QA_DATABASE_URL: ${{ secrets.QA_DATABASE_URL }}
+
+      - name: Verify QA schema and seed readiness
+        run: pnpm exec tsx scripts/qa/mint-session.ts --check
+        env:
+          QA_ENV: "1"
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.QA_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.QA_SUPABASE_SERVICE_ROLE_KEY }}
+
+  production:
+    name: Production migration
+    needs: qa
+    runs-on: ubuntu-latest
+    environment: database-production
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install trusted dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Apply committed production migrations in order
+        run: pnpm db:migrate --target production --apply
+        env:
+          PROD_DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+
+  audit:
+    name: Required release database audit
+    needs: production
+    runs-on: ubuntu-latest
+    environment: database-audit
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install trusted dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Audit both catalogs and committed migration ledgers
+        run: pnpm db:audit
+        env:
+          PROD_DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+          QA_DATABASE_URL: ${{ secrets.QA_DATABASE_URL }}
+
+  deploy:
+    name: Trigger production deployment
+    needs: audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Require and call the Vercel production deploy hook
+        env:
+          VERCEL_PRODUCTION_DEPLOY_HOOK: ${{ secrets.VERCEL_PRODUCTION_DEPLOY_HOOK }}
+        run: |
+          set -euo pipefail
+          test -n "$VERCEL_PRODUCTION_DEPLOY_HOOK"
+          curl --fail --silent --show-error --request POST "$VERCEL_PRODUCTION_DEPLOY_HOOK" > /dev/null
