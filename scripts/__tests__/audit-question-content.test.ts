@@ -7,6 +7,7 @@ import {
   optionsFromArgs,
   parseMinistryQuestions,
   renderMarkdown,
+  verifyPinnedQuestionBankChecksum,
   type AuditReport,
 } from "../audit-question-content";
 import type { DatabaseConfig } from "../compare-databases";
@@ -38,6 +39,18 @@ function databaseQuestion(overrides: Record<string, unknown> = {}) {
 }
 
 describe("Ministry question audit", () => {
+  it("requires the Ministry XML to match the pinned question-bank checksum", () => {
+    const xml = "<rss>official source</rss>";
+    const checksum = "240e2163bff835e5e8ff5700433af3db0e82a9257fb8aced78752fa809fee4c1";
+
+    expect(verifyPinnedQuestionBankChecksum(xml, {
+      sources: [{ kind: "question_bank", sourceChecksum: checksum }],
+    })).toBe(checksum);
+    expect(() => verifyPinnedQuestionBankChecksum(xml, {
+      sources: [{ kind: "question_bank", sourceChecksum: "stale" }],
+    })).toThrow(/does not match the pinned question_bank checksum/);
+  });
+
   it("accepts pnpm's forwarded argument separator", () => {
     expect(optionsFromArgs(["--", "--env", ".env.qa", "--target", "QA", "--output", ".context/audit"])).toEqual({
       envPath: ".env.qa",
@@ -61,8 +74,8 @@ describe("Ministry question audit", () => {
     ]));
   });
 
-  it("normalizes HTML entities, tags, whitespace, and Unicode consistently", () => {
-    expect(normalizeText("  <span>א&nbsp;&amp;  ב</span> \n")).toBe("א & ב");
+  it("normalizes HTML entities, tags, quoted attributes, whitespace, and Unicode consistently", () => {
+    expect(normalizeText("  <span data-example=\"a > b\">א&nbsp;&amp;  ב</span> \n")).toBe("א & ב");
   });
 
   it("classifies all content mismatches and inactive source rows", () => {

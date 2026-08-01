@@ -84,12 +84,32 @@ function optionLetter(index: number): SourceQuestion["correctOption"] {
 }
 
 export function normalizeText(value: string): string {
-  return decodeHtml(value)
-    .replace(/<[^>]*>/g, "")
+  return decodeHtml(stripMarkup(value))
     .replace(/\u00a0/g, " ")
     .replace(/\s+/gu, " ")
     .trim()
     .normalize("NFC");
+}
+
+function stripMarkup(value: string): string {
+  let result = "";
+  let inTag = false;
+  let quote: "'" | '"' | null = null;
+  for (const character of value) {
+    if (!inTag) {
+      if (character === "<") inTag = true;
+      else result += character;
+      continue;
+    }
+    if (quote) {
+      if (character === quote) quote = null;
+    } else if (character === "'" || character === '"') {
+      quote = character;
+    } else if (character === ">") {
+      inTag = false;
+    }
+  }
+  return result;
 }
 
 function decodeHtml(value: string): string {
@@ -117,6 +137,29 @@ function tagValue(item: string, tag: string): string | null {
 function cdataValue(value: string): string {
   const match = value.match(/^<!\[CDATA\[([\s\S]*)\]\]>$/);
   return match?.[1] ?? value;
+}
+
+export function verifyPinnedQuestionBankChecksum(xml: string, manifest: unknown): string {
+  const checksum = createHash("sha256").update(xml).digest("hex");
+  if (typeof manifest !== "object" || manifest === null) {
+    throw new Error("content review manifest is not an object");
+  }
+  const sources = (manifest as { sources?: unknown }).sources;
+  if (!Array.isArray(sources)) throw new Error("content review manifest has no sources array");
+  const questionBank = sources.find(
+    (source): source is { kind: string; sourceChecksum: string } =>
+      typeof source === "object" &&
+      source !== null &&
+      (source as { kind?: unknown }).kind === "question_bank" &&
+      typeof (source as { sourceChecksum?: unknown }).sourceChecksum === "string"
+  );
+  if (!questionBank) throw new Error("content review manifest has no question_bank source checksum");
+  if (questionBank.sourceChecksum !== checksum) {
+    throw new Error(
+      `Ministry XML SHA-256 ${checksum} does not match the pinned question_bank checksum ${questionBank.sourceChecksum}`
+    );
+  }
+  return checksum;
 }
 
 /** Parses the Ministry RSS without sharing the importer's parser. */
@@ -382,6 +425,10 @@ async function main(): Promise<void> {
   const options = optionsFromArgs(process.argv.slice(2));
   const config = configFromEnv(parseEnv(readFileSync(options.envPath, "utf8")), options.target);
   const xml = readFileSync("seeds/theoryexam.xml", "utf8");
+  const sourceChecksum = verifyPinnedQuestionBankChecksum(
+    xml,
+    JSON.parse(readFileSync("content/reviews/release.json", "utf8"))
+  );
   const official = parseMinistryQuestions(xml);
   const [topics, questionResult] = await Promise.all([
     fetchAllRows(config, "topics", "id,slug"),
@@ -400,7 +447,7 @@ async function main(): Promise<void> {
     generatedAt: new Date().toISOString(),
     target: config.label,
     activitySource: questionResult.activitySource,
-    sourceChecksum: createHash("sha256").update(xml).digest("hex"),
+    sourceChecksum,
     officialQuestionCount: official.length,
     databaseQuestionCount: questions.length,
     activeDatabaseQuestionCount: questions.filter((question) => isDatabaseQuestion(question) && question.is_active).length,
