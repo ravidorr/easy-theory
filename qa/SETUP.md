@@ -48,7 +48,8 @@ In the project's **SQL editor**, run these files in exactly this order:
    `029_harden_exam_sessions.sql`, `030_allow_exam_session_insert.sql`,
    `031_secure_exam_session_creation.sql`,
    `032_atomic_diagnostic_completion.sql`, `033_remove_answer_confidence.sql`,
-   `034_schedule_time_zones.sql`, `035_repair_prompt_sign_images.sql`)
+   `034_schedule_time_zones.sql`, `035_repair_prompt_sign_images.sql`,
+   `036_content_release_provenance.sql`)
 
 **Keep the QA project's schema in sync**: whenever a new file lands in
 `seeds/migrations/`, run it in the QA project's SQL editor too. The app's code assumes
@@ -148,7 +149,39 @@ pnpm db:migration:checksum seeds/migrations/024_example.sql
 
 The migration-integrity workflow rejects a new migration that lacks this marker.
 
-## 8. Resetting the test user (optional)
+## 8. Required release migration gate
+
+`Database Release` runs from trusted `main`: it applies only missing committed migrations
+to QA, runs `qa:mint --check`, waits for the `database-production` environment approval,
+applies production migrations, runs the direct catalog/ledger audit, then requests a
+Vercel production deploy. It never runs for pull-request code.
+
+Configure these GitHub environments before relying on the workflow:
+
+- `database-qa`: `QA_DATABASE_URL`, `QA_SUPABASE_URL`, and `QA_SUPABASE_SERVICE_ROLE_KEY`.
+- `database-production`: require a reviewer; set `PROD_DATABASE_URL`.
+- `database-audit`: `PROD_DATABASE_URL` and `QA_DATABASE_URL`.
+
+Set `VERCEL_PRODUCTION_DEPLOY_HOOK` as an Actions repository secret (a Vercel production
+deploy-hook URL). It is consumed only after the approved production migration and required
+audit pass, so the deploy job does not ask for a second production approval.
+
+Vercel production must retain `NEXT_PUBLIC_SUPABASE_URL` and
+`SUPABASE_SERVICE_ROLE_KEY`. The `prebuild` lifecycle runs `db:verify-ledger` there and
+fails the build if `public.schema_migrations` differs from the committed SQL files. This
+also blocks an automatic Git deployment that starts before the migration workflow reaches
+the Vercel hook.
+
+For a separate QA Vercel project, set its QA `NEXT_PUBLIC_SUPABASE_URL`,
+`SUPABASE_SERVICE_ROLE_KEY`, and `MIGRATION_LEDGER_GATE=1`. Its prebuild then enforces
+the same ledger gate before a QA deployment.
+
+The six-hour **Database Catalog Audit** remains the continuous check; the same audit is
+now a required release step. Configure a GlitchTip alert rule separately for new
+production issues matching `column .* does not exist`, delivered to the on-call channel.
+That alert is provider configuration and is not stored in this repository.
+
+## 9. Resetting the test user (optional)
 
 To start a run from a clean slate, wipe the test user's data in the SQL editor:
 
