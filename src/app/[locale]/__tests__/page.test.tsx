@@ -10,6 +10,7 @@ import {
   getTopicAccuracy,
   getTopicQuestionCounts,
   getQuizAnswerEventCountForWindow,
+  getUserSchedule,
 } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
 
@@ -30,13 +31,21 @@ vi.mock("@/lib/db", () => ({
   getTopicAccuracy: vi.fn(),
   getTopicQuestionCounts: vi.fn(),
   getQuizAnswerEventCountForWindow: vi.fn(),
+  getUserSchedule: vi.fn(),
 }));
 vi.mock("next/link", () => ({
   default: ({ href, children, ...rest }: { href: string; children: unknown }) =>
     React.createElement("a", { href, ...rest }, children as React.ReactNode),
 }));
+vi.mock("next/script", () => ({
+  default: () => React.createElement("div", { "data-testid": "modal-script" }),
+}));
 vi.mock("@/components/TabBar", () => ({
   TabBar: () => React.createElement("div", { "data-testid": "tabbar" }),
+}));
+vi.mock("../ScheduleNudge", () => ({
+  ScheduleNudge: ({ hasSchedule }: { hasSchedule: boolean }) =>
+    React.createElement("div", { "data-testid": "schedule-nudge", "data-has-schedule": String(hasSchedule) }),
 }));
 vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn().mockResolvedValue((key: string) => key),
@@ -50,6 +59,7 @@ const mockGetExamAttempts = vi.mocked(getExamAttempts);
 const mockGetTopicAccuracy = vi.mocked(getTopicAccuracy);
 const mockGetQuestionCounts = vi.mocked(getTopicQuestionCounts);
 const mockGetWindowAnswerCount = vi.mocked(getQuizAnswerEventCountForWindow);
+const mockGetUserSchedule = vi.mocked(getUserSchedule);
 
 const TOPIC_A = { id: "t1", slug: "signs", name_he: "תמרורים", icon: null };
 const TOPIC_B = { id: "t2", slug: "priority", name_he: "זכות קדימה", icon: null };
@@ -94,6 +104,7 @@ describe("HomePage", () => {
     mockGetTopicAccuracy.mockResolvedValue([]);
     mockGetQuestionCounts.mockResolvedValue({ t1: 20, t2: 10 });
     mockGetWindowAnswerCount.mockResolvedValue(0);
+    mockGetUserSchedule.mockResolvedValue([]);
     vi.mocked(getTranslations).mockResolvedValue(valuesT);
     vi.mocked(getLocale).mockResolvedValue("he");
   });
@@ -105,6 +116,26 @@ describe("HomePage", () => {
     expect(screen.getByRole("heading", { level: 1, name: "publicTitle" })).toBeInTheDocument();
     expect(screen.getByText("shortName")).toBeInTheDocument();
     expect(screen.getByText("tagline")).toBeInTheDocument();
+    expect(screen.queryByTestId("schedule-nudge")).not.toBeInTheDocument();
+    expect(mockGetUserSchedule).not.toHaveBeenCalled();
+  });
+
+  it("passes scheduleless authenticated learners to the schedule nudge", async () => {
+    render(await HomePage());
+
+    expect(screen.getByTestId("schedule-nudge")).toHaveAttribute("data-has-schedule", "false");
+    expect(screen.getByTestId("modal-script")).toBeInTheDocument();
+  });
+
+  it("does not mount the nudge when the learner already has a schedule", async () => {
+    mockGetUserSchedule.mockResolvedValue([
+      { day_of_week: 0, start_time: "17:00:00", duration_minutes: 45, notify: true },
+    ] as never);
+
+    render(await HomePage());
+
+    expect(screen.queryByTestId("schedule-nudge")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("modal-script")).not.toBeInTheDocument();
   });
 
   it("leads with one daily-task heading and a capped daily-progress line", async () => {

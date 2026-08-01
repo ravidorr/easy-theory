@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.250] — 2026-08-01
+
+### Added
+
+- Added a localized daily schedule prompt on Home for learners without a saved study plan.
+
+---
+
 ## [0.3.249] — 2026-08-01
 
 ### Changed
