@@ -11,7 +11,7 @@ const RECOMMENDED_SCHEDULE = {
   days: [0, 2, 4],
   start_time: "17:00",
   duration_minutes: 45,
-  notify: true,
+  notify: false,
 };
 const FOCUSABLE =
   "button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])";

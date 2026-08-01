@@ -62,7 +62,7 @@ describe("ScheduleNudge", () => {
           days: [0, 2, 4],
           start_time: "17:00",
           duration_minutes: 45,
-          notify: true,
+          notify: false,
           time_zone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         }),
       })
