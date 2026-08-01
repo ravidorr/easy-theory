@@ -13,10 +13,14 @@ describe("login loading skeleton", () => {
     expect(container.querySelector("main")).toHaveAttribute("aria-busy", "true");
   });
 
-  it("mirrors the hero lines and the login card without app chrome", async () => {
+  it("mirrors the landing page's hero, login, preview, and content sections", async () => {
     const { container } = render(await Loading());
-    expect(container.querySelectorAll('[data-skeleton="card"]')).toHaveLength(1);
-    expect(container.querySelectorAll('[data-skeleton="block"]')).toHaveLength(2);
+    expect(container.querySelector('[class*="hero"]')).toBeTruthy();
+    expect(container.querySelector('[class*="loginCard"]')).toBeTruthy();
+    expect(container.querySelector('[class*="phoneFrame"]')).toBeTruthy();
+    expect(container.querySelectorAll('[class*="phoneFrameSmall"]')).toHaveLength(2);
+    expect(container.querySelectorAll('[class*="featureCard"]')).toHaveLength(3);
+    expect(container.querySelector('[class*="faqCard"]')).toBeTruthy();
     expect(container.querySelector("nav")).toBeNull();
   });
 });

@@ -18,9 +18,10 @@ describe("credits loading skeleton", () => {
     expect(container.querySelector("main")).toHaveAttribute("aria-busy", "true");
   });
 
-  it("mirrors two sections of credit rows", async () => {
+  it("mirrors the two credit sections and all seven rows", async () => {
     const { container } = render(await Loading());
-    expect(container.querySelectorAll('[data-skeleton="card"]')).toHaveLength(6);
+    expect(container.querySelectorAll('[class*="section"]')).toHaveLength(2);
+    expect(container.querySelectorAll('[class*="resourceLink"]')).toHaveLength(7);
   });
 
   it("keeps the More TabBar visible", async () => {

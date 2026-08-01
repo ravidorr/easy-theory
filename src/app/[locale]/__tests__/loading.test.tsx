@@ -19,10 +19,12 @@ describe("home loading skeleton", () => {
     expect(container.querySelector("main")).toHaveAttribute("aria-busy", "true");
   });
 
-  it("mirrors the quiet home layout: heading, mission, simulation, and topic cards", async () => {
+  it("mirrors the signed-in dashboard geometry", async () => {
     const { container } = render(await Loading());
-    expect(container.querySelectorAll('[data-skeleton="circle"]')).toHaveLength(1);
-    expect(container.querySelectorAll('[data-skeleton="card"]')).toHaveLength(6);
+    expect(container.querySelector('[class*="todayCard"]')).toBeTruthy();
+    expect(container.querySelector('[class*="examCta"]')).toBeTruthy();
+    expect(container.querySelectorAll('[class*="topicLink"]')).toHaveLength(6);
+    expect(container.querySelectorAll('[class*="topicLink"] [class*="progressTrack"]')).toHaveLength(6);
   });
 
   it("keeps the home tab bar visible", async () => {

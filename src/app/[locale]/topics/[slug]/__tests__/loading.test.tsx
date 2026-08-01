@@ -16,10 +16,15 @@ describe("topic quiz loading skeleton", () => {
     expect(container.querySelector("main")).toHaveAttribute("aria-busy", "true");
   });
 
-  it("mirrors one question slide: image plus four answer options", async () => {
+  it("mirrors the quiz chrome, question actions, options, and footer", async () => {
     const { container } = render(await Loading());
-    expect(container.querySelectorAll('[data-skeleton="image"]')).toHaveLength(1);
-    expect(container.querySelectorAll('[data-skeleton="block"]')).toHaveLength(5);
+    expect(container.querySelector('[class*="topBar"]')).toBeTruthy();
+    expect(container.querySelector(".quiz-slide")).toHaveStyle({ display: "flex" });
+    expect(container.querySelectorAll('[class*="questionActions"] [data-skeleton]')).toHaveLength(2);
+    expect(container.querySelectorAll('.quiz-option')).toHaveLength(4);
+    expect(container.querySelectorAll('.quiz-option [data-skeleton="circle"]')).toHaveLength(4);
+    expect(container.querySelectorAll('.quiz-option [data-skeleton="lineFlex"]')).toHaveLength(4);
+    expect(container.querySelector('[class*="quizFooter"]')).toBeTruthy();
   });
 
   it("keeps the Practice section TabBar visible", async () => {

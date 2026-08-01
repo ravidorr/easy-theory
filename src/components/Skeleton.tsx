@@ -4,13 +4,28 @@ type SkeletonVariant =
   | "line"
   | "lineLg"
   | "pill"
+  | "pillFlex"
   | "switch"
   | "block"
+  | "control"
+  | "content"
+  | "lineFlex"
   | "circle"
   | "bar"
   | "image";
 
-type SkeletonSize = "w25" | "w40" | "w60" | "w80" | "s40" | "s52" | "s72";
+type SkeletonSize =
+  | "w25"
+  | "w40"
+  | "w60"
+  | "w80"
+  | "s28"
+  | "s40"
+  | "s44"
+  | "s52"
+  | "s64"
+  | "s72"
+  | "fill";
 
 export function Skeleton({
   variant = "line",

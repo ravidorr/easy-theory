@@ -16,10 +16,12 @@ describe("mistakes review loading skeleton", () => {
     expect(container.querySelector("main")).toHaveAttribute("aria-busy", "true");
   });
 
-  it("mirrors a short list of reviewed question cards", async () => {
+  it("mirrors the normal single-page review header, scope control, and question cards", async () => {
     const { container } = render(await Loading());
-    expect(container.querySelectorAll('[data-skeleton="card"]')).toHaveLength(3);
-    expect(container.querySelectorAll('[data-skeleton="block"]')).toHaveLength(12);
+    expect(container.querySelector('[class*="topBar"]')).toBeTruthy();
+    expect(container.querySelectorAll('[class*="scopeOption"]')).toHaveLength(2);
+    expect(container.querySelectorAll('[class*="questionCard"]')).toHaveLength(3);
+    expect(container.querySelector('[class*="pagination"]')).toBeNull();
   });
 
   it("keeps the Practice section TabBar visible", async () => {
