@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { getApiTranslator, parseJsonBody } from "@/lib/api";
+import { getApiContext, parseJsonBody } from "@/lib/api";
 import { upsertSrsCard } from "@/lib/db";
 import { INITIAL_SRS_STATE, reviewCard } from "@/lib/srs";
 import { reportError } from "@/lib/monitoring";
@@ -13,8 +12,7 @@ const FOREIGN_KEY_VIOLATION = "23503";
 // through real quiz answers in /api/quiz — an open grading endpoint for
 // questions would let clients schedule away their mistakes.
 export async function POST(request: Request) {
-  const t = getApiTranslator(request);
-  const supabase = await createClient();
+  const { t, supabase } = await getApiContext(request);
   const {
     data: { user },
   } = await supabase.auth.getUser();

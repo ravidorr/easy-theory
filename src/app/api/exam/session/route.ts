@@ -1,14 +1,12 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase";
-import { getApiTranslator, parseJsonBody } from "@/lib/api";
+import { getApiContext, parseJsonBody } from "@/lib/api";
 import { reportError } from "@/lib/monitoring";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const OPTION_RE = /^[a-d]$/;
 
 export async function PATCH(request: Request) {
-  const t = getApiTranslator(request);
-  const supabase = await createClient();
+  const { t, supabase } = await getApiContext(request);
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: t("notAuthenticated") }, { status: 401 });
 

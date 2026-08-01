@@ -1,5 +1,7 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+import { createClient } from "@/lib/supabase";
 import {
+  getApiContext,
   getApiTranslator,
   getNotifyTranslator,
   getRequestLocale,
@@ -7,6 +9,10 @@ import {
 } from "../api";
 import heMessages from "../../../messages/he.json";
 import arMessages from "../../../messages/ar.json";
+
+vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
+
+const mockCreateClient = vi.mocked(createClient);
 
 function makeRequest(body: string) {
   return new Request("http://localhost/api/test", {
@@ -79,6 +85,19 @@ describe("getApiTranslator", () => {
   it("translates in Arabic for an ar cookie", () => {
     const t = getApiTranslator(requestWithCookie("NEXT_LOCALE=ar"));
     expect(t("notAuthenticated")).toBe(arMessages.Api.notAuthenticated);
+  });
+});
+
+describe("getApiContext", () => {
+  it("returns the request-localized translator and server client", async () => {
+    const supabase = { auth: { getUser: vi.fn() } };
+    mockCreateClient.mockResolvedValue(supabase as never);
+
+    const context = await getApiContext(requestWithCookie("NEXT_LOCALE=ar"));
+
+    expect(context.supabase).toBe(supabase);
+    expect(context.t("notAuthenticated")).toBe(arMessages.Api.notAuthenticated);
+    expect(mockCreateClient).toHaveBeenCalledOnce();
   });
 });
 

@@ -1,6 +1,7 @@
 import { createTranslator } from "next-intl";
 import { routing } from "@/i18n/routing";
 import type { Locale } from "@/i18n/routing";
+import { createClient } from "@/lib/supabase";
 import heMessages from "../../messages/he.json";
 import arMessages from "../../messages/ar.json";
 
@@ -33,6 +34,12 @@ export function getApiTranslator(request: Request) {
     messages: MESSAGES[locale],
     namespace: "Api",
   });
+}
+
+/** Request-scoped translation and database context for API routes. */
+export async function getApiContext(request: Request) {
+  const supabase = await createClient();
+  return { t: getApiTranslator(request), supabase };
 }
 
 /** Translator for the Notify namespace (cron notifications, no request context). */

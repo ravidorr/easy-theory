@@ -1,17 +1,16 @@
 import { NextResponse } from "next/server";
-import { createAdminClient, createClient } from "@/lib/supabase";
+import { createAdminClient } from "@/lib/supabase";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { EXAM_QUESTION_COUNT, EXAM_PASS_MARK, scoreExam } from "@/lib/exam";
 import type { ExamAnswer } from "@/lib/exam";
-import { getApiTranslator, parseJsonBody } from "@/lib/api";
+import { getApiContext, parseJsonBody } from "@/lib/api";
 import { reportError } from "@/lib/monitoring";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const OPTION_RE = /^[a-d]$/;
 
 export async function POST(request: Request) {
-  const t = getApiTranslator(request);
-  const supabase = await createClient();
+  const { t, supabase } = await getApiContext(request);
   const {
     data: { user },
   } = await supabase.auth.getUser();
