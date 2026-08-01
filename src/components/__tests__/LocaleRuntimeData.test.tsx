@@ -20,6 +20,18 @@ describe("LocaleRuntimeData", () => {
     expect(window.__tf?.(translations.score, { points: 10 })).toBe("10 نقطة");
   });
 
+  it("preserves placeholders with no runtime value", () => {
+    render(
+      <LocaleRuntimeData
+        locale="he"
+        translations={{ message: "{known} {missing}" }}
+        theme="dark"
+      />
+    );
+
+    expect(window.__tf?.("{known} {missing}", { known: "ערך" })).toBe("ערך {missing}");
+  });
+
   it("updates globals and theme color when the locale layout rerenders", () => {
     const { rerender } = render(
       <LocaleRuntimeData locale="he" translations={{ nextBtn: "הבא" }} theme="dark" />
