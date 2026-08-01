@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import { unstable_noStore as noStore } from "next/cache";
 import Link from "next/link";
 import Image from "next/image";
+import Script from "next/script";
 import { createClient } from "@/lib/supabase";
 import {
   getTopics,
@@ -10,6 +11,7 @@ import {
   getTopicAccuracy,
   getTopicQuestionCounts,
   getQuizAnswerEventCountForWindow,
+  getUserSchedule,
 } from "@/lib/db";
 import { DAILY_GOAL_QUESTIONS } from "@/lib/gamification";
 import { computeReadiness, findWeakestTopics, READINESS_MAX_ATTEMPTS } from "@/lib/readiness";
@@ -21,6 +23,7 @@ import { getTranslations, getLocale } from "next-intl/server";
 import { localizedRecordField } from "@/lib/content-locale";
 import { readinessConfidence } from "@/lib/learner-plan";
 import { OFFICIAL_QUESTION_BANK_URL } from "@/lib/source-release";
+import { ScheduleNudge } from "./ScheduleNudge";
 import styles from "./page.module.css";
 
 const MISSION_RING_RADIUS = 30;
@@ -97,7 +100,7 @@ export default async function HomePage() {
   }
 
   const todayWindow = dayWindow(new Date(), 0);
-  const [topics, progressRows, examAttempts, topicAccuracy, questionCounts, answeredToday] =
+  const [topics, progressRows, examAttempts, topicAccuracy, questionCounts, answeredToday, schedule] =
     await Promise.all([
       getTopics(supabase),
       getTopicProgress(supabase, user.id),
@@ -110,7 +113,10 @@ export default async function HomePage() {
         todayWindow.fromIso,
         todayWindow.toIso
       ),
+      getUserSchedule(supabase, user.id),
     ]);
+
+  const hasSchedule = schedule.length > 0;
 
   const progressMap = Object.fromEntries(progressRows.map((progress) => [progress.topic_id, progress]));
   const answeredMap = Object.fromEntries(topicAccuracy.map((accuracy) => [accuracy.topic_id, accuracy.total]));
@@ -259,6 +265,12 @@ export default async function HomePage() {
         </section>
       </main>
       <TabBar active="home" />
+      {!hasSchedule && (
+        <>
+          <Script src="/js/modal.js" strategy="afterInteractive" />
+          <ScheduleNudge hasSchedule={hasSchedule} />
+        </>
+      )}
     </>
   );
 }
