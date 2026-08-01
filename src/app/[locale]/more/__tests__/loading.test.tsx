@@ -23,7 +23,7 @@ describe("more page loading skeleton", () => {
     const { container } = render(await Loading());
     expect(container.querySelectorAll('[class*="pageSection"]')).toHaveLength(2);
     expect(container.querySelectorAll('[class*="statsGrid"] [data-skeleton="circle"]')).toHaveLength(6);
-    expect(container.querySelectorAll('[class*="medalsGrid"] [data-skeleton="circle"]')).toHaveLength(8);
+    expect(container.querySelectorAll('[class*="medalsGrid"] [data-skeleton="circle"]')).toHaveLength(6);
     expect(container.querySelectorAll('[class*="navRow"]')).toHaveLength(5);
     const settingsRows = container.querySelectorAll('[class*="settingsRow"]');
     expect(settingsRows).toHaveLength(4);

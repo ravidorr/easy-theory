@@ -28,7 +28,7 @@ checks:
     oracle: "Streak, star points, and level shown on /he/more equal their home values captured in the same run; More's accuracy, answered-question, and completion values render as intentional values or intentional empty treatment (no NaN/undefined/empty layout)"
   - id: CHK-MORE-02
     desc: "Achievements grid renders streak medals and derived achievements"
-    oracle: "The grid includes streak medals (3/7/14/30) and achievement tiles for first topic, 100 questions, all topics, and exam pass; earned vs locked state is visually and programmatically distinguishable, including for a zero-progress user"
+    oracle: "The grid has six tiles in two rows of three: streak medals (3/7/30) and achievements for first topic, all topics, and exam pass; earned vs locked state is visually and programmatically distinguishable, including for a zero-progress user"
   - id: CHK-MORE-03
     desc: "Navigation entries lead where they claim"
     oracle: "Links/rows for exam, schedule, resources, bookmarks, and credits navigate to /he/exam, /he/schedule, /he/resources, /he/bookmarks, and /he/credits respectively"

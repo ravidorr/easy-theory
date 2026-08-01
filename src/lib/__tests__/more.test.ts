@@ -38,26 +38,22 @@ describe("buildMoreMedalItems", () => {
     expect(items.map((item) => item.slug)).toEqual([
       "streak-3",
       "streak-7",
-      "streak-14",
       "streak-30",
       "first-topic",
-      "questions-100",
       "all-topics",
       "exam-pass",
     ]);
     expect(items.map((item) => item.icon)).toEqual([
       "flame",
       "star",
-      "gem",
       "trophy",
       "check",
-      "cards",
       "globe",
       "timer",
     ]);
     expect(items.every((item) => !item.earned)).toBe(true);
     expect(items.map((item) => item.dateText)).toEqual(
-      Array.from({ length: 8 }, () => "translated:medalLockedLabel")
+      Array.from({ length: 6 }, () => "translated:medalLockedLabel")
     );
   });
 
@@ -85,7 +81,7 @@ describe("buildMoreMedalItems", () => {
       earned: true,
       dateText: expectedDate,
     });
-    expect(items[7]).toMatchObject({
+    expect(items[5]).toMatchObject({
       slug: "exam-pass",
       label: "translated:achExamPass",
       earned: true,

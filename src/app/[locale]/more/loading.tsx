@@ -34,7 +34,7 @@ export default async function Loading() {
             <section className={styles.medalsSection}>
               <Skeleton variant="lineLg" size="w40" />
               <div className={styles.medalsGrid}>
-                {Array.from({ length: 8 }, (_, i) => (
+                {Array.from({ length: 6 }, (_, i) => (
                   <div key={i} className={styles.medalItem}>
                     <Skeleton variant="circle" />
                     <Skeleton size="w60" />

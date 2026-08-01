@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.251] — 2026-08-01
+
+### Removed
+
+- Retired the two-week and 100-question achievements, leaving a six-tile More-page grid and preventing future awards.
+
+---
+
 ## [0.3.250] — 2026-08-01
 
 ### Added

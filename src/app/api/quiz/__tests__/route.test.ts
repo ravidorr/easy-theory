@@ -356,7 +356,7 @@ describe("POST /api/quiz", () => {
     const client = buildClient({
       result: {
         ...storedResult,
-        medals_earned: ["streak-3", "questions-100", "first-topic", "all-topics"],
+        medals_earned: ["streak-3", "first-topic", "all-topics"],
         topic_completed: true,
       },
     });
@@ -366,7 +366,7 @@ describe("POST /api/quiz", () => {
 
     expect(await response.json()).toEqual({
       ...storedResult,
-      medals_earned: ["streak-3", "questions-100", "first-topic", "all-topics"],
+      medals_earned: ["streak-3", "first-topic", "all-topics"],
     });
   });
 

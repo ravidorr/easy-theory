@@ -151,8 +151,8 @@ describe("MorePage", () => {
     mockGetMedals.mockResolvedValue([]);
     const jsx = await MorePage();
     render(jsx);
-    // 4 milestone dates + 4 achievement date slots.
-    expect(screen.getAllByText("medalLockedLabel")).toHaveLength(8);
+    // 3 milestone dates + 3 achievement date slots.
+    expect(screen.getAllByText("medalLockedLabel")).toHaveLength(6);
     // The empty accuracy stat gets contextual copy instead of a dash.
     expect(screen.getByText("statAccuracyEmpty")).toBeInTheDocument();
     expect(screen.queryByText("-")).not.toBeInTheDocument();
@@ -164,18 +164,17 @@ describe("MorePage", () => {
     ] as never);
     const jsx = await MorePage();
     render(jsx);
-    expect(screen.getAllByText("medalLockedLabel")).toHaveLength(7);
+    expect(screen.getAllByText("medalLockedLabel")).toHaveLength(5);
   });
 
-  it("renders the four milestone medals plus four derived achievements", async () => {
+  it("renders three milestone medals plus three derived achievements in a 3 by 2 grid", async () => {
     const jsx = await MorePage();
     const { container } = render(jsx);
     const medalIcons = container.querySelectorAll('[class*="medal"] svg');
-    expect(medalIcons).toHaveLength(8);
+    expect(medalIcons).toHaveLength(6);
     expect(medalIcons[0]).toHaveAttribute("width", "18");
     expect(medalIcons[0]).toHaveAttribute("height", "18");
     expect(screen.getByText("achFirstTopic")).toBeInTheDocument();
-    expect(screen.getByText("achQuestions100")).toBeInTheDocument();
     expect(screen.getByText("achAllTopics")).toBeInTheDocument();
     expect(screen.getByText("achExamPass")).toBeInTheDocument();
   });
@@ -244,22 +243,21 @@ describe("MorePage", () => {
       mockGetTopicAccuracy.mockResolvedValue([{ topic_id: "t1", correct: 80, total: 100 }]);
       const jsx = await MorePage();
       render(jsx);
-      expect(screen.getAllByText("medalLockedLabel")).toHaveLength(8);
+      expect(screen.getAllByText("medalLockedLabel")).toHaveLength(6);
     });
 
     it("marks and dates achievements stored in user_medals", async () => {
       mockGetMedals.mockResolvedValue([
         { medal_slug: "first-topic", earned_at: "2026-01-15T10:00:00Z" },
-        { medal_slug: "questions-100", earned_at: "2026-01-15T10:00:00Z" },
         { medal_slug: "all-topics", earned_at: "2026-01-15T10:00:00Z" },
         { medal_slug: "exam-pass", earned_at: "2026-01-15T10:00:00Z" },
       ] as never);
       const jsx = await MorePage();
       render(jsx);
-      for (const label of ["achFirstTopic", "achQuestions100", "achAllTopics", "achExamPass"]) {
+      for (const label of ["achFirstTopic", "achAllTopics", "achExamPass"]) {
         expect(screen.getByText(label).className).toContain("medalLabelEarned");
       }
-      expect(screen.getAllByText("medalLockedLabel")).toHaveLength(4);
+      expect(screen.getAllByText("medalLockedLabel")).toHaveLength(3);
     });
 
     it("leaves all achievements locked for a fresh account", async () => {
@@ -267,7 +265,6 @@ describe("MorePage", () => {
       render(jsx);
       for (const label of [
         "achFirstTopic",
-        "achQuestions100",
         "achAllTopics",
         "achExamPass",
       ]) {
@@ -383,7 +380,7 @@ describe("MorePage", () => {
     ] as never);
     const jsx = await MorePage();
     render(jsx);
-    expect(screen.getAllByText("medalLockedLabel")).toHaveLength(7);
+    expect(screen.getAllByText("medalLockedLabel")).toHaveLength(5);
   });
 
   it("renders light mode toggle when theme is light", async () => {
