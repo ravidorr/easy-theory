@@ -1,9 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import {
   Skeleton,
-  SkeletonCard,
   SkeletonCol,
-  SkeletonRow,
   SkeletonScreen,
 } from "@/components/Skeleton";
 import styles from "./page.module.css";
@@ -15,33 +13,50 @@ export default async function Loading() {
   return (
     <>
     <SkeletonScreen label={t("label")} className={styles.page}>
-      <SkeletonRow>
-        <Skeleton variant="circle" size="s40" />
-        <SkeletonCol>
+      <div className={styles.topBar}>
+        <Skeleton variant="circle" size="s44" />
+        <div className={styles.titleCol}>
           <Skeleton variant="lineLg" size="w40" />
           <Skeleton size="w60" />
-        </SkeletonCol>
-      </SkeletonRow>
-      <SkeletonCard>
+        </div>
+      </div>
+      <section className={styles.card}>
         <Skeleton size="w25" />
-        <SkeletonRow>
+        <div className={styles.dayRow}>
           {[0, 1, 2, 3, 4, 5, 6].map((i) => (
-            <Skeleton key={i} variant="circle" size="s40" />
+            <Skeleton key={i} variant="circle" size="s44" />
           ))}
-        </SkeletonRow>
+        </div>
         <Skeleton size="w60" />
-      </SkeletonCard>
-      <SkeletonCard>
-        <Skeleton size="w25" />
+      </section>
+      <section className={styles.timeCard}>
+        <div className={styles.timeLabel}>
+          <Skeleton size="w25" />
+          <Skeleton variant="control" />
+        </div>
+        <div className={styles.durationWrapper}>
+          <Skeleton size="w25" />
+          <div className={styles.durationRow}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} variant="control" />
+            ))}
+          </div>
+        </div>
+        <div className={styles.notifyLabel}>
+          <Skeleton variant="switch" />
+          <SkeletonCol>
+            <Skeleton size="w60" />
+            <Skeleton size="w40" />
+          </SkeletonCol>
+        </div>
+      </section>
+      <div className={styles.saveArea}>
+        <div className={styles.summaryCard}>
+          <Skeleton size="w60" />
+          <Skeleton size="w40" />
+        </div>
         <Skeleton variant="block" />
-        <Skeleton size="w25" />
-        <SkeletonRow>
-          {[0, 1, 2, 3].map((i) => (
-            <Skeleton key={i} variant="pill" />
-          ))}
-        </SkeletonRow>
-      </SkeletonCard>
-      <Skeleton variant="block" />
+      </div>
     </SkeletonScreen>
     <TabBar active="more" current={null} />
     </>

@@ -1,7 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import {
   Skeleton,
-  SkeletonCard,
   SkeletonScreen,
 } from "@/components/Skeleton";
 import { TabBar } from "@/components/TabBar";
@@ -15,18 +14,22 @@ export default async function Loading() {
       <SkeletonScreen label={t("label")} className={styles.page}>
         <Skeleton variant="lineLg" size="w60" />
         <Skeleton size="w80" />
-        <SkeletonCard>
+        <section className={styles.rulesCard}>
           <Skeleton size="w40" />
           <Skeleton size="w80" />
           <Skeleton size="w80" />
           <Skeleton size="w60" />
-        </SkeletonCard>
+        </section>
         <Skeleton variant="block" />
-        <SkeletonCard>
+        <section className={styles.historyCard}>
           <Skeleton size="w40" />
-          <Skeleton size="w60" />
-          <Skeleton size="w60" />
-        </SkeletonCard>
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className={styles.attemptRow}>
+              <Skeleton size="w40" />
+              <Skeleton size="w25" />
+            </div>
+          ))}
+        </section>
       </SkeletonScreen>
       <TabBar active="exam" />
     </>

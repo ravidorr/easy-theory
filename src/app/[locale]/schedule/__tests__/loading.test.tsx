@@ -16,10 +16,13 @@ describe("schedule loading skeleton", () => {
     expect(container.querySelector("main")).toHaveAttribute("aria-busy", "true");
   });
 
-  it("mirrors the seven day buttons and the duration pills", async () => {
+  it("mirrors the schedule header, controls, summary, and save area", async () => {
     const { container } = render(await Loading());
-    expect(container.querySelectorAll('[data-skeleton="circle"]')).toHaveLength(8);
-    expect(container.querySelectorAll('[data-skeleton="pill"]')).toHaveLength(4);
+    expect(container.querySelector('[class*="topBar"]')).toBeTruthy();
+    expect(container.querySelectorAll('[class*="dayRow"] [data-skeleton="circle"]')).toHaveLength(7);
+    expect(container.querySelectorAll('[class*="durationRow"] [data-skeleton="control"]')).toHaveLength(3);
+    expect(container.querySelector('[class*="timeCard"] [data-skeleton="switch"]')).toBeTruthy();
+    expect(container.querySelector('[class*="saveArea"]')).toBeTruthy();
   });
 
   it("keeps the More section TabBar visible", async () => {

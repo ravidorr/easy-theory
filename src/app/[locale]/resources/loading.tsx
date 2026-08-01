@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { TabBar } from "@/components/TabBar";
-import { Skeleton, SkeletonCard, SkeletonCol, SkeletonIconCard, SkeletonRow, SkeletonScreen } from "@/components/Skeleton";
+import { Skeleton, SkeletonCol, SkeletonScreen } from "@/components/Skeleton";
 import styles from "./page.module.css";
 
 export default async function Loading() {
@@ -11,43 +11,58 @@ export default async function Loading() {
       <SkeletonScreen label={t("label")} className={styles.page}>
         <Skeleton variant="lineLg" size="w40" />
         <div className={styles.section}>
-          <Skeleton size="w25" />
-          <SkeletonCard>
-            <Skeleton variant="image" />
-            <Skeleton size="w60" />
-            <Skeleton size="w40" />
-          </SkeletonCard>
-          {[0, 1, 2].map((i) => (
-            <SkeletonCard key={i}>
-              <SkeletonRow>
-                <Skeleton variant="image" size="s52" />
-                <SkeletonCol>
-                  <Skeleton size="w60" />
-                  <Skeleton size="w40" />
-                </SkeletonCol>
-              </SkeletonRow>
-            </SkeletonCard>
+          <Skeleton variant="lineLg" size="w40" />
+          <div className={styles.featuredLink}>
+            <div className={styles.thumbnailFeatured}>
+              <Skeleton variant="image" size="fill" />
+            </div>
+            <div className={styles.videoMeta}>
+              <Skeleton size="w60" />
+              <Skeleton size="w80" />
+            </div>
+          </div>
+          {[0].map((i) => (
+            <div key={i} className={styles.rowLink}>
+              <div className={styles.thumbnailRow}>
+                <Skeleton variant="image" size="fill" />
+              </div>
+              <SkeletonCol>
+                <Skeleton size="w60" />
+                <Skeleton size="w80" />
+              </SkeletonCol>
+            </div>
           ))}
         </div>
         <div className={styles.section}>
-          <Skeleton size="w25" />
-          {[0, 1, 2].map((i) => (
-            <SkeletonCard key={i}>
-              <SkeletonRow>
-                <Skeleton variant="image" size="s52" />
+          <Skeleton variant="lineLg" size="w40" />
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className={styles.rowLink}>
+              <div className={styles.thumbnailRow}>
+                <Skeleton variant="image" size="fill" />
+              </div>
+              <SkeletonCol>
+                <Skeleton size="w60" />
+                <Skeleton variant="pill" />
+              </SkeletonCol>
+            </div>
+          ))}
+        </div>
+        {[0, 1].map((section) => (
+          <div key={section} className={styles.section}>
+            <Skeleton variant="lineLg" size="w40" />
+            {Array.from({ length: section === 0 ? 4 : 3 }, (_, i) => (
+              <div key={i} className={styles.resourceLink}>
+                <div className={styles.iconWrap}>
+                  <Skeleton variant="block" size="s52" />
+                </div>
                 <SkeletonCol>
                   <Skeleton size="w60" />
+                  <Skeleton size="w80" />
                 </SkeletonCol>
-              </SkeletonRow>
-            </SkeletonCard>
-          ))}
-        </div>
-        <div className={styles.section}>
-          <Skeleton size="w25" />
-          {[0, 1].map((i) => (
-            <SkeletonIconCard key={i} />
-          ))}
-        </div>
+              </div>
+            ))}
+          </div>
+        ))}
       </SkeletonScreen>
       <TabBar active="more" current={null} />
     </>

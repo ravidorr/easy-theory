@@ -16,10 +16,12 @@ describe("exam run loading skeleton", () => {
     expect(container.querySelector("main")).toHaveAttribute("aria-busy", "true");
   });
 
-  it("mirrors a question slide with four options and two nav buttons", async () => {
+  it("mirrors the exam progress bar, question slide, and footer controls", async () => {
     const { container } = render(await Loading());
-    expect(container.querySelectorAll('[data-skeleton="block"]')).toHaveLength(6);
-    expect(container.querySelectorAll('[data-skeleton="pill"]')).toHaveLength(1);
+    expect(container.querySelector('[class*="topBar"]')).toBeTruthy();
+    expect(container.querySelectorAll('.quiz-option')).toHaveLength(4);
+    expect(container.querySelector('[class*="examFooter"]')).toBeTruthy();
+    expect(container.querySelectorAll('[class*="navButtons"] [data-skeleton="block"]')).toHaveLength(2);
   });
 
   it("keeps the Exam section TabBar visible without a false current page", async () => {

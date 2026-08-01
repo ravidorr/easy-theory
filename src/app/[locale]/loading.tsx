@@ -2,9 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { TabBar } from "@/components/TabBar";
 import {
   Skeleton,
-  SkeletonCard,
   SkeletonCol,
-  SkeletonRow,
   SkeletonScreen,
 } from "@/components/Skeleton";
 import styles from "./page.module.css";
@@ -17,7 +15,7 @@ export default async function Loading() {
       <SkeletonScreen label={t("label")} className={styles.page}>
         <Skeleton variant="lineLg" size="w40" />
 
-        <div className={styles.todayCard}>
+        <section className={styles.todayCard}>
           <div className={styles.missionRow}>
             <Skeleton variant="circle" size="s72" />
             <SkeletonCol>
@@ -27,32 +25,38 @@ export default async function Loading() {
             </SkeletonCol>
           </div>
           <Skeleton variant="block" />
-        </div>
+        </section>
 
-        <div className={styles.examCta}>
-          <Skeleton variant="block" size="s40" />
+        <section className={styles.examCta}>
+          <div className={styles.examCtaIcon}>
+            <Skeleton variant="block" size="s40" />
+          </div>
           <SkeletonCol>
             <Skeleton size="w40" />
             <Skeleton size="w60" />
             <Skeleton size="w40" />
           </SkeletonCol>
-        </div>
+        </section>
 
-        <div className={styles.topicsSection}>
+        <section className={styles.topicsSection}>
           <Skeleton variant="lineLg" size="w40" />
           {[0, 1, 2, 3, 4, 5].map((i) => (
-            <SkeletonCard key={i}>
-              <SkeletonRow>
-                <Skeleton variant="block" size="s52" />
-                <SkeletonCol>
+            <div key={i} className={styles.topicLink}>
+              <div className={styles.topicIconWrap}>
+                <Skeleton variant="block" size="s40" />
+              </div>
+              <div className={styles.topicBody}>
+                <div className={styles.topicTitleRow}>
                   <Skeleton size="w60" />
                   <Skeleton size="w40" />
-                  <Skeleton variant="bar" />
-                </SkeletonCol>
-              </SkeletonRow>
-            </SkeletonCard>
+                </div>
+                <div className={styles.progressTrack}>
+                  <Skeleton variant="bar" size="fill" />
+                </div>
+              </div>
+            </div>
           ))}
-        </div>
+        </section>
       </SkeletonScreen>
       <TabBar active="home" />
     </>

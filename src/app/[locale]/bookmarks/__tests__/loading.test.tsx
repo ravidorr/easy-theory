@@ -18,9 +18,10 @@ describe("bookmarks loading skeleton", () => {
     expect(container.querySelector("main")).toHaveAttribute("aria-busy", "true");
   });
 
-  it("mirrors bookmarked question cards with their options", async () => {
+  it("mirrors bookmarked question card and option geometry", async () => {
     const { container } = render(await Loading());
-    expect(container.querySelectorAll('[data-skeleton="card"]')).toHaveLength(2);
+    expect(container.querySelectorAll('[class*="questionCard"]')).toHaveLength(2);
+    expect(container.querySelectorAll('[class*="imgWide"]')).toHaveLength(2);
     expect(container.querySelectorAll('[data-skeleton="block"]')).toHaveLength(8);
   });
 

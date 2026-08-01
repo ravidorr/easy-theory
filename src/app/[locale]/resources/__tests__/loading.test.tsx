@@ -19,10 +19,12 @@ describe("resources loading skeleton", () => {
     expect(container.querySelector("main")).toHaveAttribute("aria-busy", "true");
   });
 
-  it("mirrors video and resource content sections", async () => {
+  it("mirrors video and resource sections with their loaded card shapes", async () => {
     const { container } = render(await Loading());
-    expect(container.querySelectorAll('[data-skeleton="image"]')).toHaveLength(7);
-    expect(container.querySelectorAll('[data-skeleton="card"]')).toHaveLength(9);
+    expect(container.querySelectorAll('[class*="section"]')).toHaveLength(4);
+    expect(container.querySelectorAll('[class*="featuredLink"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[class*="rowLink"]')).toHaveLength(5);
+    expect(container.querySelectorAll('[class*="resourceLink"]')).toHaveLength(7);
   });
 
   it("keeps the More tab bar visible without marking it current", async () => {

@@ -1,8 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import {
   Skeleton,
-  SkeletonCard,
-  SkeletonRow,
   SkeletonScreen,
 } from "@/components/Skeleton";
 import styles from "./page.module.css";
@@ -13,22 +11,35 @@ export default async function Loading() {
 
   return (
     <>
-    <SkeletonScreen label={t("label")} className={styles.page}>
-      <SkeletonRow>
-        <Skeleton variant="circle" size="s40" />
-        <Skeleton variant="lineLg" size="w40" />
-      </SkeletonRow>
-      <Skeleton variant="pill" />
-      <Skeleton size="w40" />
-      {[0, 1, 2].map((i) => (
-        <SkeletonCard key={i}>
-          <Skeleton size="w80" />
-          {[0, 1, 2, 3].map((j) => (
-            <Skeleton key={j} variant="block" />
-          ))}
-        </SkeletonCard>
-      ))}
-    </SkeletonScreen>
+      <SkeletonScreen label={t("label")} className={styles.page}>
+        <div className={styles.topBar}>
+          <Skeleton variant="circle" size="s44" />
+          <Skeleton variant="lineLg" size="w40" />
+        </div>
+        <div className={styles.scopeToggle}>
+          <div className={styles.scopeOption}><Skeleton size="w60" /></div>
+          <div className={styles.scopeOption}><Skeleton size="w60" /></div>
+        </div>
+        <Skeleton size="w40" />
+        {[0, 1, 2].map((i) => (
+          <section key={i} className={styles.questionCard}>
+            <div className={styles.imgWide}>
+              <Skeleton variant="image" size="fill" />
+            </div>
+            <Skeleton variant="lineLg" size="w80" />
+            <div className={styles.optionsList}>
+              {[0, 1, 2, 3].map((j) => (
+                <Skeleton key={j} variant="block" />
+              ))}
+            </div>
+          </section>
+        ))}
+        <div className={styles.pagination}>
+          <Skeleton variant="block" />
+          <Skeleton size="w25" />
+          <Skeleton variant="block" />
+        </div>
+      </SkeletonScreen>
     <TabBar active="practice" current={null} />
     </>
   );

@@ -51,6 +51,12 @@
   border-radius: var(--radius-lg);
 }
 
+.control {
+  height: var(--hit-min);
+  width: 100%;
+  border-radius: var(--radius-md);
+}
+
 .circle {
   width: 36px;
   height: 36px;
@@ -95,9 +101,21 @@
   flex-shrink: 0;
 }
 
+.s44 {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+
 .s52 {
   width: 52px;
   height: 52px;
+  flex-shrink: 0;
+}
+
+.s64 {
+  width: 64px;
+  height: 64px;
   flex-shrink: 0;
 }
 
@@ -105,6 +123,11 @@
   width: 72px;
   height: 72px;
   flex-shrink: 0;
+}
+
+.fill {
+  width: 100%;
+  height: 100%;
 }
 
 /* Horizontal grouping for icon-plus-text placeholder rows. Fluid shapes

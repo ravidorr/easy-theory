@@ -19,10 +19,11 @@ describe("flashcards loading skeleton", () => {
     expect(container.querySelector("main")).toHaveAttribute("aria-busy", "true");
   });
 
-  it("mirrors the flashcard and the two answer buttons", async () => {
+  it("mirrors the flashcard frame, progress track, and two answer buttons", async () => {
     const { container } = render(await Loading());
-    expect(container.querySelectorAll('[data-skeleton="image"]')).toHaveLength(1);
-    expect(container.querySelectorAll('[data-skeleton="block"]')).toHaveLength(2);
+    expect(container.querySelector('[class*="progressTrack"]')).toBeTruthy();
+    expect(container.querySelector(".flashcard-wrap")).toBeTruthy();
+    expect(container.querySelectorAll('[class*="actionsRow"] [data-skeleton="block"]')).toHaveLength(2);
   });
 
   it("groups the flashcards loading state under Practice without a false current page", async () => {
