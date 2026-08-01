@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import React from "react";
 import ProgressPage from "../page";
 import { createClient } from "@/lib/supabase";
@@ -50,7 +50,9 @@ describe("ProgressPage", () => {
     expect(screen.getByText("4").tagName).toBe("DD");
     expect(screen.getByText("8").tagName).toBe("DD");
     expect(screen.getByText("0").tagName).toBe("DD");
-    expect(screen.getByRole("link", { name: "Progress.practiceCta" })).toHaveAttribute("href", "/practice");
+    const readinessCard = screen.getByRole("heading", { name: "Progress.readinessTitle", level: 2 }).closest("section");
+    expect(readinessCard).not.toBeNull();
+    expect(within(readinessCard as HTMLElement).getByRole("link", { name: "Progress.practiceCta" })).toHaveAttribute("href", "/practice");
     expect(screen.getByTestId("tabbar")).toBeInTheDocument();
   });
 
