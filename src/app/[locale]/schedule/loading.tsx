@@ -38,7 +38,7 @@ export default async function Loading() {
           <Skeleton size="w25" />
           <div className={styles.durationRow}>
             {[0, 1, 2].map((i) => (
-              <Skeleton key={i} variant="control" />
+              <Skeleton key={i} variant="pillFlex" />
             ))}
           </div>
         </div>

@@ -20,7 +20,7 @@ describe("schedule loading skeleton", () => {
     const { container } = render(await Loading());
     expect(container.querySelector('[class*="topBar"]')).toBeTruthy();
     expect(container.querySelectorAll('[class*="dayRow"] [data-skeleton="circle"]')).toHaveLength(7);
-    expect(container.querySelectorAll('[class*="durationRow"] [data-skeleton="control"]')).toHaveLength(3);
+    expect(container.querySelectorAll('[class*="durationRow"] [data-skeleton="pillFlex"]')).toHaveLength(3);
     expect(container.querySelector('[class*="timeCard"] [data-skeleton="switch"]')).toBeTruthy();
     expect(container.querySelector('[class*="saveArea"]')).toBeTruthy();
   });

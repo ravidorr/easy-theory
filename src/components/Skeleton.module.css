@@ -38,6 +38,13 @@
   border-radius: var(--radius-pill);
 }
 
+.pillFlex {
+  height: var(--hit-min);
+  flex: 1;
+  min-width: 0;
+  border-radius: var(--radius-pill);
+}
+
 .switch {
   width: 46px;
   height: 28px;

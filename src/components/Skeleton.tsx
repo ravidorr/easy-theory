@@ -4,6 +4,7 @@ type SkeletonVariant =
   | "line"
   | "lineLg"
   | "pill"
+  | "pillFlex"
   | "switch"
   | "block"
   | "control"
