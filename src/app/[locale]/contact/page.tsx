@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase";
+import { requireAuthenticatedUser } from "@/lib/auth";
 import { Link } from "@/lib/navigation";
 import { TabBar } from "@/components/TabBar";
 import { Icon } from "@/components/Icon";
@@ -9,10 +9,7 @@ import styles from "./page.module.css";
 
 export default async function ContactPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/login?next=/contact");
+  await requireAuthenticatedUser(supabase, "/auth/login?next=/contact");
 
   const t = await getTranslations("Contact");
 

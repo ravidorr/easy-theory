@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { Link } from "@/lib/navigation";
 import Script from "next/script";
 import { existsSync } from "fs";
@@ -8,6 +7,7 @@ import { QuestionImage } from "@/components/QuestionImage";
 import { TabBar } from "@/components/TabBar";
 import { EmptyStateCard } from "@/components/EmptyStateCard";
 import { createClient } from "@/lib/supabase";
+import { requireAuthenticatedUser } from "@/lib/auth";
 import { getOrCreateExamSession, getQuestionsByIds, getRandomExamQuestions, getTopics } from "@/lib/db";
 import type { Question } from "@/lib/db";
 import {
@@ -122,10 +122,7 @@ function formatDuration(totalSeconds: number): string {
 
 export default async function ExamRunPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/login?next=/exam/run");
+  const user = await requireAuthenticatedUser(supabase, "/auth/login?next=/exam/run");
 
   const locale = await getLocale();
   const t = await getTranslations("Exam");

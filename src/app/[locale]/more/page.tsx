@@ -1,9 +1,9 @@
 import { unstable_noStore as noStore } from "next/cache";
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import Script from "next/script";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase";
+import { requireAuthenticatedUser } from "@/lib/auth";
 import { TabBar } from "@/components/TabBar";
 import { Icon, type IconName } from "@/components/Icon";
 import {
@@ -41,10 +41,7 @@ function autoAdvanceDelay(value: string | undefined) {
 export default async function MorePage() {
   noStore();
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/login?next=/more");
+  const user = await requireAuthenticatedUser(supabase, "/auth/login?next=/more");
 
   const locale = await getLocale();
   const t = await getTranslations("More");

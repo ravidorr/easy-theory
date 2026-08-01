@@ -1,8 +1,8 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { TabBar } from "@/components/TabBar";
 import { createClient } from "@/lib/supabase";
+import { requireAuthenticatedUser } from "@/lib/auth";
 import { getTopics } from "@/lib/db";
 import { localizedRecordField } from "@/lib/content-locale";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -11,8 +11,7 @@ import styles from "./page.module.css";
 
 export default async function PracticePage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/login?next=/practice");
+  await requireAuthenticatedUser(supabase, "/auth/login?next=/practice");
   const [topics, t, locale] = await Promise.all([
     getTopics(supabase),
     getTranslations("Practice"),

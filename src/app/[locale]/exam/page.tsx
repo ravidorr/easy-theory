@@ -1,7 +1,7 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import { TabBar } from "@/components/TabBar";
 import { createClient } from "@/lib/supabase";
+import { requireAuthenticatedUser } from "@/lib/auth";
 import { getExamAttempts } from "@/lib/db";
 import {
   EXAM_QUESTION_COUNT,
@@ -13,10 +13,7 @@ import styles from "./page.module.css";
 
 export default async function ExamPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/login?next=/exam");
+  const user = await requireAuthenticatedUser(supabase, "/auth/login?next=/exam");
 
   const locale = await getLocale();
   const t = await getTranslations("Exam");

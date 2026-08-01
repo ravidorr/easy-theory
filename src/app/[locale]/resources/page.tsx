@@ -1,7 +1,7 @@
-import { redirect } from "next/navigation";
 import Image from "next/image";
 import { SignImage } from "@/components/SignImage";
 import { createClient } from "@/lib/supabase";
+import { requireAuthenticatedUser } from "@/lib/auth";
 import { getResources, getVideos, type Resource } from "@/lib/db";
 import { TabBar } from "@/components/TabBar";
 import { Icon } from "@/components/Icon";
@@ -22,10 +22,7 @@ const PlayIcon = ({ size = 20 }: { size?: number }) => (
 
 export default async function ResourcesPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/login?next=/resources");
+  await requireAuthenticatedUser(supabase, "/auth/login?next=/resources");
 
   const [t, videosT] = await Promise.all([
     getTranslations("Resources"),
