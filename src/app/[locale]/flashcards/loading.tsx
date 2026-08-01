@@ -20,7 +20,7 @@ export default async function Loading() {
           <Skeleton variant="bar" size="fill" />
         </div>
         <div className={styles.cardsContainer}>
-          <div className={`flashcard-wrap ${styles.flashcardItem}`}>
+          <div className={`flashcard-wrap ${styles.flashcardItem}`} style={{ display: "flex" }}>
             <div className="flashcard-inner">
               <div className="flashcard-face">
                 <Skeleton variant="image" size="fill" />

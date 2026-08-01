@@ -19,6 +19,7 @@ describe("topic quiz loading skeleton", () => {
   it("mirrors the quiz chrome, question actions, options, and footer", async () => {
     const { container } = render(await Loading());
     expect(container.querySelector('[class*="topBar"]')).toBeTruthy();
+    expect(container.querySelector(".quiz-slide")).toHaveStyle({ display: "flex" });
     expect(container.querySelectorAll('[class*="questionActions"] [data-skeleton]')).toHaveLength(2);
     expect(container.querySelectorAll('.quiz-option')).toHaveLength(4);
     expect(container.querySelector('[class*="quizFooter"]')).toBeTruthy();

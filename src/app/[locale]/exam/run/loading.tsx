@@ -19,7 +19,7 @@ export default async function Loading() {
           <Skeleton size="w25" />
           <Skeleton size="w25" />
         </div>
-        <section className={`quiz-slide ${styles.slideItem}`}>
+        <section className={`quiz-slide ${styles.slideItem}`} style={{ display: "flex" }}>
           <div className={styles.questionContainer}>
             <div className={styles.imgWide}>
               <Skeleton variant="image" size="fill" />

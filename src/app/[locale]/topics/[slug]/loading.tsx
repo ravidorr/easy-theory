@@ -19,7 +19,7 @@ export default async function Loading() {
           </div>
           <Skeleton size="w25" />
         </div>
-        <section className={`quiz-slide ${styles.slideItem}`}>
+        <section className={`quiz-slide ${styles.slideItem}`} style={{ display: "flex" }}>
           <div className={styles.questionContainer}>
             <div className={styles.questionActions}>
               <Skeleton variant="circle" size="s40" />

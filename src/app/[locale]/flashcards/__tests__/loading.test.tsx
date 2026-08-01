@@ -22,7 +22,7 @@ describe("flashcards loading skeleton", () => {
   it("mirrors the flashcard frame, progress track, and two answer buttons", async () => {
     const { container } = render(await Loading());
     expect(container.querySelector('[class*="progressTrack"]')).toBeTruthy();
-    expect(container.querySelector(".flashcard-wrap")).toBeTruthy();
+    expect(container.querySelector(".flashcard-wrap")).toHaveStyle({ display: "flex" });
     expect(container.querySelectorAll('[class*="actionsRow"] [data-skeleton="block"]')).toHaveLength(2);
   });
 

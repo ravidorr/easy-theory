@@ -19,6 +19,7 @@ describe("exam run loading skeleton", () => {
   it("mirrors the exam progress bar, question slide, and footer controls", async () => {
     const { container } = render(await Loading());
     expect(container.querySelector('[class*="topBar"]')).toBeTruthy();
+    expect(container.querySelector(".quiz-slide")).toHaveStyle({ display: "flex" });
     expect(container.querySelectorAll('.quiz-option')).toHaveLength(4);
     expect(container.querySelector('[class*="examFooter"]')).toBeTruthy();
     expect(container.querySelectorAll('[class*="navButtons"] [data-skeleton="block"]')).toHaveLength(2);
