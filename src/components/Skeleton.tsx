@@ -8,6 +8,7 @@ type SkeletonVariant =
   | "switch"
   | "block"
   | "control"
+  | "content"
   | "circle"
   | "bar"
   | "image";

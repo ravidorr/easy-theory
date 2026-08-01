@@ -16,7 +16,7 @@ describe("Skeleton", () => {
     expect(el).toHaveAttribute("data-skeleton", "line");
   });
 
-  it.each(["line", "lineLg", "pill", "pillFlex", "switch", "block", "control", "circle", "bar", "image"] as const)(
+  it.each(["line", "lineLg", "pill", "pillFlex", "switch", "block", "control", "content", "circle", "bar", "image"] as const)(
     "renders the %s variant hidden from assistive tech",
     (variant) => {
       const { container } = render(<Skeleton variant={variant} />);

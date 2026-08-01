@@ -16,8 +16,8 @@ export default async function Loading() {
           <div className={styles.progressTrack}>
             <Skeleton variant="bar" size="fill" />
           </div>
-          <Skeleton size="w25" />
-          <Skeleton size="w25" />
+          <Skeleton variant="content" />
+          <Skeleton variant="content" />
         </div>
         <section className={`quiz-slide ${styles.slideItem}`} style={{ display: "flex" }}>
           <div className={styles.questionContainer}>
