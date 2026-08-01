@@ -9,6 +9,7 @@ type SkeletonVariant =
   | "block"
   | "control"
   | "content"
+  | "lineFlex"
   | "circle"
   | "bar"
   | "image";
@@ -18,6 +19,7 @@ type SkeletonSize =
   | "w40"
   | "w60"
   | "w80"
+  | "s28"
   | "s40"
   | "s44"
   | "s52"

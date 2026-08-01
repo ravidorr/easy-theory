@@ -23,6 +23,8 @@ describe("exam run loading skeleton", () => {
     expect(container.querySelector('[class*="topBar"] [class*="w25"]')).toBeNull();
     expect(container.querySelector(".quiz-slide")).toHaveStyle({ display: "flex" });
     expect(container.querySelectorAll('.quiz-option')).toHaveLength(4);
+    expect(container.querySelectorAll('.quiz-option [data-skeleton="circle"]')).toHaveLength(4);
+    expect(container.querySelectorAll('.quiz-option [data-skeleton="lineFlex"]')).toHaveLength(4);
     expect(container.querySelector('[class*="examFooter"]')).toBeTruthy();
     expect(container.querySelectorAll('[class*="navButtons"] [data-skeleton="block"]')).toHaveLength(2);
   });

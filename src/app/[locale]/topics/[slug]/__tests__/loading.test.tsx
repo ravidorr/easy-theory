@@ -22,6 +22,8 @@ describe("topic quiz loading skeleton", () => {
     expect(container.querySelector(".quiz-slide")).toHaveStyle({ display: "flex" });
     expect(container.querySelectorAll('[class*="questionActions"] [data-skeleton]')).toHaveLength(2);
     expect(container.querySelectorAll('.quiz-option')).toHaveLength(4);
+    expect(container.querySelectorAll('.quiz-option [data-skeleton="circle"]')).toHaveLength(4);
+    expect(container.querySelectorAll('.quiz-option [data-skeleton="lineFlex"]')).toHaveLength(4);
     expect(container.querySelector('[class*="quizFooter"]')).toBeTruthy();
   });
 

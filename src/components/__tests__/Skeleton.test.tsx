@@ -16,7 +16,7 @@ describe("Skeleton", () => {
     expect(el).toHaveAttribute("data-skeleton", "line");
   });
 
-  it.each(["line", "lineLg", "pill", "pillFlex", "switch", "block", "control", "content", "circle", "bar", "image"] as const)(
+  it.each(["line", "lineLg", "lineFlex", "pill", "pillFlex", "switch", "block", "control", "content", "circle", "bar", "image"] as const)(
     "renders the %s variant hidden from assistive tech",
     (variant) => {
       const { container } = render(<Skeleton variant={variant} />);
@@ -27,7 +27,7 @@ describe("Skeleton", () => {
   );
 
   it("accepts a size without changing the variant marker", () => {
-    const { container } = render(<Skeleton variant="circle" size="s72" />);
+    const { container } = render(<Skeleton variant="circle" size="s28" />);
     expect(container.querySelector('[data-skeleton="circle"]')).toBeInTheDocument();
   });
 });

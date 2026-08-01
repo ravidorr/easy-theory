@@ -29,7 +29,8 @@ export default async function Loading() {
           <div className={styles.optionsList}>
             {[0, 1, 2, 3].map((i) => (
               <div key={i} className="quiz-option">
-                <Skeleton size="w60" />
+                <Skeleton variant="circle" size="s28" />
+                <Skeleton variant="lineFlex" />
               </div>
             ))}
           </div>
