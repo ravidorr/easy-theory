@@ -47,12 +47,15 @@ pnpm dev
 
 ## Git hooks
 
-Linters run on every commit (pre-commit). The CHANGELOG and version rule is per PR, checked on push (pre-push): every pushed branch must differ from `origin/main` in both `CHANGELOG.md` and the `package.json` version, or the push will be rejected. Individual commits within a PR do not need their own bump or entry. Hooks are installed automatically via `pnpm install` (husky `prepare` script).
+Linters run on every commit (pre-commit). The release rule is per PR, checked on push (pre-push): every pushed branch must add exactly one top-level `CHANGELOG.md` release entry and make exactly one stable SemVer increment from `origin/main`. The entry version and `package.json` version must match. Individual commits within a PR do not need their own bump or entry. Hooks are installed automatically via `pnpm install` (husky `prepare` script).
 
-- Add one `## [x.y.z]` section at the top of `CHANGELOG.md` describing the whole PR
-- Bump the patch version in `package.json` once per PR (e.g. `0.1.4` → `0.1.5`)
+- Add one `## [x.y.z]` section as the first released section in `CHANGELOG.md`, describing the whole PR
+- Bump `package.json` once per PR: patch for a backward-compatible fix, minor for a backward-compatible feature, or major for a breaking change
+- Preserve every existing release heading; insert the new heading instead of renaming one
 
 If `main` releases a version while your PR is open, renumber your entry and bump when you rebase.
+
+The historical changelog was normalized once from `0.3.252` to `0.56.3`; subsequent releases use the normal direct-increment rule.
 
 ## Code conventions
 
