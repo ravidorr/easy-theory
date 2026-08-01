@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.248] — 2026-08-01
+
+### Changed
+
+- Extracted More-page preference and medal view-model helpers and aligned its loading skeleton.
+
+---
+
 ## [0.3.247] — 2026-08-01
 
 ### Added
