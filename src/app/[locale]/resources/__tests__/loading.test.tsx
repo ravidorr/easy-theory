@@ -22,9 +22,9 @@ describe("resources loading skeleton", () => {
   it("mirrors video and resource sections with their loaded card shapes", async () => {
     const { container } = render(await Loading());
     expect(container.querySelectorAll('[class*="section"]')).toHaveLength(4);
-    expect(container.querySelectorAll('[class*="featuredLink"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[class*="featuredLink"]')).toHaveLength(2);
     expect(container.querySelectorAll('[class*="rowLink"]')).toHaveLength(5);
-    expect(container.querySelectorAll('[class*="resourceLink"]')).toHaveLength(7);
+    expect(container.querySelectorAll('[class*="resourceLink"]')).toHaveLength(3);
   });
 
   it("keeps the More tab bar visible without marking it current", async () => {

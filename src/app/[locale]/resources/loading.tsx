@@ -50,7 +50,18 @@ export default async function Loading() {
         {[0, 1].map((section) => (
           <div key={section} className={styles.section}>
             <Skeleton variant="lineLg" size="w40" />
-            {Array.from({ length: section === 0 ? 4 : 3 }, (_, i) => (
+            {section === 0 && (
+              <div className={styles.featuredLink}>
+                <div className={styles.featuredVisual}>
+                  <Skeleton variant="image" size="fill" />
+                </div>
+                <div className={styles.featuredBody}>
+                  <Skeleton size="w60" />
+                  <Skeleton size="w80" />
+                </div>
+              </div>
+            )}
+            {Array.from({ length: section === 0 ? 1 : 2 }, (_, i) => (
               <div key={i} className={styles.resourceLink}>
                 <div className={styles.iconWrap}>
                   <Skeleton variant="block" size="s52" />
