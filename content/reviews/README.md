@@ -12,6 +12,16 @@ sources.
 Run `pnpm content:validate-questions` to independently validate the Ministry
 private-car subset, answer markers, topics, manifest source hash, and images.
 
+Run `pnpm content:audit-questions -- --env .env.qa --target QA` before
+promotion, and `pnpm content:audit-questions` immediately after promotion. It
+compares every active Hebrew question served by the app with the pinned Ministry
+XML: topic, prompt, four answer choices in order, and the marked correct answer.
+It writes JSON and Markdown evidence under a new `.context/question-audit-*`
+directory and exits nonzero for any mismatch. Resolve all mismatches before
+approving a release. For a pre-provenance database that has no `is_active`
+column, the report explicitly records that every row was audited as active.
+Arabic translation quality is not part of this audit.
+
 Create the sign snapshot with:
 
 ```sh
