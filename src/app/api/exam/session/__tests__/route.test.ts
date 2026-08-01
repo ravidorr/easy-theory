@@ -62,6 +62,9 @@ describe("PATCH /api/exam/session", () => {
     expect((await PATCH(request({
       session_id: SESSION_ID, revision: -1, answers: [], current_index: 30, marked_question_ids: ["bad"],
     }))).status).toBe(400);
+    expect((await PATCH(request({
+      session_id: SESSION_ID, revision: 0, answers: {}, current_index: 0,
+    }))).status).toBe(400);
   });
 
   it("maps conflicts and unexpected RPC failures", async () => {

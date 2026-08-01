@@ -42,11 +42,16 @@ function makeAdminClient({
   topic = { data: { id: TOPIC_ID, slug: "signs" }, error: null },
   existing = { data: null, error: null },
   insert = { data: { id: "r1" }, error: null },
-}: Partial<Record<"question" | "topic" | "existing" | "insert", { data: unknown; error: unknown }>> = {}) {
+  sourceRelease = { data: null, error: null },
+  sourceReleaseRejects = false,
+}: Partial<Record<"question" | "topic" | "existing" | "insert" | "sourceRelease", { data: unknown; error: unknown }>> & { sourceReleaseRejects?: boolean } = {}) {
   const questionMaybeSingle = vi.fn().mockResolvedValue(question);
   const topicMaybeSingle = vi.fn().mockResolvedValue(topic);
   const existingMaybeSingle = vi.fn().mockResolvedValue(existing);
   const insertSingle = vi.fn().mockResolvedValue(insert);
+  const sourceReleaseMaybeSingle = sourceReleaseRejects
+    ? vi.fn().mockRejectedValue(new Error("source release unavailable"))
+    : vi.fn().mockResolvedValue(sourceRelease);
   const insertSelect = vi.fn().mockReturnValue({ single: insertSingle });
   const insertReport = vi.fn().mockReturnValue({ select: insertSelect });
   const reports = {
@@ -61,6 +66,9 @@ function makeAdminClient({
     }
     if (table === "topics") {
       return { select: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ maybeSingle: topicMaybeSingle }) }) };
+    }
+    if (table === "content_source_releases") {
+      return { select: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ maybeSingle: sourceReleaseMaybeSingle }) }) };
     }
     return reports;
   });
@@ -199,6 +207,34 @@ describe("POST /api/question-reports", () => {
     expect(response.status).toBe(200);
     expect(admin.insertReport).toHaveBeenCalledWith(
       expect.objectContaining({ category: "image" })
+    );
+  });
+
+  it("persists source metadata when the reported question has a release", async () => {
+    const admin = makeAdminClient({
+      question: { data: { topic_id: TOPIC_ID, source_release_id: "release-1" }, error: null },
+      sourceRelease: { data: { source_checksum: "checksum-1" }, error: null },
+    } as never);
+    mockCreateAdminClient.mockReturnValue(admin as never);
+
+    expect((await POST(makeRequest(validBody()))).status).toBe(200);
+    expect(admin.insertReport).toHaveBeenCalledWith(expect.objectContaining({ source_checksum: "checksum-1" }));
+  });
+
+  it("keeps reporting available when source-release metadata cannot be loaded", async () => {
+    const admin = makeAdminClient({
+      question: { data: { topic_id: TOPIC_ID, source_release_id: "release-1" }, error: null },
+      sourceReleaseRejects: true,
+    });
+    mockCreateAdminClient.mockReturnValue(admin as never);
+
+    expect((await POST(makeRequest(validBody()))).status).toBe(200);
+    expect(admin.insertReport).toHaveBeenCalledWith(expect.objectContaining({ source_checksum: null }));
+    expect(reportError).toHaveBeenCalledWith(
+      "question-reports",
+      "source release lookup failed",
+      expect.anything(),
+      { userId: "u1" }
     );
   });
 

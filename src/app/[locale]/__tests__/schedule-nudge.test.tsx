@@ -98,6 +98,99 @@ describe("ScheduleNudge", () => {
     await screen.findByRole("alert");
   });
 
+  it("keeps dismiss, repeat-save, and customize actions inert while saving", async () => {
+    let resolveFetch: (response: Response) => void;
+    vi.mocked(fetch).mockReturnValue(new Promise((resolve) => {
+      resolveFetch = resolve;
+    }));
+    render(<ScheduleNudge hasSchedule={false} />);
+
+    const primary = await screen.findByRole("button", { name: "ScheduleNudge.saveRecommended" });
+    const customize = screen.getByRole("button", { name: "ScheduleNudge.customize" });
+    fireEvent.click(primary);
+    await waitFor(() => expect(primary).toBeDisabled());
+
+    primary.removeAttribute("disabled");
+    customize.removeAttribute("disabled");
+    fireEvent.click(primary);
+    fireEvent.keyDown(document, { key: "Escape" });
+    fireEvent.click(customize);
+
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(push).not.toHaveBeenCalled();
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+
+    resolveFetch!({ ok: false } as Response);
+    await screen.findByRole("alert");
+  });
+
+  it("handles non-Tab keys and every focus-trap boundary", async () => {
+    render(<ScheduleNudge hasSchedule={false} />);
+
+    const primary = await screen.findByRole("button", { name: "ScheduleNudge.saveRecommended" });
+    const later = screen.getByRole("button", { name: "ScheduleNudge.later" });
+    fireEvent.keyDown(document, { key: "ArrowDown" });
+
+    screen.getAllByRole("button").forEach((button) => button.setAttribute("disabled", ""));
+    fireEvent.keyDown(document, { key: "Tab" });
+    screen.getAllByRole("button").forEach((button) => button.removeAttribute("disabled"));
+
+    later.focus();
+    fireEvent.keyDown(document, { key: "Tab", shiftKey: true });
+    expect(later).toHaveFocus();
+
+    primary.focus();
+    fireEvent.keyDown(document, { key: "Tab" });
+    expect(primary).toHaveFocus();
+
+    later.focus();
+    fireEvent.keyDown(document, { key: "Tab" });
+    expect(primary).toHaveFocus();
+
+    const outside = document.createElement("button");
+    document.body.appendChild(outside);
+    outside.focus();
+    fireEvent.keyDown(document, { key: "Tab", shiftKey: true });
+    expect(later).toHaveFocus();
+    outside.remove();
+  });
+
+  it("saves without a toast helper and omits an unavailable time zone", async () => {
+    delete (window as Window & { modal?: unknown }).modal;
+    const resolvedOptions = vi
+      .spyOn(Intl.DateTimeFormat.prototype, "resolvedOptions")
+      .mockImplementation(() => {
+        throw new Error("time zone unavailable");
+      });
+    vi.mocked(fetch).mockResolvedValue({ ok: true } as Response);
+    render(<ScheduleNudge hasSchedule={false} />);
+
+    fireEvent.click(await screen.findByRole("button", { name: "ScheduleNudge.saveRecommended" }));
+
+    await waitFor(() =>
+      expect(fetch).toHaveBeenCalledWith("/api/schedule", expect.objectContaining({
+        body: JSON.stringify({
+          days: [0, 2, 4],
+          start_time: "17:00",
+          duration_minutes: 45,
+          notify: false,
+        }),
+      }))
+    );
+    resolvedOptions.mockRestore();
+  });
+
+  it("shows when storage reads are blocked", async () => {
+    const getItem = vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
+      throw new Error("storage unavailable");
+    });
+
+    render(<ScheduleNudge hasSchedule={false} />);
+
+    expect(await screen.findByRole("dialog")).toBeInTheDocument();
+    getItem.mockRestore();
+  });
+
   it("routes to the full schedule editor without saving", async () => {
     render(<ScheduleNudge hasSchedule={false} />);
 
@@ -129,5 +222,16 @@ describe("ScheduleNudge", () => {
     fireEvent.click(scrim);
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
     invokingButton.remove();
+  });
+
+  it("does not attempt to restore focus to a disconnected invoking element", async () => {
+    const invokingButton = document.createElement("button");
+    document.body.appendChild(invokingButton);
+    invokingButton.focus();
+    const { unmount } = render(<ScheduleNudge hasSchedule={false} />);
+
+    await screen.findByRole("dialog");
+    invokingButton.remove();
+    unmount();
   });
 });

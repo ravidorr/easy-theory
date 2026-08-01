@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import React from "react";
-import LocaleLayout, { generateViewport } from "../layout";
+import LocaleLayout, { generateMetadata, generateStaticParams, generateViewport } from "../layout";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 
@@ -162,6 +162,14 @@ describe("LocaleLayout", () => {
         get: vi.fn().mockReturnValue({ value: "light" }),
       } as never);
       expect(await generateViewport()).toEqual({ themeColor: "#f5f7fc" });
+    });
+  });
+
+  it("generates static params and localized metadata", async () => {
+    expect(generateStaticParams()).toEqual([{ locale: "he" }, { locale: "ar" }]);
+    await expect(generateMetadata({ params: Promise.resolve({ locale: "ar" }) })).resolves.toEqual({
+      title: "rootTitle",
+      description: "rootDescription",
     });
   });
 });

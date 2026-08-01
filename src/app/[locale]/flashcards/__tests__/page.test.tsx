@@ -259,6 +259,16 @@ describe("FlashcardsPage", () => {
     expect(data.map((c: { id: string }) => c.id)).toEqual(["s2", "s1"]);
   });
 
+  it("orders future cards by their next review time", async () => {
+    const later = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
+    mockGetSigns.mockResolvedValue([SIGN_1, SIGN_2] as never);
+    mockGetSignSrsCards.mockResolvedValue([srsCard("s1", later), srsCard("s2", FUTURE)] as never);
+
+    const { container } = render(await FlashcardsPage());
+    const data = JSON.parse(container.querySelector("#fc-data")!.textContent!);
+    expect(data.map((sign: { id: string }) => sign.id)).toEqual(["s2", "s1"]);
+  });
+
   it("shows the dueToday note only when cards are due", async () => {
     mockGetSigns.mockResolvedValue([SIGN_1, SIGN_2] as never);
     mockGetSignSrsCards.mockResolvedValue([srsCard("s1", PAST)] as never);
