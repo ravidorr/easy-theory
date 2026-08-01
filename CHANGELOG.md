@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.246] — 2026-08-01
+
+### Changed
+
+- Split database queries into learner, review, and exam modules while retaining the `db` compatibility barrel.
+
+---
+
 ## [0.3.245] — 2026-08-01
 
 ### Changed

@@ -1,4 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { SourceRelease } from "../source-release";
+import { throwOnDbError, type Question } from "./shared";
+
+export type { Question } from "./shared";
 
 export type Topic = {
   id: string;
@@ -9,25 +13,6 @@ export type Topic = {
   description_ar: string | null;
   order_index: number;
   icon: string | null;
-};
-
-export type Question = {
-  id: string;
-  topic_id: string;
-  question_number: number;
-  question_he: string;
-  option_a: string;
-  option_b: string;
-  option_c: string;
-  option_d: string;
-  correct_option: "a" | "b" | "c" | "d";
-  image_url: string | null;
-  explanation_he: string | null;
-  explanation_ar?: string | null;
-  explanation_he_source_url?: string | null;
-  explanation_ar_source_url?: string | null;
-  is_active?: boolean;
-  source_release_id?: string | null;
 };
 
 export type Sign = {
@@ -72,12 +57,6 @@ export type Resource = {
   icon_variant: "neutral" | "primary" | "success" | "muted";
 };
 
-// Failed queries throw instead of pretending the result is empty. The one
-// deliberate exception is getBookmarkedQuestionIds in the learner module.
-export function throwOnDbError(error: { message: string } | null, context: string): void {
-  if (error) throw new Error(`${context} query failed: ${error.message}`, { cause: error });
-}
-
 export async function getTopics(supabase: SupabaseClient): Promise<Topic[]> {
   const { data, error } = await supabase.from("topics").select("*").order("order_index");
   throwOnDbError(error, "getTopics: topics");
@@ -114,4 +93,15 @@ export async function getSigns(supabase: SupabaseClient, limit = 100): Promise<S
     .from("signs").select("*").eq("is_active", true).order("sign_number").limit(limit);
   throwOnDbError(error, "getSigns: signs");
   return data ?? [];
+}
+
+export async function getLatestSourceRelease(supabase: SupabaseClient): Promise<SourceRelease | null> {
+  const { data, error } = await supabase
+    .from("content_source_releases")
+    .select("source_name, resource_url, source_checksum, importer_version, imported_at")
+    .order("imported_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  throwOnDbError(error, "getLatestSourceRelease: content_source_releases");
+  return data ?? null;
 }
