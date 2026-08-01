@@ -1,6 +1,6 @@
 {
   "name": "easy-in-theory",
-  "version": "0.3.239",
+  "version": "0.3.240",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -22,6 +22,7 @@
     "db:migration:checksum": "tsx scripts/checksum-migration.ts",
     "content:import-signs": "tsx scripts/import-wikipedia-signs.ts",
     "content:validate-questions": "python3 scripts/validate_question_bank.py",
+    "content:audit-questions": "tsx scripts/audit-question-content.ts",
     "content:verify": "tsx scripts/content-release.ts",
     "db:sync-reference": "tsx scripts/sync-reference-data.ts",
     "qa:dev": "scripts/qa/qa-dev.sh",
