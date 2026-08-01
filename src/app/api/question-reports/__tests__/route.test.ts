@@ -191,6 +191,18 @@ describe("POST /api/question-reports", () => {
     );
   });
 
+  it("persists a valid selected report category", async () => {
+    const admin = makeAdminClient();
+    mockCreateAdminClient.mockReturnValue(admin as never);
+
+    const response = await POST(makeRequest({ ...validBody(), category: "image" }));
+
+    expect(response.status).toBe(200);
+    expect(admin.insertReport).toHaveBeenCalledWith(
+      expect.objectContaining({ category: "image" })
+    );
+  });
+
   it("keeps existing and racing duplicate reports successful without a notification", async () => {
     const existing = makeAdminClient({ existing: { data: { id: "r1" }, error: null } });
     mockCreateAdminClient.mockReturnValue(existing as never);
