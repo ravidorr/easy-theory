@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase";
+import { requireAuthenticatedUser } from "@/lib/auth";
 import { SignImage } from "@/components/SignImage";
 import { TabBar } from "@/components/TabBar";
 import { Icon } from "@/components/Icon";
@@ -10,10 +10,7 @@ const ExternalIcon = () => <Icon name="external" size={18} className={styles.ext
 
 export default async function CreditsPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/login?next=/credits");
+  await requireAuthenticatedUser(supabase, "/auth/login?next=/credits");
 
   const t = await getTranslations("Credits");
 

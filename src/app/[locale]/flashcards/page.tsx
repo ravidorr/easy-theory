@@ -1,9 +1,9 @@
-import { redirect } from "next/navigation";
 import Script from "next/script";
 import { SignImage } from "@/components/SignImage";
 import { Icon } from "@/components/Icon";
 import { TabBar } from "@/components/TabBar";
 import { createClient } from "@/lib/supabase";
+import { requireAuthenticatedUser } from "@/lib/auth";
 import { getSigns, getSignSrsCards } from "@/lib/db";
 import type { Sign, SrsCard } from "@/lib/db";
 import { isDue } from "@/lib/srs";
@@ -89,10 +89,7 @@ function SignCard({ card, flipHint }: { card: FlashcardData; flipHint: string })
 
 export default async function FlashcardsPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/login?next=/flashcards");
+  const user = await requireAuthenticatedUser(supabase, "/auth/login?next=/flashcards");
 
   const t = await getTranslations("Flashcards");
   const locale = await getLocale();

@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.243] — 2026-08-01
+
+### Changed
+
+- Consolidated protected server-page authentication guards while preserving each login return URL.
+
+---
+
 ## [0.3.242] — 2026-08-01
 
 ### Changed

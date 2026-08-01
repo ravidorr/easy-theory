@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import Script from "next/script";
 import { existsSync } from "fs";
 import { join } from "path";
@@ -9,6 +8,7 @@ import { EmptyStateCard } from "@/components/EmptyStateCard";
 import { TabBar } from "@/components/TabBar";
 import { ApprovedExplanation } from "@/components/ApprovedExplanation";
 import { createClient } from "@/lib/supabase";
+import { requireAuthenticatedUser } from "@/lib/auth";
 import { getBookmarkedQuestions, getTopics } from "@/lib/db";
 import type { BookmarkedQuestion } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
@@ -131,10 +131,7 @@ function BookmarkCard({
 
 export default async function BookmarksPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/login?next=/bookmarks");
+  const user = await requireAuthenticatedUser(supabase, "/auth/login?next=/bookmarks");
 
   const locale = await getLocale();
   const t = await getTranslations("Bookmarks");

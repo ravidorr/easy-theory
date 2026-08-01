@@ -1,8 +1,8 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import { TabBar } from "@/components/TabBar";
 import { Icon } from "@/components/Icon";
 import { createClient } from "@/lib/supabase";
+import { requireAuthenticatedUser } from "@/lib/auth";
 import { getExamAttempts, getTopicAccuracy, getUserStats } from "@/lib/db";
 import { computeReadiness } from "@/lib/readiness";
 import { readinessConfidence } from "@/lib/learner-plan";
@@ -11,8 +11,7 @@ import styles from "./page.module.css";
 
 export default async function ProgressPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/login?next=/progress");
+  const user = await requireAuthenticatedUser(supabase, "/auth/login?next=/progress");
   const [stats, attempts, accuracy, t] = await Promise.all([
     getUserStats(supabase, user.id),
     getExamAttempts(supabase, user.id),

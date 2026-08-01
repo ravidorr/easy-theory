@@ -1,7 +1,7 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import Script from "next/script";
 import { createClient } from "@/lib/supabase";
+import { requireAuthenticatedUser } from "@/lib/auth";
 import { getUserSchedule } from "@/lib/db";
 import { getTranslations } from "next-intl/server";
 import { TabBar } from "@/components/TabBar";
@@ -11,10 +11,7 @@ const DURATIONS = [30, 45, 60];
 
 export default async function SchedulePage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/login?next=/schedule");
+  const user = await requireAuthenticatedUser(supabase, "/auth/login?next=/schedule");
 
   const t = await getTranslations("Schedule");
 

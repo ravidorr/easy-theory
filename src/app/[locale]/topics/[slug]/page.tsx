@@ -1,4 +1,4 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Link } from "@/lib/navigation";
 import Script from "next/script";
 import { existsSync } from "fs";
@@ -10,6 +10,7 @@ import { EmptyStateCard } from "@/components/EmptyStateCard";
 import { TabBar } from "@/components/TabBar";
 import { ApprovedExplanation } from "@/components/ApprovedExplanation";
 import { createClient } from "@/lib/supabase";
+import { requireAuthenticatedUser } from "@/lib/auth";
 import { getQuestionsForTopic, getBookmarkedQuestionIds, getAnsweredQuestionIdsForTopic, getTopics, getTopicProgress } from "@/lib/db";
 import type { Question } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
@@ -154,10 +155,7 @@ export default async function TopicQuizPage({
 }) {
   const { slug } = await params;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect(`/auth/login?next=/topics/${slug}`);
+  const user = await requireAuthenticatedUser(supabase, `/auth/login?next=/topics/${slug}`);
 
   const locale = await getLocale();
   const t = await getTranslations("Quiz");

@@ -9,6 +9,7 @@ import { Icon } from "@/components/Icon";
 import { ApprovedExplanation } from "@/components/ApprovedExplanation";
 import { TabBar } from "@/components/TabBar";
 import { createClient } from "@/lib/supabase";
+import { requireAuthenticatedUser } from "@/lib/auth";
 import { getTopicBySlug, getMistakesForTopic, getBookmarkedQuestionIds } from "@/lib/db";
 import type { MistakeScope, Question } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
@@ -156,11 +157,11 @@ export default async function RetryMistakesPage({
   const { scope: scopeParam } = (await searchParams) ?? {};
   const scope: MistakeScope = scopeParam === "all" ? "all" : "lastSession";
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
   const retryHref = `/topics/${slug}/retry${scope === "all" ? "?scope=all" : ""}`;
-  if (!user) redirect(`/auth/login?next=${encodeURIComponent(retryHref)}`);
+  const user = await requireAuthenticatedUser(
+    supabase,
+    `/auth/login?next=${encodeURIComponent(retryHref)}`
+  );
 
   const locale = await getLocale();
   const tQuiz = await getTranslations("Quiz");

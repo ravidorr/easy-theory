@@ -1,4 +1,4 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Link } from "@/lib/navigation";
 import Script from "next/script";
 import { existsSync } from "fs";
@@ -10,6 +10,7 @@ import { EmptyStateCard } from "@/components/EmptyStateCard";
 import { TabBar } from "@/components/TabBar";
 import { ApprovedExplanation } from "@/components/ApprovedExplanation";
 import { createClient } from "@/lib/supabase";
+import { requireAuthenticatedUser } from "@/lib/auth";
 import { getTopicBySlug, getMistakesForTopic, getBookmarkedQuestionIds } from "@/lib/db";
 import type { MistakeScope, QuizMistake } from "@/lib/db";
 import { isDue } from "@/lib/srs";
@@ -169,10 +170,7 @@ export default async function ReviewPage({
   const scope: MistakeScope = scopeParam === "all" ? "all" : "lastSession";
   const requestedPage = parsePage(pageParam);
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect(`/auth/login?next=/topics/${slug}/review`);
+  const user = await requireAuthenticatedUser(supabase, `/auth/login?next=/topics/${slug}/review`);
 
   const locale = await getLocale();
   const t = await getTranslations("Review");

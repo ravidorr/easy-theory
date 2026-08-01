@@ -1,10 +1,10 @@
-import { redirect } from "next/navigation";
 import { Link } from "@/lib/navigation";
 import Image from "next/image";
 import { TabBar } from "@/components/TabBar";
 import { EmptyStateCard } from "@/components/EmptyStateCard";
 import { Icon } from "@/components/Icon";
 import { createClient } from "@/lib/supabase";
+import { requireAuthenticatedUser } from "@/lib/auth";
 import { getMistakesForTopic, getTopics } from "@/lib/db";
 import { localizedRecordField } from "@/lib/content-locale";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -12,8 +12,7 @@ import styles from "./page.module.css";
 
 export default async function MistakesPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/login?next=/mistakes");
+  const user = await requireAuthenticatedUser(supabase, "/auth/login?next=/mistakes");
   const [topics, t, locale] = await Promise.all([
     getTopics(supabase),
     getTranslations("Mistakes"),
