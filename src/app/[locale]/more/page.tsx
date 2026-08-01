@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase";
 import { requireAuthenticatedUser } from "@/lib/auth";
 import { TabBar } from "@/components/TabBar";
-import { Icon, type IconName } from "@/components/Icon";
+import { Icon } from "@/components/Icon";
 import {
   getUserMedals,
   getUserStats,
@@ -21,22 +21,14 @@ import {
 } from "@/lib/gamification";
 import { getTranslations, getLocale } from "next-intl/server";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import {
+  AUTO_ADVANCE_DELAY_STEP_MS,
+  autoAdvanceDelay,
+  buildMoreMedalItems,
+  MAX_AUTO_ADVANCE_DELAY_MS,
+  MIN_AUTO_ADVANCE_DELAY_MS,
+} from "@/lib/more";
 import styles from "./page.module.css";
-
-const DEFAULT_AUTO_ADVANCE_DELAY_MS = 1125;
-const MIN_AUTO_ADVANCE_DELAY_MS = 750;
-const MAX_AUTO_ADVANCE_DELAY_MS = 3000;
-const AUTO_ADVANCE_DELAY_STEP_MS = 125;
-
-function autoAdvanceDelay(value: string | undefined) {
-  const delay = Number(value);
-  return Number.isInteger(delay) &&
-    delay >= MIN_AUTO_ADVANCE_DELAY_MS &&
-    delay <= MAX_AUTO_ADVANCE_DELAY_MS &&
-    (delay - MIN_AUTO_ADVANCE_DELAY_MS) % AUTO_ADVANCE_DELAY_STEP_MS === 0
-    ? delay
-    : DEFAULT_AUTO_ADVANCE_DELAY_MS;
-}
 
 export default async function MorePage() {
   noStore();
@@ -54,9 +46,6 @@ export default async function MorePage() {
       getTopicAccuracy(supabase, user.id),
       getTopicQuestionCounts(supabase),
     ]);
-  const earnedSet = new Set(medals.map((m) => m.medal_slug));
-  const earnedDateMap = Object.fromEntries(medals.map((m) => [m.medal_slug, m.earned_at]));
-
   const answeredMap = Object.fromEntries(topicAccuracy.map((a) => [a.topic_id, a.total]));
   const completion = completionSummary(
     topics.map((topic) => topic.id),
@@ -74,52 +63,9 @@ export default async function MorePage() {
     cookieStore.get("quiz-auto-advance-delay")?.value
   );
 
-  const MILESTONES: { slug: string; label: string; icon: IconName }[] = [
-    { slug: "streak-3", label: t("milestone3"), icon: "flame" },
-    { slug: "streak-7", label: t("milestone7"), icon: "star" },
-    { slug: "streak-14", label: t("milestone14"), icon: "gem" },
-    { slug: "streak-30", label: t("milestone30"), icon: "trophy" },
-  ];
-
-  const ACHIEVEMENT_META: Record<string, { label: string; icon: IconName }> = {
-    "first-topic": { label: t("achFirstTopic"), icon: "check" },
-    "questions-100": { label: t("achQuestions100"), icon: "cards" },
-    "all-topics": { label: t("achAllTopics"), icon: "globe" },
-    "exam-pass": { label: t("achExamPass"), icon: "timer" },
-  };
-
-  const dateLocale = locale === "ar" ? "ar-IL" : "he-IL";
-
-  function fmtDate(iso: string) {
-    return new Intl.DateTimeFormat(dateLocale, { day: "numeric", month: "short" }).format(
-      new Date(iso)
-    );
-  }
-
   // Every medal is an immutable earn event; this prevents a later topic-bank
   // expansion from taking an already-earned achievement away.
-  const medalItems = [
-    ...MILESTONES.map(({ slug, label, icon }) => {
-      const earned = earnedSet.has(slug);
-      return {
-        slug,
-        label,
-        icon,
-        earned,
-        dateText: earned ? fmtDate(earnedDateMap[slug]) : t("medalLockedLabel"),
-      };
-    }),
-    ...Object.entries(ACHIEVEMENT_META).map(([slug, meta]) => {
-      const earned = earnedSet.has(slug);
-      return {
-      slug,
-      label: meta.label,
-      icon: meta.icon,
-      earned,
-      dateText: earned ? fmtDate(earnedDateMap[slug]) : t("medalLockedLabel"),
-      };
-    }),
-  ];
+  const medalItems = buildMoreMedalItems({ medals, locale, translate: t });
 
   return (
     <>

@@ -1,6 +1,14 @@
 import styles from "./Skeleton.module.css";
 
-type SkeletonVariant = "line" | "lineLg" | "pill" | "block" | "circle" | "bar" | "image";
+type SkeletonVariant =
+  | "line"
+  | "lineLg"
+  | "pill"
+  | "switch"
+  | "block"
+  | "circle"
+  | "bar"
+  | "image";
 
 type SkeletonSize = "w25" | "w40" | "w60" | "w80" | "s40" | "s52" | "s72";
 
