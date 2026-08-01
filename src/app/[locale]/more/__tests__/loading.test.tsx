@@ -19,14 +19,20 @@ describe("more page loading skeleton", () => {
     expect(container.querySelector("main")).toHaveAttribute("aria-busy", "true");
   });
 
-  it("mirrors the six stat cells and the nav rows", async () => {
+  it("mirrors the loaded page's progress and account card structure", async () => {
     const { container } = render(await Loading());
-    expect(container.querySelectorAll('[data-skeleton="circle"]')).toHaveLength(10);
-    expect(container.querySelectorAll('[data-skeleton="card"]')).toHaveLength(2);
+    expect(container.querySelectorAll('[class*="pageSection"]')).toHaveLength(2);
+    expect(container.querySelectorAll('[class*="statsGrid"] [data-skeleton="circle"]')).toHaveLength(6);
+    expect(container.querySelectorAll('[class*="medalsGrid"] [data-skeleton="circle"]')).toHaveLength(8);
+    expect(container.querySelectorAll('[class*="navRow"]')).toHaveLength(5);
+    const settingsRows = container.querySelectorAll('[class*="settingsRow"]');
+    expect(settingsRows).toHaveLength(4);
+    expect(settingsRows[0].querySelector('[data-skeleton="switch"]')).toBeTruthy();
+    expect(settingsRows[1].querySelector('[data-skeleton="switch"]')).toBeTruthy();
     const progressCard = container.querySelector('[class*="progressCard"]');
     expect(progressCard).toBeTruthy();
     expect(progressCard?.querySelector('[data-skeleton="lineLg"]')).toBeTruthy();
-    expect(container.querySelector('[class*="statsGrid"]')).toBeTruthy();
+    expect(container.querySelector('[class*="accountCard"]')).toBeTruthy();
   });
 
   it("keeps the more tab bar visible", async () => {
