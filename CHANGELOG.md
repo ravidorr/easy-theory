@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 One version bump and one entry per PR (enforced by the pre-push hook); individual commits within a PR do not bump.
 
+## [0.3.244] — 2026-08-01
+
+### Changed
+
+- Extracted catalog queries and shared catalog types into a dedicated database module while retaining the existing compatibility barrel.
+
+---
+
 ## [0.3.243] — 2026-08-01
 
 ### Changed
