@@ -4,10 +4,8 @@
   const MEDAL_META = {
     "streak-3": { label: t.medal3Label || "3 ימים ברצף", description: t.medal3Desc || "שלושה ימים של למידה ברצף, כל הכבוד!" },
     "streak-7": { label: t.medal7Label || "שבוע ברצף", description: t.medal7Desc || "שבוע שלם של למידה ברצף, מדהים!" },
-    "streak-14": { label: t.medal14Label || "שבועיים ברצף", description: t.medal14Desc || "ארבעה עשר ימים ברצף, ממש יפה!" },
     "streak-30": { label: t.medal30Label || "חודש ברצף", description: t.medal30Desc || "חודש שלם ברצף, הישג מדהים!" },
     "first-topic": { label: t.achievementFirstTopicLabel || "נושא ראשון הושלם", description: t.achievementFirstTopicDesc || "סיימתם נושא שלם. המשיכו כך!" },
-    "questions-100": { label: t.achievementQuestions100Label || "100 שאלות נענו", description: t.achievementQuestions100Desc || "עניתם על 100 שאלות. הדרך למבחן ברורה יותר." },
     "all-topics": { label: t.achievementAllTopicsLabel || "כל הנושאים הושלמו", description: t.achievementAllTopicsDesc || "סיימתם את כל נושאי הלימוד. אתם מוכנים לחזרה ולמבחן." },
     "exam-pass": { label: t.achievementExamPassLabel || "עברתם סימולציה", description: t.achievementExamPassDesc || "עברתם את הסימולציה. עבודה מצוינת!" },
   };

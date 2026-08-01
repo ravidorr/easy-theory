@@ -23,13 +23,11 @@ type Translate = (key: string) => string;
 const MILESTONE_META: ReadonlyArray<{ slug: string; labelKey: string; icon: IconName }> = [
   { slug: "streak-3", labelKey: "milestone3", icon: "flame" },
   { slug: "streak-7", labelKey: "milestone7", icon: "star" },
-  { slug: "streak-14", labelKey: "milestone14", icon: "gem" },
   { slug: "streak-30", labelKey: "milestone30", icon: "trophy" },
 ];
 
 const ACHIEVEMENT_META: ReadonlyArray<{ slug: string; labelKey: string; icon: IconName }> = [
   { slug: "first-topic", labelKey: "achFirstTopic", icon: "check" },
-  { slug: "questions-100", labelKey: "achQuestions100", icon: "cards" },
   { slug: "all-topics", labelKey: "achAllTopics", icon: "globe" },
   { slug: "exam-pass", labelKey: "achExamPass", icon: "timer" },
 ];
