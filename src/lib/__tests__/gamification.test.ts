@@ -1,11 +1,9 @@
 import { describe, it, expect } from "vitest";
 import {
-  QUESTIONS_ACHIEVEMENT_TARGET,
   pointsToReachLevel,
   levelForPoints,
   completionSummary,
   overallAccuracy,
-  deriveAchievements,
 } from "../gamification";
 import { POINTS_PER_CORRECT } from "../quiz";
 
@@ -84,64 +82,6 @@ describe("overallAccuracy", () => {
   it("returns 100 for all-correct and 0 for all-wrong", () => {
     expect(overallAccuracy([{ topic_id: "t1", correct: 7, total: 7 }])).toBe(100);
     expect(overallAccuracy([{ topic_id: "t1", correct: 0, total: 7 }])).toBe(0);
-  });
-});
-
-describe("deriveAchievements", () => {
-  const fresh = {
-    completedTopicCount: 0,
-    totalTopicCount: 8,
-    questionsAnswered: 0,
-    hasPassedExam: false,
-  };
-
-  function earnedSlugs(input: typeof fresh) {
-    return deriveAchievements(input)
-      .filter((a) => a.earned)
-      .map((a) => a.slug);
-  }
-
-  it("returns all four achievements unearned for a fresh account", () => {
-    const achievements = deriveAchievements(fresh);
-    expect(achievements.map((a) => a.slug)).toEqual([
-      "first-topic",
-      "questions-100",
-      "all-topics",
-      "exam-pass",
-    ]);
-    expect(achievements.every((a) => !a.earned)).toBe(true);
-  });
-
-  it("earns first-topic with one completed topic", () => {
-    expect(earnedSlugs({ ...fresh, completedTopicCount: 1 })).toEqual(["first-topic"]);
-  });
-
-  it("earns questions-100 exactly at the target", () => {
-    expect(
-      earnedSlugs({ ...fresh, questionsAnswered: QUESTIONS_ACHIEVEMENT_TARGET - 1 })
-    ).toEqual([]);
-    expect(
-      earnedSlugs({ ...fresh, questionsAnswered: QUESTIONS_ACHIEVEMENT_TARGET })
-    ).toEqual(["questions-100"]);
-  });
-
-  it("earns all-topics only when every topic is completed", () => {
-    expect(
-      earnedSlugs({ ...fresh, completedTopicCount: 7, totalTopicCount: 8 })
-    ).toEqual(["first-topic"]);
-    expect(
-      earnedSlugs({ ...fresh, completedTopicCount: 8, totalTopicCount: 8 })
-    ).toEqual(["first-topic", "all-topics"]);
-  });
-
-  it("never earns all-topics when there are no topics", () => {
-    expect(
-      earnedSlugs({ ...fresh, completedTopicCount: 0, totalTopicCount: 0 })
-    ).toEqual([]);
-  });
-
-  it("earns exam-pass from a passed exam", () => {
-    expect(earnedSlugs({ ...fresh, hasPassedExam: true })).toEqual(["exam-pass"]);
   });
 });
 

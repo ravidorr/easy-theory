@@ -4,9 +4,6 @@ import { POINTS_PER_CORRECT } from "@/lib/quiz";
 /** Practice questions per Asia/Jerusalem day that count as a met daily goal. */
 export const DAILY_GOAL_QUESTIONS = 20;
 
-/** Answered-question count that earns the questions achievement. */
-export const QUESTIONS_ACHIEVEMENT_TARGET = 100;
-
 // Tied to the points scale so rebalancing POINTS_PER_CORRECT keeps the same
 // level pacing: with 6 first-correct answers per curve unit, the full
 // 1,273-question bank spans roughly 15 levels. Exported so pages can hand the
@@ -101,44 +98,4 @@ export function overallAccuracy(rows: TopicAccuracy[]): number | null {
   }
   if (total === 0) return null;
   return Math.round((correct / total) * 100);
-}
-
-export type AchievementSlug =
-  | "first-topic"
-  | "questions-100"
-  | "all-topics"
-  | "exam-pass";
-
-export type Achievement = {
-  slug: AchievementSlug;
-  earned: boolean;
-};
-
-/**
- * Display-only achievements derived from already-persisted progress. Unlike
- * streak medals these are recomputed on every render, so they need no storage
- * and always reflect the current data; the flip side is that they are not
- * sticky (growing the topic bank can un-earn all-topics until the new topic
- * is completed). Persisting earn events in user_medals is the follow-up.
- */
-export function deriveAchievements(input: {
-  completedTopicCount: number;
-  totalTopicCount: number;
-  questionsAnswered: number;
-  hasPassedExam: boolean;
-}): Achievement[] {
-  return [
-    { slug: "first-topic", earned: input.completedTopicCount >= 1 },
-    {
-      slug: "questions-100",
-      earned: input.questionsAnswered >= QUESTIONS_ACHIEVEMENT_TARGET,
-    },
-    {
-      slug: "all-topics",
-      earned:
-        input.totalTopicCount > 0 &&
-        input.completedTopicCount >= input.totalTopicCount,
-    },
-    { slug: "exam-pass", earned: input.hasPassedExam },
-  ];
 }

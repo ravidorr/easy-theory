@@ -22,16 +22,13 @@ import {
   getSignSrsCards,
   getQuestionSrsCards,
   upsertSrsCard,
-  markTopicCompleted,
   getRandomExamQuestions,
   getOrCreateExamSession,
   getExamAttempts,
   hasPassedExam,
   getTopicAccuracy,
   getTopicQuestionCounts,
-  getQuizAccuracyForWindow,
   getQuizAnswerEventCountForWindow,
-  getQuestionNumbersForTopic,
 } from "../db";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -1044,55 +1041,6 @@ describe("getTopicQuestionCounts", () => {
   });
 });
 
-describe("getQuizAccuracyForWindow", () => {
-  // The window chain needs gte/lt, which the shared chain() lacks.
-  function makeWindowClient(
-    data: unknown,
-    error: { message: string } | null = null
-  ) {
-    const result = { data: error ? null : data, error };
-    const mock: Record<string, unknown> = {};
-    for (const m of ["select", "eq", "gte", "lt"]) {
-      mock[m] = vi.fn().mockReturnValue(mock);
-    }
-    mock.then = (
-      onFulfilled: (v: typeof result) => unknown,
-      onRejected?: (e: unknown) => unknown
-    ) => Promise.resolve(result).then(onFulfilled, onRejected);
-    return { from: vi.fn().mockReturnValue(mock) } as unknown as SupabaseClient;
-  }
-
-  it("aggregates correct and total from the window rows", async () => {
-    const rows = [
-      { is_correct: true },
-      { is_correct: false },
-      { is_correct: true },
-    ];
-    expect(
-      await getQuizAccuracyForWindow(
-        makeWindowClient(rows),
-        "u1",
-        "2026-07-13T21:00:00Z",
-        "2026-07-14T21:00:00Z"
-      )
-    ).toEqual({ correct: 2, total: 3 });
-  });
-
-  it("returns zeros when Supabase returns null", async () => {
-    expect(
-      await getQuizAccuracyForWindow(makeWindowClient(null), "u1", "a", "b")
-    ).toEqual({ correct: 0, total: 0 });
-  });
-
-  it("throws when the query fails", async () => {
-    await expect(
-      getQuizAccuracyForWindow(makeWindowClient(null, boom), "u1", "a", "b")
-    ).rejects.toThrow(
-      /getQuizAccuracyForWindow: user_quiz_responses query failed: boom/
-    );
-  });
-});
-
 describe("getQuizAnswerEventCountForWindow", () => {
   function makeAnswerEventWindowClient(
     count: number | null,
@@ -1132,111 +1080,6 @@ describe("getQuizAnswerEventCountForWindow", () => {
       getQuizAnswerEventCountForWindow(makeAnswerEventWindowClient(null, boom), "u1", "a", "b")
     ).rejects.toThrow(
       /getQuizAnswerEventCountForWindow: quiz_answer_events query failed: boom/
-    );
-  });
-});
-
-describe("getQuestionNumbersForTopic", () => {
-  it("returns id and question_number rows", async () => {
-    const rows = [
-      { id: "q1", question_number: 1 },
-      { id: "q2", question_number: 2 },
-    ];
-    expect(await getQuestionNumbersForTopic(makeClient(rows), "t1")).toEqual(rows);
-  });
-
-  it("returns [] on null", async () => {
-    expect(await getQuestionNumbersForTopic(makeClient(null), "t1")).toEqual([]);
-  });
-
-  it("throws when the query fails", async () => {
-    await expect(getQuestionNumbersForTopic(makeClient(null, boom), "t1")).rejects.toThrow(
-      /getQuestionNumbersForTopic: questions query failed: boom/
-    );
-  });
-});
-
-// ─── markTopicCompleted ──────────────────────────────────────────────────────
-
-function makeMarkTopicClient(
-  existing: { id: string; status: string } | null,
-  {
-    existingError = null as { message: string } | null,
-    updateError = null as { message: string } | null,
-    insertError = null as { message: string } | null,
-  } = {}
-) {
-  const updateEq = vi.fn().mockResolvedValue({ data: null, error: updateError });
-  const updateFn = vi.fn().mockReturnValue({ eq: updateEq });
-  const insertFn = vi.fn().mockResolvedValue({ data: null, error: insertError });
-
-  const fromMock = {
-    select: vi.fn().mockReturnValue({
-      eq: vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue({
-          maybeSingle: vi.fn().mockResolvedValue({
-            data: existingError ? null : existing,
-            error: existingError,
-          }),
-        }),
-      }),
-    }),
-    update: updateFn,
-    insert: insertFn,
-  };
-
-  return {
-    client: { from: vi.fn().mockReturnValue(fromMock) } as unknown as SupabaseClient,
-    updateFn,
-    insertFn,
-  };
-}
-
-describe("markTopicCompleted", () => {
-  it("inserts a new record when none exists", async () => {
-    const { client, insertFn } = makeMarkTopicClient(null);
-    await markTopicCompleted(client, "u1", "t1");
-    expect(insertFn).toHaveBeenCalledWith(
-      expect.objectContaining({ user_id: "u1", topic_id: "t1", status: "completed" })
-    );
-  });
-
-  it("updates status when existing record is not completed", async () => {
-    const { client, updateFn } = makeMarkTopicClient({ id: "r1", status: "in-progress" });
-    await markTopicCompleted(client, "u1", "t1");
-    expect(updateFn).toHaveBeenCalledWith(
-      expect.objectContaining({ status: "completed" })
-    );
-  });
-
-  it("skips update when existing record is already completed", async () => {
-    const { client, updateFn, insertFn } = makeMarkTopicClient({ id: "r1", status: "completed" });
-    await markTopicCompleted(client, "u1", "t1");
-    expect(updateFn).not.toHaveBeenCalled();
-    expect(insertFn).not.toHaveBeenCalled();
-  });
-
-  it("throws when the progress lookup fails", async () => {
-    const { client } = makeMarkTopicClient(null, { existingError: boom });
-    await expect(markTopicCompleted(client, "u1", "t1")).rejects.toThrow(
-      /markTopicCompleted: progress lookup query failed: boom/
-    );
-  });
-
-  it("throws when the update fails", async () => {
-    const { client } = makeMarkTopicClient(
-      { id: "r1", status: "in-progress" },
-      { updateError: boom }
-    );
-    await expect(markTopicCompleted(client, "u1", "t1")).rejects.toThrow(
-      /markTopicCompleted: progress update query failed: boom/
-    );
-  });
-
-  it("throws when the insert fails", async () => {
-    const { client } = makeMarkTopicClient(null, { insertError: boom });
-    await expect(markTopicCompleted(client, "u1", "t1")).rejects.toThrow(
-      /markTopicCompleted: progress insert query failed: boom/
     );
   });
 });
