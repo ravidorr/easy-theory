@@ -58,7 +58,13 @@ describe("ScheduleNudge", () => {
       expect(fetch).toHaveBeenCalledWith("/api/schedule", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ days: [0, 2, 4], start_time: "17:00", duration_minutes: 45, notify: true }),
+        body: JSON.stringify({
+          days: [0, 2, 4],
+          start_time: "17:00",
+          duration_minutes: 45,
+          notify: true,
+          time_zone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        }),
       })
     );
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();

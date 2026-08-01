@@ -33,6 +33,14 @@ function rememberToday() {
   }
 }
 
+function detectedTimeZone() {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  } catch {
+    return undefined;
+  }
+}
+
 export function ScheduleNudge({ hasSchedule }: { hasSchedule: boolean }) {
   const router = useRouter();
   const t = useTranslations("ScheduleNudge");
@@ -114,7 +122,7 @@ export function ScheduleNudge({ hasSchedule }: { hasSchedule: boolean }) {
       const response = await fetch("/api/schedule", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(RECOMMENDED_SCHEDULE),
+        body: JSON.stringify({ ...RECOMMENDED_SCHEDULE, time_zone: detectedTimeZone() }),
       });
       if (!response.ok) throw new Error("schedule save failed");
 
