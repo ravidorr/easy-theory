@@ -39,18 +39,19 @@ export default async function ProgressPage() {
         </header>
 
         <section className={styles.readinessCard} aria-labelledby="progress-readiness">
-          <span className={styles.readinessIcon}>
-            <Icon name="trophy" size={24} />
-          </span>
-          <div className={styles.readinessContent}>
-            <h2 id="progress-readiness">{t("readinessTitle")}</h2>
-            <p>{readinessText}</p>
+          <div className={styles.readinessSummary}>
+            <span className={styles.readinessIcon}>
+              <Icon name="trophy" size={24} />
+            </span>
+            <div className={styles.readinessContent}>
+              <h2 id="progress-readiness">{t("readinessTitle")}</h2>
+              <p>{readinessText}</p>
+            </div>
           </div>
+          <Link href={nextStep.href} className="btn-primary">
+            {nextStep.label}
+          </Link>
         </section>
-
-        <Link href={nextStep.href} className="btn-primary">
-          {nextStep.label}
-        </Link>
 
         <dl className={styles.statGrid}>
           <div className={styles.statTile}>
@@ -67,7 +68,7 @@ export default async function ProgressPage() {
             <dt>{t("answered")}</dt>
             <dd>{answered}</dd>
           </div>
-          <div className={`${styles.statTile} ${styles.statTileWide}`}>
+          <div className={styles.statTile}>
             <span className={`${styles.statIcon} ${styles.statIconSimulations}`}>
               <Icon name="timer" size={22} />
             </span>
