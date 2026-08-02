@@ -232,10 +232,18 @@ export async function getQuizAnswerEventCountForWindow(
 export async function getTopicQuestionCounts(
   supabase: SupabaseClient
 ): Promise<Record<string, number>> {
-  const { data, error } = await supabase
+  const { data: activeData, error: activeError } = await supabase
     .from("topics")
     .select("id, questions!inner(count)")
     .eq("questions.is_active", true);
+
+  const missingActivityColumn =
+    activeError &&
+    (/column questions(?:_\d+)?\.is_active does not exist/i.test(activeError.message) ||
+      (activeError.code === "PGRST204" && /is_active/i.test(activeError.message)));
+  const { data, error } = missingActivityColumn
+    ? await supabase.from("topics").select("id, questions!inner(count)")
+    : { data: activeData, error: activeError };
   throwOnDbError(error, "getTopicQuestionCounts: topics");
 
   const counts: Record<string, number> = {};
