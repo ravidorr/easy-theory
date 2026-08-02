@@ -117,11 +117,32 @@ describe("instrumentation (server + client GlitchTip init)", () => {
   it("client entry initialises the SDK on import with the same settings", async () => {
     vi.stubEnv("NEXT_PUBLIC_GLITCHTIP_DSN", "https://key@glitchtip.example/1");
     vi.stubEnv("NODE_ENV", "production");
-    await import("@/instrumentation-client");
-    expect(mockInit).toHaveBeenCalledWith({
+    const { isRedactedServerComponentError } = await import("@/instrumentation-client");
+    expect(mockInit).toHaveBeenCalledWith(expect.objectContaining({
       dsn: "https://key@glitchtip.example/1",
       tracesSampleRate: 0,
       enabled: true,
-    });
+    }));
+
+    expect(isRedactedServerComponentError({
+      exception: {
+        values: [{ value: "Minified React error #441; details omitted" }],
+      },
+    })).toBe(true);
+    expect(isRedactedServerComponentError({
+      exception: { values: [{ value: "getTopicAccuracy query failed" }] },
+    })).toBe(false);
+
+    const beforeSend = mockInit.mock.calls[0]?.[0]?.beforeSend;
+    const wrapperEvent = {
+      exception: {
+        values: [{ value: "Minified React error #441; details omitted" }],
+      },
+    };
+    const originalErrorEvent = {
+      exception: { values: [{ value: "getTopicAccuracy query failed" }] },
+    };
+    expect(beforeSend?.(wrapperEvent as never, {} as never)).toBeNull();
+    expect(beforeSend?.(originalErrorEvent as never, {} as never)).toBe(originalErrorEvent);
   });
 });
