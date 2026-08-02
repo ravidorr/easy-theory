@@ -172,6 +172,17 @@ export type TopicAccuracy = {
 
 const TOPIC_ACCURACY_PAGE_SIZE = 1000;
 
+function isMissingQuestionActivityColumn(
+  error: { code?: string; message: string } | null
+): boolean {
+  if (!error) return false;
+
+  return (
+    /column questions(?:_\d+)?\.is_active does not exist/.test(error.message) ||
+    (error.code === "PGRST204" && /\bis_active\b/.test(error.message))
+  );
+}
+
 export async function getTopicAccuracy(
   supabase: SupabaseClient,
   userId: string
@@ -181,15 +192,26 @@ export async function getTopicAccuracy(
   // 1000-row response cap, so page through all responses; question_id gives a
   // stable order for range pagination.
   const byTopic = new Map<string, { correct: number; total: number }>();
+  let filterActiveQuestions = true;
 
   for (let from = 0; ; from += TOPIC_ACCURACY_PAGE_SIZE) {
-    const { data, error } = await supabase
+    const query = supabase
       .from("user_quiz_responses")
       .select("is_correct, questions!inner(topic_id)")
-      .eq("user_id", userId)
-      .eq("questions.is_active", true)
+      .eq("user_id", userId);
+    const activeQuestionQuery = filterActiveQuestions
+      ? query.eq("questions.is_active", true)
+      : query;
+    const { data, error } = await activeQuestionQuery
       .order("question_id")
       .range(from, from + TOPIC_ACCURACY_PAGE_SIZE - 1);
+
+    if (filterActiveQuestions && isMissingQuestionActivityColumn(error)) {
+      // Older databases predate questions.is_active, so every question is
+      // treated as active there.
+      filterActiveQuestions = false;
+      continue;
+    }
 
     // A mid-pagination failure would otherwise silently truncate the results.
     throwOnDbError(error, "getTopicAccuracy: user_quiz_responses");

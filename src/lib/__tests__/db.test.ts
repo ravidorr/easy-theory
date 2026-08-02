@@ -991,6 +991,30 @@ describe("getTopicAccuracy", () => {
     expect(await getTopicAccuracy(makeClient(null), "u1")).toEqual([]);
   });
 
+  it.each([
+    { message: "column questions_1.is_active does not exist" },
+    {
+      code: "PGRST204",
+      message: "Could not find the 'is_active' column of 'questions' in the schema cache",
+    },
+  ])("retries without the active filter when the column is unavailable", async (missingColumn) => {
+    const filtered = chain({ data: null, error: missingColumn });
+    const legacy = chain({
+      data: [{ is_correct: true, questions: { topic_id: "t1" } }],
+    });
+    const from = vi
+      .fn()
+      .mockReturnValueOnce(filtered)
+      .mockReturnValueOnce(legacy);
+    const client = { from } as unknown as SupabaseClient;
+
+    await expect(getTopicAccuracy(client, "u1")).resolves.toEqual([
+      { topic_id: "t1", correct: 1, total: 1 },
+    ]);
+    expect(filtered.eq).toHaveBeenCalledWith("questions.is_active", true);
+    expect(legacy.eq).not.toHaveBeenCalledWith("questions.is_active", true);
+  });
+
   it("pages through more than 1000 responses", async () => {
     // Page 1: exactly 1000 rows (forces a second request); page 2: the rest.
     const page1 = Array.from({ length: 1000 }, (_, i) => ({
