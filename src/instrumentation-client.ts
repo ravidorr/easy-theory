@@ -1,9 +1,9 @@
 import * as Sentry from "@sentry/nextjs";
 
-const REDACTED_SERVER_COMPONENT_ERROR = /Minified React error #441\b/;
+const REDACTED_SERVER_COMPONENT_ERROR = /Minified React error #(?:419|441)\b/;
 
-// React #441 is the client-side wrapper for a Server Components failure. It
-// intentionally omits the cause, while the server-side request hook records
+// React #419 and #441 are client-side wrappers for Server Components failures.
+// They intentionally omit the cause, while the server-side request hook records
 // the actionable exception (for example, a failed database query).
 export function isRedactedServerComponentError(event: {
   exception?: { values?: Array<{ value?: string }> };

@@ -130,6 +130,11 @@ describe("instrumentation (server + client GlitchTip init)", () => {
       },
     })).toBe(true);
     expect(isRedactedServerComponentError({
+      exception: {
+        values: [{ value: "Minified React error #419; details omitted" }],
+      },
+    })).toBe(true);
+    expect(isRedactedServerComponentError({
       exception: { values: [{ value: "getTopicAccuracy query failed" }] },
     })).toBe(false);
 
@@ -139,10 +144,16 @@ describe("instrumentation (server + client GlitchTip init)", () => {
         values: [{ value: "Minified React error #441; details omitted" }],
       },
     };
+    const suspenseWrapperEvent = {
+      exception: {
+        values: [{ value: "Minified React error #419; details omitted" }],
+      },
+    };
     const originalErrorEvent = {
       exception: { values: [{ value: "getTopicAccuracy query failed" }] },
     };
     expect(beforeSend?.(wrapperEvent as never, {} as never)).toBeNull();
+    expect(beforeSend?.(suspenseWrapperEvent as never, {} as never)).toBeNull();
     expect(beforeSend?.(originalErrorEvent as never, {} as never)).toBe(originalErrorEvent);
   });
 });
