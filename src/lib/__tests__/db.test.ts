@@ -1106,6 +1106,37 @@ describe("getTopicQuestionCounts", () => {
     expect(await getTopicQuestionCounts(makeClient(null))).toEqual({});
   });
 
+  it("retries when Supabase aliases the missing questions relation", async () => {
+    const activeQuery = chain({
+      data: null,
+      error: { message: "column questions_1.is_active does not exist" },
+    });
+    const legacyQuery = chain({ data: [{ id: "t1", questions: [{ count: 361 }] }] });
+    const from = vi.fn().mockReturnValueOnce(activeQuery).mockReturnValueOnce(legacyQuery);
+    const client = { from } as unknown as SupabaseClient;
+
+    await expect(getTopicQuestionCounts(client)).resolves.toEqual({ t1: 361 });
+    expect(activeQuery.eq).toHaveBeenCalledWith("questions.is_active", true);
+    expect(legacyQuery.eq).not.toHaveBeenCalled();
+  });
+
+  it("retries without the active filter when the database predates is_active", async () => {
+    const activeQuery = chain({
+      data: null,
+      error: {
+        code: "PGRST204",
+        message: "Could not find the 'is_active' column of 'questions' in the schema cache",
+      },
+    });
+    const legacyQuery = chain({ data: [{ id: "t1", questions: [{ count: 361 }] }] });
+    const from = vi.fn().mockReturnValueOnce(activeQuery).mockReturnValueOnce(legacyQuery);
+    const client = { from } as unknown as SupabaseClient;
+
+    await expect(getTopicQuestionCounts(client)).resolves.toEqual({ t1: 361 });
+    expect(activeQuery.eq).toHaveBeenCalledWith("questions.is_active", true);
+    expect(legacyQuery.eq).not.toHaveBeenCalled();
+  });
+
   it("throws when the query fails", async () => {
     await expect(getTopicQuestionCounts(makeClient(null, boom))).rejects.toThrow(
       /getTopicQuestionCounts: topics query failed: boom/
