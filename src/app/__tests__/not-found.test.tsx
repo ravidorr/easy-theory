@@ -4,10 +4,6 @@ import React from "react";
 import RootNotFound from "../not-found";
 import { getTranslations } from "next-intl/server";
 
-vi.mock("next/font/google", () => ({
-  Rubik: vi.fn().mockReturnValue({ variable: "--font-rubik", className: "rubik" }),
-}));
-
 vi.mock("next/link", () => ({
   default: ({ href, children, ...rest }: { href: string; children: unknown }) =>
     React.createElement("a", { href, ...rest }, children as React.ReactNode),
@@ -37,11 +33,10 @@ beforeEach(() => {
 });
 
 describe("RootNotFound", () => {
-  it("renders its own html element since it mounts outside any layout", async () => {
+  it("leaves the document shell to the root layout", async () => {
     const html = renderToStaticMarkup(await RootNotFound());
-    expect(html).toContain("<html");
-    expect(html).toContain('lang="he"');
-    expect(html).toContain('dir="rtl"');
+    expect(html).not.toContain("<html");
+    expect(html).not.toContain("<body");
   });
 
   it("resolves strings in the default locale when the request has no signal", async () => {
@@ -67,8 +62,6 @@ describe("RootNotFound", () => {
       locale: "ar",
       namespace: "NotFound",
     });
-    expect(html).toContain('lang="ar"');
-    expect(html).toContain('dir="rtl"');
     expect(html).toContain('href="/ar"');
   });
 
@@ -79,7 +72,6 @@ describe("RootNotFound", () => {
       locale: "ar",
       namespace: "NotFound",
     });
-    expect(html).toContain('lang="ar"');
     expect(html).toContain('href="/ar"');
   });
 
@@ -87,6 +79,6 @@ describe("RootNotFound", () => {
     requestCookies.NEXT_LOCALE = "fr";
     requestHeaders["accept-language"] = "ar";
     const html = renderToStaticMarkup(await RootNotFound());
-    expect(html).toContain('lang="ar"');
+    expect(html).toContain('href="/ar"');
   });
 });

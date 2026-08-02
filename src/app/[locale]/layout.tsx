@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { Rubik } from "next/font/google";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import Script from "next/script";
@@ -10,14 +9,6 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { LocaleRuntimeData } from "@/components/LocaleRuntimeData";
-import "@/app/globals.css";
-
-const rubik = Rubik({
-  subsets: ["latin", "hebrew", "arabic"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-rubik",
-  display: "swap",
-});
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -76,30 +67,23 @@ export default async function LocaleLayout({
   };
 
   return (
-    <html
-      lang={currentLocale}
-      dir="rtl"
-      data-theme={theme}
-      className={rubik.variable}
-    >
-      <head>
-        {vapidPublicKey && (
-          <meta name="vapid-public-key" content={vapidPublicKey} />
-        )}
-      </head>
-      <body>
-        <LocaleRuntimeData locale={currentLocale} translations={jsT} theme={theme} />
-        <NextIntlClientProvider messages={messages}>
-          {children}
-        </NextIntlClientProvider>
-        <Analytics />
-        <SpeedInsights />
-        <Script id="register-sw" strategy="afterInteractive">{`
-          if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js');
-          }
-        `}</Script>
-      </body>
-    </html>
+    <>
+      <LocaleRuntimeData
+        locale={currentLocale}
+        translations={jsT}
+        theme={theme}
+        vapidPublicKey={vapidPublicKey}
+      />
+      <NextIntlClientProvider messages={messages}>
+        {children}
+      </NextIntlClientProvider>
+      <Analytics />
+      <SpeedInsights />
+      <Script id="register-sw" strategy="afterInteractive">{`
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('/sw.js');
+        }
+      `}</Script>
+    </>
   );
 }

@@ -6,6 +6,7 @@ type LocaleRuntimeDataProps = {
   locale: string;
   translations: Record<string, string>;
   theme: string;
+  vapidPublicKey?: string;
 };
 
 declare global {
@@ -16,12 +17,21 @@ declare global {
   }
 }
 
-export function LocaleRuntimeData({ locale, translations, theme }: LocaleRuntimeDataProps) {
+export function LocaleRuntimeData({
+  locale,
+  translations,
+  theme,
+  vapidPublicKey,
+}: LocaleRuntimeDataProps) {
   useLayoutEffect(() => {
     window.__locale = locale;
     window.__t = translations;
     window.__tf = (source, values) =>
       source.replace(/\{(\w+)\}/g, (_, key) => String(values[key] ?? _));
+
+    document.documentElement.lang = locale;
+    document.documentElement.dir = "rtl";
+    document.documentElement.dataset.theme = theme;
 
     const themeColor = theme === "light" ? "#f5f7fc" : "#131829";
     let themeColorMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
@@ -31,7 +41,17 @@ export function LocaleRuntimeData({ locale, translations, theme }: LocaleRuntime
       document.head.appendChild(themeColorMeta);
     }
     themeColorMeta.content = themeColor;
-  }, [locale, theme, translations]);
+
+    if (vapidPublicKey) {
+      let vapidPublicKeyMeta = document.querySelector<HTMLMetaElement>('meta[name="vapid-public-key"]');
+      if (!vapidPublicKeyMeta) {
+        vapidPublicKeyMeta = document.createElement("meta");
+        vapidPublicKeyMeta.name = "vapid-public-key";
+        document.head.appendChild(vapidPublicKeyMeta);
+      }
+      vapidPublicKeyMeta.content = vapidPublicKey;
+    }
+  }, [locale, theme, translations, vapidPublicKey]);
 
   return null;
 }
