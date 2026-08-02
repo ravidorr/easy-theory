@@ -4,9 +4,12 @@ import * as Sentry from "@sentry/nextjs";
 vi.mock("@sentry/nextjs", () => ({
   init: vi.fn(),
   captureRequestError: vi.fn(),
+  withScope: vi.fn(),
 }));
 
 const mockInit = vi.mocked(Sentry.init);
+const mockCaptureRequestError = vi.mocked(Sentry.captureRequestError);
+const mockWithScope = vi.mocked(Sentry.withScope);
 
 describe("instrumentation (server + client GlitchTip init)", () => {
   beforeEach(() => {
@@ -51,9 +54,64 @@ describe("instrumentation (server + client GlitchTip init)", () => {
     );
   });
 
-  it("exposes Sentry's request-error hook for unhandled route errors", async () => {
+  it("tags server errors with their RSC digest before reporting them", async () => {
+    const setTag = vi.fn();
+    mockWithScope.mockImplementation((callback) => callback({ setTag }));
     const { onRequestError } = await import("@/instrumentation");
-    expect(onRequestError).toBe(Sentry.captureRequestError);
+    const error = Object.assign(new Error("Database query failed"), {
+      digest: "488860242",
+    });
+    const request = {
+      path: "/he/more",
+      method: "GET",
+      headers: {},
+    };
+    const errorContext = {
+      routerKind: "App Router" as const,
+      routePath: "/[locale]/more",
+      routeType: "render" as const,
+      renderSource: "react-server-components" as const,
+      revalidateReason: undefined,
+    };
+
+    onRequestError(error, request, errorContext);
+
+    expect(setTag).toHaveBeenCalledWith("next.digest", "488860242");
+    expect(setTag).toHaveBeenCalledWith(
+      "next.render_source",
+      "react-server-components"
+    );
+    expect(mockCaptureRequestError).toHaveBeenCalledWith(
+      error,
+      request,
+      errorContext
+    );
+  });
+
+  it("reports errors without a digest", async () => {
+    const setTag = vi.fn();
+    mockWithScope.mockImplementation((callback) => callback({ setTag }));
+    const { onRequestError } = await import("@/instrumentation");
+    const error = new Error("Route handler failed");
+    const request = { path: "/api/example", method: "POST", headers: {} };
+    const errorContext = {
+      routerKind: "App Router" as const,
+      routePath: "/api/example",
+      routeType: "route" as const,
+      revalidateReason: undefined,
+    };
+
+    onRequestError(error, request, errorContext);
+
+    expect(setTag).not.toHaveBeenCalledWith(
+      "next.digest",
+      expect.anything()
+    );
+    expect(mockCaptureRequestError).toHaveBeenCalledWith(
+      error,
+      request,
+      errorContext
+    );
   });
 
   it("client entry initialises the SDK on import with the same settings", async () => {
