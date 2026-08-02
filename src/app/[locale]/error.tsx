@@ -7,6 +7,21 @@ import * as Sentry from "@sentry/nextjs";
 import { ClientTabBar } from "@/components/ClientTabBar";
 import styles from "./error.module.css";
 
+export function retryError(
+  error: Error & { digest?: string },
+  reset: () => void,
+  reload: () => void
+) {
+  // A digest means the server failed while rendering this route. Retrying the
+  // RSC request with the same client bundle can repeat a deployment-version
+  // mismatch; a document reload obtains the current deployment instead.
+  if (error.digest) {
+    reload();
+    return;
+  }
+  reset();
+}
+
 // Segment-level error boundary for everything under [locale]. Data helpers
 // (e.g. getMistakesForTopic) throw on failed queries instead of pretending
 // the result is empty; this surfaces those failures in the user's language.
@@ -18,6 +33,10 @@ export default function LocaleError({
   reset: () => void;
 }) {
   const t = useTranslations("Error");
+
+  function retry() {
+    retryError(error, reset, () => window.location.reload());
+  }
 
   useEffect(() => {
     console.error(error);
@@ -54,7 +73,7 @@ export default function LocaleError({
         <h1 className={styles.headline}>{t("headline")}</h1>
         <p className={styles.support}>{t("support")}</p>
       </div>
-      <button onClick={reset} className={`btn-primary ${styles.retryBtn}`}>
+      <button onClick={retry} className={`btn-primary ${styles.retryBtn}`}>
         {t("retry")}
       </button>
       <Link href="/" className={`btn-secondary ${styles.homeLink}`}>

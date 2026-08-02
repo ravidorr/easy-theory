@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import React from "react";
 import * as Sentry from "@sentry/nextjs";
-import LocaleError from "../error";
+import LocaleError, { retryError } from "../error";
 
 vi.mock("@sentry/nextjs", () => ({
   captureException: vi.fn(),
@@ -46,10 +46,17 @@ describe("LocaleError ([locale] error boundary)", () => {
     expect(Sentry.captureException).toHaveBeenCalledWith(error);
   });
 
-  it("calls reset when the retry button is clicked", () => {
-    render(<LocaleError error={error} reset={reset} />);
+  it("calls reset for a client-rendered error", () => {
+    render(<LocaleError error={new Error("client boom")} reset={reset} />);
     fireEvent.click(screen.getByRole("button", { name: "retry" }));
     expect(reset).toHaveBeenCalledTimes(1);
+  });
+
+  it("reloads instead of retrying a digested server-render error", () => {
+    const reload = vi.fn();
+    retryError(error, reset, reload);
+    expect(reload).toHaveBeenCalledOnce();
+    expect(reset).not.toHaveBeenCalled();
   });
 
   it("keeps the Home section TabBar visible without a false current page", () => {
