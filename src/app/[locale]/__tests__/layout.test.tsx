@@ -85,23 +85,11 @@ describe("LocaleLayout", () => {
     expect(vi.mocked(notFound)).toHaveBeenCalled();
   });
 
-  it("sets lang=he on the html element for he locale", async () => {
+  it("leaves document attributes to the root layout", async () => {
     const jsx = await LocaleLayout(layoutProps("he"));
     const html = renderToStaticMarkup(jsx);
-    expect(html).toContain('lang="he"');
-  });
-
-  it("sets lang=ar on the html element for ar locale", async () => {
-    const jsx = await LocaleLayout(layoutProps("ar"));
-    const html = renderToStaticMarkup(jsx);
-    expect(html).toContain('lang="ar"');
-  });
-
-  it("always sets dir=rtl (both locales are RTL)", async () => {
-    for (const currentLocale of ["he", "ar"]) {
-      const jsx = await LocaleLayout(layoutProps(currentLocale));
-      expect(renderToStaticMarkup(jsx)).toContain('dir="rtl"');
-    }
+    expect(html).not.toContain("<html");
+    expect(html).not.toContain("<body");
   });
 
   it("passes locale, JS translations, and theme to the client runtime", async () => {
@@ -117,30 +105,13 @@ describe("LocaleLayout", () => {
     });
   });
 
-  it("defaults to dark theme when no theme cookie", async () => {
-    const jsx = await LocaleLayout(layoutProps("he"));
-    expect(renderToStaticMarkup(jsx)).toContain('data-theme="dark"');
-  });
-
-  it("uses light theme when theme cookie is light", async () => {
-    mockCookies.mockResolvedValue({
-      get: vi.fn().mockReturnValue({ value: "light" }),
-    } as never);
-    const jsx = await LocaleLayout(layoutProps("he"));
-    expect(renderToStaticMarkup(jsx)).toContain('data-theme="light"');
-  });
-
-  it("renders the vapid-public-key meta tag when the env var is set", async () => {
+  it("passes the vapid public key to the document runtime", async () => {
     process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY = "test-vapid-key";
     const jsx = await LocaleLayout(layoutProps("he"));
-    const html = renderToStaticMarkup(jsx);
-    expect(html).toContain('name="vapid-public-key"');
-    expect(html).toContain('content="test-vapid-key"');
-  });
-
-  it("omits the vapid-public-key meta tag when the env var is unset", async () => {
-    const jsx = await LocaleLayout(layoutProps("he"));
-    expect(renderToStaticMarkup(jsx)).not.toContain('name="vapid-public-key"');
+    renderToStaticMarkup(jsx);
+    expect(mockLocaleRuntimeData).toHaveBeenLastCalledWith(
+      expect.objectContaining({ vapidPublicKey: "test-vapid-key" })
+    );
   });
 
   it("renders children inside the layout", async () => {

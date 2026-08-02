@@ -9,6 +9,10 @@ describe("LocaleRuntimeData", () => {
     delete window.__t;
     delete window.__tf;
     document.querySelector('meta[name="theme-color"]')?.remove();
+    document.querySelector('meta[name="vapid-public-key"]')?.remove();
+    document.documentElement.lang = "";
+    document.documentElement.dir = "";
+    delete document.documentElement.dataset.theme;
   });
 
   it("updates the legacy locale globals", () => {
@@ -46,6 +50,25 @@ describe("LocaleRuntimeData", () => {
     expect(document.querySelector('meta[name="theme-color"]')).toHaveAttribute(
       "content",
       "#f5f7fc"
+    );
+    expect(document.documentElement).toHaveAttribute("lang", "ar");
+    expect(document.documentElement).toHaveAttribute("dir", "rtl");
+    expect(document.documentElement).toHaveAttribute("data-theme", "light");
+  });
+
+  it("adds the VAPID public key metadata needed by the push script", () => {
+    render(
+      <LocaleRuntimeData
+        locale="he"
+        translations={{}}
+        theme="dark"
+        vapidPublicKey="test-vapid-key"
+      />
+    );
+
+    expect(document.querySelector('meta[name="vapid-public-key"]')).toHaveAttribute(
+      "content",
+      "test-vapid-key"
     );
   });
 });
