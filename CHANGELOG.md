@@ -9,6 +9,7 @@ Historical release headings were normalized from their changelog categories: `Ad
 
 - Removed the selected-answer echo from wrong-answer quiz feedback.
 - Retained legacy quiz-feedback translations for cached clients during rollout.
+- Kept mixed cached Arabic pages localized while their quiz script refreshes.
 
 ---
 

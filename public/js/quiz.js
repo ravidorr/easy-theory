@@ -579,7 +579,10 @@
         rewardFloat.setAttribute("data-animate", "");
       }
     } else if (rewardMessage) {
-      rewardMessage.textContent = t.rewardWrong || "לא נורא, נסו שוב בפעם הבאה.";
+      const legacyWrongMessage = typeof t.rewardWrongSuffix === "string"
+        ? t.rewardWrongSuffix.replace(/^\s*-\s*/, "")
+        : "";
+      rewardMessage.textContent = t.rewardWrong || legacyWrongMessage || "לא נורא, נסו שוב בפעם הבאה.";
     }
 
     return isCorrect;

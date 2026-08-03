@@ -1032,6 +1032,24 @@ describe("quiz.js – reward score and feedback", () => {
     expect(floatEl().hasAttribute("data-animate")).toBe(false);
   });
 
+  it("uses the legacy Arabic suffix during a mixed cached rollout", () => {
+    const translations = (window as unknown as { __t: Record<string, string> }).__t;
+    try {
+      (window as unknown as { __t: Record<string, string> }).__t = {
+        rewardWrongPrefix: "اخترتم ",
+        rewardWrongSuffix: " - لا بأس، حاولوا مرة أخرى في المرة القادمة.",
+        rewardSignSuffix: " (إشارة {number})",
+      };
+      setupDOM({ locale: "ar" });
+
+      clickOption(0, "b");
+
+      expect(messageText()).toBe("لا بأس، حاولوا مرة أخرى في المرة القادمة.");
+    } finally {
+      (window as unknown as { __t: Record<string, string> }).__t = translations;
+    }
+  });
+
   it("clears the message but keeps the score when advancing to the next question", async () => {
     clickOption(0, "a");
     await flushAsyncWork();
