@@ -47,8 +47,11 @@ describe("locale messages", () => {
       expect(messages.Quiz.rewardTopicDone).toBe(messages.JS.Quiz.rewardTopicDone);
       expect(messages.Quiz.rewardWrong).toBe(messages.JS.Quiz.rewardWrong);
       expect(messages.Quiz.rewardWrongPrefix).toBe(messages.JS.Quiz.rewardWrongPrefix);
+      expect(messages.Quiz.rewardWrongPrefix).toBeTruthy();
       expect(messages.Quiz.rewardWrongSuffix).toBe(messages.JS.Quiz.rewardWrongSuffix);
+      expect(messages.Quiz.rewardWrongSuffix).toBeTruthy();
       expect(messages.Quiz.rewardSignSuffix).toBe(messages.JS.Quiz.rewardSignSuffix);
+      expect(messages.Quiz.rewardSignSuffix).toBeTruthy();
     }
   });
 
