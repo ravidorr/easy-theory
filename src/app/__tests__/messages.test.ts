@@ -42,10 +42,13 @@ describe("locale messages", () => {
     });
   });
 
-  it("keeps duplicate quiz feedback copy aligned with the runtime messages", () => {
+  it("keeps quiz feedback copy aligned for current and cached runtimes", () => {
     for (const messages of [he, ar]) {
       expect(messages.Quiz.rewardTopicDone).toBe(messages.JS.Quiz.rewardTopicDone);
       expect(messages.Quiz.rewardWrong).toBe(messages.JS.Quiz.rewardWrong);
+      expect(messages.Quiz.rewardWrongPrefix).toBe(messages.JS.Quiz.rewardWrongPrefix);
+      expect(messages.Quiz.rewardWrongSuffix).toBe(messages.JS.Quiz.rewardWrongSuffix);
+      expect(messages.Quiz.rewardSignSuffix).toBe(messages.JS.Quiz.rewardSignSuffix);
     }
   });
 
