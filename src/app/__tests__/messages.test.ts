@@ -20,12 +20,12 @@ describe("locale messages", () => {
     expect(he.Metadata).toMatchObject({
       rootTitle: "קל בתיאוריה",
       shortName: "קל בתיאוריה",
-      tagline: "מנה אחת בכל פעם, בלי להילחץ.",
+      tagline: "שיעור קצר בזמן שלך.",
     });
     expect(ar.Metadata).toMatchObject({
       rootTitle: "سهل في النظرية",
       shortName: "سهل في النظرية",
-      tagline: "جرعة واحدة كل مرة، بدون ضغط.",
+      tagline: "درس قصير في وقتك.",
     });
   });
 
