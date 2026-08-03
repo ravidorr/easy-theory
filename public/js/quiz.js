@@ -579,11 +579,7 @@
         rewardFloat.setAttribute("data-animate", "");
       }
     } else if (rewardMessage) {
-      const wrongBtn = slide.querySelector('[data-option="' + selectedOption + '"]');
-      const badge = wrongBtn?.querySelector(".quiz-option-badge")?.textContent?.trim() || "";
-      const signNum = wrongBtn?.querySelector("span:not(.quiz-option-badge):not(.quiz-option-explanation) span")?.textContent?.trim() || "";
-      const suffix = signNum ? tf(t.rewardSignSuffix || ' (תמרור {number})', { number: signNum }) : "";
-      rewardMessage.textContent = (t.rewardWrongPrefix || "בחרתם ב־") + badge + suffix + (t.rewardWrongSuffix || " - לא נורא, נסו שוב בפעם הבאה.");
+      rewardMessage.textContent = t.rewardWrong || "לא נורא, נסו שוב בפעם הבאה.";
     }
 
     return isCorrect;
