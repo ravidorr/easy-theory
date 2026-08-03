@@ -1028,8 +1028,26 @@ describe("quiz.js – reward score and feedback", () => {
   it("keeps the score and shows the wrong-answer message on a wrong answer", () => {
     clickOption(0, "b");
     expect(scoreText()).toBe("0");
-    expect(messageText()).toContain("בחרתם ב־");
+    expect(messageText()).toBe("לא נורא, נסו שוב בפעם הבאה.");
     expect(floatEl().hasAttribute("data-animate")).toBe(false);
+  });
+
+  it("uses the legacy Arabic suffix during a mixed cached rollout", () => {
+    const translations = (window as unknown as { __t: Record<string, string> }).__t;
+    try {
+      (window as unknown as { __t: Record<string, string> }).__t = {
+        rewardWrongPrefix: "اخترتم ",
+        rewardWrongSuffix: " - لا بأس، حاولوا مرة أخرى في المرة القادمة.",
+        rewardSignSuffix: " (إشارة {number})",
+      };
+      setupDOM({ locale: "ar" });
+
+      clickOption(0, "b");
+
+      expect(messageText()).toBe("لا بأس، حاولوا مرة أخرى في المرة القادمة.");
+    } finally {
+      (window as unknown as { __t: Record<string, string> }).__t = translations;
+    }
   });
 
   it("clears the message but keeps the score when advancing to the next question", async () => {
@@ -1643,20 +1661,18 @@ describe("quiz.js – resume", () => {
 
   it("re-renders restored wrong feedback from the current locale strings", async () => {
     (window as unknown as { __t: Record<string, string> }).__t = {
-      rewardWrongPrefix: "قديم ",
-      rewardWrongSuffix: " قديم",
+      rewardWrong: "قديم",
     };
     setupDOM({ locale: "ar", userId: "u1" });
     clickOption(0, "b");
     await flushAsyncWork();
 
     (window as unknown as { __t: Record<string, string> }).__t = {
-      rewardWrongPrefix: "اخترنا ",
-      rewardWrongSuffix: " وسنحاول مجددًا",
+      rewardWrong: "لا بأس، حاولوا مرة أخرى في المرة القادمة.",
     };
     setupDOM({ locale: "ar", userId: "u1" });
 
-    expect(messageText()).toBe("اخترنا ב وسنحاول مجددًا");
+    expect(messageText()).toBe("لا بأس، حاولوا مرة أخرى في المرة القادمة.");
     expect(localStorage.getItem(resumeKey("ar"))).not.toContain("قديم");
   });
 
@@ -1694,7 +1710,7 @@ describe("quiz.js – resume", () => {
     setupDOM({ userId: "u1" });
 
     expect(scoreText()).toBe("0");
-    expect(messageText()).toContain("בחרתם ב־");
+    expect(messageText()).toBe("לא נורא, נסו שוב בפעם הבאה.");
     expect(actionButton().textContent).toBe("לשאלה הבאה");
     expect(actionButton().disabled).toBe(false);
     expect(fetchCalls("/api/quiz")).toHaveLength(1);
