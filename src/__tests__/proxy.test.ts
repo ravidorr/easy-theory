@@ -164,6 +164,11 @@ describe("proxy middleware", () => {
       expect(res.status).toBe(200);
     });
 
+    it.each(["he", "ar"])("allows the public /%s/about page through", async (locale) => {
+      const res = await proxy(makeRequest(`/${locale}/about`));
+      expect(res.status).toBe(200);
+    });
+
     it("allows /api/auth/send-otp through (skip guard)", async () => {
       const res = await proxy(makeRequest("/api/auth/send-otp"));
       expect(res.status).toBe(200);

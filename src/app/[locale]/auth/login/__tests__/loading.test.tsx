@@ -13,14 +13,12 @@ describe("login loading skeleton", () => {
     expect(container.querySelector("main")).toHaveAttribute("aria-busy", "true");
   });
 
-  it("mirrors the landing page's hero, login, preview, and content sections", async () => {
+  it("mirrors the simplified landing page's hero and login card", async () => {
     const { container } = render(await Loading());
     expect(container.querySelector('[class*="hero"]')).toBeTruthy();
     expect(container.querySelector('[class*="loginCard"]')).toBeTruthy();
-    expect(container.querySelector('[class*="phoneFrame"]')).toBeTruthy();
-    expect(container.querySelectorAll('[class*="phoneFrameSmall"]')).toHaveLength(2);
-    expect(container.querySelectorAll('[class*="featureCard"]')).toHaveLength(3);
-    expect(container.querySelector('[class*="faqCard"]')).toBeTruthy();
+    expect(container.querySelector('[class*="phoneFrame"]')).toBeNull();
+    expect(container.querySelectorAll('[class*="featureCard"]')).toHaveLength(0);
     expect(container.querySelector("nav")).toBeNull();
   });
 });
