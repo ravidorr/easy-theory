@@ -11,6 +11,17 @@ const mockInit = vi.mocked(Sentry.init);
 const mockCaptureRequestError = vi.mocked(Sentry.captureRequestError);
 const mockWithScope = vi.mocked(Sentry.withScope);
 
+function mockScopeWithSetTag(setTag: (...args: unknown[]) => unknown) {
+  mockWithScope.mockImplementation((scopeOrCallback, callback) => {
+    // Vitest infers Sentry's two-argument overload, although the code under
+    // test uses the one-argument callback overload.
+    const run = typeof (scopeOrCallback as unknown) === "function"
+      ? (scopeOrCallback as unknown as (scope: Sentry.Scope) => void)
+      : callback;
+    return run?.({ setTag } as Sentry.Scope);
+  });
+}
+
 describe("instrumentation (server + client GlitchTip init)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -56,7 +67,7 @@ describe("instrumentation (server + client GlitchTip init)", () => {
 
   it("tags server errors with their RSC digest before reporting them", async () => {
     const setTag = vi.fn();
-    mockWithScope.mockImplementation((callback) => callback({ setTag }));
+    mockScopeWithSetTag(setTag);
     const { onRequestError } = await import("@/instrumentation");
     const error = Object.assign(new Error("Database query failed"), {
       digest: "488860242",
@@ -90,7 +101,7 @@ describe("instrumentation (server + client GlitchTip init)", () => {
 
   it("reports errors without a digest", async () => {
     const setTag = vi.fn();
-    mockWithScope.mockImplementation((callback) => callback({ setTag }));
+    mockScopeWithSetTag(setTag);
     const { onRequestError } = await import("@/instrumentation");
     const error = new Error("Route handler failed");
     const request = { path: "/api/example", method: "POST", headers: {} };
