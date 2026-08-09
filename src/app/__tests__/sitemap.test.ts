@@ -17,7 +17,7 @@ describe("sitemap", () => {
     delete process.env.NEXT_PUBLIC_SITE_URL;
     const entries = (await loadSitemap())();
 
-    expect(entries).toHaveLength(6);
+    expect(entries).toHaveLength(7);
     expect(entries[0]).toMatchObject({
       url: "https://easy-theory-omega.vercel.app/he",
       changeFrequency: "monthly",
@@ -31,6 +31,7 @@ describe("sitemap", () => {
     const entries = (await loadSitemap())();
 
     expect(entries.slice(1)).toEqual(expect.arrayContaining([
+      expect.objectContaining({ url: "https://easy-in-theory.example/he/about", priority: 0.7 }),
       expect.objectContaining({ url: "https://easy-in-theory.example/he/faq", priority: 0.7 }),
       expect.objectContaining({ url: "https://easy-in-theory.example/he/guides/signs", priority: 0.7 }),
       expect.objectContaining({ url: "https://easy-in-theory.example/he/guides/vehicle", priority: 0.7 }),

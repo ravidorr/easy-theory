@@ -65,6 +65,7 @@ export async function proxy(request: NextRequest) {
     pathname === `/${locale}` ||
     pathname === `/${locale}/` ||
     pathname.startsWith(`/${locale}/diagnostic`) ||
+    pathname.startsWith(`/${locale}/about`) ||
     (locale === "he" && (pathname.startsWith(`/${locale}/guides`) || pathname.startsWith(`/${locale}/faq`)));
 
   if (!user && !isPublic) {
