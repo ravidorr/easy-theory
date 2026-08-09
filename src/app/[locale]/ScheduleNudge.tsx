@@ -199,7 +199,7 @@ export function ScheduleNudge({ hasSchedule }: { hasSchedule: boolean }) {
         {error && <p className={styles.error} role="alert">{error}</p>}
 
         <div className={styles.actions}>
-          <button ref={primaryRef} type="button" className="btn-primary" disabled={saving} onClick={saveRecommended}>
+          <button ref={primaryRef} type="button" className={`btn-primary ${styles.saveRecommended}`} disabled={saving} onClick={saveRecommended}>
             {saving ? tSchedule("saving") : t("saveRecommended")}
           </button>
           <button type="button" className={`btn-secondary ${styles.customize}`} disabled={saving} onClick={chooseCustomSchedule}>
