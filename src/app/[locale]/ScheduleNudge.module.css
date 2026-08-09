@@ -15,7 +15,7 @@
   padding: 16px 22px 24px;
   border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
   background: var(--surface);
-  box-shadow: var(--shadow-pop);
+  box-shadow: 0 -12px 40px rgb(16 22 45 / 22%);
   animation: sheet-in 320ms var(--ease-spring) both;
 }
 
@@ -145,6 +145,11 @@
   border-radius: var(--radius-pill);
 }
 
+.saveRecommended {
+  border-radius: var(--radius-pill);
+  font-size: 16px;
+}
+
 .later {
   width: 100%;
   min-height: 44px;
@@ -181,6 +186,8 @@
 }
 
 [data-theme="dark"] .scrim { background: rgb(0 0 0 / 55%); }
+
+[data-theme="dark"] .sheet { box-shadow: 0 -12px 40px rgb(0 0 0 / 50%); }
 
 [data-theme="dark"] .chip { background: var(--surface-2); }
 
