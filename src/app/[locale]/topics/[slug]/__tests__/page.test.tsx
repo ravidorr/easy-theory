@@ -296,7 +296,7 @@ describe("TopicQuizPage", () => {
     expect(container.querySelector("img[src='/signs/sign-999.png']")).toBeTruthy();
   });
 
-  it("renders question 397's prompt sign and every sign answer", async () => {
+  it("hides question 397's prompt sign when it is an answer option", async () => {
     const q = {
       ...QUESTION,
       question_number: 397,
@@ -305,14 +305,14 @@ describe("TopicQuizPage", () => {
       option_b: "618",
       option_c: "307",
       option_d: "401",
+      correct_option: "d",
     };
     mockGetQuestions.mockResolvedValue([q] as never);
     const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "he" }) });
     const { container } = render(jsx);
     const matchingImages = container.querySelectorAll("img[src='/signs/sign-401.png']");
-    expect(matchingImages).toHaveLength(2);
-    expect(matchingImages[0].closest(".quiz-option")).toBeNull();
-    expect(matchingImages[1].closest(".quiz-option")).toBeTruthy();
+    expect(matchingImages).toHaveLength(1);
+    expect(matchingImages[0].closest(".quiz-option")).toBeTruthy();
     expect(container.querySelector("img[src='/signs/sign-402.png']")).toBeTruthy();
     expect(container.querySelector("img[src='/signs/sign-618.png']")).toBeTruthy();
     expect(container.querySelector("img[src='/signs/sign-307.png']")).toBeTruthy();
