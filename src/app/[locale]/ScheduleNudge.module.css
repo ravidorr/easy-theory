@@ -4,6 +4,7 @@
   inset: 0;
   display: flex;
   align-items: flex-end;
+  justify-content: center;
   background: rgb(28 35 60 / 45%);
   backdrop-filter: blur(1px);
   animation: scrim-in 250ms ease both;
@@ -12,6 +13,7 @@
 .sheet {
   box-sizing: border-box;
   width: 100%;
+  max-width: 440px;
   padding: 16px 22px 24px;
   border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
   background: var(--surface);
