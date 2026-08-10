@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 Historical release headings were normalized from their changelog categories: `Added` releases receive a minor increment, except for a clearly test-only addition; all other categories receive a patch increment. No historical major increment was inferred. One stable SemVer increment and one top-level entry per PR are enforced by the pre-push hook; individual commits within a PR do not bump.
 
+## [0.56.19] — 2026-08-10
+
+### Fixed
+
+- Hid a prompt traffic sign when it duplicates the correct sign answer, preventing it from revealing the correct answer.
+
+---
+
 ## [0.56.18] — 2026-08-10
 
 ### Changed

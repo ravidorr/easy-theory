@@ -17,6 +17,7 @@ import { isDue } from "@/lib/srs";
 import { getTranslations, getLocale } from "next-intl/server";
 import { localizeQuestion } from "@/lib/content-locale";
 import { resolveOptionSignImage } from "@/lib/option-sign-image";
+import { shouldSuppressQuestionImage } from "@/lib/question-image";
 import styles from "./page.module.css";
 
 function resolveImageUrl(url: string | null | undefined): string | null {
@@ -72,7 +73,9 @@ function QuestionReview({
     ["d", (qAny.option_d_display as string) ?? question.option_d],
   ];
 
-  const imageUrl = resolveImageUrl(question.image_url);
+  const imageUrl = shouldSuppressQuestionImage(question.image_url, question.correct_option, options)
+    ? null
+    : resolveImageUrl(question.image_url);
   const isWide = imageUrl && !imageUrl.includes("sign-");
   const signNumber = imageUrl ? signNumberFromUrl(imageUrl) : null;
   const signAlt = signNumber ? t("signAlt", { number: signNumber }) : t("questionImageAlt");

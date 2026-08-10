@@ -179,17 +179,16 @@ describe("BookmarksPage", () => {
     expect(container.querySelector('[data-testid="sign-img"]')).toBeNull();
   });
 
-  it("renders the question image and the option as a sign for sign questions", async () => {
+  it("hides a question sign duplicated by an option", async () => {
     mockGetBookmarks.mockResolvedValue([
       { ...BOOKMARK_A, image_url: "/signs/sign-101.png", option_a: "101" },
     ] as never);
     const jsx = await BookmarksPage();
     const { container } = render(jsx);
     const signImgs = container.querySelectorAll('[data-testid="sign-img"]');
-    expect(signImgs).toHaveLength(2);
+    expect(signImgs).toHaveLength(1);
     expect(signImgs[0].getAttribute("src")).toBe("/signs/sign-101.png");
-    expect(signImgs[0].closest(".quiz-option")).toBeNull();
-    expect(signImgs[1].closest(".quiz-option")).toBeTruthy();
+    expect(signImgs[0].closest(".quiz-option")).toBeTruthy();
     expect(screen.getByText("101")).toBeInTheDocument();
   });
 
