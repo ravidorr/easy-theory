@@ -1,4 +1,8 @@
 {
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/ravidorr"
+  },
   "name": "easy-in-theory",
   "version": "0.56.20",
   "private": true,
