@@ -161,6 +161,19 @@ describe("POST /api/srs", () => {
     errorSpy.mockRestore();
   });
 
+  it("returns 500 when the upsert throws a non-Error value", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const client = makeClient();
+    client.upsert.mockRejectedValue("database unavailable");
+    mockCreateClient.mockResolvedValue(client as never);
+
+    const res = await POST(makeRequest({ sign_id: SIGN_ID, knew: true }));
+
+    expect(res.status).toBe(500);
+    expect(await res.json()).toEqual({ error: heMessages.Api.srsSaveFailed });
+    errorSpy.mockRestore();
+  });
+
   it("returns 500 when the existing-card select fails", async () => {
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const client = makeClient({ selectError: { message: "boom" } });

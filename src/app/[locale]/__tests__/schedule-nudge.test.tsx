@@ -18,6 +18,14 @@ function today() {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 }
 
+function invokeReactClick(element: HTMLElement) {
+  const key = Object.keys(element).find((name) => name.startsWith("__reactProps"));
+  const handler = key
+    ? (element as unknown as Record<string, unknown>)[key] as { onClick?: (event: { preventDefault: () => void }) => void }
+    : undefined;
+  handler?.onClick?.({ preventDefault: () => {} });
+}
+
 describe("ScheduleNudge", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -110,11 +118,9 @@ describe("ScheduleNudge", () => {
     fireEvent.click(primary);
     await waitFor(() => expect(primary).toBeDisabled());
 
-    primary.removeAttribute("disabled");
-    customize.removeAttribute("disabled");
-    fireEvent.click(primary);
+    invokeReactClick(primary);
     fireEvent.keyDown(document, { key: "Escape" });
-    fireEvent.click(customize);
+    invokeReactClick(customize);
 
     expect(fetch).toHaveBeenCalledTimes(1);
     expect(push).not.toHaveBeenCalled();
@@ -178,6 +184,15 @@ describe("ScheduleNudge", () => {
       }))
     );
     resolvedOptions.mockRestore();
+  });
+
+  it("opens without storing a non-element activeElement for focus restoration", async () => {
+    const activeElementSpy = vi.spyOn(document, "activeElement", "get").mockReturnValue(document as unknown as Element);
+
+    render(<ScheduleNudge hasSchedule={false} />);
+
+    expect(await screen.findByRole("dialog")).toBeInTheDocument();
+    activeElementSpy.mockRestore();
   });
 
   it("shows when storage reads are blocked", async () => {

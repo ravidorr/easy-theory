@@ -217,6 +217,14 @@ describe("PUT /api/schedule", () => {
     expect(res.status).toBe(400);
   });
 
+  it("returns 400 for an empty timezone string", async () => {
+    mockCreateClient.mockResolvedValue(makeClient() as never);
+    const res = await PUT(
+      makePutRequest({ days: [2], start_time: "10:00", time_zone: "" })
+    );
+    expect(res.status).toBe(400);
+  });
+
   it("succeeds with empty days array (clears schedule)", async () => {
     const client = makeClient();
     mockCreateClient.mockResolvedValue(client as never);

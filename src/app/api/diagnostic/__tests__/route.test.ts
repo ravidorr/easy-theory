@@ -58,6 +58,15 @@ describe("POST /api/diagnostic", () => {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ answers: unavailableAnswers }),
     }));
     expect(unavailable.status).toBe(400);
+
+    mockCreateAdminClient.mockReturnValue({
+      from: vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue({ in: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ data: null, error: null }) }) }) }),
+    } as never);
+    const nullDataAnswers = Array.from({ length: 12 }, (_, index) => ({ question_id: questionId(index), selected_option: "a" }));
+    const nullData = await POST(new Request("http://localhost/api/diagnostic", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ answers: nullDataAnswers }),
+    }));
+    expect(nullData.status).toBe(400);
   });
 
   it("saves authenticated diagnostics atomically and ignores invalid target dates", async () => {

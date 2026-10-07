@@ -111,4 +111,13 @@ describe("completionSummary", () => {
       percent: 0,
     });
   });
+
+  it("treats missing topic count entries as zero", () => {
+    expect(completionSummary(["missing"], {}, {})).toEqual({
+      totalQuestions: 0,
+      answeredQuestions: 0,
+      remainingQuestions: 0,
+      percent: 0,
+    });
+  });
 });

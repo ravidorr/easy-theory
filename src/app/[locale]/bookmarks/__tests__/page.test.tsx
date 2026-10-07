@@ -5,6 +5,7 @@ import BookmarksPage from "../page";
 import { createClient } from "@/lib/supabase";
 import { getBookmarkedQuestions, getTopics } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
+import { localizeQuestion } from "@/lib/content-locale";
 
 vi.mock("next/image", () => ({
   default: ({ src, alt, className }: { src: string; alt?: string; className?: string }) =>
@@ -40,6 +41,13 @@ vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn().mockResolvedValue((key: string) => key),
   getLocale: vi.fn().mockResolvedValue("he"),
 }));
+vi.mock("@/lib/content-locale", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/content-locale")>();
+  return {
+    ...actual,
+    localizeQuestion: vi.fn(actual.localizeQuestion),
+  };
+});
 
 const mockCreateClient = vi.mocked(createClient);
 const mockGetBookmarks = vi.mocked(getBookmarkedQuestions);
@@ -125,6 +133,16 @@ describe("BookmarksPage", () => {
     render(jsx);
     expect(screen.getByText("מה המשמעות של תמרור זה?")).toBeInTheDocument();
     expect(screen.getByText("מה הגיל המינימלי?")).toBeInTheDocument();
+  });
+
+  it("falls back to Hebrew fields when localized display values are absent", async () => {
+    vi.mocked(localizeQuestion).mockReturnValueOnce({} as ReturnType<typeof localizeQuestion>);
+    mockGetBookmarks.mockResolvedValue([BOOKMARK_A] as never);
+
+    render(await BookmarksPage());
+
+    expect(screen.getByText("מה המשמעות של תמרור זה?")).toBeInTheDocument();
+    expect(screen.getByText("עצור")).toBeInTheDocument();
   });
 
   it("marks only the correct option and shows its explanation", async () => {

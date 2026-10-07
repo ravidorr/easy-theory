@@ -5,6 +5,10 @@ import { routing } from "./i18n/routing";
 
 const intlMiddleware = createNextIntlMiddleware(routing);
 
+export function loginReturnPath(pathname: string): string {
+  return pathname.replace(/^\/(he|ar)(?=\/|$)/, "") || "/";
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -72,7 +76,7 @@ export async function proxy(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = `/${locale}/auth/login`;
 
-    const returnPath = pathname.replace(/^\/(he|ar)(?=\/|$)/, "") || "/";
+    const returnPath = loginReturnPath(pathname);
     const safeNext =
       returnPath.startsWith("/") && !returnPath.startsWith("//") ? returnPath : "/";
     url.searchParams.set("next", safeNext);
