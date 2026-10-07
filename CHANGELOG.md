@@ -3,19 +3,12 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 Historical release headings were normalized from their changelog categories: `Added` releases receive a minor increment, except for a clearly test-only addition; all other categories receive a patch increment. No historical major increment was inferred. One stable SemVer increment and one top-level entry per PR are enforced by the pre-push hook; individual commits within a PR do not bump.
 
-## [0.56.22] — 2026-10-07
-
-### Fixed
-
-- Used Webpack for production builds while Vercel’s Turbopack integration cannot resolve Google font assets.
-
----
-
 ## [0.56.21] — 2026-10-07
 
 ### Fixed
 
 - Aligned the Vitest V8 coverage provider with Vitest 5 so CI can collect coverage successfully.
+- Used Webpack for production builds while Vercel’s Turbopack integration cannot resolve Google font assets.
 
 ---
 
