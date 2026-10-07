@@ -71,6 +71,17 @@ describe("validateSecurityPolicyVersion", () => {
     });
   });
 
+  it("rejects version rows that are not part of the supported-versions table", () => {
+    const malformedPolicy = `| Version | Supported |
+This is not a table delimiter.
+| 0.58.3 | ${supportedStatus} |`;
+
+    expect(validateSecurityPolicyVersion(packageJson, malformedPolicy)).toEqual({
+      valid: false,
+      error: "SECURITY.md is missing a supported-versions table.",
+    });
+  });
+
   it("rejects an invalid package version", () => {
     expect(
       validateSecurityPolicyVersion(
