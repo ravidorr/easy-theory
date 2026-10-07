@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 Historical release headings were normalized from their changelog categories: `Added` releases receive a minor increment, except for a clearly test-only addition; all other categories receive a patch increment. No historical major increment was inferred. One stable SemVer increment and one top-level entry per PR are enforced by the pre-push hook; individual commits within a PR do not bump.
 
+## [0.57.1] — 2026-10-07
+
+### Fixed
+
+- Stopped sending the learner's email address as analytics visitor metadata, matching the existing rule that the audience includes minors. Signed-in learners are now initialized under the same placeholder account id (`system`) that server-side events use, so one learner's events share one account context.
+
+---
+
 ## [0.57.0] — 2026-10-07
 
 ### Added
