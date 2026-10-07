@@ -20,6 +20,20 @@ export type PendoVisitor = {
   medalSlug: string[];
 };
 
+// user_stats counters are nullable in the database; segments need a number.
+function count(value: number | null | undefined): number {
+  return value ?? 0;
+}
+
+// user_schedule has no constraint tying a learner's rows together, so a field
+// is only sent when every row agrees on it. Otherwise it is null rather than
+// whichever row happened to sort first.
+function uniform<Row, Key extends keyof Row>(rows: Row[], key: Key): Row[Key] | null {
+  if (rows.length === 0) return null;
+  const first = rows[0][key];
+  return rows.every((row) => row[key] === first) ? first : null;
+}
+
 export async function getPendoVisitor(
   supabase: SupabaseClient,
   user: User
@@ -30,25 +44,21 @@ export async function getPendoVisitor(
     getUserSchedule(supabase, user.id),
     getUserMedals(supabase, user.id),
   ]);
-  // replace_user_schedule writes the same time, duration, reminder setting,
-  // locale, and time zone to every scheduled day.
-  const slot = schedule[0];
-
   return {
     id: user.id,
     email: user.email ?? null,
-    starPoints: stats.star_points,
-    streakDays: stats.streak_days,
+    starPoints: count(stats.star_points),
+    streakDays: count(stats.streak_days),
     lastActiveDate: stats.last_active_date,
     targetExamDate: plan?.target_exam_date ?? null,
     diagnosticCompletedAt: plan?.diagnostic_completed_at ?? null,
     dailyQuestionGoal: plan?.daily_question_goal ?? null,
-    locale: slot?.locale ?? null,
-    timeZone: slot?.time_zone ?? null,
-    notify: slot?.notify ?? null,
+    locale: uniform(schedule, "locale"),
+    timeZone: uniform(schedule, "time_zone"),
+    notify: uniform(schedule, "notify"),
     dayOfWeek: schedule.map((day) => day.day_of_week),
-    startTime: slot?.start_time ?? null,
-    durationMinutes: slot?.duration_minutes ?? null,
+    startTime: uniform(schedule, "start_time"),
+    durationMinutes: uniform(schedule, "duration_minutes"),
     medalSlug: medals.map((medal) => medal.medal_slug),
   };
 }

@@ -64,4 +64,34 @@ describe("RootLayout", () => {
     expect(head.match(/pendo\.initialize\(/g)).toEqual(["pendo.initialize("]);
     expect(head).toContain("pendo.initialize({ visitor: { id: '' } });");
   });
+
+  it("emits a snippet that inserts the agent and queues exactly one anonymous initialize", async () => {
+    const html = renderToStaticMarkup(await RootLayout({ children: <div /> }));
+    const match = html.match(/<script id="pendo-install"[^>]*>([\s\S]*?)<\/script>/);
+    const source = (match?.[1] ?? "").replace(/&#x27;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, "&");
+    expect(source).toContain("pendo.initialize(");
+
+    const inserted: Array<{ src: string }> = [];
+    const anchor = {
+      parentNode: { insertBefore: (node: { src: string }) => inserted.push(node) },
+    };
+    const fakeWindow: Record<string, unknown> = {};
+    const fakeDocument = {
+      createElement: () => ({ src: "", async: false }),
+      getElementsByTagName: () => [anchor],
+    };
+
+    // `with` makes the bare `pendo` in the snippet resolve against the fake window,
+    // as it does against the real one in a browser.
+    new Function("window", "document", `with (window) { ${source} }`)(fakeWindow, fakeDocument);
+
+    expect(inserted).toHaveLength(1);
+    expect(inserted[0].src).toMatch(
+      /^https:\/\/cdn\.pendo\.io\/agent\/static\/[0-9a-f-]{36}\/pendo\.js$/
+    );
+    const queue = (fakeWindow.pendo as { _q: unknown[][] })._q;
+    expect(queue.filter(([method]) => method === "initialize")).toEqual([
+      ["initialize", { visitor: { id: "" } }],
+    ]);
+  });
 });

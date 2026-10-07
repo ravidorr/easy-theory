@@ -54,6 +54,7 @@ describe("PendoIdentify", () => {
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     vi.unstubAllGlobals();
   });
 
@@ -74,15 +75,63 @@ describe("PendoIdentify", () => {
     expect(runScript(script)).toHaveBeenCalledWith({ visitor: { ...visitor, email } });
   });
 
-  it("renders nothing for signed-out visitors", async () => {
+  it("resets a stale Pendo identity once the agent loads for signed-out visitors", async () => {
+    vi.useFakeTimers();
     mockCreateClient.mockResolvedValue(makeClient(null) as never);
 
-    await expect(PendoIdentify()).resolves.toBeNull();
+    const element = await PendoIdentify();
+    expect(element?.props).toMatchObject({ id: "pendo-reset", strategy: "afterInteractive" });
     expect(mockGetPendoVisitor).not.toHaveBeenCalled();
-    expect(reportError).not.toHaveBeenCalled();
+
+    // Only the snippet stub exists when the page runs: the reset must wait.
+    const clearSession = vi.fn();
+    const stub: Record<string, unknown> = {};
+    vi.stubGlobal("window", { pendo: stub });
+    eval(element?.props.children as string);
+    vi.advanceTimersByTime(500);
+    expect(clearSession).not.toHaveBeenCalled();
+
+    // The agent finishes loading later, still holding the previous learner.
+    stub.clearSession = clearSession;
+    stub.isAnonymousVisitor = () => false;
+    vi.advanceTimersByTime(100);
+    expect(clearSession).toHaveBeenCalledTimes(1);
+
+    vi.advanceTimersByTime(60_000);
+    expect(clearSession).toHaveBeenCalledTimes(1);
+    vi.useRealTimers();
   });
 
-  it("reports a failed lookup and renders nothing instead of breaking the page", async () => {
+  it("leaves an anonymous visitor alone so public pages do not mint new visitors", async () => {
+    vi.useFakeTimers();
+    mockCreateClient.mockResolvedValue(makeClient(null) as never);
+    const element = await PendoIdentify();
+
+    const clearSession = vi.fn();
+    vi.stubGlobal("window", {
+      pendo: { clearSession, isAnonymousVisitor: () => true },
+    });
+    eval(element?.props.children as string);
+    vi.advanceTimersByTime(1000);
+
+    expect(clearSession).not.toHaveBeenCalled();
+    vi.useRealTimers();
+  });
+
+  it("does not clear the identity when auth is only temporarily unreachable", async () => {
+    mockCreateClient.mockResolvedValue({
+      auth: {
+        getUser: vi.fn().mockResolvedValue({
+          data: { user: null },
+          error: { name: "AuthRetryableFetchError", status: 0 },
+        }),
+      },
+    } as never);
+
+    await expect(PendoIdentify()).resolves.toBeNull();
+  });
+
+  it("reports a failed lookup and renders nothing, keeping the identity, instead of breaking the page", async () => {
     const error = new Error("getLearnerPlan: user_learner_plans query failed: boom");
     mockGetPendoVisitor.mockRejectedValue(error);
 

@@ -7,7 +7,7 @@ Historical release headings were normalized from their changelog categories: `Ad
 
 ### Added
 
-- Added Novus by Pendo product analytics: the root layout loads the agent and initializes it once per page load, the locale layout identifies signed-in learners with their stats, learner plan, study schedule, and medals, and logging out clears the Pendo session.
+- Added Novus by Pendo product analytics: the root layout loads the agent and initializes it once per page load, the locale layout identifies signed-in learners with their stats, learner plan, study schedule, and medals, and logging out clears the Pendo session. Any page without a signed-in learner (the login page after a logout or an expired session, and public pages) also resets a stale identity once the agent loads, without minting new anonymous visitors. Star points and streak days are sent as 0 when NULL, and schedule metadata is sent only when every scheduled day agrees.
 
 ---
 

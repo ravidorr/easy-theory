@@ -127,7 +127,7 @@ describe("LocaleLayout", () => {
     expect(html).toContain("hello");
   });
 
-  it("identifies the signed-in learner to Pendo", async () => {
+  it("renders the Pendo identify component", async () => {
     const html = renderToStaticMarkup(await LocaleLayout(layoutProps("he")));
     expect(html).toContain('id="pendo-identify"');
   });

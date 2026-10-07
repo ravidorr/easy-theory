@@ -12,8 +12,8 @@ const rubik = Rubik({
   display: "swap",
 });
 
-// Keep initialize in the snippet's script: src/instrumentation-client.ts runs
-// before beforeInteractive scripts, so `pendo` does not exist there yet.
+// Keep initialize in the snippet's script: the snippet is what creates the
+// `pendo` queue stub, so initialize has to run right after it in the same script.
 const PENDO_INSTALL_SCRIPT = `
 (function(apiKey){
     (function(p,e,n,d,o){var v,w,x,y,z;o=p[d]=p[d]||{};o._q=o._q||[];

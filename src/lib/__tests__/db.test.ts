@@ -295,9 +295,20 @@ describe("getLearnerPlan", () => {
       daily_question_goal: 20,
       diagnostic_completed_at: "2025-03-01T18:30:00+00:00",
     };
-    const client = makeClient(plan);
+    const query = {} as Record<string, unknown>;
+    for (const method of ["select", "eq"]) {
+      query[method] = vi.fn().mockReturnValue(query);
+    }
+    query.maybeSingle = vi.fn().mockResolvedValue({ data: plan, error: null });
+    const client = { from: vi.fn().mockReturnValue(query) } as unknown as SupabaseClient;
+
     expect(await getLearnerPlan(client, "u1")).toEqual(plan);
     expect(client.from).toHaveBeenCalledWith("user_learner_plans");
+    expect(query.select).toHaveBeenCalledWith(
+      "target_exam_date, daily_question_goal, diagnostic_completed_at"
+    );
+    expect(query.eq).toHaveBeenCalledWith("user_id", "u1");
+    expect(query.maybeSingle).toHaveBeenCalledTimes(1);
   });
 
   it("returns null before the diagnostic creates a plan", async () => {

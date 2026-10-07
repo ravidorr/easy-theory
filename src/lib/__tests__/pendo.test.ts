@@ -103,4 +103,37 @@ describe("getPendoVisitor", () => {
       medalSlug: [],
     });
   });
+
+  it("sends zero for star points and streak days that are NULL in the database", async () => {
+    vi.mocked(getUserStats).mockResolvedValue({
+      user_id: "user-1",
+      star_points: null,
+      streak_days: null,
+      last_active_date: null,
+    } as unknown as Awaited<ReturnType<typeof getUserStats>>);
+
+    const visitor = await getPendoVisitor(supabase, { id: "user-1" } as User);
+
+    expect(visitor.starPoints).toBe(0);
+    expect(visitor.streakDays).toBe(0);
+  });
+
+  it("sends schedule metadata only when every scheduled day agrees", async () => {
+    vi.mocked(getUserSchedule).mockResolvedValue([
+      scheduleRow("s1", 0),
+      { ...scheduleRow("s2", 2), start_time: "07:00:00", notify: false },
+      { ...scheduleRow("s3", 4), time_zone: "Europe/London", duration_minutes: 30 },
+    ]);
+
+    const visitor = await getPendoVisitor(supabase, { id: "user-1" } as User);
+
+    expect(visitor).toMatchObject({
+      dayOfWeek: [0, 2, 4],
+      locale: "he",
+      startTime: null,
+      notify: null,
+      timeZone: null,
+      durationMinutes: null,
+    });
+  });
 });
