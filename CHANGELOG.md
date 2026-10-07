@@ -7,7 +7,7 @@ Historical release headings were normalized from their changelog categories: `Ad
 
 ### Added
 
-- Added Novus by Pendo product analytics: the root layout loads the agent and initializes it once per page load, the locale layout identifies signed-in learners with their stats, learner plan, study schedule, and medals, and logging out clears the Pendo session. With no Supabase session cookie the root initializer sets `forceAnonymous`, so a leftover identified visitor is not read back after logout. Any page without a signed-in learner (the login page after a logout or an expired session, and public pages) also resets a stale identity once the agent loads, without minting new anonymous visitors. Star points and streak days are sent as 0 when NULL, and schedule metadata is sent only when every scheduled day agrees.
+- Added Novus by Pendo product analytics: the root layout loads the agent without initializing it, and `PendoInit` initializes it once after a verified `getUser()` result. A confirmed learner is initialized with their stats, learner plan, study schedule, and medals (or by id alone if that lookup fails); every other case, including an expired session, a PKCE verifier cookie only, or an unreachable auth service, starts anonymous with `forceAnonymous` so a previous learner is never restored. Logging out also clears the Pendo session. Star points and streak days are sent as 0 when NULL, and schedule metadata is sent only when every scheduled day agrees.
 
 ---
 
