@@ -12,6 +12,7 @@ export type { Question, Resource, Sign, Topic, Video } from "./db/catalog";
 export {
   claimScheduleNotification,
   completeScheduleNotification,
+  getLearnerPlan,
   getPushSubscriptionsForUsers,
   getQuizAnswerEventCountForWindow,
   getTopicAccuracy,
@@ -24,6 +25,7 @@ export {
   releaseScheduleNotification,
 } from "./db/learner";
 export type {
+  LearnerPlan,
   PushSubscriptionRow,
   Schedule,
   ScheduleWithUser,

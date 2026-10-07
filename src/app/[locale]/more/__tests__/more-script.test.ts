@@ -225,4 +225,36 @@ describe("more.js", () => {
     });
     expect(loc.href).toBe("/auth/login");
   });
+
+  it("clears the Pendo session after logging out, before redirecting", async () => {
+    const calls: string[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation(async () => {
+        calls.push("logout");
+        return { ok: true };
+      })
+    );
+    vi.stubGlobal("pendo", { clearSession: vi.fn(() => calls.push("clearSession")) });
+    const loc = stubLocation();
+    setupDOM("dark");
+
+    (document.getElementById("logout-btn") as HTMLButtonElement).click();
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(calls).toEqual(["logout", "clearSession"]);
+    expect(loc.href).toBe("/auth/login");
+  });
+
+  it("still logs out when only the Pendo snippet stub has loaded", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true }));
+    vi.stubGlobal("pendo", { identify: vi.fn() });
+    const loc = stubLocation();
+    setupDOM("dark");
+
+    (document.getElementById("logout-btn") as HTMLButtonElement).click();
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(loc.href).toBe("/auth/login");
+  });
 });

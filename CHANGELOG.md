@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 Historical release headings were normalized from their changelog categories: `Added` releases receive a minor increment, except for a clearly test-only addition; all other categories receive a patch increment. No historical major increment was inferred. One stable SemVer increment and one top-level entry per PR are enforced by the pre-push hook; individual commits within a PR do not bump.
 
+## [0.57.0] — 2026-10-07
+
+### Added
+
+- Added Novus by Pendo product analytics: the root layout loads the agent without initializing it, and `PendoInit` initializes it once after a verified `getUser()` result. A confirmed learner is initialized with their stats, learner plan, study schedule, and medals (or by id alone if that lookup fails); every other case, including an expired session, a PKCE verifier cookie only, or an unreachable auth service, starts anonymous with `forceAnonymous` so a previous learner is never restored. Logging out also clears the Pendo session. Star points and streak days are sent as 0 when NULL, and schedule metadata is sent only when every scheduled day agrees.
+
+---
+
 ## [0.56.22] — 2026-10-07
 
 ### Changed

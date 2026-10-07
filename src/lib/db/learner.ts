@@ -22,7 +22,14 @@ export type Schedule = {
   start_time: string;
   duration_minutes: number;
   notify: boolean;
+  locale: Locale;
   time_zone: string;
+};
+
+export type LearnerPlan = {
+  target_exam_date: string | null;
+  daily_question_goal: number;
+  diagnostic_completed_at: string | null;
 };
 
 export async function getUserStats(
@@ -66,6 +73,19 @@ export async function getUserSchedule(
     .order("day_of_week");
   throwOnDbError(error, "getUserSchedule: user_schedule");
   return data ?? [];
+}
+
+export async function getLearnerPlan(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<LearnerPlan | null> {
+  const { data, error } = await supabase
+    .from("user_learner_plans")
+    .select("target_exam_date, daily_question_goal, diagnostic_completed_at")
+    .eq("user_id", userId)
+    .maybeSingle();
+  throwOnDbError(error, "getLearnerPlan: user_learner_plans");
+  return data;
 }
 
 export type ScheduleWithUser = {
