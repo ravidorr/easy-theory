@@ -53,11 +53,21 @@
     } catch {}
   }
 
+  // Only the path of the post-login target is tracked: its query string can carry
+  // arbitrary values. The full target is still sent to the server for the redirect.
+  function pathOnly(target) {
+    try {
+      return new URL(target, window.location.origin).pathname;
+    } catch {
+      return "/";
+    }
+  }
+
   // The email address is never tracked: the audience includes minors.
   function trackLinkRequested(isResend, nextPath) {
     trackEvent("magic_link_requested", {
       is_resend: isResend,
-      next_path: nextPath,
+      next_path: pathOnly(nextPath),
       locale: window.__locale,
       after_expired_link: new URLSearchParams(window.location.search).get("error") === "1",
     });

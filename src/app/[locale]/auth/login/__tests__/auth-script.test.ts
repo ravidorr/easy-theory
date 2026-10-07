@@ -12,6 +12,7 @@ function setupDOM() {
     <div id="login-header"></div>
     <form id="login-form">
       <input id="email-input" type="email" value="test@example.com" />
+      <input id="next-path" type="hidden" value="/" />
       <button id="send-btn" type="submit">שלח לי קישור</button>
       <div id="login-error" style="display:none"></div>
     </form>
@@ -113,6 +114,43 @@ describe("auth.js – Pendo tracking", () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
+  });
+
+  it("tracks only the path of the post-login target while still sending the full target", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) });
+    vi.stubGlobal("fetch", fetchMock);
+    const target = "/topics?email=a%40b.test&token=secret#frag";
+    (document.getElementById("next-path") as HTMLInputElement).value = target;
+
+    submitForm();
+    await flush();
+    (document.getElementById("resend-btn") as HTMLButtonElement).click();
+    await flush();
+
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({
+      email: "test@example.com",
+      next: target,
+    });
+    const tracked = track.mock.calls.filter(([name]) => name === "magic_link_requested");
+    expect(tracked).toHaveLength(2);
+    for (const [, properties] of tracked) {
+      expect(properties.next_path).toBe("/topics");
+    }
+    expect(JSON.stringify(track.mock.calls)).not.toContain("secret");
+    expect(JSON.stringify(track.mock.calls)).not.toContain("a%40b.test");
+  });
+
+  it("falls back to the root path when the post-login target cannot be parsed", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) }));
+    (document.getElementById("next-path") as HTMLInputElement).value = "http://[bad";
+
+    submitForm();
+    await flush();
+
+    expect(track).toHaveBeenCalledWith(
+      "magic_link_requested",
+      expect.objectContaining({ next_path: "/" })
+    );
   });
 
   it("tracks a sent magic link without the email address", async () => {
