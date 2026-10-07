@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import * as Sentry from "@sentry/nextjs";
+import { trackPendoEvent } from "@/lib/pendo-client";
 import GlobalError from "../global-error";
 import heMessages from "../../../messages/he.json";
 import arMessages from "../../../messages/ar.json";
@@ -8,6 +9,8 @@ import arMessages from "../../../messages/ar.json";
 vi.mock("@sentry/nextjs", () => ({
   captureException: vi.fn(),
 }));
+
+vi.mock("@/lib/pendo-client", () => ({ trackPendoEvent: vi.fn() }));
 
 describe("GlobalError (root error boundary)", () => {
   const error = Object.assign(new Error("boom"), { digest: "d1" });
@@ -32,6 +35,17 @@ describe("GlobalError (root error boundary)", () => {
     render(<GlobalError error={error} reset={reset} />);
     expect(Sentry.captureException).toHaveBeenCalledWith(error);
     expect(console.error).toHaveBeenCalledWith(error);
+  });
+
+  it("tracks the root error boundary in product analytics", () => {
+    render(<GlobalError error={error} reset={reset} />);
+    expect(trackPendoEvent).toHaveBeenCalledTimes(1);
+    expect(trackPendoEvent).toHaveBeenCalledWith("app_error_shown", {
+      error_boundary: "root",
+      error_digest: "d1",
+      page_path: window.location.pathname,
+      locale: undefined,
+    });
   });
 
   it("calls reset when the retry button is clicked", () => {

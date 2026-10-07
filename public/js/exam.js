@@ -71,6 +71,42 @@
   let autoAdvanceTimer = null;
   let saveInFlight = false;
   let saveQueued = false;
+  // A conflicted or failing session fails every later autosave too; report
+  // each failure reason once per page.
+  const reportedSaveFailures = new Set();
+
+  function trackEvent(name, properties) {
+    try {
+      if (window.pendo && typeof window.pendo.track === "function") window.pendo.track(name, properties);
+    } catch {}
+  }
+
+  function trackSaveFailed(reason) {
+    if (reportedSaveFailures.has(reason)) return;
+    reportedSaveFailures.add(reason);
+    trackEvent("exam_progress_save_failed", {
+      session_id: sessionId,
+      failure_reason: reason,
+      revision: revision,
+      answered_count: answeredCount(),
+      current_index: currentIndex,
+    });
+  }
+
+  function weakestTopicId(topicBreakdown) {
+    const breakdown = topicBreakdown && typeof topicBreakdown === "object" ? topicBreakdown : {};
+    let weakestId;
+    let weakestRatio = Infinity;
+    Object.keys(breakdown).forEach(function (topicId) {
+      const correct = Number(breakdown[topicId] && breakdown[topicId].correct) || 0;
+      const topicTotal = Number(breakdown[topicId] && breakdown[topicId].total) || 0;
+      if (topicTotal > 0 && correct / topicTotal < weakestRatio) {
+        weakestRatio = correct / topicTotal;
+        weakestId = topicId;
+      }
+    });
+    return weakestId;
+  }
 
   function persist() {
     if (!sessionId || submitted) return;
@@ -103,6 +139,7 @@
           errorEl.textContent = t.examSaveConflict || "הסימולציה נפתחה במקום אחר. יש לרענן את הדף.";
           errorEl.hidden = false;
         }
+        trackSaveFailed("conflict");
         return;
       }
       if (typeof data.revision === "number") revision = data.revision;
@@ -111,6 +148,7 @@
         errorEl.textContent = t.examSaveError || "לא ניתן לשמור את מצב הסימולציה.";
         errorEl.hidden = false;
       }
+      trackSaveFailed("error");
     }).finally(function () {
       saveInFlight = false;
       flushSave();
@@ -347,11 +385,13 @@
       }),
     };
 
+    let responseStatus;
     fetch("/api/exam", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     }).then(function (res) {
+      responseStatus = res.status;
       if (!res.ok) throw new Error("submit failed");
       return res.json();
     }).then(function (data) {
@@ -359,9 +399,24 @@
       submitting = false;
       stopTimer();
       showResults(data);
+      trackEvent("exam_submitted", {
+        session_id: sessionId,
+        passed: data.passed === true,
+        score: data.score,
+        total: data.total,
+        pass_mark: data.pass_mark,
+        score_gap: data.pass_mark - data.score,
+        unanswered_count: data.unanswered_count,
+        duration_seconds: data.duration_seconds,
+        auto_submitted: auto,
+        marked_for_review_count: markedQuestionIds.length,
+        weakest_topic_id: weakestTopicId(data.topic_breakdown),
+        medals_earned: Array.isArray(data.medals_earned) ? data.medals_earned.join(",") : "",
+      });
       if (data.medals_earned && window.medalCelebration) {
         window.medalCelebration.show(data.medals_earned, {
           fallbackFocus: resultScreen && resultScreen.querySelector("button, a"),
+          source: "exam",
         });
       }
     }).catch(function () {
@@ -370,6 +425,14 @@
         errorEl.textContent = t.examSubmitError || "שגיאה בשליחה, נסו שוב?";
         errorEl.hidden = false;
       }
+      trackEvent("exam_submission_failed", {
+        session_id: sessionId,
+        auto_submitted: auto,
+        http_status: responseStatus,
+        is_network_error: responseStatus === undefined,
+        answered_count: answeredCount(),
+        remaining_seconds: remaining,
+      });
       if (submitBtn) {
         submitBtn.disabled = false;
         submitBtn.textContent = t.examSubmit || "הגשת המבחן";
@@ -451,4 +514,14 @@
   showSlide(currentIndex);
   updateAnswered();
   timerId = setInterval(tick, 1000);
+  trackEvent("exam_started", {
+    session_id: sessionId,
+    is_resumed: revision > 0 || answeredCount() > 0,
+    total_questions: total,
+    duration_seconds: durationSeconds,
+    remaining_seconds: remaining,
+    answered_count: answeredCount(),
+    current_index: currentIndex,
+    session_mode: sessionId ? "server_session" : "legacy",
+  });
 })();

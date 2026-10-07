@@ -94,11 +94,27 @@
     buildMedalModal(meta, fallbackFocus);
   }
 
+  function trackEvent(name, properties) {
+    try {
+      if (window.pendo && typeof window.pendo.track === "function") window.pendo.track(name, properties);
+    } catch {}
+  }
+
   window.medalCelebration = {
     show: function (slugs, options) {
       if (!Array.isArray(slugs)) return;
+      const context = options || {};
+      slugs.forEach(function (slug) {
+        trackEvent("medal_earned", {
+          medal_slug: slug,
+          medal_category: String(slug).indexOf("streak-") === 0 ? "streak" : "achievement",
+          source: context.source,
+          streak_days: context.streakDays,
+          new_total_stars: context.newTotalStars,
+        });
+      });
       medalQueue.push.apply(medalQueue, slugs);
-      showNextMedal(options && options.fallbackFocus);
+      showNextMedal(context.fallbackFocus);
     },
   };
 })();

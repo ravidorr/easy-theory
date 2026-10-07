@@ -21,14 +21,18 @@ const SIGNS: CardData[] = [
 
 const STALE_SRCSET = "/_next/image?url=%2Fsigns%2Fsign-301.png&w=96&q=75 1x";
 
-function setupDOM(signs: CardData[] | string = SIGNS, { withDataEl = true } = {}) {
+function setupDOM(
+  signs: CardData[] | string = SIGNS,
+  { withDataEl = true, dueCount }: { withDataEl?: boolean; dueCount?: number } = {}
+) {
   const json = typeof signs === "string" ? signs : JSON.stringify(signs);
   const first = typeof signs === "string" ? SIGNS[0] : (signs[0] ?? SIGNS[0]);
+  const dueCountAttr = dueCount === undefined ? "" : ` data-due-count="${dueCount}"`;
   document.body.innerHTML = `
     <main>
       <span id="fc-count"></span>
       <div id="fc-progress"></div>
-      <div id="flashcards-container" data-total="${typeof signs === "string" ? 0 : signs.length}">
+      <div id="flashcards-container" data-total="${typeof signs === "string" ? 0 : signs.length}"${dueCountAttr}>
         <button type="button" class="flashcard-wrap" data-index="0" aria-label="הקשי לראות את השם" aria-expanded="false" style="display:flex">
           <div class="flashcard-inner">
             <div class="flashcard-face">
@@ -317,6 +321,73 @@ describe("flashcard.js", () => {
       clickYes();
       await Promise.resolve();
       expect(countText()).toBe("הושלם! 1 כרטיסים");
+    });
+  });
+
+  describe("Pendo tracking", () => {
+    const DUE_AT = "2026-08-01T00:00:00.000Z";
+    let track: ReturnType<typeof vi.fn>;
+
+    function flush() {
+      return new Promise((r) => setTimeout(r, 0));
+    }
+
+    function tracked(name: string) {
+      return track.mock.calls
+        .filter(([event]) => event === name)
+        .map(([, properties]) => properties);
+    }
+
+    beforeEach(() => {
+      track = vi.fn();
+      vi.stubGlobal("pendo", { track });
+    });
+
+    it("tracks each first-time grade once its review is saved", async () => {
+      fetchMock.mockResolvedValue({ ok: true, json: async () => ({ ok: true, due_at: DUE_AT }) });
+      setupDOM();
+
+      card().click();
+      clickYes();
+      clickNo();
+      await flush();
+
+      expect(tracked("flashcard_graded")).toEqual([
+        { sign_id: ID_1, knew: true, was_flipped: true, card_position: 1, deck_size: 3, next_due_at: DUE_AT },
+        { sign_id: ID_2, knew: false, was_flipped: false, card_position: 2, deck_size: 3, next_due_at: DUE_AT },
+      ]);
+    });
+
+    it("does not track a grade the server rejected", async () => {
+      fetchMock.mockResolvedValue({ ok: false, json: async () => ({}) });
+      setupDOM();
+
+      clickYes();
+      await flush();
+
+      expect(tracked("flashcard_graded")).toEqual([]);
+    });
+
+    it("tracks a finished deck with first-pass and replay counts", () => {
+      setupDOM(SIGNS, { dueCount: 2 });
+
+      clickNo(); // card 0
+      clickYes(); // card 1
+      clickNo(); // card 2, replay starts at card 0
+      clickNo(); // replayed card 0, re-queued
+      clickYes(); // replayed card 2
+      clickYes(); // replayed card 0, deck done
+
+      expect(tracked("flashcard_deck_completed")).toEqual([
+        {
+          deck_size: 3,
+          cards_graded: 3,
+          known_first_try_count: 1,
+          unknown_first_try_count: 2,
+          replayed_cards_count: 3,
+          due_count: 2,
+        },
+      ]);
     });
   });
 });

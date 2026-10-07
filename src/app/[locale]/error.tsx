@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import * as Sentry from "@sentry/nextjs";
 import { ClientTabBar } from "@/components/ClientTabBar";
+import { trackPendoEvent } from "@/lib/pendo-client";
 import styles from "./error.module.css";
 
 // Segment-level error boundary for everything under [locale]. Data helpers
@@ -22,6 +23,12 @@ export default function LocaleError({
   useEffect(() => {
     console.error(error);
     Sentry.captureException(error);
+    trackPendoEvent("app_error_shown", {
+      error_boundary: "locale",
+      error_digest: error.digest,
+      page_path: window.location.pathname,
+      locale: window.__locale,
+    });
   }, [error]);
 
   return (

@@ -226,6 +226,40 @@ describe("more.js", () => {
     expect(loc.href).toBe("/auth/login");
   });
 
+  it("tracks each preference change with its resulting and previous value", () => {
+    const track = vi.fn();
+    vi.stubGlobal("pendo", { track });
+    vi.stubGlobal("__locale", "ar");
+    setupDOM("dark");
+
+    toggle().click();
+    autoAdvanceDelayInput().value = "1750";
+    autoAdvanceDelayInput().dispatchEvent(new Event("input", { bubbles: true }));
+    autoAdvanceDelayInput().value = "2000";
+    autoAdvanceDelayInput().dispatchEvent(new Event("input", { bubbles: true }));
+    autoAdvanceDelayInput().dispatchEvent(new Event("change", { bubbles: true }));
+    autoAdvanceToggle().click();
+
+    expect(track.mock.calls).toEqual([
+      ["app_preference_changed", { preference: "theme", new_value: "light", previous_value: "dark", locale: "ar" }],
+      [
+        "app_preference_changed",
+        { preference: "quiz_auto_advance_delay", new_value: "2000", previous_value: "1125", locale: "ar" },
+      ],
+      ["app_preference_changed", { preference: "quiz_auto_advance", new_value: "off", previous_value: "on", locale: "ar" }],
+    ]);
+  });
+
+  it("does not track a delay slider released at its stored value", () => {
+    const track = vi.fn();
+    vi.stubGlobal("pendo", { track });
+    setupDOM("dark");
+
+    autoAdvanceDelayInput().dispatchEvent(new Event("change", { bubbles: true }));
+
+    expect(track).not.toHaveBeenCalled();
+  });
+
   it("clears the Pendo session after logging out, before redirecting", async () => {
     const calls: string[] = [];
     vi.stubGlobal(

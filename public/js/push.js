@@ -12,33 +12,51 @@
     return Uint8Array.from(raw, function (c) { return c.charCodeAt(0); });
   }
 
-  async function subscribeToPush() {
+  function trackEvent(name, properties) {
     try {
-      if (!("serviceWorker" in navigator) || !("PushManager" in window)) return false;
+      if (global.pendo && typeof global.pendo.track === "function") global.pendo.track(name, properties);
+    } catch {}
+  }
 
-      const vapidKey = getVapidKey();
-      if (!vapidKey) return false;
+  async function requestSubscription() {
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return "unsupported";
 
-      const permission = await Notification.requestPermission();
-      if (permission !== "granted") return false;
+    const vapidKey = getVapidKey();
+    if (!vapidKey) return "missing_vapid_key";
 
-      const reg = await navigator.serviceWorker.ready;
-      const subscription = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(vapidKey),
-      });
+    const permission = await Notification.requestPermission();
+    if (permission === "denied") return "permission_denied";
+    if (permission !== "granted") return "permission_dismissed";
 
-      const subJson = subscription.toJSON();
-      const res = await fetch("/api/push/subscribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(subJson),
-      });
+    const reg = await navigator.serviceWorker.ready;
+    const subscription = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(vapidKey),
+    });
 
-      return res.ok;
+    const subJson = subscription.toJSON();
+    const res = await fetch("/api/push/subscribe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(subJson),
+    });
+
+    return res.ok ? "subscribed" : "save_failed";
+  }
+
+  async function subscribeToPush() {
+    let outcome;
+    try {
+      outcome = await requestSubscription();
     } catch {
-      return false;
+      outcome = "error";
     }
+    trackEvent("push_opt_in_completed", {
+      outcome: outcome,
+      permission: typeof Notification !== "undefined" ? Notification.permission : undefined,
+      source: "schedule_save",
+    });
+    return outcome === "subscribed";
   }
 
   async function unsubscribeFromPush() {

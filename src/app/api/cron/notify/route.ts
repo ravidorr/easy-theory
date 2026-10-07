@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { Resend } from "resend";
 import webpush from "web-push";
 import { createAdminClient } from "@/lib/supabase";
@@ -11,12 +11,26 @@ import {
 } from "@/lib/db";
 import { getNotifyTranslator } from "@/lib/api";
 import { reportError } from "@/lib/monitoring";
+import { trackServerEvent } from "@/lib/pendo-server";
 
 const APP_URL = "https://easy-theory-omega.vercel.app";
+
+type ReminderChannel = "push" | "email";
 
 const weekdayMap: Record<string, number> = {
   Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6,
 };
+
+// The tag lets the landing page attribute the visit to this reminder
+// (public/js/reminder-click.js), since a notification click happens outside
+// any page.
+function reminderUrl(channel: ReminderChannel, localDate: string): string {
+  const url = new URL(APP_URL);
+  url.searchParams.set("source", "study_reminder");
+  url.searchParams.set("channel", channel);
+  url.searchParams.set("reminder_date", localDate);
+  return url.toString();
+}
 
 function getLocalScheduleDate(timeZone: string, now = new Date()) {
   const parts = new Intl.DateTimeFormat("en-US", {
@@ -81,6 +95,19 @@ export async function GET(request: Request) {
       const duration = s.duration_minutes;
       const pushSub = pushSubsByUser.get(s.user_id);
       const t = getNotifyTranslator(s.locale === "ar" ? "ar" : "he");
+      // The push endpoint and email address are deliberately not tracked.
+      const trackReminderSent = (channel: ReminderChannel) =>
+        after(() =>
+          trackServerEvent("study_reminder_sent", s.user_id, {
+            channel,
+            local_date: localDate,
+            day_of_week: s.day_of_week,
+            start_time: time,
+            duration_minutes: duration,
+            locale: s.locale,
+            time_zone: s.time_zone,
+          })
+        );
 
       if (pushSub) {
         try {
@@ -89,7 +116,7 @@ export async function GET(request: Request) {
             JSON.stringify({
               title: t("pushTitle"),
               body: t("pushBody", { time, duration }),
-              url: APP_URL,
+              url: reminderUrl("push", localDate),
             })
           );
           await completeScheduleNotification(admin, s.user_id, localDate);
@@ -119,7 +146,9 @@ export async function GET(request: Request) {
             });
           }
           await releaseScheduleNotification(admin, s.user_id, localDate);
+          return;
         }
+        trackReminderSent("push");
         return;
       }
 
@@ -143,7 +172,7 @@ export async function GET(request: Request) {
             "",
             t("emailLesson", { time, duration }),
             "",
-            t("emailCta", { url: APP_URL }),
+            t("emailCta", { url: reminderUrl("email", localDate) }),
             "",
             t("emailGoodLuck"),
           ].join("\n"),
@@ -154,6 +183,7 @@ export async function GET(request: Request) {
         await releaseScheduleNotification(admin, s.user_id, localDate);
         throw err;
       }
+      trackReminderSent("email");
     })
   );
 

@@ -84,6 +84,7 @@ export default async function LocaleLayout({
           navigator.serviceWorker.register('/sw.js');
         }
       `}</Script>
+      <Script src="/js/reminder-click.js" strategy="afterInteractive" />
     </>
   );
 }

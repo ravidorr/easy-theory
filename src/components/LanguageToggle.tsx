@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useLocale } from "next-intl";
 import { usePathname, useRouter } from "@/lib/navigation";
+import { trackPendoEvent } from "@/lib/pendo-client";
 import styles from "./LanguageToggle.module.css";
 
 export function LanguageToggle() {
@@ -15,6 +16,12 @@ export function LanguageToggle() {
     if (isSwitching) return;
     setIsSwitching(true);
     const newLocale = locale === "he" ? "ar" : "he";
+    trackPendoEvent("app_preference_changed", {
+      preference: "language",
+      new_value: newLocale,
+      previous_value: locale,
+      locale,
+    });
     router.replace(pathname, { locale: newLocale });
   };
 

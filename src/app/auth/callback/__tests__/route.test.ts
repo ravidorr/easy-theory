@@ -1,12 +1,31 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { GET } from "../route";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { trackServerEvent } from "@/lib/pendo-server";
 
 // vi.mock is hoisted — use vi.hoisted() so the variable is available inside the factory.
-const mockExchangeCode = vi.hoisted(() => vi.fn().mockResolvedValue({ error: null }));
-const mockVerifyOtp = vi.hoisted(() => vi.fn().mockResolvedValue({ error: null }));
+const signedOut = vi.hoisted(() => ({ data: { user: null, session: null }, error: null }));
+const mockExchangeCode = vi.hoisted(() => vi.fn().mockResolvedValue(signedOut));
+const mockVerifyOtp = vi.hoisted(() => vi.fn().mockResolvedValue(signedOut));
 const mockCookieGet = vi.hoisted(() => vi.fn().mockReturnValue(undefined));
+// after() runs its task once the response has been sent, so the mock only queues it.
+const afterTasks = vi.hoisted(() => [] as Array<() => unknown>);
+const mockAfter = vi.hoisted(() =>
+  vi.fn((task: () => unknown) => {
+    afterTasks.push(task);
+  })
+);
+async function flushAfter() {
+  await Promise.all(afterTasks.splice(0).map((task) => task()));
+}
+
+vi.mock("next/server", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("next/server")>()),
+  after: mockAfter,
+}));
+
+vi.mock("@/lib/pendo-server", () => ({ trackServerEvent: vi.fn() }));
 
 vi.mock("next/headers", () => ({
   cookies: vi.fn().mockResolvedValue({
@@ -34,8 +53,9 @@ function makeRequest(params: Record<string, string>) {
 describe("GET /auth/callback", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockExchangeCode.mockResolvedValue({ error: null });
-    mockVerifyOtp.mockResolvedValue({ error: null });
+    afterTasks.length = 0;
+    mockExchangeCode.mockResolvedValue(signedOut);
+    mockVerifyOtp.mockResolvedValue(signedOut);
     mockCookieGet.mockReturnValue(undefined);
   });
 
@@ -103,6 +123,82 @@ describe("GET /auth/callback", () => {
     const res = await GET(makeRequest({ token_hash: "bad", type: "email" }));
     expect(res.status).toBe(307);
     expect(res.headers.get("location")).toContain("/auth/login?error=1");
+  });
+
+  describe("user_signed_in tracking", () => {
+    const NOW = new Date("2026-07-30T05:00:00Z");
+
+    function signedIn(createdAt: string) {
+      return {
+        data: { user: { id: "u1", created_at: createdAt }, session: {} },
+        error: null,
+      };
+    }
+
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(NOW);
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("tracks a token-hash sign-in after the response, flagging a just-created account as new", async () => {
+      mockVerifyOtp.mockResolvedValue(signedIn("2026-07-30T04:55:00Z"));
+
+      const res = await GET(makeRequest({ token_hash: "abc", type: "email", next: "/topics" }));
+
+      expect(res.headers.get("location")).toBe("http://localhost/topics");
+      expect(mockAfter).toHaveBeenCalledTimes(1);
+      expect(trackServerEvent).not.toHaveBeenCalled();
+      await flushAfter();
+      expect(trackServerEvent).toHaveBeenCalledWith("user_signed_in", "u1", {
+        auth_flow: "token_hash",
+        otp_type: "email",
+        next_path: "/topics",
+        is_new_user: true,
+      });
+    });
+
+    it("tracks a PKCE sign-in by a returning learner", async () => {
+      mockExchangeCode.mockResolvedValue(signedIn("2026-05-01T10:00:00Z"));
+
+      await GET(makeRequest({ code: "abc123" }));
+      await flushAfter();
+
+      expect(trackServerEvent).toHaveBeenCalledWith("user_signed_in", "u1", {
+        auth_flow: "pkce",
+        next_path: "/schedule",
+        is_new_user: false,
+      });
+    });
+
+    it("reports only the path of the post-login target, never its query string", async () => {
+      mockVerifyOtp.mockResolvedValue(signedIn("2026-05-01T10:00:00Z"));
+
+      const res = await GET(
+        makeRequest({ token_hash: "abc", type: "email", next: "/topics?utm=secret&email=a@b.co" })
+      );
+      await flushAfter();
+
+      expect(res.headers.get("location")).toBe("http://localhost/topics?utm=secret&email=a@b.co");
+      expect(trackServerEvent).toHaveBeenCalledWith(
+        "user_signed_in",
+        "u1",
+        expect.objectContaining({ next_path: "/topics" })
+      );
+      expect(JSON.stringify(vi.mocked(trackServerEvent).mock.calls)).not.toContain("secret");
+    });
+
+    it("does not track when the session has no user or verification fails", async () => {
+      await GET(makeRequest({ code: "abc123" }));
+      mockVerifyOtp.mockResolvedValue({ error: { message: "invalid token" } });
+      await GET(makeRequest({ token_hash: "bad", type: "email" }));
+
+      expect(mockAfter).not.toHaveBeenCalled();
+      expect(trackServerEvent).not.toHaveBeenCalled();
+    });
   });
 
   describe("cookie callbacks passed to createServerClient", () => {

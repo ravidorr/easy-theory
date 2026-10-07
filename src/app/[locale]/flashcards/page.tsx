@@ -149,6 +149,7 @@ export default async function FlashcardsPage() {
         <div
           id="flashcards-container"
           data-total={total}
+          data-due-count={dueCount}
           className={styles.cardsContainer}
         >
           {total > 0 && <SignCard card={cards[0]} flipHint={t("flipHint")} />}

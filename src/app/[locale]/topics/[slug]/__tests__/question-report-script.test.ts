@@ -95,4 +95,27 @@ describe("question-report.js", () => {
     expect(document.activeElement).toBe(textarea);
     expect([...document.querySelectorAll("button")].find((button) => button.textContent === "Send")?.disabled).toBe(false);
   });
+
+  it("tracks a sent report with the comment length but never its text", async () => {
+    const track = vi.fn();
+    vi.stubGlobal("pendo", { track });
+    vi.mocked(fetch).mockResolvedValue({ ok: true, json: async () => ({ ok: true }) } as Response);
+    (document.querySelector(".report-question") as HTMLButtonElement).click();
+    (document.querySelector("textarea") as HTMLTextAreaElement).value = "  Wrong sign  ";
+    (document.querySelector("select") as HTMLSelectElement).value = "image";
+    [...document.querySelectorAll("button")].find((button) => button.textContent === "Send")!.click();
+    await flushAsyncWork();
+
+    expect(track).toHaveBeenCalledTimes(1);
+    expect(track).toHaveBeenCalledWith("question_reported", {
+      question_id: "q1",
+      topic_id: "t1",
+      category: "image",
+      has_comment: true,
+      comment_length: 10,
+      locale: "ar",
+      quiz_mode: "topic",
+    });
+    expect(JSON.stringify(track.mock.calls)).not.toContain("Wrong sign");
+  });
 });

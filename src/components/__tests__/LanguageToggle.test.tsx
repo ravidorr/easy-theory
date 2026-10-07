@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
+import { trackPendoEvent } from "@/lib/pendo-client";
 import { LanguageToggle } from "../LanguageToggle";
+
+vi.mock("@/lib/pendo-client", () => ({ trackPendoEvent: vi.fn() }));
 
 function invokeReactClick(element: HTMLElement) {
   const key = Object.keys(element).find((name) => name.startsWith("__reactProps"));
@@ -59,6 +62,17 @@ describe("LanguageToggle", () => {
     expect(mockReplace).toHaveBeenCalledWith("/he/more", { locale: "ar" });
   });
 
+  it("tracks the language switch as a preference change", () => {
+    render(<LanguageToggle />);
+    fireEvent.click(screen.getByRole("button"));
+    expect(trackPendoEvent).toHaveBeenCalledWith("app_preference_changed", {
+      preference: "language",
+      new_value: "ar",
+      previous_value: "he",
+      locale: "he",
+    });
+  });
+
   it("disables after activation to prevent duplicate locale changes", () => {
     render(<LanguageToggle />);
     const button = screen.getByRole("button");
@@ -70,6 +84,7 @@ describe("LanguageToggle", () => {
     invokeReactClick(button);
 
     expect(mockReplace).toHaveBeenCalledTimes(1);
+    expect(trackPendoEvent).toHaveBeenCalledTimes(1);
   });
 
   it("calls router.replace with he locale when clicked from ar", () => {

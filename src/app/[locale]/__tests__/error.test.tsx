@@ -2,11 +2,14 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import React from "react";
 import * as Sentry from "@sentry/nextjs";
+import { trackPendoEvent } from "@/lib/pendo-client";
 import LocaleError from "../error";
 
 vi.mock("@sentry/nextjs", () => ({
   captureException: vi.fn(),
 }));
+
+vi.mock("@/lib/pendo-client", () => ({ trackPendoEvent: vi.fn() }));
 
 vi.mock("next/link", () => ({
   default: ({ href, children, ...rest }: { href: string; children: unknown }) =>
@@ -44,6 +47,19 @@ describe("LocaleError ([locale] error boundary)", () => {
   it("reports the error to the tracker", () => {
     render(<LocaleError error={error} reset={reset} />);
     expect(Sentry.captureException).toHaveBeenCalledWith(error);
+  });
+
+  it("tracks the error boundary in product analytics", () => {
+    window.__locale = "ar";
+    render(<LocaleError error={error} reset={reset} />);
+    expect(trackPendoEvent).toHaveBeenCalledTimes(1);
+    expect(trackPendoEvent).toHaveBeenCalledWith("app_error_shown", {
+      error_boundary: "locale",
+      error_digest: "d1",
+      page_path: window.location.pathname,
+      locale: "ar",
+    });
+    delete window.__locale;
   });
 
   it("calls reset when the retry button is clicked", () => {

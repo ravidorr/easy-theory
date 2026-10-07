@@ -10,6 +10,7 @@ import {
   releaseScheduleNotification,
 } from "@/lib/db";
 import { reportError } from "@/lib/monitoring";
+import { trackServerEvent } from "@/lib/pendo-server";
 import heMessages from "../../../../../../messages/he.json";
 import arMessages from "../../../../../../messages/ar.json";
 
@@ -17,7 +18,22 @@ import arMessages from "../../../../../../messages/ar.json";
 const mockSendNotification = vi.hoisted(() => vi.fn().mockResolvedValue({}));
 const mockSetVapidDetails = vi.hoisted(() => vi.fn());
 const mockEmailSend = vi.hoisted(() => vi.fn().mockResolvedValue({ id: "email-id" }));
+// after() runs its task once the response has been sent, so the mock only queues it.
+const afterTasks = vi.hoisted(() => [] as Array<() => unknown>);
+const mockAfter = vi.hoisted(() =>
+  vi.fn((task: () => unknown) => {
+    afterTasks.push(task);
+  })
+);
+async function flushAfter() {
+  await Promise.all(afterTasks.splice(0).map((task) => task()));
+}
 
+vi.mock("next/server", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("next/server")>()),
+  after: mockAfter,
+}));
+vi.mock("@/lib/pendo-server", () => ({ trackServerEvent: vi.fn() }));
 vi.mock("@/lib/supabase", () => ({ createAdminClient: vi.fn() }));
 vi.mock("@/lib/db", () => ({
   claimScheduleNotification: vi.fn(),
@@ -86,6 +102,7 @@ const PUSH_SUB = { user_id: "u1", endpoint: "https://push.example.com", auth: "a
 
 describe("GET /api/cron/notify", () => {
   beforeEach(() => {
+    afterTasks.length = 0;
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-30T05:00:00Z"));
     vi.clearAllMocks();
@@ -151,6 +168,71 @@ describe("GET /api/cron/notify", () => {
       "2026-07-30"
     );
     expect(body).toEqual({ sent: 1 });
+  });
+
+  it("tags the push link and tracks the delivered reminder without the endpoint", async () => {
+    mockGetSchedules.mockResolvedValue([SCHEDULE]);
+    mockGetPushSubs.mockResolvedValue([PUSH_SUB]);
+
+    await GET(makeRequest());
+
+    const payload = JSON.parse(mockSendNotification.mock.calls[0][1]);
+    expect(payload.url).toBe(
+      "https://easy-theory-omega.vercel.app/?source=study_reminder&channel=push&reminder_date=2026-07-30"
+    );
+    expect(mockAfter).toHaveBeenCalledTimes(1);
+    expect(trackServerEvent).not.toHaveBeenCalled();
+    await flushAfter();
+    expect(trackServerEvent).toHaveBeenCalledTimes(1);
+    expect(trackServerEvent).toHaveBeenCalledWith("study_reminder_sent", SCHEDULE.user_id, {
+      channel: "push",
+      local_date: "2026-07-30",
+      day_of_week: 4,
+      start_time: "08:00",
+      duration_minutes: 45,
+      locale: "he",
+      time_zone: "Asia/Jerusalem",
+    });
+  });
+
+  it("tags the email link and tracks the delivered reminder without the address", async () => {
+    mockGetSchedules.mockResolvedValue([SCHEDULE]);
+    mockGetPushSubs.mockResolvedValue([]);
+
+    await GET(makeRequest());
+    await flushAfter();
+
+    expect(mockEmailSend.mock.calls[0][0].text).toContain(
+      "https://easy-theory-omega.vercel.app/?source=study_reminder&channel=email&reminder_date=2026-07-30"
+    );
+    expect(trackServerEvent).toHaveBeenCalledWith(
+      "study_reminder_sent",
+      SCHEDULE.user_id,
+      expect.objectContaining({ channel: "email", local_date: "2026-07-30" })
+    );
+    expect(JSON.stringify(vi.mocked(trackServerEvent).mock.calls)).not.toContain("user@example.com");
+  });
+
+  it("does not track reminders that were not delivered", async () => {
+    mockGetSchedules.mockResolvedValue([SCHEDULE]);
+    mockGetPushSubs.mockResolvedValue([PUSH_SUB]);
+    mockSendNotification.mockRejectedValueOnce(
+      Object.assign(new Error("410 Gone"), { statusCode: 410 })
+    );
+
+    await GET(makeRequest());
+
+    mockGetPushSubs.mockResolvedValue([]);
+    mockEmailSend.mockRejectedValueOnce(new Error("Resend unavailable"));
+    await expect(GET(makeRequest())).rejects.toThrow("Resend unavailable");
+
+    const admin = makeAdminClient();
+    admin.auth.admin.getUserById = vi.fn().mockResolvedValue({ data: { user: { email: null } } });
+    mockCreateAdminClient.mockReturnValue(admin as never);
+    await GET(makeRequest());
+    await flushAfter();
+
+    expect(trackServerEvent).not.toHaveBeenCalled();
   });
 
   it("sends the push notification in Hebrew for a he schedule", async () => {

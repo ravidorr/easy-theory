@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach, vi, type Mock } from "vitest";
+import { describe, it, expect, afterEach, beforeEach, vi, type Mock } from "vitest";
 import { readFileSync } from "fs";
 import { resolve } from "path";
 
@@ -164,6 +164,83 @@ describe("push.js", () => {
 
       const helpers = loadScript();
       await expect(helpers.subscribeToPush()).resolves.toBe(false);
+    });
+  });
+
+  describe("push_opt_in_completed tracking", () => {
+    let track: ReturnType<typeof vi.fn>;
+
+    function stubPermission(result: string) {
+      vi.stubGlobal("Notification", {
+        permission: result,
+        requestPermission: vi.fn().mockResolvedValue(result),
+      });
+    }
+
+    beforeEach(() => {
+      track = vi.fn();
+    });
+
+    async function subscribe() {
+      vi.stubGlobal("pendo", { track });
+      return loadScript().subscribeToPush();
+    }
+
+    it("tracks a completed subscription", async () => {
+      stubPushEnvironment();
+      stubPermission("granted");
+      addVapidMeta();
+
+      await expect(subscribe()).resolves.toBe(true);
+
+      expect(track).toHaveBeenCalledTimes(1);
+      expect(track).toHaveBeenCalledWith("push_opt_in_completed", {
+        outcome: "subscribed",
+        permission: "granted",
+        source: "schedule_save",
+      });
+    });
+
+    it.each([
+      ["denied", "permission_denied"],
+      ["default", "permission_dismissed"],
+    ])("tracks a %s permission prompt as %s", async (permission, outcome) => {
+      stubPushEnvironment();
+      stubPermission(permission);
+      addVapidMeta();
+
+      await expect(subscribe()).resolves.toBe(false);
+
+      expect(track).toHaveBeenCalledWith("push_opt_in_completed", {
+        outcome,
+        permission,
+        source: "schedule_save",
+      });
+    });
+
+    it("tracks unsupported browsers, a missing VAPID key, save failures and errors", async () => {
+      stubPushEnvironment();
+      delete (window as unknown as { PushManager?: unknown }).PushManager;
+      await subscribe();
+
+      stubPushEnvironment();
+      await subscribe();
+
+      stubPushEnvironment({ fetchOk: false });
+      addVapidMeta();
+      await subscribe();
+
+      const registration = makeRegistration();
+      registration.pushManager.subscribe.mockRejectedValue(new Error("push failed"));
+      stubPushEnvironment({ registration });
+      await subscribe();
+
+      expect(track.mock.calls.map(([, properties]) => properties.outcome)).toEqual([
+        "unsupported",
+        "missing_vapid_key",
+        "save_failed",
+        "error",
+      ]);
     });
   });
 
