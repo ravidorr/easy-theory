@@ -1,0 +1,12 @@
+---
+description: Use GitHub issues and pull requests for project workflow
+alwaysApply: true
+---
+
+# GitHub Workflow
+
+This project does not use Jira.
+
+- Use GitHub issues as the work-item reference.
+- Do not ask for, infer, or add Jira keys to branch names, commits, pull requests, or changelogs.
+- Use the repository's conventional commit format without a ticket prefix.
