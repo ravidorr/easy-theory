@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useLocale } from "next-intl";
 import { usePathname, useRouter } from "@/lib/navigation";
-import { trackPendoEvent } from "@/lib/pendo";
+import { trackPendoEvent } from "@/lib/pendo-client";
 import styles from "./LanguageToggle.module.css";
 
 export function LanguageToggle() {

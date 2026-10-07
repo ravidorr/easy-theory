@@ -123,6 +123,11 @@ describe("LocaleLayout", () => {
     expect(html).toContain("hello");
   });
 
+  it("leaves Pendo initialization to the root layout", async () => {
+    const html = renderToStaticMarkup(await LocaleLayout(layoutProps("he")));
+    expect(html).not.toContain("pendo");
+  });
+
   describe("generateViewport", () => {
     it("returns the dark theme color when no theme cookie", async () => {
       expect(await generateViewport()).toEqual({ themeColor: "#131829" });

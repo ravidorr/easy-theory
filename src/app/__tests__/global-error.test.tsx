@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import * as Sentry from "@sentry/nextjs";
-import { trackPendoEvent } from "@/lib/pendo";
+import { trackPendoEvent } from "@/lib/pendo-client";
 import GlobalError from "../global-error";
 import heMessages from "../../../messages/he.json";
 import arMessages from "../../../messages/ar.json";
@@ -10,7 +10,7 @@ vi.mock("@sentry/nextjs", () => ({
   captureException: vi.fn(),
 }));
 
-vi.mock("@/lib/pendo", () => ({ trackPendoEvent: vi.fn() }));
+vi.mock("@/lib/pendo-client", () => ({ trackPendoEvent: vi.fn() }));
 
 describe("GlobalError (root error boundary)", () => {
   const error = Object.assign(new Error("boom"), { digest: "d1" });

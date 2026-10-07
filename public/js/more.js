@@ -147,6 +147,12 @@
   if (logoutBtn) {
     logoutBtn.addEventListener("click", async function () {
       await fetch("/api/auth/logout", { method: "POST" });
+      // The Pendo snippet stub has no clearSession; it exists once the agent loads.
+      // If it has not, the login page initializes anonymously and ignores the
+      // persisted learner (see PendoInit).
+      if (window.pendo && typeof window.pendo.clearSession === "function") {
+        window.pendo.clearSession();
+      }
       window.location.href = "/auth/login";
     });
   }

@@ -3,13 +3,21 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 Historical release headings were normalized from their changelog categories: `Added` releases receive a minor increment, except for a clearly test-only addition; all other categories receive a patch increment. No historical major increment was inferred. One stable SemVer increment and one top-level entry per PR are enforced by the pre-push hook; individual commits within a PR do not bump.
 
-## [0.57.0] — 2026-10-07
+## [0.58.0] — 2026-10-07
 
 ### Added
 
 - Pendo Track Events across the learner journey: magic-link requests and failures, completed and replayed diagnostics, saved and failed quiz answers, topic and mistakes-retry completions, topic mastery, question reports, bookmarks, flashcard grades and decks, mock-exam starts, submissions, failures and autosave conflicts, medals, saved study schedules, push opt-in outcomes, reminder clicks, contact messages, preference changes and error boundaries. Every client call is guarded, so it is a no-op until the Pendo agent is installed, and no event carries an email address, message text or report comment.
 - Server-side `user_signed_in` and `study_reminder_sent` events through Pendo's Track Event API (`src/lib/pendo-server.ts`), sent after the response with `after()` and disabled unless `PENDO_TRACK_EVENT_SECRET` is set; `.env.qa.example` pins it empty.
 - Study-reminder push and email links now carry a `source=study_reminder` tag, which `public/js/reminder-click.js` records as a reminder click and then removes from the URL.
+
+---
+
+## [0.57.0] — 2026-10-07
+
+### Added
+
+- Added Novus by Pendo product analytics: the root layout loads the agent without initializing it, and `PendoInit` initializes it once after a verified `getUser()` result. A confirmed learner is initialized with their stats, learner plan, study schedule, and medals (or by id alone if that lookup fails); every other case, including an expired session, a PKCE verifier cookie only, or an unreachable auth service, starts anonymous with `forceAnonymous` so a previous learner is never restored. Logging out also clears the Pendo session. Star points and streak days are sent as 0 when NULL, and schedule metadata is sent only when every scheduled day agrees.
 
 ---
 

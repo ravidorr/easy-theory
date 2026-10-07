@@ -3,7 +3,7 @@
 import { type FormEvent, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Icon } from "@/components/Icon";
-import { trackPendoEvent } from "@/lib/pendo";
+import { trackPendoEvent } from "@/lib/pendo-client";
 import styles from "./page.module.css";
 
 const TOPICS = ["question", "bug", "idea", "general"] as const;

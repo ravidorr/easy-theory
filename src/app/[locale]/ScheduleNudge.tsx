@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { trackPendoEvent } from "@/lib/pendo";
+import { trackPendoEvent } from "@/lib/pendo-client";
 import styles from "./ScheduleNudge.module.css";
 
 const LAST_SEEN_KEY = "scheduleNudge.lastSeen";

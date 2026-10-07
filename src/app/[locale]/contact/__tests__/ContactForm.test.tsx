@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
-import { trackPendoEvent } from "@/lib/pendo";
+import { trackPendoEvent } from "@/lib/pendo-client";
 import { ContactForm } from "../ContactForm";
 
-vi.mock("@/lib/pendo", () => ({ trackPendoEvent: vi.fn() }));
+vi.mock("@/lib/pendo-client", () => ({ trackPendoEvent: vi.fn() }));
 
 const messages = {
   Contact: {

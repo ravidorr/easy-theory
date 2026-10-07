@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { trackPendoEvent } from "@/lib/pendo";
+import { trackPendoEvent } from "@/lib/pendo-client";
 import { LanguageToggle } from "../LanguageToggle";
 
-vi.mock("@/lib/pendo", () => ({ trackPendoEvent: vi.fn() }));
+vi.mock("@/lib/pendo-client", () => ({ trackPendoEvent: vi.fn() }));
 
 function invokeReactClick(element: HTMLElement) {
   const key = Object.keys(element).find((name) => name.startsWith("__reactProps"));

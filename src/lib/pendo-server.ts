@@ -1,4 +1,4 @@
-import type { PendoTrackProperties } from "./pendo";
+import type { PendoTrackProperties } from "./pendo-client";
 
 const PENDO_TRACK_URL = "https://data.pendo.io/data/track";
 const TRACK_TIMEOUT_MS = 3000;

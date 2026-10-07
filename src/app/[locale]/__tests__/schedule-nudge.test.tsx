@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
-import { trackPendoEvent } from "@/lib/pendo";
+import { trackPendoEvent } from "@/lib/pendo-client";
 import { ScheduleNudge } from "../ScheduleNudge";
 
 const push = vi.fn();
 
-vi.mock("@/lib/pendo", () => ({ trackPendoEvent: vi.fn() }));
+vi.mock("@/lib/pendo-client", () => ({ trackPendoEvent: vi.fn() }));
 vi.mock("next/image", () => ({
   default: ({ src, alt }: { src: string; alt: string }) => React.createElement("img", { src, alt }),
 }));

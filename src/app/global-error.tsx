@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import * as Sentry from "@sentry/nextjs";
-import { trackPendoEvent } from "@/lib/pendo";
+import { trackPendoEvent } from "@/lib/pendo-client";
 import heMessages from "../../messages/he.json";
 import arMessages from "../../messages/ar.json";
 import styles from "./global-error.module.css";

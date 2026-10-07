@@ -2,14 +2,14 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import React from "react";
 import * as Sentry from "@sentry/nextjs";
-import { trackPendoEvent } from "@/lib/pendo";
+import { trackPendoEvent } from "@/lib/pendo-client";
 import LocaleError from "../error";
 
 vi.mock("@sentry/nextjs", () => ({
   captureException: vi.fn(),
 }));
 
-vi.mock("@/lib/pendo", () => ({ trackPendoEvent: vi.fn() }));
+vi.mock("@/lib/pendo-client", () => ({ trackPendoEvent: vi.fn() }));
 
 vi.mock("next/link", () => ({
   default: ({ href, children, ...rest }: { href: string; children: unknown }) =>
