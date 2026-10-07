@@ -2,9 +2,14 @@ import type { SupabaseClient, User } from "@supabase/supabase-js";
 import type { Locale } from "@/i18n/routing";
 import { getLearnerPlan, getUserMedals, getUserSchedule, getUserStats } from "@/lib/db";
 
+// Learners are individuals, so every learner belongs to one placeholder account.
+// Server-side events must report the same id, or one learner's events would be
+// split across two account contexts.
+export const PENDO_ACCOUNT_ID = "system";
+
+// The email address is deliberately not sent: the audience includes minors.
 export type PendoVisitor = {
   id: string;
-  email: string | null;
   starPoints: number;
   streakDays: number;
   lastActiveDate: string | null;
@@ -46,7 +51,6 @@ export async function getPendoVisitor(
   ]);
   return {
     id: user.id,
-    email: user.email ?? null,
     starPoints: count(stats.star_points),
     streakDays: count(stats.streak_days),
     lastActiveDate: stats.last_active_date,

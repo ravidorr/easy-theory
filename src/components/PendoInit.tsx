@@ -1,10 +1,10 @@
 import Script from "next/script";
 import { reportError } from "@/lib/monitoring";
-import { getPendoVisitor } from "@/lib/pendo";
+import { getPendoVisitor, PENDO_ACCOUNT_ID } from "@/lib/pendo";
 import { createClient } from "@/lib/supabase";
 
 type InitOptions =
-  | { visitor: Record<string, unknown> }
+  | { visitor: Record<string, unknown>; account: { id: string } }
   | { visitor: { id: "" }; forceAnonymous: true };
 
 // Anything that is not a confirmed, signed-in learner starts anonymous and
@@ -25,12 +25,15 @@ async function getInitOptions(): Promise<InitOptions> {
     if (!user) return ANONYMOUS;
 
     try {
-      return { visitor: { ...(await getPendoVisitor(supabase, user)) } };
+      return {
+        visitor: { ...(await getPendoVisitor(supabase, user)) },
+        account: { id: PENDO_ACCOUNT_ID },
+      };
     } catch (error) {
       // Analytics must never take down the page it is measuring. The learner is
       // still verified, so identify them by id alone rather than as a stranger.
       reportError("pendo", "visitor lookup failed", error);
-      return { visitor: { id: user.id } };
+      return { visitor: { id: user.id }, account: { id: PENDO_ACCOUNT_ID } };
     }
   } catch (error) {
     reportError("pendo", "session lookup failed", error);
@@ -41,8 +44,8 @@ async function getInitOptions(): Promise<InitOptions> {
 export async function PendoInit() {
   const options = await getInitOptions();
 
-  // The email is learner-supplied; escaping "<" keeps it from ever closing a
-  // script element.
+  // Escaping "<" keeps any string in the payload from ever closing a script
+  // element.
   const payload = JSON.stringify(options).replace(/</g, "\\u003c");
 
   return (
