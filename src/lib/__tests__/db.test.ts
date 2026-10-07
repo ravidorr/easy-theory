@@ -9,6 +9,7 @@ import {
   getVideos,
   getResources,
   getUserSchedule,
+  getLearnerPlan,
   getUsersWithEnabledNotifications,
   claimScheduleNotification,
   completeScheduleNotification,
@@ -283,6 +284,29 @@ describe("getUserSchedule", () => {
   it("throws when the query fails", async () => {
     await expect(getUserSchedule(makeClient(null, boom), "u1")).rejects.toThrow(
       /getUserSchedule: user_schedule query failed: boom/
+    );
+  });
+});
+
+describe("getLearnerPlan", () => {
+  it("returns the learner plan row", async () => {
+    const plan = {
+      target_exam_date: "2025-06-01",
+      daily_question_goal: 20,
+      diagnostic_completed_at: "2025-03-01T18:30:00+00:00",
+    };
+    const client = makeClient(plan);
+    expect(await getLearnerPlan(client, "u1")).toEqual(plan);
+    expect(client.from).toHaveBeenCalledWith("user_learner_plans");
+  });
+
+  it("returns null before the diagnostic creates a plan", async () => {
+    expect(await getLearnerPlan(makeClient(null), "u1")).toBeNull();
+  });
+
+  it("throws when the query fails", async () => {
+    await expect(getLearnerPlan(makeClient(null, boom), "u1")).rejects.toThrow(
+      /getLearnerPlan: user_learner_plans query failed: boom/
     );
   });
 });

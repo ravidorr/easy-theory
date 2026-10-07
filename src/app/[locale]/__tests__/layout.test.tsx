@@ -58,6 +58,10 @@ vi.mock("@/components/LocaleRuntimeData", () => ({
   },
 }));
 
+vi.mock("@/components/PendoIdentify", () => ({
+  PendoIdentify: () => React.createElement("script", { id: "pendo-identify" }),
+}));
+
 vi.mock("@vercel/analytics/next", () => ({ Analytics: () => null }));
 vi.mock("@vercel/speed-insights/next", () => ({ SpeedInsights: () => null }));
 vi.mock("@/app/globals.css", () => ({}));
@@ -121,6 +125,11 @@ describe("LocaleLayout", () => {
     const html = renderToStaticMarkup(jsx);
     expect(html).toContain('id="test-child"');
     expect(html).toContain("hello");
+  });
+
+  it("identifies the signed-in learner to Pendo", async () => {
+    const html = renderToStaticMarkup(await LocaleLayout(layoutProps("he")));
+    expect(html).toContain('id="pendo-identify"');
   });
 
   describe("generateViewport", () => {

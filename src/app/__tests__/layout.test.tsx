@@ -1,5 +1,6 @@
 import { beforeEach, describe, it, expect, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
+import React from "react";
 import RootLayout from "../layout";
 
 const { mockCookieGet, mockHeaderGet } = vi.hoisted(() => ({
@@ -14,6 +15,15 @@ vi.mock("next/font/google", () => ({
 vi.mock("next/headers", () => ({
   cookies: async () => ({ get: mockCookieGet }),
   headers: async () => ({ get: mockHeaderGet }),
+}));
+
+vi.mock("next/script", () => ({
+  default: ({ id, strategy, children }: { id?: string; strategy?: string; children?: string }) =>
+    React.createElement("script", {
+      id,
+      "data-strategy": strategy,
+      dangerouslySetInnerHTML: { __html: children ?? "" },
+    }),
 }));
 
 vi.mock("@/app/globals.css", () => ({}));
@@ -42,5 +52,16 @@ describe("RootLayout", () => {
 
     const html = renderToStaticMarkup(await RootLayout({ children: <div /> }));
     expect(html).toContain('<html lang="ar"');
+  });
+
+  it("loads Pendo and initializes it once from the head, before hydration", async () => {
+    const html = renderToStaticMarkup(await RootLayout({ children: <div /> }));
+    const head = html.slice(html.indexOf("<head>"), html.indexOf("</head>"));
+
+    expect(head).toContain('<script id="pendo-install" data-strategy="beforeInteractive">');
+    expect(head).toContain("'https://cdn.pendo.io/agent/static/'+apiKey+'/pendo.js'");
+    expect(head).toMatch(/\}\)\('[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}'\);/);
+    expect(head.match(/pendo\.initialize\(/g)).toEqual(["pendo.initialize("]);
+    expect(head).toContain("pendo.initialize({ visitor: { id: '' } });");
   });
 });

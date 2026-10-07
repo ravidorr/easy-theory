@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import Script from "next/script";
@@ -9,6 +10,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { LocaleRuntimeData } from "@/components/LocaleRuntimeData";
+import { PendoIdentify } from "@/components/PendoIdentify";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -79,6 +81,9 @@ export default async function LocaleLayout({
       </NextIntlClientProvider>
       <Analytics />
       <SpeedInsights />
+      <Suspense fallback={null}>
+        <PendoIdentify />
+      </Suspense>
       <Script id="register-sw" strategy="afterInteractive">{`
         if ('serviceWorker' in navigator) {
           navigator.serviceWorker.register('/sw.js');
