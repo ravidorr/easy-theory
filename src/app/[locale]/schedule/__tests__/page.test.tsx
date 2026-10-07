@@ -133,16 +133,11 @@ describe("SchedulePage", () => {
     expect(toggle).toBeInTheDocument();
   });
 
-  it("renders the back link to /more", async () => {
+  it("does not render a top-right back link", async () => {
     const jsx = await SchedulePage();
     const { container } = render(jsx);
-    expect(container.querySelector('a[href="/more"]')).toBeTruthy();
-  });
-
-  it("gives the icon-only back link an accessible name", async () => {
-    const jsx = await SchedulePage();
-    const { container } = render(jsx);
-    expect(container.querySelector("a[aria-label='backLabel']")).toBeTruthy();
+    expect(container.querySelector('a[href="/more"]')).toBeNull();
+    expect(container.querySelector("a[aria-label='backLabel']")).toBeNull();
   });
 
   it("keeps the More section TabBar visible without a false current page", async () => {

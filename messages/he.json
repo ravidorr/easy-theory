@@ -191,7 +191,6 @@
   "Contact": {
     "pageTitle": "יצירת קשר",
     "subtitle": "יש לכם מה לומר? כל הודעה נקראת.",
-    "closeLabel": "סגירה וחזרה לחשבון",
     "topicTitle": "על מה מדובר?",
     "topicQuestion": "שאלה לא נכונה",
     "topicBug": "תקלה טכנית",
@@ -226,7 +225,6 @@
     "nextBtn": "לשאלה הבאה",
     "autoAdvanceHint": "אחרי תשובה נכונה עוברים אוטומטית לשאלה הבאה. אפשר לכבות במסך \"עוד\".",
     "scoreLabel": "ניקוד",
-    "closeLabel": "סגירה",
     "signAlt": "תמרור {number}",
     "questionImageAlt": "תמונה המצורפת לשאלה",
     "optionCorrectSr": "תשובה נכונה",
@@ -350,8 +348,7 @@
     "summaryChoose": "בחרו ימים כדי להתחיל",
     "summaryHint": "קצב נעים שמספיק בדיוק לחומר.",
     "saveBtn": "שמרו את התוכנית",
-    "days": "א,ב,ג,ד,ה,ו,ש",
-    "backLabel": "חזרה"
+    "days": "א,ב,ג,ד,ה,ו,ש"
   },
   "ScheduleNudge": {
     "eyebrow": "תוכנית לימוד מוצעת",

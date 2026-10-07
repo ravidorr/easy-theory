@@ -499,12 +499,10 @@ describe("TopicQuizPage", () => {
     expect(container.querySelector(".quiz-slide h2")?.textContent).toBe("");
   });
 
-  it("labels the close link for screen readers", async () => {
+  it("does not render a top-right close link", async () => {
     const jsx = await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "he" }) });
     const { container } = render(jsx);
-    const closeLink = container.querySelector("a[aria-label='closeLabel']");
-    expect(closeLink).toBeTruthy();
-    expect(closeLink?.getAttribute("href")).toBe("/he");
+    expect(container.querySelector("a[aria-label='closeLabel']")).toBeNull();
   });
 
   it("renders every option button with aria-pressed false", async () => {

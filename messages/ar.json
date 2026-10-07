@@ -191,7 +191,6 @@
   "Contact": {
     "pageTitle": "تواصل معنا",
     "subtitle": "يسرّنا أن نسمع منك، فكل رسالة تُقرأ.",
-    "closeLabel": "إغلاق والعودة إلى الحساب",
     "topicTitle": "ما الموضوع؟",
     "topicQuestion": "سؤال غير صحيح",
     "topicBug": "مشكلة تقنية",
@@ -226,7 +225,6 @@
     "nextBtn": "السؤال التالي",
     "autoAdvanceHint": "بعد الإجابة الصحيحة ننتقل تلقائياً إلى السؤال التالي. يمكن إيقاف ذلك من شاشة \"المزيد\".",
     "scoreLabel": "النقاط",
-    "closeLabel": "إغلاق",
     "signAlt": "إشارة {number}",
     "questionImageAlt": "صورة مرفقة بالسؤال",
     "optionCorrectSr": "إجابة صحيحة",
@@ -350,8 +348,7 @@
     "summaryChoose": "اختاروا أيامًا للبدء",
     "summaryHint": "إيقاع مريح يكفي تماماً للمادة.",
     "saveBtn": "احفظوا الخطة",
-    "days": "ح,ا,ث,ر,خ,ج,س",
-    "backLabel": "رجوع"
+    "days": "ح,ا,ث,ر,خ,ج,س"
   },
   "ScheduleNudge": {
     "eyebrow": "خطة دراسة مقترحة",

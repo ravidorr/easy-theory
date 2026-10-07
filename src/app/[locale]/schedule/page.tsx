@@ -1,4 +1,3 @@
-import Link from "next/link";
 import Script from "next/script";
 import { createClient } from "@/lib/supabase";
 import { requireAuthenticatedUser } from "@/lib/auth";
@@ -27,9 +26,6 @@ export default async function SchedulePage() {
     <>
       <main className={styles.page}>
         <div className={styles.topBar}>
-          <Link href="/more" className={`icon-btn ${styles.backBtn}`} aria-label={t("backLabel")}>
-            →
-          </Link>
           <div className={styles.titleCol}>
             <h1>{t("pageTitle")}</h1>
             <span className={styles.subtitle}>{t("subtitle")}</span>

@@ -42,10 +42,10 @@ describe("ContactPage", () => {
     await expect(ContactPage()).rejects.toThrow("redirect");
   });
 
-  it("renders the canonical close control back to More", async () => {
+  it("does not render a top-right close link", async () => {
     const jsx = await ContactPage();
-    render(jsx);
-    expect(screen.getByRole("link", { name: "closeLabel" })).toHaveAttribute("href", "/more");
+    const { container } = render(jsx);
+    expect(container.querySelector("a[aria-label='closeLabel']")).toBeNull();
   });
 
   it("keeps the More tab bar visible but inactive", async () => {

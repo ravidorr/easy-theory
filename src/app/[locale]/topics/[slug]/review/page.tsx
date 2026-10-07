@@ -220,9 +220,6 @@ export default async function ReviewPage({
     <>
     <main className={styles.page}>
       <div className={styles.topBar}>
-        <Link href={`/topics/${slug}`} className={`icon-btn ${styles.closeBtn}`} aria-label={tQuiz("closeLabel")}>
-          <Icon name="close" size={20} />
-        </Link>
         <h1>{t("topBarTitle")}</h1>
       </div>
 
