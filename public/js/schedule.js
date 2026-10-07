@@ -27,6 +27,10 @@
 
   let notifyOn = notifyToggle ? notifyToggle.dataset.on === "true" : true;
 
+  // A saved schedule always has at least one day, so preselected days mean
+  // the learner is editing an existing schedule.
+  let hadSchedule = selectedDays.size > 0;
+
   // Saving returns to More: that is where the user came from, and where
   // the page's own back button points.
   function morePath() {
@@ -46,6 +50,12 @@
     if (window.modal) return window.modal.alert({ message: message });
     alert(message);
     return Promise.resolve();
+  }
+
+  function trackEvent(name, properties) {
+    try {
+      if (window.pendo && typeof window.pendo.track === "function") window.pendo.track(name, properties);
+    } catch {}
   }
 
   function updateSummary() {
@@ -118,20 +128,35 @@
     saveBtn.disabled = true;
     saveBtn.textContent = t.saving || "התוכנית נשמרת...";
 
+    const startTime = timeInput ? timeInput.value : "17:00";
+    const timeZone = detectedTimeZone();
+
     try {
       const res = await fetch("/api/schedule", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           days: Array.from(selectedDays),
-          start_time: timeInput ? timeInput.value : "17:00",
+          start_time: startTime,
           duration_minutes: selectedDuration,
           notify: notifyOn,
-          time_zone: detectedTimeZone(),
+          time_zone: timeZone,
         }),
       });
 
       if (!res.ok) throw new Error("save failed");
+
+      trackEvent("study_schedule_saved", {
+        source: "schedule_page",
+        days_count: selectedDays.size,
+        days: Array.from(selectedDays).sort(function (a, b) { return a - b; }).join(","),
+        start_time: startTime,
+        duration_minutes: selectedDuration,
+        notify: notifyOn,
+        time_zone: timeZone,
+        is_first_schedule: !hadSchedule,
+      });
+      hadSchedule = true;
 
       if (notifyOn && window.pushHelpers) {
         void window.pushHelpers.subscribeToPush();

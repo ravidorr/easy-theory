@@ -96,3 +96,105 @@ describe("auth.js – send button loading state", () => {
     expect((document.getElementById("sent-banner") as HTMLElement).style.display).toBe("flex");
   });
 });
+
+describe("auth.js – Pendo tracking", () => {
+  let track: ReturnType<typeof vi.fn>;
+
+  function flush() {
+    return new Promise((r) => setTimeout(r, 0));
+  }
+
+  beforeEach(() => {
+    vi.unstubAllGlobals();
+    track = vi.fn();
+    vi.stubGlobal("pendo", { track });
+    setupDOM();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("tracks a sent magic link without the email address", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) }));
+
+    submitForm();
+    await flush();
+
+    expect(track).toHaveBeenCalledWith("magic_link_requested", {
+      is_resend: false,
+      next_path: "/",
+      locale: undefined,
+      after_expired_link: false,
+    });
+    expect(JSON.stringify(track.mock.calls)).not.toContain("test@example.com");
+  });
+
+  it.each([
+    [400, "validation"],
+    [429, "rate_limited"],
+    [500, "server_error"],
+  ])("tracks a %i link request as a %s failure", async (status, failureType) => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: false, status, json: async () => ({ error: "שגיאה" }) })
+    );
+
+    submitForm();
+    await flush();
+
+    expect(track).toHaveBeenCalledTimes(1);
+    expect(track).toHaveBeenCalledWith("magic_link_request_failed", {
+      status_code: status,
+      failure_type: failureType,
+      is_resend: false,
+      locale: undefined,
+    });
+  });
+
+  it("tracks a network failure", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("network")));
+
+    submitForm();
+    await flush();
+
+    expect(track).toHaveBeenCalledWith("magic_link_request_failed", {
+      failure_type: "network_error",
+      is_resend: false,
+      locale: undefined,
+    });
+  });
+
+  it("tracks resend outcomes as resends", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce({ ok: true, json: async () => ({}) })
+        .mockResolvedValueOnce({ ok: true, json: async () => ({}) })
+        .mockResolvedValueOnce({ ok: false, status: 429, json: async () => ({ error: "שגיאה" }) })
+    );
+    submitForm();
+    await flush();
+    const resend = document.getElementById("resend-btn") as HTMLButtonElement;
+
+    resend.click();
+    await flush();
+    expect(track).toHaveBeenLastCalledWith("magic_link_requested", {
+      is_resend: true,
+      next_path: "/",
+      locale: undefined,
+      after_expired_link: false,
+    });
+
+    resend.disabled = false;
+    resend.click();
+    await flush();
+    expect(track).toHaveBeenLastCalledWith("magic_link_request_failed", {
+      status_code: 429,
+      failure_type: "rate_limited",
+      is_resend: true,
+      locale: undefined,
+    });
+  });
+});

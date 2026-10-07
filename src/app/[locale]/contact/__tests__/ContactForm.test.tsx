@@ -1,7 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
+import { trackPendoEvent } from "@/lib/pendo";
 import { ContactForm } from "../ContactForm";
+
+vi.mock("@/lib/pendo", () => ({ trackPendoEvent: vi.fn() }));
 
 const messages = {
   Contact: {
@@ -93,6 +96,26 @@ describe("ContactForm", () => {
 
     await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("apiError"));
     expect(screen.getByPlaceholderText("messagePlaceholder")).toHaveValue("Need help");
+    expect(trackPendoEvent).not.toHaveBeenCalled();
+  });
+
+  it("tracks a sent message by topic and length, never its text or reply address", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ok: true }) }));
+    renderForm();
+
+    fireEvent.click(screen.getByRole("button", { name: "topicBug" }));
+    fireEvent.change(screen.getByPlaceholderText("messagePlaceholder"), { target: { value: "  It broke  " } });
+    fireEvent.change(screen.getByPlaceholderText("replyEmailPlaceholder"), { target: { value: "reply@example.com" } });
+    fireEvent.submit(screen.getByRole("button", { name: "submit" }).closest("form")!);
+
+    await waitFor(() => expect(screen.getByText("sentTitle")).toBeInTheDocument());
+    expect(trackPendoEvent).toHaveBeenCalledTimes(1);
+    expect(trackPendoEvent).toHaveBeenCalledWith("contact_message_sent", {
+      topic: "bug",
+      message_length: 8,
+      has_reply_email: true,
+      locale: "he",
+    });
   });
 
   it("falls back to the generic error when the API error payload is not text", async () => {

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { trackPendoEvent } from "@/lib/pendo";
 import styles from "./ScheduleNudge.module.css";
 
 const LAST_SEEN_KEY = "scheduleNudge.lastSeen";
@@ -126,13 +127,24 @@ export function ScheduleNudge({ hasSchedule }: { hasSchedule: boolean }) {
     setError(null);
 
     try {
+      const timeZone = detectedTimeZone();
       const response = await fetch("/api/schedule", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...RECOMMENDED_SCHEDULE, time_zone: detectedTimeZone() }),
+        body: JSON.stringify({ ...RECOMMENDED_SCHEDULE, time_zone: timeZone }),
       });
       if (!response.ok) throw new Error("schedule save failed");
 
+      trackPendoEvent("study_schedule_saved", {
+        source: "home_nudge",
+        days_count: RECOMMENDED_SCHEDULE.days.length,
+        days: RECOMMENDED_SCHEDULE.days.join(","),
+        start_time: RECOMMENDED_SCHEDULE.start_time,
+        duration_minutes: RECOMMENDED_SCHEDULE.duration_minutes,
+        notify: RECOMMENDED_SCHEDULE.notify,
+        time_zone: timeZone,
+        is_first_schedule: !hasSchedule,
+      });
       setOpen(false);
       const modal = (window as Window & { modal?: ModalToast }).modal;
       if (modal?.toast) void modal.toast({ message: tSchedule("savedToast") });

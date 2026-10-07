@@ -7,12 +7,12 @@ const scheduleScript = readFileSync(
   "utf-8"
 );
 
-function setupDOM() {
+function setupDOM({ preselectedDay = true } = {}) {
   (window as unknown as { __locale?: string }).__locale = "he";
   document.body.innerHTML = `
     <button id="save-schedule-btn">שמרי</button>
     <div id="day-picker">
-      <button class="day-btn" data-day="0" data-selected="true" aria-pressed="true">א</button>
+      <button class="day-btn" data-day="0" data-selected="${preselectedDay}" aria-pressed="${preselectedDay}">א</button>
       <button class="day-btn" data-day="1" data-selected="false" aria-pressed="false">ב</button>
     </div>
     <div id="duration-picker">
@@ -383,5 +383,68 @@ describe("schedule.js – successful save", () => {
     await vi.advanceTimersByTimeAsync(800);
     expect(loc.href).toBe("/ar/more");
     vi.useRealTimers();
+  });
+});
+
+describe("schedule.js – Pendo tracking", () => {
+  let track: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    vi.unstubAllGlobals();
+    vi.useFakeTimers();
+    track = vi.fn();
+    vi.stubGlobal("pendo", { track });
+    Object.defineProperty(window, "location", {
+      value: { href: "" },
+      writable: true,
+      configurable: true,
+    });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+  });
+
+  it("tracks an edited schedule saved from the schedule page", async () => {
+    setupDOM();
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true }));
+
+    dayBtn(1).click();
+    durationBtn(60).click();
+    clickSave();
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(track).toHaveBeenCalledTimes(1);
+    expect(track).toHaveBeenCalledWith("study_schedule_saved", {
+      source: "schedule_page",
+      days_count: 2,
+      days: "0,1",
+      start_time: "17:00",
+      duration_minutes: 60,
+      notify: true,
+      time_zone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      is_first_schedule: false,
+    });
+  });
+
+  it("flags a learner's first schedule and skips failed saves", async () => {
+    setupDOM({ preselectedDay: false });
+    stubModal();
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce({ ok: false }).mockResolvedValueOnce({ ok: true }));
+
+    dayBtn(1).click();
+    clickSave();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(track).not.toHaveBeenCalled();
+
+    clickSave();
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(track).toHaveBeenCalledTimes(1);
+    expect(track).toHaveBeenCalledWith(
+      "study_schedule_saved",
+      expect.objectContaining({ days: "1", days_count: 1, is_first_schedule: true })
+    );
   });
 });

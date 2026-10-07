@@ -12,6 +12,12 @@
     return t[key] || fallback;
   }
 
+  function trackEvent(name, properties) {
+    try {
+      if (window.pendo && typeof window.pendo.track === "function") window.pendo.track(name, properties);
+    } catch {}
+  }
+
   function openDialog(trigger) {
     const previouslyFocused = document.activeElement;
     const questionId = trigger.dataset.questionId;
@@ -162,6 +168,17 @@
         });
         if (!response.ok) throw new Error(typeof data.error === "string" ? data.error : "");
         showSuccess();
+        const quizContainer = document.getElementById("quiz-container");
+        // Only the comment's presence and length are tracked, never its text.
+        trackEvent("question_reported", {
+          question_id: questionId,
+          topic_id: topicId,
+          category: category.value,
+          has_comment: comment.length > 0,
+          comment_length: comment.length,
+          locale: locale,
+          quiz_mode: (quizContainer && quizContainer.dataset.quizMode) || "topic",
+        });
       } catch (requestError) {
         setPending(false);
         showError(requestError && requestError.message);

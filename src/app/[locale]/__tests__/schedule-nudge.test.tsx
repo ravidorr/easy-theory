@@ -1,10 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
+import { trackPendoEvent } from "@/lib/pendo";
 import { ScheduleNudge } from "../ScheduleNudge";
 
 const push = vi.fn();
 
+vi.mock("@/lib/pendo", () => ({ trackPendoEvent: vi.fn() }));
 vi.mock("next/image", () => ({
   default: ({ src, alt }: { src: string; alt: string }) => React.createElement("img", { src, alt }),
 }));
@@ -79,6 +81,27 @@ describe("ScheduleNudge", () => {
     expect(toast).toHaveBeenCalledWith({ message: "JS.Schedule.savedToast" });
   });
 
+  it("tracks the saved recommended plan as the learner's first schedule", async () => {
+    vi.mocked(fetch).mockResolvedValue({ ok: true } as Response);
+    render(<ScheduleNudge hasSchedule={false} />);
+
+    fireEvent.click(await screen.findByRole("button", { name: "ScheduleNudge.saveRecommended" }));
+
+    await waitFor(() =>
+      expect(trackPendoEvent).toHaveBeenCalledWith("study_schedule_saved", {
+        source: "home_nudge",
+        days_count: 3,
+        days: "0,2,4",
+        start_time: "17:00",
+        duration_minutes: 45,
+        notify: false,
+        time_zone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        is_first_schedule: true,
+      })
+    );
+    expect(trackPendoEvent).toHaveBeenCalledTimes(1);
+  });
+
   it("keeps the modal open with an error when saving fails", async () => {
     vi.mocked(fetch).mockResolvedValue({ ok: false } as Response);
     render(<ScheduleNudge hasSchedule={false} />);
@@ -87,6 +110,7 @@ describe("ScheduleNudge", () => {
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Api.scheduleUpdateFailed");
     expect(screen.getByRole("button", { name: "ScheduleNudge.saveRecommended" })).toBeEnabled();
+    expect(trackPendoEvent).not.toHaveBeenCalled();
   });
 
   it("keeps focus inside the dialog while a save is in flight", async () => {

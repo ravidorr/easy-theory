@@ -49,6 +49,16 @@
   const dontKnow = [];
   let replayMode = false;
   const graded = new Set();
+  let knownFirstTry = 0;
+  let unknownFirstTry = 0;
+  let replayedCards = 0;
+  const dueCount = parseInt(container.dataset.dueCount, 10);
+
+  function trackEvent(name, properties) {
+    try {
+      if (window.pendo && typeof window.pendo.track === "function") window.pendo.track(name, properties);
+    } catch {}
+  }
 
   // Persist the SM-2 grade; fire-and-forget so a failed save never blocks
   // the deck. First answer wins: in-session replays of "don't know" cards
@@ -57,10 +67,23 @@
     const id = signs[index].id;
     if (!id || graded.has(id)) return;
     graded.add(id);
+    const wasFlipped = flipped;
     fetch("/api/srs", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ sign_id: id, knew: knew }),
+    }).then(function (res) {
+      return res.ok ? res.json() : null;
+    }).then(function (data) {
+      if (!data) return;
+      trackEvent("flashcard_graded", {
+        sign_id: id,
+        knew: knew,
+        was_flipped: wasFlipped,
+        card_position: index + 1,
+        deck_size: total,
+        next_due_at: data.due_at,
+      });
     }).catch(function () {});
   }
 
@@ -138,11 +161,26 @@
     done.style.cssText = "flex:1;display:flex;align-items:center;justify-content:center;font-size:var(--type-h2-size);color:var(--text-muted);";
     done.textContent = t.allDone || "כל הכרטיסים עברו!";
     container.appendChild(done);
+    trackEvent("flashcard_deck_completed", {
+      deck_size: total,
+      cards_graded: graded.size,
+      known_first_try_count: knownFirstTry,
+      unknown_first_try_count: unknownFirstTry,
+      replayed_cards_count: replayedCards,
+      due_count: Number.isFinite(dueCount) ? dueCount : undefined,
+    });
   }
 
   function advance(knew) {
     gradeCard(current, knew);
     if (!knew) dontKnow.push(current);
+    if (replayMode) {
+      replayedCards++;
+    } else if (knew) {
+      knownFirstTry++;
+    } else {
+      unknownFirstTry++;
+    }
 
     if (!replayMode) {
       current++;

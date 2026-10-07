@@ -138,4 +138,45 @@ describe("bookmark.js", () => {
 
     expect(fetchMock).not.toHaveBeenCalled();
   });
+
+  it("tracks a saved bookmark with its question, topic and page", async () => {
+    const track = vi.fn();
+    vi.stubGlobal("pendo", { track });
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true }));
+    setupDOM("false");
+    document.querySelector(".quiz-slide")!.setAttribute("data-topic-id", "t1");
+
+    toggleBtn().click();
+    await flush();
+
+    expect(track).toHaveBeenCalledWith("question_bookmark_toggled", {
+      question_id: "q1",
+      bookmarked: true,
+      topic_id: "t1",
+      source_page: "quiz",
+    });
+  });
+
+  it("reports the bookmarks page as the source and skips failed saves", async () => {
+    const track = vi.fn();
+    vi.stubGlobal("pendo", { track });
+    window.history.replaceState(null, "", "/he/bookmarks");
+    const fetchMock = vi.fn().mockResolvedValueOnce({ ok: true }).mockResolvedValueOnce({ ok: false, status: 500 });
+    vi.stubGlobal("fetch", fetchMock);
+    setupDOM("true");
+
+    toggleBtn().click();
+    await flush();
+    toggleBtn().click();
+    await flush();
+
+    expect(track).toHaveBeenCalledTimes(1);
+    expect(track).toHaveBeenCalledWith("question_bookmark_toggled", {
+      question_id: "q1",
+      bookmarked: false,
+      topic_id: undefined,
+      source_page: "bookmarks",
+    });
+    window.history.replaceState(null, "", "/");
+  });
 });

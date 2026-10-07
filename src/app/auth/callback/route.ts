@@ -1,7 +1,12 @@
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
-import type { EmailOtpType } from "@supabase/supabase-js";
+import type { EmailOtpType, User } from "@supabase/supabase-js";
+import { trackServerEvent } from "@/lib/pendo-server";
+
+// Requesting a magic link is what creates an account, and links expire within
+// an hour, so an account younger than that is completing its first sign-in.
+const NEW_USER_WINDOW_MS = 60 * 60 * 1000;
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -35,12 +40,27 @@ export async function GET(request: Request) {
     return response;
   }
 
+  function trackSignIn(
+    user: User | null,
+    properties: { auth_flow: "token_hash" | "pkce"; otp_type?: EmailOtpType }
+  ) {
+    if (!user) return;
+    after(() =>
+      trackServerEvent("user_signed_in", user.id, {
+        ...properties,
+        next_path: safeNext,
+        is_new_user: Date.now() - Date.parse(user.created_at) < NEW_USER_WINDOW_MS,
+      })
+    );
+  }
+
   // Token-hash flow (cross-device, no PKCE cookie required)
   const token_hash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
   if (token_hash && type) {
-    const { error } = await supabase.auth.verifyOtp({ token_hash, type });
+    const { data, error } = await supabase.auth.verifyOtp({ token_hash, type });
     if (!error) {
+      trackSignIn(data.user, { auth_flow: "token_hash", otp_type: type });
       return successRedirect();
     }
   }
@@ -48,8 +68,9 @@ export async function GET(request: Request) {
   // PKCE code flow (fallback for any in-flight PKCE links)
   const code = searchParams.get("code");
   if (code) {
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
+      trackSignIn(data.user, { auth_flow: "pkce" });
       return successRedirect();
     }
   }

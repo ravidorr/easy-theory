@@ -31,6 +31,20 @@
     btn.setAttribute("aria-pressed", pressed ? "true" : "false");
   }
 
+  function trackEvent(name, properties) {
+    try {
+      if (window.pendo && typeof window.pendo.track === "function") window.pendo.track(name, properties);
+    } catch {}
+  }
+
+  function sourcePage() {
+    const path = window.location.pathname;
+    if (/\/bookmarks(\/|$)/.test(path)) return "bookmarks";
+    if (/\/retry(\/|$)/.test(path)) return "retry";
+    if (/\/review(\/|$)/.test(path)) return "review";
+    return "quiz";
+  }
+
   async function toggle(btn) {
     if (btn.dataset.busy) return;
     const next = btn.getAttribute("aria-pressed") !== "true";
@@ -47,6 +61,13 @@
         }),
       });
       if (!res.ok) throw new Error("bookmark save failed: " + res.status);
+      const topicHolder = btn.closest("[data-topic-id]");
+      trackEvent("question_bookmark_toggled", {
+        question_id: btn.dataset.questionId,
+        bookmarked: next,
+        topic_id: topicHolder ? topicHolder.dataset.topicId : undefined,
+        source_page: sourcePage(),
+      });
     } catch {
       setPressed(btn, !next);
       announce(t.bookmarkSaveError || "שגיאה בשמירה, נסו שוב?");

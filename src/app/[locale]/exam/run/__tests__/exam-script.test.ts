@@ -605,3 +605,161 @@ describe("exam.js – timer", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("exam.js – Pendo tracking", () => {
+  const SESSION_ID = "00000000-0000-4000-8000-000000000001";
+  let track: ReturnType<typeof vi.fn>;
+
+  function tracked(name: string) {
+    return track.mock.calls
+      .filter(([event]) => event === name)
+      .map(([, properties]) => properties);
+  }
+
+  function answerAll() {
+    clickOption(0, "a");
+    clickOption(1, "b");
+    clickOption(2, "c");
+  }
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    track = vi.fn();
+    vi.stubGlobal("pendo", { track });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+  });
+
+  it("tracks a fresh attempt starting", () => {
+    mockFetch();
+    setupDOM();
+
+    expect(tracked("exam_started")).toEqual([
+      {
+        session_id: null,
+        is_resumed: false,
+        total_questions: 3,
+        duration_seconds: 2400,
+        remaining_seconds: 2400,
+        answered_count: 0,
+        current_index: 0,
+        session_mode: "legacy",
+      },
+    ]);
+  });
+
+  it("flags a resumed server session", () => {
+    mockFetch({ ok: true, revision: 5 });
+    setupDOM({ sessionId: SESSION_ID, answers: JSON.stringify({ q1: "c" }), revision: 4 });
+
+    expect(tracked("exam_started")).toEqual([
+      expect.objectContaining({
+        session_id: SESSION_ID,
+        is_resumed: true,
+        answered_count: 1,
+        session_mode: "server_session",
+      }),
+    ]);
+  });
+
+  it("tracks a scored exam with its outcome and weakest topic", async () => {
+    mockFetch(
+      passResponse({
+        score: 24,
+        total: 30,
+        passed: false,
+        pass_mark: 26,
+        unanswered_count: 2,
+        duration_seconds: 1500,
+        topic_breakdown: { t1: { correct: 9, total: 10 }, t2: { correct: 3, total: 6 } },
+      })
+    );
+    setupDOM();
+    answerAll();
+
+    submitBtn().click();
+    await flushPromises();
+
+    expect(tracked("exam_submitted")).toEqual([
+      {
+        session_id: null,
+        passed: false,
+        score: 24,
+        total: 30,
+        pass_mark: 26,
+        score_gap: 2,
+        unanswered_count: 2,
+        duration_seconds: 1500,
+        auto_submitted: false,
+        marked_for_review_count: 0,
+        weakest_topic_id: "t2",
+        medals_earned: "",
+      },
+    ]);
+  });
+
+  it("tracks the exam-pass medal from the exam source", async () => {
+    mockFetch(passResponse({ medals_earned: ["exam-pass"] }));
+    setupDOM();
+    answerAll();
+
+    submitBtn().click();
+    await flushPromises();
+
+    expect(tracked("exam_submitted")[0]).toMatchObject({ passed: true, medals_earned: "exam-pass" });
+    expect(tracked("medal_earned")).toEqual([
+      { medal_slug: "exam-pass", medal_category: "achievement", source: "exam" },
+    ]);
+  });
+
+  it("tracks a rejected submission with its HTTP status", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, status: 429, json: async () => ({}) }));
+    setupDOM();
+    answerAll();
+
+    submitBtn().click();
+    await flushPromises();
+
+    expect(tracked("exam_submission_failed")).toEqual([
+      {
+        session_id: null,
+        auto_submitted: false,
+        http_status: 429,
+        is_network_error: false,
+        answered_count: 3,
+        remaining_seconds: 2400,
+      },
+    ]);
+  });
+
+  it("tracks a network failure on the automatic time-out submit", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
+    setupDOM({ durationSeconds: 3 });
+
+    vi.advanceTimersByTime(3000);
+    await flushPromises();
+
+    expect(tracked("exam_submission_failed")).toEqual([
+      expect.objectContaining({ auto_submitted: true, is_network_error: true, remaining_seconds: 0 }),
+    ]);
+  });
+
+  it("reports an autosave conflict once per page", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, status: 409, json: async () => ({}) }));
+    setupDOM({ sessionId: SESSION_ID, revision: 2 });
+    await flushPromises();
+    await flushPromises();
+
+    clickOption(0, "a");
+    await flushPromises();
+    await flushPromises();
+
+    expect(vi.mocked(fetch)).toHaveBeenCalledTimes(2);
+    expect(tracked("exam_progress_save_failed")).toEqual([
+      { session_id: SESSION_ID, failure_reason: "conflict", revision: 2, answered_count: 0, current_index: 0 },
+    ]);
+  });
+});

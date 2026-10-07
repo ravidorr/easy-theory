@@ -1,8 +1,9 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Icon } from "@/components/Icon";
+import { trackPendoEvent } from "@/lib/pendo";
 import styles from "./page.module.css";
 
 const TOPICS = ["question", "bug", "idea", "general"] as const;
@@ -10,6 +11,7 @@ type Topic = (typeof TOPICS)[number];
 
 export function ContactForm() {
   const t = useTranslations("Contact");
+  const locale = useLocale();
   const [topic, setTopic] = useState<Topic>("question");
   const [message, setMessage] = useState("");
   const [replyEmail, setReplyEmail] = useState("");
@@ -42,6 +44,14 @@ export function ContactForm() {
         throw new Error(typeof payload?.error === "string" ? payload.error : t("sendFailed"));
       }
       setIsSent(true);
+      // Only the message's length and whether a reply address was given are
+      // tracked, never their contents.
+      trackPendoEvent("contact_message_sent", {
+        topic,
+        message_length: message.trim().length,
+        has_reply_email: replyEmail.trim() !== "",
+        locale,
+      });
     } catch (submissionError) {
       setError(submissionError instanceof Error ? submissionError.message : t("sendFailed"));
     } finally {

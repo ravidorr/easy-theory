@@ -8,6 +8,7 @@
 
   const total = parseInt(container.dataset.total, 10) || 0;
   if (total === 0) return;
+  const quizMode = container.dataset.quizMode || "topic";
   // Matches the common upper bound for mobile double-tap recognition.
   const TOUCH_DOUBLE_TAP_SUPPRESSION_MS = 300;
   const DEFAULT_AUTO_ADVANCE_DELAY_MS = 1125;
@@ -290,6 +291,10 @@
     }
   }
 
+  // A run can start past the beginning of the deck (first unanswered question
+  // or a resumed run), while its score is reported against the whole deck.
+  const runStartIndex = currentIndex;
+
   let selectedOption = null;
   let confirmed = false;
   let answerPersistence = "idle";
@@ -405,6 +410,18 @@
         })
       );
     } catch {}
+  }
+
+  function trackEvent(name, properties) {
+    try {
+      if (window.pendo && typeof window.pendo.track === "function") window.pendo.track(name, properties);
+    } catch {}
+  }
+
+  function nextTopicSlug() {
+    const link = document.getElementById("quiz-next-topic");
+    const match = link && (link.getAttribute("href") || "").match(/\/topics\/([^/?#]+)/);
+    return match ? match[1] : undefined;
   }
 
   if (rewardFloat) {
@@ -661,6 +678,20 @@
 
     const questionId = slide.dataset.questionId;
     const topicId = container.dataset.topicId || slide.dataset.topicId;
+
+    function trackSaveFailed(failureType, httpStatus, errorCode, errorRef) {
+      trackEvent("quiz_answer_save_failed", {
+        question_id: questionId,
+        topic_id: topicId,
+        quiz_mode: quizMode,
+        failure_type: failureType,
+        http_status: httpStatus,
+        error_code: errorCode || undefined,
+        error_ref: errorRef,
+        auto_retry_used: autoRetryUsed,
+      });
+    }
+
     if (
       !pendingSubmission ||
       pendingSubmission.questionId !== questionId ||
@@ -670,6 +701,7 @@
         showPermanentSubmissionFailure(
           t.saveAnswerError || "לא ניתן לשמור את התשובה. נסו שוב."
         );
+        trackSaveFailed("permanent", undefined, "SESSION_ID_UNAVAILABLE");
         return;
       }
       pendingSubmission = {
@@ -695,6 +727,7 @@
         showRetryableSubmissionFailure(
           t.saveAnswerError || "לא ניתן לשמור את התשובה. נסו שוב."
         );
+        trackSaveFailed("retryable", undefined, "NETWORK_ERROR");
       }
       return;
     }
@@ -711,17 +744,21 @@
       return errorBody.then(function (data) {
         const message = submissionErrorMessage(data);
         const code = data && typeof data.code === "string" ? data.code : "";
+        const ref = data && typeof data.ref === "string" ? data.ref : undefined;
         // The server saw a concurrent identical submission still in flight;
         // a moment later the stored result replays, so retry silently once.
         if (code === "SUBMISSION_IN_FLIGHT") {
           if (scheduleAutoRetry(slide)) return null;
           showRetryableSubmissionFailure(message);
+          trackSaveFailed("retryable", res.status, code, ref);
           return null;
         }
         if (res.status === 429 || res.status >= 500) {
           showRetryableSubmissionFailure(message);
+          trackSaveFailed("retryable", res.status, code, ref);
         } else {
           showPermanentSubmissionFailure(message);
+          trackSaveFailed("permanent", res.status, code, ref);
         }
         return null;
       });
@@ -745,9 +782,39 @@
       };
       persistResume();
       persistLatestStats(data);
+      const medalsEarned = Array.isArray(data.medals_earned) ? data.medals_earned : [];
+      trackEvent("quiz_answer_submitted", {
+        question_id: acknowledged.questionId,
+        topic_id: topicId,
+        session_id: sessionId,
+        quiz_mode: quizMode,
+        selected_option: acknowledged.selectedOption,
+        is_correct: typeof data.is_correct === "boolean" ? data.is_correct : acknowledged.isCorrect,
+        question_index: currentIndex,
+        total_questions: total,
+        stars_earned: data.stars_earned,
+        new_total_stars: data.new_total_stars,
+        streak_days: data.streak_days,
+        topic_completed: data.topic_completed === true,
+        medals_earned_count: medalsEarned.length,
+        auto_retry_used: autoRetryUsed,
+      });
+      if (data.topic_completed === true) {
+        trackEvent("topic_completed", {
+          topic_id: topicId,
+          session_id: sessionId,
+          question_id: acknowledged.questionId,
+          streak_days: data.streak_days,
+          new_total_stars: data.new_total_stars,
+          medals_earned: medalsEarned.join(","),
+        });
+      }
       if (data.medals_earned && data.medals_earned.length && window.medalCelebration) {
         window.medalCelebration.show(data.medals_earned, {
           fallbackFocus: actionBtn,
+          source: "quiz",
+          streakDays: data.streak_days,
+          newTotalStars: data.new_total_stars,
         });
       }
       // A medal modal or topic-completed message needs the user's attention;
@@ -766,6 +833,7 @@
       showRetryableSubmissionFailure(
         t.saveAnswerError || "לא ניתן לשמור את התשובה. נסו שוב."
       );
+      trackSaveFailed("retryable", undefined, "NETWORK_ERROR");
     });
   }
 
@@ -839,7 +907,30 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ topic_id: topicId, score: pct, status }),
           }).catch(function () {});
+          trackEvent("topic_quiz_completed", {
+            topic_id: topicId,
+            session_id: sessionId,
+            correct_count: score,
+            total_questions: total,
+            score_pct: pct,
+            progress_status: status,
+            points_earned: points,
+            start_index: runStartIndex,
+            questions_answered_this_run: total - runStartIndex,
+            was_resumed: Boolean(resumed),
+            next_topic_slug: nextTopicSlug(),
+          });
         }
+      } else {
+        trackEvent("mistake_retry_completed", {
+          topic_id: container.dataset.topicId,
+          scope: new URLSearchParams(window.location.search).get("scope") === "all" ? "all" : "lastSession",
+          session_id: sessionId,
+          mistakes_count: total,
+          corrected_count: score,
+          score_pct: Math.round((score / total) * 100),
+          points_earned: points,
+        });
       }
 
       // The answered card slides away first; the final screen takes over

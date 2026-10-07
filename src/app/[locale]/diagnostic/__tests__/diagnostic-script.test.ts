@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { readFileSync } from "fs";
 import { resolve } from "path";
 
@@ -83,5 +83,95 @@ describe("diagnostic script", () => {
     resolveFetch!({ ok: true, json: async () => ({ saved: true }) });
     await flushPromises();
     expect(localStorage.getItem("easyInTheory:diagnostic:v1")).toBeNull();
+  });
+
+  describe("Pendo tracking", () => {
+    const pendingPayload = {
+      answers: Array.from({ length: 12 }, (_, index) => ({
+        question_id: `00000000-0000-4000-8000-${String(index).padStart(12, "0")}`,
+        selected_option: "a",
+      })),
+      target_exam_date: null,
+    };
+    let track: ReturnType<typeof vi.fn>;
+
+    beforeEach(() => {
+      track = vi.fn();
+      vi.stubGlobal("pendo", { track });
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("tracks a completed diagnostic with its score summary", async () => {
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(new Date(2026, 9, 1, 12));
+      setupDOM(true);
+      (document.getElementById("diagnostic-target-date") as HTMLInputElement).value = "2026-10-31";
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockResolvedValue({
+          ok: true,
+          json: async () => ({
+            saved: true,
+            topic_scores: {
+              t1: { correct: 3, total: 3 },
+              t2: { correct: 1, total: 3 },
+              t3: { correct: 2, total: 6 },
+            },
+          }),
+        })
+      );
+      eval(diagnosticScript);
+
+      document.querySelector("form")!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+      await flushPromises();
+
+      expect(track).toHaveBeenCalledWith("diagnostic_completed", {
+        saved_to_account: true,
+        is_authenticated: true,
+        answered_count: 12,
+        has_target_exam_date: true,
+        days_until_target_exam: 30,
+        correct_count: 6,
+        score_pct: 50,
+        weakest_topic_id: "t2",
+      });
+    });
+
+    it("tracks a replayed guest diagnostic once the account saves it", async () => {
+      setupDOM(true);
+      localStorage.setItem("easyInTheory:diagnostic:v1", JSON.stringify(pendingPayload));
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockResolvedValue({
+          ok: true,
+          json: async () => ({ saved: true, topic_scores: { t1: { correct: 7, total: 12 } } }),
+        })
+      );
+
+      eval(diagnosticScript);
+      await flushPromises();
+
+      expect(track).toHaveBeenCalledTimes(1);
+      expect(track).toHaveBeenCalledWith("guest_diagnostic_saved_to_account", {
+        answered_count: 12,
+        correct_count: 7,
+        has_target_exam_date: false,
+        days_until_target_exam: undefined,
+      });
+    });
+
+    it("does not count a replay the server did not save to the account", async () => {
+      setupDOM(true);
+      localStorage.setItem("easyInTheory:diagnostic:v1", JSON.stringify(pendingPayload));
+      vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ saved: false }) }));
+
+      eval(diagnosticScript);
+      await flushPromises();
+
+      expect(track).not.toHaveBeenCalled();
+    });
   });
 });

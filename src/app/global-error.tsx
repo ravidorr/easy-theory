@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import * as Sentry from "@sentry/nextjs";
+import { trackPendoEvent } from "@/lib/pendo";
 import heMessages from "../../messages/he.json";
 import arMessages from "../../messages/ar.json";
 import styles from "./global-error.module.css";
@@ -20,6 +21,13 @@ export default function GlobalError({
   useEffect(() => {
     console.error(error);
     Sentry.captureException(error);
+    // The crash may predate the Pendo agent loading; the helper is a no-op then.
+    trackPendoEvent("app_error_shown", {
+      error_boundary: "root",
+      error_digest: error.digest,
+      page_path: window.location.pathname,
+      locale: window.__locale,
+    });
   }, [error]);
 
   return (

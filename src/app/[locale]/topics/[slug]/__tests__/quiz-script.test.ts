@@ -1840,3 +1840,191 @@ describe("quiz.js – skip answered", () => {
     expect(slideDisplay(1)).toBe("none");
   });
 });
+
+describe("quiz.js – Pendo tracking", () => {
+  let track: ReturnType<typeof vi.fn>;
+
+  function tracked(name: string) {
+    return track.mock.calls
+      .filter(([event]) => event === name)
+      .map(([, properties]) => properties);
+  }
+
+  function respondWith(data: object) {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => data }));
+  }
+
+  beforeEach(() => {
+    resetTestState();
+    track = vi.fn();
+    vi.stubGlobal("pendo", { track });
+  });
+
+  afterEach(() => {
+    restoreTestState();
+    window.history.replaceState(null, "", "/");
+  });
+
+  it("tracks a saved answer with the RPC outcome", async () => {
+    respondWith({ is_correct: true, stars_earned: 10, new_total_stars: 120, streak_days: 3, medals_earned: [] });
+    setupDOM({ userId: "u1" });
+
+    clickOption(0, "a");
+    await flushAsyncWork();
+
+    expect(tracked("quiz_answer_submitted")).toEqual([
+      {
+        question_id: "q1",
+        topic_id: "t1",
+        session_id: expect.any(String),
+        quiz_mode: "topic",
+        selected_option: "a",
+        is_correct: true,
+        question_index: 0,
+        total_questions: 2,
+        stars_earned: 10,
+        new_total_stars: 120,
+        streak_days: 3,
+        topic_completed: false,
+        medals_earned_count: 0,
+        auto_retry_used: false,
+      },
+    ]);
+    expect(tracked("topic_completed")).toEqual([]);
+  });
+
+  it("tracks topic mastery and every medal the answer earned", async () => {
+    respondWith({
+      is_correct: true,
+      topic_completed: true,
+      streak_days: 7,
+      new_total_stars: 300,
+      medals_earned: ["first-topic", "streak-7"],
+    });
+    setupDOM();
+
+    clickOption(0, "a");
+    await flushAsyncWork();
+
+    expect(tracked("topic_completed")).toEqual([
+      {
+        topic_id: "t1",
+        session_id: expect.any(String),
+        question_id: "q1",
+        streak_days: 7,
+        new_total_stars: 300,
+        medals_earned: "first-topic,streak-7",
+      },
+    ]);
+    expect(tracked("medal_earned")).toEqual([
+      { medal_slug: "first-topic", medal_category: "achievement", source: "quiz", streak_days: 7, new_total_stars: 300 },
+      { medal_slug: "streak-7", medal_category: "streak", source: "quiz", streak_days: 7, new_total_stars: 300 },
+    ]);
+  });
+
+  it("tracks retryable and permanent save failures with the server ref", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(errorResponse(500, "שגיאה", { code: "SUBMISSION_FAILED", ref: "ab12cd34" }))
+    );
+    setupDOM();
+    clickOption(0, "b");
+    await flushAsyncWork();
+
+    expect(tracked("quiz_answer_save_failed")).toEqual([
+      {
+        question_id: "q1",
+        topic_id: "t1",
+        quiz_mode: "topic",
+        failure_type: "retryable",
+        http_status: 500,
+        error_code: "SUBMISSION_FAILED",
+        error_ref: "ab12cd34",
+        auto_retry_used: false,
+      },
+    ]);
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(errorResponse(409, "שגיאה", { code: "IDEMPOTENCY_CONFLICT" }))
+    );
+    setupDOM({ quizMode: "retry" });
+    clickOption(0, "b");
+    await flushAsyncWork();
+
+    expect(tracked("quiz_answer_save_failed")[1]).toMatchObject({
+      quiz_mode: "retry",
+      failure_type: "permanent",
+      http_status: 409,
+      error_code: "IDEMPOTENCY_CONFLICT",
+    });
+  });
+
+  it("tracks a network failure only once the silent retry has failed too", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
+    setupDOM();
+
+    clickOption(0, "b");
+    await flushAsyncWork();
+    expect(tracked("quiz_answer_save_failed")).toEqual([]);
+
+    vi.advanceTimersByTime(AUTO_RETRY_DELAY_MS);
+    await flushAsyncWork();
+
+    expect(tracked("quiz_answer_save_failed")).toEqual([
+      expect.objectContaining({ failure_type: "retryable", error_code: "NETWORK_ERROR", auto_retry_used: true }),
+    ]);
+  });
+
+  it("tracks a finished topic run against the question it started from", async () => {
+    respondWith({});
+    setupDOM({ userId: "u1", answeredIds: ["q1"] });
+
+    clickOption(1, "b");
+    await flushAsyncWork();
+    clickAction();
+
+    expect(tracked("topic_quiz_completed")).toEqual([
+      {
+        topic_id: "t1",
+        session_id: expect.any(String),
+        correct_count: 1,
+        total_questions: 2,
+        score_pct: 50,
+        progress_status: "in_progress",
+        points_earned: 10,
+        start_index: 1,
+        questions_answered_this_run: 1,
+        was_resumed: false,
+        next_topic_slug: "next",
+      },
+    ]);
+    expect(tracked("mistake_retry_completed")).toEqual([]);
+  });
+
+  it("tracks a finished mistakes retry with its scope", async () => {
+    respondWith({});
+    window.history.replaceState(null, "", "/he/topics/signs/retry?scope=all");
+    setupDOM({ quizMode: "retry" });
+
+    clickOption(0, "a");
+    await flushAsyncWork();
+    clickAction();
+    clickOption(1, "c");
+    await flushAsyncWork();
+    clickAction();
+
+    expect(tracked("mistake_retry_completed")).toEqual([
+      {
+        topic_id: "t1",
+        scope: "all",
+        session_id: expect.any(String),
+        mistakes_count: 2,
+        corrected_count: 1,
+        score_pct: 50,
+        points_earned: 10,
+      },
+    ]);
+    expect(tracked("topic_quiz_completed")).toEqual([]);
+  });
+});

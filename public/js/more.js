@@ -19,6 +19,21 @@
     document.cookie = name + "=" + value + "; path=/; max-age=31536000; SameSite=Lax; Secure";
   }
 
+  function trackEvent(name, properties) {
+    try {
+      if (window.pendo && typeof window.pendo.track === "function") window.pendo.track(name, properties);
+    } catch {}
+  }
+
+  function trackPreferenceChanged(preference, newValue, previousValue) {
+    trackEvent("app_preference_changed", {
+      preference: preference,
+      new_value: newValue,
+      previous_value: previousValue,
+      locale: window.__locale,
+    });
+  }
+
   function syncThemeColorMeta(theme) {
     const color = THEME_COLORS[theme === "light" ? "light" : "dark"];
     let meta = document.querySelector('meta[name="theme-color"]');
@@ -63,6 +78,7 @@
       writeCookie("theme", theme);
       updateSwitch(isDark);
       syncThemeColorMeta(theme);
+      trackPreferenceChanged("theme", theme, wasDark ? "dark" : "light");
     });
   }
 
@@ -103,11 +119,13 @@
       const isOn = !wasOn;
       writeCookie("quiz-auto-advance", isOn ? "on" : "off");
       updateAutoAdvanceSwitch(isOn);
+      trackPreferenceChanged("quiz_auto_advance", isOn ? "on" : "off", wasOn ? "on" : "off");
     });
   }
 
   if (autoAdvanceDelayInput) {
     const delay = validAutoAdvanceDelay(autoAdvanceDelayInput.value);
+    let committedDelay = delay;
     autoAdvanceDelayInput.value = String(delay);
     setAutoAdvanceDelayValue(delay);
     autoAdvanceDelayInput.addEventListener("input", function () {
@@ -115,6 +133,13 @@
       autoAdvanceDelayInput.value = String(value);
       setAutoAdvanceDelayValue(value);
       writeCookie("quiz-auto-advance-delay", value);
+    });
+    // Tracked once the slider is released, not on every input tick.
+    autoAdvanceDelayInput.addEventListener("change", function () {
+      const value = validAutoAdvanceDelay(autoAdvanceDelayInput.value);
+      if (value === committedDelay) return;
+      trackPreferenceChanged("quiz_auto_advance_delay", String(value), String(committedDelay));
+      committedDelay = value;
     });
   }
 
