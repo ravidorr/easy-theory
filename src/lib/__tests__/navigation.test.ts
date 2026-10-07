@@ -43,6 +43,8 @@ describe("navigation", () => {
   it("calls createNavigation with routing config", async () => {
     const { createNavigation } = await import("next-intl/navigation");
     const { routing } = await import("@/i18n/routing");
+    vi.resetModules();
+    await import("../navigation");
     expect(createNavigation).toHaveBeenCalledWith(routing);
   });
 });

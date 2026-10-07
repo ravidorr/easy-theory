@@ -4,12 +4,12 @@
     "url": "https://github.com/sponsors/ravidorr"
   },
   "name": "easy-in-theory",
-  "version": "0.56.20",
+  "version": "0.56.21",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "prebuild": "tsx scripts/verify-migration-ledger.ts",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
     "lint:css": "stylelint \"**/*.css\" --ignore-path .gitignore",
@@ -61,7 +61,7 @@
     "@types/react-dom": "^19",
     "@types/web-push": "^3.6.4",
     "@vitejs/plugin-react": "^6.0.3",
-    "@vitest/coverage-v8": "^4.1.9",
+    "@vitest/coverage-v8": "^5.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
     "eslint-plugin-no-em-dash": "^1.0.0",
@@ -74,7 +74,7 @@
     "stylelint-config-standard": "^40.0.0",
     "tsx": "^4.23.0",
     "typescript": "^5",
-    "vitest": "^4.1.9"
+    "vitest": "^5.0.0"
   },
   "packageManager": "pnpm@10.12.1+sha512.f0dda8580f0ee9481c5c79a1d927b9164f2c478e90992ad268bbb2465a736984391d6333d2c327913578b2804af33474ca554ba29c04a8b13060a717675ae3ac"
 }
