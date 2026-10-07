@@ -12,7 +12,9 @@ import {
 
 const packageJson = '{"version":"0.58.3"}';
 const supportedStatus = String.fromCodePoint(0x2713);
-const supportedPolicy = `| Version | Supported |
+const supportedPolicy = `## Supported Versions
+
+| Version | Supported |
 | ------- | --------- |
 | 0.58.3 | ${supportedStatus} |`;
 
@@ -71,8 +73,27 @@ describe("validateSecurityPolicyVersion", () => {
     });
   });
 
+  it("uses the table in the supported-versions section", () => {
+    const policyWithExampleTable = `## Example
+
+| Version | Supported |
+| ------- | --------- |
+| 0.58.2 | ${supportedStatus} |
+
+${supportedPolicy}`;
+
+    expect(
+      validateSecurityPolicyVersion(packageJson, policyWithExampleTable),
+    ).toEqual({
+      valid: true,
+      version: "0.58.3",
+    });
+  });
+
   it("rejects version rows that are not part of the supported-versions table", () => {
-    const malformedPolicy = `| Version | Supported |
+    const malformedPolicy = `## Supported Versions
+
+| Version | Supported |
 This is not a table delimiter.
 | 0.58.3 | ${supportedStatus} |`;
 
