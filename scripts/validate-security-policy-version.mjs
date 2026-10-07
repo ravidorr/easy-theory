@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { readStablePackageVersion } from "./validate-semver-bump.mjs";
 
 const SUPPORTED_STATUS = String.fromCodePoint(0x2713);
+const SUPPORTED_VERSIONS_SECTION = /^##[ \t]+Supported Versions[ \t]*\r?\n(?<content>[\s\S]*?)(?=^##[ \t]|(?![\s\S]))/m;
 const SUPPORTED_VERSIONS_TABLE = /^\|[ \t]*Version[ \t]*\|[ \t]*Supported[ \t]*\|[ \t]*\r?\n^\|[ \t]*:?-{3,}:?[ \t]*\|[ \t]*:?-{3,}:?[ \t]*\|[ \t]*\r?\n(?<rows>(?:^\|[^\r\n]*\|[ \t]*(?:\r?\n|$))*)/m;
 const VERSION_ROW = /^\|\s*([0-9]+\.[0-9]+\.[0-9]+)\s*\|\s*([^|]+?)\s*\|\s*$/gm;
 
@@ -17,7 +18,8 @@ export function validateSecurityPolicyVersion(packageJson, securityPolicy) {
     };
   }
 
-  const table = SUPPORTED_VERSIONS_TABLE.exec(securityPolicy);
+  const section = SUPPORTED_VERSIONS_SECTION.exec(securityPolicy);
+  const table = section && SUPPORTED_VERSIONS_TABLE.exec(section.groups.content);
 
   if (!table) {
     return {
