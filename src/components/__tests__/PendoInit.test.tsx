@@ -5,7 +5,7 @@ import { getPendoVisitor, type PendoVisitor } from "@/lib/pendo";
 import { reportError } from "@/lib/monitoring";
 
 vi.mock("@/lib/supabase", () => ({ createClient: vi.fn() }));
-vi.mock("@/lib/pendo", () => ({ getPendoVisitor: vi.fn() }));
+vi.mock("@/lib/pendo", () => ({ getPendoVisitor: vi.fn(), PENDO_ACCOUNT_ID: "system" }));
 vi.mock("@/lib/monitoring", () => ({ reportError: vi.fn() }));
 
 const mockCreateClient = vi.mocked(createClient);
@@ -13,7 +13,6 @@ const mockGetPendoVisitor = vi.mocked(getPendoVisitor);
 
 const visitor: PendoVisitor = {
   id: "learner-2",
-  email: "learner@example.com",
   starPoints: 240,
   streakDays: 5,
   lastActiveDate: "2025-03-14",
@@ -79,13 +78,15 @@ describe("PendoInit", () => {
   it("initializes the verified learner with their visitor metadata", async () => {
     const script = await initScript();
 
-    expect(script).toBe(`pendo.initialize(${JSON.stringify({ visitor })});`);
+    expect(script).toBe(
+      `pendo.initialize(${JSON.stringify({ visitor, account: { id: "system" } })});`
+    );
     expect(mockGetPendoVisitor).toHaveBeenCalledWith(expect.anything(), { id: "learner-2" });
   });
 
-  it("escapes markup so learner-supplied text cannot close the script", async () => {
-    const email = "</script><script>x()</script>@example.com";
-    mockGetPendoVisitor.mockResolvedValue({ ...visitor, email });
+  it("escapes markup so no string in the payload can close the script", async () => {
+    const timeZone = "</script><script>x()</script>";
+    mockGetPendoVisitor.mockResolvedValue({ ...visitor, timeZone });
 
     const script = await initScript();
 
@@ -93,14 +94,19 @@ describe("PendoInit", () => {
     const initialize = vi.fn();
     vi.stubGlobal("pendo", { initialize });
     eval(script);
-    expect(initialize).toHaveBeenCalledWith({ visitor: { ...visitor, email } });
+    expect(initialize).toHaveBeenCalledWith({
+      visitor: { ...visitor, timeZone },
+      account: { id: "system" },
+    });
   });
 
   it("still identifies a verified learner by id when the metadata lookup fails", async () => {
     const error = new Error("getLearnerPlan: user_learner_plans query failed: boom");
     mockGetPendoVisitor.mockRejectedValue(error);
 
-    expect(await initScript()).toBe('pendo.initialize({"visitor":{"id":"learner-2"}});');
+    expect(await initScript()).toBe(
+      'pendo.initialize({"visitor":{"id":"learner-2"},"account":{"id":"system"}});'
+    );
     expect(reportError).toHaveBeenCalledWith("pendo", "visitor lookup failed", error);
   });
 

@@ -13,6 +13,14 @@ Historical release headings were normalized from their changelog categories: `Ad
 
 ---
 
+## [0.57.1] — 2026-10-07
+
+### Fixed
+
+- Stopped sending the learner's email address as analytics visitor metadata, matching the existing rule that the audience includes minors. Signed-in learners are now initialized under the same placeholder account id (`system`) that server-side events use, so one learner's events share one account context.
+
+---
+
 ## [0.57.0] — 2026-10-07
 
 ### Added

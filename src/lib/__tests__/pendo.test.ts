@@ -54,7 +54,6 @@ describe("getPendoVisitor", () => {
 
     await expect(getPendoVisitor(supabase, user)).resolves.toEqual({
       id: "user-1",
-      email: "learner@example.com",
       starPoints: 240,
       streakDays: 5,
       lastActiveDate: "2025-03-14",
@@ -69,6 +68,7 @@ describe("getPendoVisitor", () => {
       durationMinutes: 45,
       medalSlug: ["streak-3", "first-topic"],
     });
+    expect(JSON.stringify(await getPendoVisitor(supabase, user))).not.toContain("learner@example.com");
     for (const query of [getUserStats, getLearnerPlan, getUserSchedule, getUserMedals]) {
       expect(query).toHaveBeenCalledWith(supabase, "user-1");
     }
@@ -87,7 +87,6 @@ describe("getPendoVisitor", () => {
 
     await expect(getPendoVisitor(supabase, { id: "user-2" } as User)).resolves.toEqual({
       id: "user-2",
-      email: null,
       starPoints: 0,
       streakDays: 0,
       lastActiveDate: null,
