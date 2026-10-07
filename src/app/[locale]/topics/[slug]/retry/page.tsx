@@ -198,9 +198,6 @@ export default async function RetryMistakesPage({
         className={styles.page}
       >
         <div className={styles.topBar}>
-          <Link href={reviewHref} className={`icon-btn ${styles.closeBtn}`} aria-label={tQuiz("closeLabel")}>
-            <Icon name="close" size={20} />
-          </Link>
           <div className={styles.progressTrack}>
             <div
               id="quiz-progress-fill"

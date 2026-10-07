@@ -269,10 +269,10 @@ describe("RetryMistakesPage", () => {
     expect(signImgs[0].getAttribute("alt")).toBe("signAlt");
   });
 
-  it("labels the close link for screen readers", async () => {
+  it("does not render a top-right close link", async () => {
     const jsx = await RetryMistakesPage({ params: Promise.resolve({ slug: "signs" }) });
     const { container } = render(jsx);
-    expect(container.querySelector("a[aria-label='closeLabel']")).toBeTruthy();
+    expect(container.querySelector("a[aria-label='closeLabel']")).toBeNull();
   });
 
   it("renders every option button with aria-pressed false", async () => {

@@ -384,10 +384,10 @@ describe("ReviewPage", () => {
     expect(container.querySelector("h3")?.textContent).toBe("");
   });
 
-  it("labels the close link for screen readers", async () => {
+  it("does not render a top-right close link", async () => {
     const jsx = await callPage();
     const { container } = render(jsx);
-    expect(container.querySelector("a[aria-label='closeLabel']")).toBeTruthy();
+    expect(container.querySelector("a[aria-label='closeLabel']")).toBeNull();
   });
 
   it("gives the question sign image a sign-number alt", async () => {
