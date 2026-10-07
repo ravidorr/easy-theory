@@ -4,7 +4,7 @@
     "url": "https://github.com/sponsors/ravidorr"
   },
   "name": "easy-in-theory",
-  "version": "0.58.4",
+  "version": "0.58.5",
   "private": true,
   "scripts": {
     "dev": "next dev",

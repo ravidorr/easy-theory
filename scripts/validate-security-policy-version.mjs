@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { readStablePackageVersion } from "./validate-semver-bump.mjs";
 
 const SUPPORTED_STATUS = String.fromCodePoint(0x2713);
-const TABLE_HEADER = /^\|\s*Version\s*\|\s*Supported\s*\|\s*$/m;
+const SUPPORTED_VERSIONS_TABLE = /^\|[ \t]*Version[ \t]*\|[ \t]*Supported[ \t]*\|[ \t]*\r?\n^\|[ \t]*:?-{3,}:?[ \t]*\|[ \t]*:?-{3,}:?[ \t]*\|[ \t]*\r?\n(?<rows>(?:^\|[^\r\n]*\|[ \t]*(?:\r?\n|$))*)/m;
 const VERSION_ROW = /^\|\s*([0-9]+\.[0-9]+\.[0-9]+)\s*\|\s*([^|]+?)\s*\|\s*$/gm;
 
 export function validateSecurityPolicyVersion(packageJson, securityPolicy) {
@@ -17,14 +17,16 @@ export function validateSecurityPolicyVersion(packageJson, securityPolicy) {
     };
   }
 
-  if (!TABLE_HEADER.test(securityPolicy)) {
+  const table = SUPPORTED_VERSIONS_TABLE.exec(securityPolicy);
+
+  if (!table) {
     return {
       valid: false,
       error: "SECURITY.md is missing a supported-versions table.",
     };
   }
 
-  const rows = [...securityPolicy.matchAll(VERSION_ROW)];
+  const rows = [...table.groups.rows.matchAll(VERSION_ROW)];
   const matchingRow = rows.find(([, rowVersion]) => rowVersion === version);
 
   if (matchingRow?.[2].trim() === SUPPORTED_STATUS) {
