@@ -332,6 +332,14 @@ describe("flashcard.js", () => {
       return new Promise((r) => setTimeout(r, 0));
     }
 
+    function deferred<T>() {
+      let resolve!: (value: T) => void;
+      const promise = new Promise<T>((resolvePromise) => {
+        resolve = resolvePromise;
+      });
+      return { promise, resolve };
+    }
+
     function tracked(name: string) {
       return track.mock.calls
         .filter(([event]) => event === name)
@@ -368,24 +376,105 @@ describe("flashcard.js", () => {
       expect(tracked("flashcard_graded")).toEqual([]);
     });
 
-    it("tracks a finished deck with first-pass and replay counts", () => {
-      setupDOM(SIGNS, { dueCount: 2 });
+    it("waits for saves before tracking a finished deck", async () => {
+      const save = deferred<{ ok: boolean; json: () => Promise<{ ok: boolean; due_at: string }> }>();
+      fetchMock.mockReturnValue(save.promise);
+      setupDOM([SIGNS[0]], { dueCount: 2 });
 
-      clickNo(); // card 0
-      clickYes(); // card 1
-      clickNo(); // card 2, replay starts at card 0
-      clickNo(); // replayed card 0, re-queued
-      clickYes(); // replayed card 2
-      clickYes(); // replayed card 0, deck done
+      clickYes();
+      expect(tracked("flashcard_deck_completed")).toEqual([]);
+
+      save.resolve({ ok: true, json: async () => ({ ok: true, due_at: DUE_AT }) });
+      await flush();
 
       expect(tracked("flashcard_deck_completed")).toEqual([
         {
-          deck_size: 3,
-          cards_graded: 3,
+          deck_size: 1,
+          cards_graded: 1,
           known_first_try_count: 1,
-          unknown_first_try_count: 2,
-          replayed_cards_count: 3,
+          unknown_first_try_count: 0,
+          replayed_cards_count: 0,
           due_count: 2,
+        },
+      ]);
+    });
+
+    it("excludes rejected save responses from finished-deck grades", async () => {
+      fetchMock.mockResolvedValue({ ok: false, json: async () => ({}) });
+      setupDOM([SIGNS[0]]);
+
+      clickYes();
+      await flush();
+
+      expect(tracked("flashcard_deck_completed")).toEqual([
+        {
+          deck_size: 1,
+          cards_graded: 0,
+          known_first_try_count: 0,
+          unknown_first_try_count: 0,
+          replayed_cards_count: 0,
+          due_count: undefined,
+        },
+      ]);
+    });
+
+    it("excludes rejected save requests from finished-deck grades", async () => {
+      fetchMock.mockRejectedValue(new Error("offline"));
+      setupDOM([SIGNS[0]]);
+
+      clickYes();
+      await flush();
+
+      expect(tracked("flashcard_deck_completed")).toEqual([
+        {
+          deck_size: 1,
+          cards_graded: 0,
+          known_first_try_count: 0,
+          unknown_first_try_count: 0,
+          replayed_cards_count: 0,
+          due_count: undefined,
+        },
+      ]);
+    });
+
+    it("excludes malformed successful responses from finished-deck grades", async () => {
+      fetchMock.mockResolvedValue({ ok: true, json: async () => ({ ok: true }) });
+      setupDOM([SIGNS[0]]);
+
+      clickYes();
+      await flush();
+
+      expect(tracked("flashcard_deck_completed")).toEqual([
+        {
+          deck_size: 1,
+          cards_graded: 0,
+          known_first_try_count: 0,
+          unknown_first_try_count: 0,
+          replayed_cards_count: 0,
+          due_count: undefined,
+        },
+      ]);
+    });
+
+    it("counts only successful grades when a finished deck has failed saves", async () => {
+      fetchMock
+        .mockResolvedValueOnce({ ok: true, json: async () => ({ ok: true, due_at: DUE_AT }) })
+        .mockResolvedValueOnce({ ok: false, json: async () => ({}) });
+      setupDOM([SIGNS[0], SIGNS[1]]);
+
+      clickYes();
+      clickNo();
+      clickYes();
+      await flush();
+
+      expect(tracked("flashcard_deck_completed")).toEqual([
+        {
+          deck_size: 2,
+          cards_graded: 1,
+          known_first_try_count: 1,
+          unknown_first_try_count: 0,
+          replayed_cards_count: 1,
+          due_count: undefined,
         },
       ]);
     });
