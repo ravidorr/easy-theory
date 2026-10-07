@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 Historical release headings were normalized from their changelog categories: `Added` releases receive a minor increment, except for a clearly test-only addition; all other categories receive a patch increment. No historical major increment was inferred. One stable SemVer increment and one top-level entry per PR are enforced by the pre-push hook; individual commits within a PR do not bump.
 
+## [0.58.2] - 2026-10-07
+
+### Fixed
+
+- Flashcard deck analytics now waits for SRS saves and reports only persisted grades when a save fails.
+
+---
+
 ## [0.58.1] — 2026-10-07
 
 ### Changed
