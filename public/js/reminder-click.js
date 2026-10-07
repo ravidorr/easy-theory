@@ -14,8 +14,8 @@
     if (window.pendo && typeof window.pendo.track === "function") {
       window.pendo.track("push_reminder_clicked", {
         channel: channel,
-        notification_url: landingPath,
-        opened_new_window: true,
+        // Path only: the query string can carry unrelated parameters.
+        notification_path: url.pathname,
         reminder_local_date: reminderDate || undefined,
       });
     }

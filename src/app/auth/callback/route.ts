@@ -48,7 +48,8 @@ export async function GET(request: Request) {
     after(() =>
       trackServerEvent("user_signed_in", user.id, {
         ...properties,
-        next_path: safeNext,
+        // Path only: the query string of a post-login target can carry arbitrary values.
+        next_path: new URL(safeNext, origin).pathname,
         is_new_user: Date.now() - Date.parse(user.created_at) < NEW_USER_WINDOW_MS,
       })
     );

@@ -31,8 +31,7 @@ describe("reminder-click.js", () => {
     expect(track).toHaveBeenCalledTimes(1);
     expect(track).toHaveBeenCalledWith("push_reminder_clicked", {
       channel: "push",
-      notification_url: "/he",
-      opened_new_window: true,
+      notification_path: "/he",
       reminder_local_date: "2026-07-30",
     });
     expect(currentUrl()).toBe("/he#top");
@@ -46,9 +45,11 @@ describe("reminder-click.js", () => {
 
     expect(track).toHaveBeenCalledWith(
       "push_reminder_clicked",
-      expect.objectContaining({ channel: "email", notification_url: "/ar?tab=1" })
+      expect.objectContaining({ channel: "email", notification_path: "/ar" })
     );
     expect(currentUrl()).toBe("/ar?tab=1");
+    expect(JSON.stringify(track.mock.calls)).not.toContain("tab=1");
+    expect(JSON.stringify(track.mock.calls)).not.toContain("opened_new_window");
   });
 
   it("ignores visits that did not come from a reminder", () => {

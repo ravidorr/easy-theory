@@ -18,7 +18,16 @@ import arMessages from "../../../../../../messages/ar.json";
 const mockSendNotification = vi.hoisted(() => vi.fn().mockResolvedValue({}));
 const mockSetVapidDetails = vi.hoisted(() => vi.fn());
 const mockEmailSend = vi.hoisted(() => vi.fn().mockResolvedValue({ id: "email-id" }));
-const mockAfter = vi.hoisted(() => vi.fn((task: () => unknown) => task()));
+// after() runs its task once the response has been sent, so the mock only queues it.
+const afterTasks = vi.hoisted(() => [] as Array<() => unknown>);
+const mockAfter = vi.hoisted(() =>
+  vi.fn((task: () => unknown) => {
+    afterTasks.push(task);
+  })
+);
+async function flushAfter() {
+  await Promise.all(afterTasks.splice(0).map((task) => task()));
+}
 
 vi.mock("next/server", async (importOriginal) => ({
   ...(await importOriginal<typeof import("next/server")>()),
@@ -93,6 +102,7 @@ const PUSH_SUB = { user_id: "u1", endpoint: "https://push.example.com", auth: "a
 
 describe("GET /api/cron/notify", () => {
   beforeEach(() => {
+    afterTasks.length = 0;
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-30T05:00:00Z"));
     vi.clearAllMocks();
@@ -171,6 +181,8 @@ describe("GET /api/cron/notify", () => {
       "https://easy-theory-omega.vercel.app/?source=study_reminder&channel=push&reminder_date=2026-07-30"
     );
     expect(mockAfter).toHaveBeenCalledTimes(1);
+    expect(trackServerEvent).not.toHaveBeenCalled();
+    await flushAfter();
     expect(trackServerEvent).toHaveBeenCalledTimes(1);
     expect(trackServerEvent).toHaveBeenCalledWith("study_reminder_sent", SCHEDULE.user_id, {
       channel: "push",
@@ -188,6 +200,7 @@ describe("GET /api/cron/notify", () => {
     mockGetPushSubs.mockResolvedValue([]);
 
     await GET(makeRequest());
+    await flushAfter();
 
     expect(mockEmailSend.mock.calls[0][0].text).toContain(
       "https://easy-theory-omega.vercel.app/?source=study_reminder&channel=email&reminder_date=2026-07-30"
@@ -217,6 +230,7 @@ describe("GET /api/cron/notify", () => {
     admin.auth.admin.getUserById = vi.fn().mockResolvedValue({ data: { user: { email: null } } });
     mockCreateAdminClient.mockReturnValue(admin as never);
     await GET(makeRequest());
+    await flushAfter();
 
     expect(trackServerEvent).not.toHaveBeenCalled();
   });
