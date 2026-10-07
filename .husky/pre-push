@@ -15,7 +15,7 @@ validate_security_policy() {
     return 1
   fi
 
-  pnpm validate:security-policy -- "$package_json_file" "$security_policy_file"
+  pnpm validate:security-policy "$package_json_file" "$security_policy_file"
   status=$?
   rm -f "$package_json_file" "$security_policy_file"
 

@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -94,6 +95,18 @@ describe("validateSecurityPolicyVersion", () => {
       expect(
         validateSecurityPolicyFiles(packageJsonPath, securityPolicyPath),
       ).toEqual({ valid: true, version: "0.58.3" });
+
+      expect(
+        execFileSync(
+          process.execPath,
+          [
+            "scripts/validate-security-policy-version.mjs",
+            packageJsonPath,
+            securityPolicyPath,
+          ],
+          { encoding: "utf8" },
+        ),
+      ).toBe("SECURITY.md supports package version 0.58.3.\n");
     } finally {
       rmSync(directory, { force: true, recursive: true });
     }
