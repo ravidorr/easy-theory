@@ -6,6 +6,22 @@ read_stable_version() {
   git show "$1":package.json 2>/dev/null | node scripts/validate-semver-bump.mjs --read-package-version 2>/dev/null
 }
 
+validate_security_policy() {
+  package_json_file=$(mktemp)
+  security_policy_file=$(mktemp)
+
+  if ! git show "$1":package.json > "$package_json_file" || ! git show "$1":SECURITY.md > "$security_policy_file"; then
+    rm -f "$package_json_file" "$security_policy_file"
+    return 1
+  fi
+
+  pnpm validate:security-policy -- "$package_json_file" "$security_policy_file"
+  status=$?
+  rm -f "$package_json_file" "$security_policy_file"
+
+  return "$status"
+}
+
 MAIN_VERSION=$(read_stable_version origin/main || true)
 
 while read -r local_ref local_sha remote_ref remote_sha; do
@@ -14,6 +30,13 @@ while read -r local_ref local_sha remote_ref remote_sha; do
   [ "$remote_ref" = "refs/heads/main" ] && continue
 
   BASE=$(git merge-base "$local_sha" origin/main 2>/dev/null) || continue
+
+  if ! validate_security_policy "$local_sha"; then
+    echo ""
+    echo "  pre-push: SECURITY.md must mark package.json's exact version as supported."
+    echo ""
+    exit 1
+  fi
 
   if ! git diff --name-only "$BASE" "$local_sha" | grep -qx "CHANGELOG.md"; then
     echo ""
