@@ -4,7 +4,7 @@
     "url": "https://github.com/sponsors/ravidorr"
   },
   "name": "easy-in-theory",
-  "version": "0.58.3",
+  "version": "0.58.4",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -16,6 +16,7 @@
     "lint:html": "htmlhint \"design-system/**/*.html\"",
     "lint:md": "markdownlint-cli2 \"**/*.md\"",
     "lint:all": "pnpm lint && pnpm lint:css && pnpm lint:html && pnpm lint:md",
+    "validate:security-policy": "node scripts/validate-security-policy-version.mjs",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",

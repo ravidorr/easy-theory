@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 
 const VERSION = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
 
@@ -32,16 +33,18 @@ export function isSingleSemverIncrement(current, next) {
   );
 }
 
-if (process.argv[2] === "--read-package-version") {
-  const version = readStablePackageVersion(readFileSync(0, "utf8"));
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  if (process.argv[2] === "--read-package-version") {
+    const version = readStablePackageVersion(readFileSync(0, "utf8"));
 
-  if (!version) process.exit(1);
-  process.stdout.write(version);
-} else if (process.argv.length === 4) {
-  const [, , current, next] = process.argv;
+    if (!version) process.exit(1);
+    process.stdout.write(version);
+  } else if (process.argv.length === 4) {
+    const [, , current, next] = process.argv;
 
-  if (!isSingleSemverIncrement(current, next)) {
-    console.error(`Expected exactly one SemVer increment from ${current} to ${next}.`);
-    process.exit(1);
+    if (!isSingleSemverIncrement(current, next)) {
+      console.error(`Expected exactly one SemVer increment from ${current} to ${next}.`);
+      process.exit(1);
+    }
   }
 }
