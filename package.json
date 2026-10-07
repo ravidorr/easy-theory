@@ -1,11 +1,11 @@
 {
   "name": "easy-in-theory",
-  "version": "0.56.21",
+  "version": "0.56.22",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "prebuild": "tsx scripts/verify-migration-ledger.ts",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
     "lint:css": "stylelint \"**/*.css\" --ignore-path .gitignore",
