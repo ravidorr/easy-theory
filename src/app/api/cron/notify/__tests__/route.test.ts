@@ -356,6 +356,31 @@ describe("GET /api/cron/notify", () => {
     expect(await res.json()).toEqual({ sent: 1 });
   });
 
+  it("falls back to Sunday when the localized weekday is unrecognized", async () => {
+    const formatToParts = vi.fn().mockReturnValue([
+      { type: "weekday", value: "BadDay" },
+      { type: "year", value: "2026" },
+      { type: "month", value: "07" },
+      { type: "day", value: "30" },
+    ] as Intl.DateTimeFormatPart[]);
+    const dateTimeFormat = vi.spyOn(Intl, "DateTimeFormat").mockImplementation(function mockDateTimeFormat() {
+      return {
+        formatToParts,
+        format: () => "",
+        resolvedOptions: () => ({ timeZone: "Asia/Jerusalem" }),
+      } as unknown as Intl.DateTimeFormat;
+    });
+    mockGetSchedules.mockResolvedValue([{ ...SCHEDULE, day_of_week: 0 }]);
+    mockGetPushSubs.mockResolvedValue([PUSH_SUB]);
+
+    const res = await GET(makeRequest());
+
+    expect(formatToParts).toHaveBeenCalled();
+    expect(mockClaimScheduleNotification).toHaveBeenCalled();
+    expect(await res.json()).toEqual({ sent: 1 });
+    dateTimeFormat.mockRestore();
+  });
+
   it("does not send a duplicate when the daily delivery was already claimed", async () => {
     mockGetSchedules.mockResolvedValue([SCHEDULE]);
     mockClaimScheduleNotification.mockResolvedValue(false);

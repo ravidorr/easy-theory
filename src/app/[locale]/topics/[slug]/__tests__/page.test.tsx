@@ -5,6 +5,7 @@ import TopicQuizPage from "../page";
 import { createClient } from "@/lib/supabase";
 import { getQuestionsForTopic, getBookmarkedQuestionIds, getAnsweredQuestionIdsForTopic, getTopics, getTopicProgress } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
+import { localizeQuestion } from "@/lib/content-locale";
 import { SIGNS_QUESTION_15_AR } from "@/test-fixtures/signs-question-15-ar";
 
 vi.mock("next/image", () => ({
@@ -42,6 +43,13 @@ vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn().mockResolvedValue((key: string) => key),
   getLocale: vi.fn().mockResolvedValue("he"),
 }));
+vi.mock("@/lib/content-locale", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/content-locale")>();
+  return {
+    ...actual,
+    localizeQuestion: vi.fn(actual.localizeQuestion),
+  };
+});
 vi.mock("@/components/TabBar", () => ({
   TabBar: ({ active, current }: { active: string; current?: string | null }) =>
     React.createElement("nav", { "data-tab-bar": "", "data-active": active, "data-current": current ?? "" }),
@@ -155,6 +163,18 @@ describe("TopicQuizPage", () => {
     const { container } = render(jsx);
     const options = container.querySelectorAll(".quiz-option");
     expect(options).toHaveLength(4);
+  });
+
+  it("falls back to Hebrew fields when localized display values are absent", async () => {
+    vi.mocked(localizeQuestion).mockReturnValueOnce({} as ReturnType<typeof localizeQuestion>);
+    mockGetQuestions.mockResolvedValue([QUESTION] as never);
+
+    const { container } = render(
+      await TopicQuizPage({ params: Promise.resolve({ slug: "signs", locale: "he" }) })
+    );
+
+    expect(container.querySelector('[data-option="a"]')?.textContent).toContain("עצור");
+    expect(screen.getByText("מה המשמעות של תמרור זה?")).toBeInTheDocument();
   });
 
   it("uses display option text when supplied", async () => {

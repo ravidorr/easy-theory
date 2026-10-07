@@ -2,6 +2,14 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { LanguageToggle } from "../LanguageToggle";
 
+function invokeReactClick(element: HTMLElement) {
+  const key = Object.keys(element).find((name) => name.startsWith("__reactProps"));
+  const handler = key
+    ? (element as unknown as Record<string, unknown>)[key] as { onClick?: (event: { preventDefault: () => void }) => void }
+    : undefined;
+  handler?.onClick?.({ preventDefault: () => {} });
+}
+
 const mockReplace = vi.hoisted(() => vi.fn());
 
 vi.mock("next-intl", () => ({
@@ -56,11 +64,12 @@ describe("LanguageToggle", () => {
     const button = screen.getByRole("button");
 
     fireEvent.click(button);
-    fireEvent.click(button);
-
-    expect(mockReplace).toHaveBeenCalledTimes(1);
     expect(button).toBeDisabled();
     expect(button).toHaveAttribute("aria-busy", "true");
+
+    invokeReactClick(button);
+
+    expect(mockReplace).toHaveBeenCalledTimes(1);
   });
 
   it("calls router.replace with he locale when clicked from ar", () => {

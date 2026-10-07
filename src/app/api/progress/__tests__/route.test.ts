@@ -171,6 +171,16 @@ describe("POST /api/progress", () => {
     expect(await res.json()).toEqual({ ok: true });
   });
 
+  it("preserves an explicit not_started status", async () => {
+    const client = makeClient({ existing: null });
+    mockClients(client);
+    const res = await POST(makeRequest({ topic_id: "t1", status: "not_started" }));
+    expect(res.status).toBe(200);
+    expect(client.insert).toHaveBeenCalledWith(
+      expect.objectContaining({ status: "not_started" })
+    );
+  });
+
   it("uses best_score max when updating existing record", async () => {
     const existing = { id: "p1", best_score: 70, status: "in_progress" };
     const client = makeClient({ existing });

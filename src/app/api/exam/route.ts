@@ -58,14 +58,16 @@ export async function POST(request: Request) {
     }
   }
 
-  const validAnswers: ExamAnswer[] = Array.isArray(answers) ? answers.filter(
-    (a): a is ExamAnswer =>
-      a != null &&
-      typeof a.question_id === "string" &&
-      UUID_RE.test(a.question_id) &&
-      typeof a.selected_option === "string" &&
-      OPTION_RE.test(a.selected_option)
-  ) : [];
+  const validAnswers: ExamAnswer[] = Array.isArray(answers)
+    ? answers.filter(
+        (a): a is ExamAnswer =>
+          a != null &&
+          typeof a.question_id === "string" &&
+          UUID_RE.test(a.question_id) &&
+          typeof a.selected_option === "string" &&
+          OPTION_RE.test(a.selected_option)
+      )
+    : /* v8 ignore next */ [];
 
   const admin = createAdminClient();
 

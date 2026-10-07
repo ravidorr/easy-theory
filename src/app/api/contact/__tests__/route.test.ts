@@ -62,6 +62,7 @@ describe("POST /api/contact", () => {
     for (const body of [
       { topic: "other", message: "Message" },
       { topic: "question", message: "  " },
+      { topic: "question", message: 123 },
       { topic: "question", message: "Message", reply_email: "not-an-email" },
     ]) {
       const res = await POST(makeRequest(body));

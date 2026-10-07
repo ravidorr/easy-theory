@@ -71,4 +71,23 @@ describe("LocaleRuntimeData", () => {
       "test-vapid-key"
     );
   });
+
+  it("reuses an existing VAPID public key meta tag", () => {
+    const existing = document.createElement("meta");
+    existing.name = "vapid-public-key";
+    existing.content = "old-key";
+    document.head.appendChild(existing);
+
+    render(
+      <LocaleRuntimeData
+        locale="he"
+        translations={{}}
+        theme="dark"
+        vapidPublicKey="updated-key"
+      />
+    );
+
+    expect(document.querySelectorAll('meta[name="vapid-public-key"]')).toHaveLength(1);
+    expect(existing).toHaveAttribute("content", "updated-key");
+  });
 });

@@ -46,6 +46,25 @@ describe("ContactForm", () => {
     expect(screen.getByRole("button", { name: "topicBug" })).toHaveAttribute("aria-pressed", "true");
   });
 
+  it("ignores duplicate submit attempts while the first request is pending", async () => {
+    let resolveFetch: (response: Response) => void;
+    const fetchMock = vi.fn().mockReturnValue(new Promise<Response>((resolve) => {
+      resolveFetch = resolve;
+    }));
+    vi.stubGlobal("fetch", fetchMock);
+    renderForm();
+
+    fireEvent.change(screen.getByPlaceholderText("messagePlaceholder"), { target: { value: "Need help" } });
+    const submitButton = screen.getByRole("button", { name: "submit" });
+    fireEvent.submit(submitButton.closest("form")!);
+    submitButton.removeAttribute("disabled");
+    fireEvent.submit(submitButton.closest("form")!);
+
+    resolveFetch!({ ok: true, json: async () => ({ ok: true }) } as Response);
+    await waitFor(() => expect(screen.getByText("sentTitle")).toBeInTheDocument());
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   it("submits the selected topic and shows the sent state", async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ ok: true }) });
     vi.stubGlobal("fetch", fetchMock);

@@ -111,6 +111,11 @@ describe("getQuestionsByIds", () => {
     const client = makeClient([{ id: "q2" }, { id: "q1" }]);
     await expect(getQuestionsByIds(client, ["q1", "missing", "q2"])).resolves.toEqual([{ id: "q1" }, { id: "q2" }]);
   });
+
+  it("returns an empty list when the query yields null data", async () => {
+    const client = makeClient(null);
+    await expect(getQuestionsByIds(client, ["q1"])).resolves.toEqual([]);
+  });
 });
 
 describe("getLatestSourceRelease", () => {
@@ -307,6 +312,12 @@ describe("claimScheduleNotification", () => {
   it("returns false when the day has already been claimed", async () => {
     await expect(
       claimScheduleNotification(makeClient(false), "u1", "2026-07-30")
+    ).resolves.toBe(false);
+  });
+
+  it("returns false when the claim RPC yields null", async () => {
+    await expect(
+      claimScheduleNotification(makeClient(null), "u1", "2026-07-30")
     ).resolves.toBe(false);
   });
 
@@ -695,6 +706,11 @@ describe("getAnsweredQuestionIdsForTopic", () => {
     expect(await getAnsweredQuestionIdsForTopic(supabase, "u1", "t1")).toEqual(new Set());
   });
 
+  it("returns an empty Set when the responses query yields null data", async () => {
+    const supabase = makeMistakesClient({ responses: null as unknown as [] });
+    expect(await getAnsweredQuestionIdsForTopic(supabase, "u1", "t1")).toEqual(new Set());
+  });
+
   it("throws when the responses query fails", async () => {
     const supabase = makeMistakesClient({ responsesError: boom });
     await expect(getAnsweredQuestionIdsForTopic(supabase, "u1", "t1")).rejects.toThrow(
@@ -765,6 +781,14 @@ describe("getQuestionSrsCards", () => {
     await expect(getQuestionSrsCards(makeErrorClient("boom"), "u1", ["q1"])).rejects.toThrow(
       /getQuestionSrsCards: query failed: boom/
     );
+  });
+
+  it("returns an empty list when a chunk yields null data", async () => {
+    const supabase = {
+      from: vi.fn().mockReturnValue(chain({ data: null, error: null })),
+    } as unknown as SupabaseClient;
+
+    await expect(getQuestionSrsCards(supabase, "u1", ["q1"])).resolves.toEqual([]);
   });
 });
 

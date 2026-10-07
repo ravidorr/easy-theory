@@ -61,4 +61,9 @@ describe("generateMetadata", () => {
     expect(meta.description).toBe("metaDescription");
     expect(meta.openGraph?.locale).toBe("he_IL");
   });
+
+  it("uses Arabic Open Graph locale metadata", async () => {
+    const meta = await generateMetadata({ params: Promise.resolve({ locale: "ar" }) });
+    expect(meta.openGraph?.locale).toBe("ar_IL");
+  });
 });

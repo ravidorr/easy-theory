@@ -97,4 +97,18 @@ describe("ResourcesPage", () => {
     expect(screen.getByTestId("tabbar")).toHaveAttribute("data-active", "more");
     expect(screen.getByTestId("tabbar")).toHaveAttribute("data-current", "");
   });
+
+  it("renders non-sign icons for featured and list resources", async () => {
+    mockGetResources.mockResolvedValue([
+      resource({ id: "featured-official", section: "official", href: "https://featured.example", icon_type: "char", icon_value: "★" }),
+      resource({ id: "listed-official", section: "official", href: "https://listed.example", icon_type: "sign", icon_value: "/signs/sign-301.png" }),
+      resource({ id: "listed-practice", section: "practice", href: "https://practice.example", icon_type: "char", icon_value: "?" }),
+    ]);
+
+    const { container } = render(await ResourcesPage());
+
+    expect(screen.getByTestId("featured-resource")).toHaveTextContent("★");
+    expect(container.querySelector('a[href="https://listed.example"] img[src="/signs/sign-301.png"]')).toBeTruthy();
+    expect(container.querySelector('a[href="https://practice.example"]')).toHaveTextContent("?");
+  });
 });

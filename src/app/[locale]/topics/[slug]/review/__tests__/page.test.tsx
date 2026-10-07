@@ -4,7 +4,9 @@ import React from "react";
 import ReviewPage from "../page";
 import { createClient } from "@/lib/supabase";
 import { getTopicBySlug, getMistakesForTopic, getBookmarkedQuestionIds } from "@/lib/db";
+import type { QuizMistake } from "@/lib/db/review";
 import { getTranslations, getLocale } from "next-intl/server";
+import { localizeQuestion } from "@/lib/content-locale";
 
 vi.mock("next/image", () => ({
   default: ({ src, alt, className }: { src: string; alt?: string; className?: string }) =>
@@ -40,6 +42,13 @@ vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn().mockResolvedValue((key: string) => key),
   getLocale: vi.fn().mockResolvedValue("he"),
 }));
+vi.mock("@/lib/content-locale", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/content-locale")>();
+  return {
+    ...actual,
+    localizeQuestion: vi.fn(actual.localizeQuestion),
+  };
+});
 vi.mock("@/components/TabBar", () => ({
   TabBar: ({ active, current }: { active: string; current?: string | null }) =>
     React.createElement("nav", { "data-tab-bar": "", "data-active": active, "data-current": current ?? "" }),
@@ -52,8 +61,10 @@ const mockGetBookmarkedIds = vi.mocked(getBookmarkedQuestionIds);
 
 const TOPIC = { id: "t1", slug: "signs", name_he: "תמרורים" };
 
-const MISTAKE_A = {
+const MISTAKE_A: QuizMistake = {
   id: "q1",
+  topic_id: "t1",
+  question_number: 1,
   question_he: "מה המשמעות של תמרור זה?",
   option_a: "עצור",
   option_b: "פנה ימינה",
@@ -64,10 +75,13 @@ const MISTAKE_A = {
   explanation_he: "תמרור זה משמעותו עצור",
   explanation_he_source_url: "https://example.test/source",
   image_url: null,
+  due_at: null,
 };
 
-const MISTAKE_B = {
+const MISTAKE_B: QuizMistake = {
   id: "q2",
+  topic_id: "t1",
+  question_number: 2,
   question_he: "מה הגיל המינימלי?",
   option_a: "16",
   option_b: "17",
@@ -77,6 +91,7 @@ const MISTAKE_B = {
   selected_option: "a",
   explanation_he: null,
   image_url: null,
+  due_at: null,
 };
 
 function makeClient(user: { id: string } | null = { id: "u1" }) {
@@ -213,6 +228,16 @@ describe("ReviewPage", () => {
     expect(explanation?.querySelector("strong")?.textContent).toBe("חגורות הבטיחות");
     expect(explanation?.textContent).toContain("מחזיקות את הנוסע");
     expect(explanation?.textContent).not.toContain("**");
+  });
+
+  it("falls back to Hebrew fields when localized display values are absent", async () => {
+    vi.mocked(localizeQuestion).mockReturnValueOnce({} as ReturnType<typeof localizeQuestion>);
+    mockGetMistakes.mockResolvedValue([MISTAKE_A]);
+
+    render(await callPage());
+
+    expect(screen.getByText("מה המשמעות של תמרור זה?")).toBeInTheDocument();
+    expect(screen.getByText("עצור")).toBeInTheDocument();
   });
 
   it("renders question text", async () => {

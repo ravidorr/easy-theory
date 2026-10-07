@@ -249,4 +249,46 @@ describe("HomePage", () => {
     expect(screen.getAllByText("إشارات المرور").length).toBeGreaterThan(0);
     expect(screen.queryByText("תמרורים")).not.toBeInTheDocument();
   });
+
+  it("shows the empty state when every topic is complete and nothing needs review", async () => {
+    mockGetProgress.mockResolvedValue([
+      { topic_id: "t1", status: "completed", best_score: 100 },
+      { topic_id: "t2", status: "completed", best_score: 100 },
+    ] as never);
+    mockGetTopicAccuracy.mockResolvedValue([
+      { topic_id: "t1", correct: 20, total: 20 },
+      { topic_id: "t2", correct: 10, total: 10 },
+    ] as never);
+
+    render(await HomePage());
+
+    expect(screen.getByText("emptyStateTitle")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "emptyStateBtn" })).toHaveAttribute("href", "/schedule");
+  });
+
+  it("ignores weak-topic accuracy rows that no longer exist in the catalog", async () => {
+    mockGetTopicAccuracy.mockResolvedValue([
+      { topic_id: "t1", correct: 2, total: 20 },
+      { topic_id: "missing-topic", correct: 1, total: 20 },
+    ] as never);
+
+    render(await HomePage());
+
+    expect(screen.getByText("topicNeedsPractice")).toBeInTheDocument();
+  });
+
+  it("handles mission topics with missing question-count entries", async () => {
+    mockGetProgress.mockResolvedValue([
+      { topic_id: "t1", status: "completed", best_score: 50 },
+      { topic_id: "t2", status: "completed", best_score: 50 },
+    ] as never);
+    mockGetTopicAccuracy.mockResolvedValue([
+      { topic_id: "t1", correct: 2, total: 20 },
+    ] as never);
+    mockGetQuestionCounts.mockResolvedValue({ t2: 10 } as never);
+
+    render(await HomePage());
+
+    expect(screen.getByText("todayReviewTaskDesc")).toBeInTheDocument();
+  });
 });

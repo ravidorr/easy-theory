@@ -148,6 +148,10 @@ describe("instrumentation (server + client GlitchTip init)", () => {
     expect(isRedactedServerComponentError({
       exception: { values: [{ value: "getTopicAccuracy query failed" }] },
     })).toBe(false);
+    expect(isRedactedServerComponentError({})).toBe(false);
+    expect(isRedactedServerComponentError({
+      exception: { values: [{ value: undefined }] },
+    })).toBe(false);
 
     const beforeSend = mockInit.mock.calls[0]?.[0]?.beforeSend;
     const wrapperEvent = {

@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase";
 import { getTopicBySlug, getMistakesForTopic, getBookmarkedQuestionIds } from "@/lib/db";
 import type { QuizMistake } from "@/lib/db";
 import { getTranslations, getLocale } from "next-intl/server";
+import { localizeQuestion } from "@/lib/content-locale";
 import { redirect } from "next/navigation";
 
 vi.mock("next/image", () => ({
@@ -41,6 +42,13 @@ vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn().mockResolvedValue((key: string) => key),
   getLocale: vi.fn().mockResolvedValue("he"),
 }));
+vi.mock("@/lib/content-locale", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/content-locale")>();
+  return {
+    ...actual,
+    localizeQuestion: vi.fn(actual.localizeQuestion),
+  };
+});
 vi.mock("@/components/TabBar", () => ({
   TabBar: ({ active, current }: { active: string; current?: string | null }) =>
     React.createElement("nav", { "data-tab-bar": "", "data-active": active, "data-current": current ?? "" }),
@@ -148,6 +156,16 @@ describe("RetryMistakesPage", () => {
     await expect(
       callPage()
     ).rejects.toThrow("redirect");
+  });
+
+  it("falls back to Hebrew fields when localized display values are absent", async () => {
+    vi.mocked(localizeQuestion).mockReturnValueOnce({} as ReturnType<typeof localizeQuestion>);
+    mockGetMistakes.mockResolvedValue([MISTAKE_A]);
+
+    render(await RetryMistakesPage({ params: Promise.resolve({ slug: "signs" }) }));
+
+    expect(screen.getByText("מה המשמעות של תמרור זה?")).toBeInTheDocument();
+    expect(screen.getByText("עצור")).toBeInTheDocument();
   });
 
   it("renders question text for first mistake", async () => {

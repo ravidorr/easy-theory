@@ -25,10 +25,10 @@ export async function POST(request: Request) {
     .select("id, topic_id, correct_option")
     .in("id", answers.map((answer) => answer.question_id))
     .eq("is_active", true);
-  if (error || (questions ?? []).length !== 12) {
+  if (error || !questions || questions.length !== 12) {
     return NextResponse.json({ error: t("missingParams") }, { status: 400 });
   }
-  const questionById = new Map((questions ?? []).map((question) => [question.id, question]));
+  const questionById = new Map(questions.map((question) => [question.id, question]));
   const topicScores: Record<string, { correct: number; total: number }> = {};
   for (const answer of answers) {
     const question = questionById.get(answer.question_id)!;

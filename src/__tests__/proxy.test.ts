@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { proxy } from "../proxy";
+import { loginReturnPath, proxy } from "../proxy";
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
@@ -51,6 +51,13 @@ function makeRequest(path: string): NextRequest {
     url: url.href,
   } as unknown as NextRequest;
 }
+
+describe("loginReturnPath", () => {
+  it("returns root when the pathname is only a locale prefix", () => {
+    expect(loginReturnPath("/he")).toBe("/");
+    expect(loginReturnPath("/ar")).toBe("/");
+  });
+});
 
 describe("proxy middleware", () => {
   beforeEach(() => {
