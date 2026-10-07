@@ -1,9 +1,8 @@
+import { PENDO_ACCOUNT_ID } from "./pendo";
 import type { PendoTrackProperties } from "./pendo-client";
 
 const PENDO_TRACK_URL = "https://data.pendo.io/data/track";
 const TRACK_TIMEOUT_MS = 3000;
-// Learners are individuals; the app has no account concept to report.
-const PENDO_ACCOUNT_ID = "system";
 
 // Server-side Track Event API. Silent unless PENDO_TRACK_EVENT_SECRET is set,
 // so dev, QA and CI never send events. Never throws, and failures are only
