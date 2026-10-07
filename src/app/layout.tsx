@@ -14,7 +14,18 @@ const rubik = Rubik({
 
 // Keep initialize in the snippet's script: the snippet is what creates the
 // `pendo` queue stub, so initialize has to run right after it in the same script.
-const PENDO_INSTALL_SCRIPT = `
+//
+// The SDK persists identity and, on initialize, reads a persisted identified
+// visitor back as the current one even when `visitor.id` is empty. With no
+// Supabase session cookie nobody is signed in, so `forceAnonymous` makes
+// initialize ignore a leftover identified id instead of attributing the page to
+// the previous learner. A stale cookie (expired session) is handled by
+// PendoIdentify once the server has checked it.
+function pendoInstallScript(signedOut: boolean) {
+  const options = signedOut
+    ? "{ visitor: { id: '' }, forceAnonymous: true }"
+    : "{ visitor: { id: '' } }";
+  return `
 (function(apiKey){
     (function(p,e,n,d,o){var v,w,x,y,z;o=p[d]=p[d]||{};o._q=o._q||[];
     v=['initialize','identify','updateOptions','pageLoad','track', 'trackAgent'];for(w=0,x=v.length;w<x;++w)(function(m){
@@ -22,8 +33,14 @@ const PENDO_INSTALL_SCRIPT = `
     y=e.createElement(n);y.async=!0;y.src='https://cdn.pendo.io/agent/static/'+apiKey+'/pendo.js';
     z=e.getElementsByTagName(n)[0];z.parentNode.insertBefore(y,z);})(window,document,'script','pendo');
 })('1074b64c-ee2f-4f65-a898-24f4bf352035');
-pendo.initialize({ visitor: { id: '' } });
+pendo.initialize(${options});
 `;
+}
+
+// Supabase stores the session in `sb-<project>-auth-token` (chunked as `.0`, `.1`).
+function hasSupabaseSession(cookieNames: string[]) {
+  return cookieNames.some((name) => /^sb-.+-auth-token/.test(name));
+}
 
 export default async function RootLayout({
   children,
@@ -39,6 +56,8 @@ export default async function RootLayout({
         headerStore.get("accept-language")
       );
 
+  const signedOut = !hasSupabaseSession(cookieStore.getAll().map((cookie) => cookie.name));
+
   return (
     <html
       lang={locale}
@@ -49,7 +68,7 @@ export default async function RootLayout({
     >
       <head>
         <Script id="pendo-install" strategy="beforeInteractive">
-          {PENDO_INSTALL_SCRIPT}
+          {pendoInstallScript(signedOut)}
         </Script>
       </head>
       <body>{children}</body>
