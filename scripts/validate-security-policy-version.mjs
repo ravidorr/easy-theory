@@ -8,6 +8,40 @@ const SUPPORTED_VERSIONS_SECTION = /^##[ \t]+Supported Versions[ \t]*\r?\n(?<con
 const SUPPORTED_VERSIONS_TABLE = /^\|[ \t]*Version[ \t]*\|[ \t]*Supported[ \t]*\|[ \t]*\r?\n^\|[ \t]*:?-{3,}:?[ \t]*\|[ \t]*:?-{3,}:?[ \t]*\|[ \t]*\r?\n(?<rows>(?:^\|[^\r\n]*\|[ \t]*(?:\r?\n|$))*)/m;
 const VERSION_ROW = /^\|\s*([0-9]+\.[0-9]+\.[0-9]+)\s*\|\s*([^|]+?)\s*\|\s*$/gm;
 
+function stripFencedCodeBlocks(markdown) {
+  let fenceMarker;
+
+  return markdown
+    .split(/\r?\n/)
+    .filter((line) => {
+      if (fenceMarker) {
+        const trimmedLine = line.trimStart();
+        const closingMarker = /^(`+|~+)/.exec(trimmedLine)?.[1];
+
+        if (
+          closingMarker
+          && closingMarker[0] === fenceMarker[0]
+          && closingMarker.length >= fenceMarker.length
+          && trimmedLine.slice(closingMarker.length).trim() === ""
+        ) {
+          fenceMarker = undefined;
+        }
+
+        return false;
+      }
+
+      const openingMarker = /^[ \t]{0,3}(`{3,}|~{3,})/.exec(line)?.[1];
+
+      if (openingMarker) {
+        fenceMarker = openingMarker;
+        return false;
+      }
+
+      return true;
+    })
+    .join("\n");
+}
+
 export function validateSecurityPolicyVersion(packageJson, securityPolicy) {
   const version = readStablePackageVersion(packageJson);
 
@@ -18,7 +52,9 @@ export function validateSecurityPolicyVersion(packageJson, securityPolicy) {
     };
   }
 
-  const section = SUPPORTED_VERSIONS_SECTION.exec(securityPolicy);
+  const section = SUPPORTED_VERSIONS_SECTION.exec(
+    stripFencedCodeBlocks(securityPolicy),
+  );
   const table = section && SUPPORTED_VERSIONS_TABLE.exec(section.groups.content);
 
   if (!table) {

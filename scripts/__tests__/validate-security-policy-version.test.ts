@@ -90,6 +90,25 @@ ${supportedPolicy}`;
     });
   });
 
+  it("ignores a supported-versions table in a fenced code example", () => {
+    const policyWithFencedExampleTable = `\`\`\`markdown
+## Supported Versions
+
+| Version | Supported |
+| ------- | --------- |
+| 0.58.2 | ${supportedStatus} |
+\`\`\`
+
+${supportedPolicy}`;
+
+    expect(
+      validateSecurityPolicyVersion(packageJson, policyWithFencedExampleTable),
+    ).toEqual({
+      valid: true,
+      version: "0.58.3",
+    });
+  });
+
   it("rejects version rows that are not part of the supported-versions table", () => {
     const malformedPolicy = `## Supported Versions
 
