@@ -90,6 +90,166 @@ ${supportedPolicy}`;
     });
   });
 
+  it("ignores a supported-versions table in a fenced code example", () => {
+    const policyWithFencedExampleTable = `\`\`\`markdown
+## Supported Versions
+
+| Version | Supported |
+| ------- | --------- |
+| 0.58.2 | ${supportedStatus} |
+\`\`\`
+
+${supportedPolicy}`;
+
+    expect(
+      validateSecurityPolicyVersion(packageJson, policyWithFencedExampleTable),
+    ).toEqual({
+      valid: true,
+      version: "0.58.3",
+    });
+  });
+
+  it("does not join table lines separated by a fenced code block", () => {
+    const policyWithFenceInsideTable = `## Supported Versions
+
+| Version | Supported |
+\`\`\`text
+Example content.
+\`\`\`
+| ------- | --------- |
+| 0.58.3 | ${supportedStatus} |`;
+
+    expect(
+      validateSecurityPolicyVersion(packageJson, policyWithFenceInsideTable),
+    ).toEqual({
+      valid: false,
+      error: "SECURITY.md is missing a supported-versions table.",
+    });
+  });
+
+  it("does not close a fence with four leading spaces", () => {
+    const policyWithIndentedPseudoCloser = `\`\`\`text
+    \`\`\`
+## Supported Versions
+
+| Version | Supported |
+| ------- | --------- |
+| 0.58.3 | ${supportedStatus} |
+\`\`\``;
+
+    expect(
+      validateSecurityPolicyVersion(packageJson, policyWithIndentedPseudoCloser),
+    ).toEqual({
+      valid: false,
+      error: "SECURITY.md is missing a supported-versions table.",
+    });
+  });
+
+  it("does not treat a tab-indented fence marker as a fenced block", () => {
+    const policyWithTabIndentedMarker = `\t\`\`\`text
+${supportedPolicy}`;
+
+    expect(
+      validateSecurityPolicyVersion(packageJson, policyWithTabIndentedMarker),
+    ).toEqual({
+      valid: true,
+      version: "0.58.3",
+    });
+  });
+
+  it("does not treat a four-space-indented fence marker as a fenced block", () => {
+    const policyWithFourSpaceIndentedMarker = `    \`\`\`text
+${supportedPolicy}`;
+
+    expect(
+      validateSecurityPolicyVersion(
+        packageJson,
+        policyWithFourSpaceIndentedMarker,
+      ),
+    ).toEqual({
+      valid: true,
+      version: "0.58.3",
+    });
+  });
+
+  it("does not treat a fence marker in a table cell as a fenced block", () => {
+    const policyWithFenceMarkerInTable = `| Example |
+| ------- |
+| \`\`\`markdown |
+
+${supportedPolicy}`;
+
+    expect(
+      validateSecurityPolicyVersion(packageJson, policyWithFenceMarkerInTable),
+    ).toEqual({
+      valid: true,
+      version: "0.58.3",
+    });
+  });
+
+  it("ignores a tilde-fenced example with a longer closing fence", () => {
+    const policyWithTildeFencedExample = `~~~markdown
+## Supported Versions
+
+| Version | Supported |
+| ------- | --------- |
+| 0.58.2 | ${supportedStatus} |
+~~~~
+
+${supportedPolicy}`;
+
+    expect(
+      validateSecurityPolicyVersion(packageJson, policyWithTildeFencedExample),
+    ).toEqual({
+      valid: true,
+      version: "0.58.3",
+    });
+  });
+
+  it("ignores a backtick fence closed with more backticks", () => {
+    const policyWithLongerClosingFence = `\`\`\`markdown
+## Supported Versions
+
+| Version | Supported |
+| ------- | --------- |
+| 0.58.2 | ${supportedStatus} |
+\`\`\`\`
+
+${supportedPolicy}`;
+
+    expect(
+      validateSecurityPolicyVersion(packageJson, policyWithLongerClosingFence),
+    ).toEqual({
+      valid: true,
+      version: "0.58.3",
+    });
+  });
+
+  it("rejects a supported-versions table inside an unterminated fence", () => {
+    const policyWithUnterminatedFence = `\`\`\`\`markdown
+${supportedPolicy}
+\`\`\``;
+
+    expect(
+      validateSecurityPolicyVersion(packageJson, policyWithUnterminatedFence),
+    ).toEqual({
+      valid: false,
+      error: "SECURITY.md is missing a supported-versions table.",
+    });
+  });
+
+  it("does not treat a backtick-containing info string as a fence", () => {
+    const policyWithInvalidFenceInfo = `\`\`\`markdown\`
+${supportedPolicy}`;
+
+    expect(
+      validateSecurityPolicyVersion(packageJson, policyWithInvalidFenceInfo),
+    ).toEqual({
+      valid: true,
+      version: "0.58.3",
+    });
+  });
+
   it("rejects version rows that are not part of the supported-versions table", () => {
     const malformedPolicy = `## Supported Versions
 

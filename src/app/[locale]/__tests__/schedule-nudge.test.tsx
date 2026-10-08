@@ -158,6 +158,7 @@ describe("ScheduleNudge", () => {
     render(<ScheduleNudge hasSchedule={false} />);
 
     const primary = await screen.findByRole("button", { name: "ScheduleNudge.saveRecommended" });
+    await waitFor(() => expect(primary).toHaveFocus());
     const later = screen.getByRole("button", { name: "ScheduleNudge.later" });
     fireEvent.keyDown(document, { key: "ArrowDown" });
 
