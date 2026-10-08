@@ -7,37 +7,53 @@ const SUPPORTED_STATUS = String.fromCodePoint(0x2713);
 const SUPPORTED_VERSIONS_SECTION = /^##[ \t]+Supported Versions[ \t]*\r?\n(?<content>[\s\S]*?)(?=^##[ \t]|(?![\s\S]))/m;
 const SUPPORTED_VERSIONS_TABLE = /^\|[ \t]*Version[ \t]*\|[ \t]*Supported[ \t]*\|[ \t]*\r?\n^\|[ \t]*:?-{3,}:?[ \t]*\|[ \t]*:?-{3,}:?[ \t]*\|[ \t]*\r?\n(?<rows>(?:^\|[^\r\n]*\|[ \t]*(?:\r?\n|$))*)/m;
 const VERSION_ROW = /^\|\s*([0-9]+\.[0-9]+\.[0-9]+)\s*\|\s*([^|]+?)\s*\|\s*$/gm;
+const FENCE_OPENING = /^(?: {0,3})(`{3,}|~{3,})(.*)$/;
+const FENCE_CLOSING = /^(?: {0,3})(`+|~+)[ \t]*$/;
 
-function stripFencedCodeBlocks(markdown) {
+function readOpeningFenceMarker(line) {
+  const match = FENCE_OPENING.exec(line);
+
+  if (!match) return undefined;
+
+  const [, marker, info] = match;
+
+  if (marker[0] === "`" && info.includes("`")) return undefined;
+
+  return marker;
+}
+
+function isClosingFence(line, openingMarker) {
+  const closingMarker = FENCE_CLOSING.exec(line)?.[1];
+
+  return Boolean(
+    closingMarker
+    && closingMarker[0] === openingMarker[0]
+    && closingMarker.length >= openingMarker.length,
+  );
+}
+
+function maskFencedCodeBlocks(markdown) {
   let fenceMarker;
 
   return markdown
     .split(/\r?\n/)
-    .filter((line) => {
+    .map((line) => {
       if (fenceMarker) {
-        const trimmedLine = line.trimStart();
-        const closingMarker = /^(`+|~+)/.exec(trimmedLine)?.[1];
-
-        if (
-          closingMarker
-          && closingMarker[0] === fenceMarker[0]
-          && closingMarker.length >= fenceMarker.length
-          && trimmedLine.slice(closingMarker.length).trim() === ""
-        ) {
+        if (isClosingFence(line, fenceMarker)) {
           fenceMarker = undefined;
         }
 
-        return false;
+        return "";
       }
 
-      const openingMarker = /^[ \t]{0,3}(`{3,}|~{3,})/.exec(line)?.[1];
+      const openingMarker = readOpeningFenceMarker(line);
 
       if (openingMarker) {
         fenceMarker = openingMarker;
-        return false;
+        return "";
       }
 
-      return true;
+      return line;
     })
     .join("\n");
 }
@@ -53,7 +69,7 @@ export function validateSecurityPolicyVersion(packageJson, securityPolicy) {
   }
 
   const section = SUPPORTED_VERSIONS_SECTION.exec(
-    stripFencedCodeBlocks(securityPolicy),
+    maskFencedCodeBlocks(securityPolicy),
   );
   const table = section && SUPPORTED_VERSIONS_TABLE.exec(section.groups.content);
 
