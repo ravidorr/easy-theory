@@ -25,10 +25,10 @@ describe("isSingleSemverIncrement", () => {
   it.each([
     ['{"version":"0.3.253"}', "0.3.253"],
     ['{"version":"0.3.253-beta.1"}', null],
-    ['{"version":"0.3.253+build.1"}', null],
+    ['{"version":"0.3.253+build.1"}', "0.3.253+build.1"],
     ['{"version":253}', null],
     ["not json", null],
-  ])("reads only exact stable package versions", (packageJson, expected) => {
+  ])("reads stable package versions including build metadata", (packageJson, expected) => {
     expect(readStablePackageVersion(packageJson)).toBe(expected);
   });
 });

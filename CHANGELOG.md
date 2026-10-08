@@ -8,6 +8,7 @@ Historical release headings were normalized from their changelog categories: `Ad
 ### Fixed
 
 - Ignored fenced Markdown examples when locating the security policy's supported-versions table.
+- Accepted exact stable SemVer versions with build metadata in security-policy validation.
 
 ---
 

@@ -26,6 +26,20 @@ describe("validateSecurityPolicyVersion", () => {
     });
   });
 
+  it("accepts a matching package version with SemVer build metadata", () => {
+    const versionWithBuildMetadata = "0.58.3+build.1";
+
+    expect(
+      validateSecurityPolicyVersion(
+        `{"version":"${versionWithBuildMetadata}"}`,
+        supportedPolicy.replace("0.58.3", versionWithBuildMetadata),
+      ),
+    ).toEqual({
+      valid: true,
+      version: versionWithBuildMetadata,
+    });
+  });
+
   it("rejects a policy that supports a different release", () => {
     expect(
       validateSecurityPolicyVersion(
