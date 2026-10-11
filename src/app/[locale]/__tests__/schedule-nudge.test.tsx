@@ -252,7 +252,7 @@ describe("ScheduleNudge", () => {
     expect(screen.getByRole("button", { name: "ScheduleNudge.later" })).toHaveFocus();
     fireEvent.keyDown(document, { key: "Escape" });
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
-    expect(invokingButton).toHaveFocus();
+    await waitFor(() => expect(invokingButton).toHaveFocus());
 
     unmount();
     localStorage.clear();
