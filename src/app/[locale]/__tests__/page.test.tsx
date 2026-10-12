@@ -120,6 +120,15 @@ describe("HomePage", () => {
     expect(mockGetUserSchedule).not.toHaveBeenCalled();
   });
 
+  it("keeps the public diagnostic link in the active Arabic locale", async () => {
+    mockCreateClient.mockResolvedValue(makeClient(null) as never);
+    vi.mocked(getLocale).mockResolvedValue("ar" as never);
+
+    render(await HomePage());
+
+    expect(screen.getByRole("link", { name: "publicDiagnostic" })).toHaveAttribute("href", "/ar/diagnostic");
+  });
+
   it("passes scheduleless authenticated learners to the schedule nudge", async () => {
     render(await HomePage());
 
