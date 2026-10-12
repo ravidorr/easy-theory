@@ -13,7 +13,6 @@
 
 A Hebrew-first RTL driving theory study app for the Israeli car-B license exam. Built for a 16-year-old — warm, encouraging, no pressure.
 
-
 **Live:** [easy-theory-omega.vercel.app](https://easy-theory-omega.vercel.app)
 
 ## Features

@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-const VERSION = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
+const VERSION = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
 
 export function readStablePackageVersion(packageJson) {
   try {
@@ -10,6 +10,12 @@ export function readStablePackageVersion(packageJson) {
   } catch {
     return null;
   }
+}
+
+export function normalizeStableVersionForChangelog(version) {
+  return typeof version === "string" && VERSION.test(version)
+    ? version.split("+", 1)[0]
+    : null;
 }
 
 function parseVersion(version) {
@@ -36,6 +42,11 @@ export function isSingleSemverIncrement(current, next) {
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   if (process.argv[2] === "--read-package-version") {
     const version = readStablePackageVersion(readFileSync(0, "utf8"));
+
+    if (!version) process.exit(1);
+    process.stdout.write(version);
+  } else if (process.argv[2] === "--normalize-for-changelog") {
+    const version = normalizeStableVersionForChangelog(process.argv[3]);
 
     if (!version) process.exit(1);
     process.stdout.write(version);
