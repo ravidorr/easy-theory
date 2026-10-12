@@ -28,15 +28,17 @@ export default async function DiagnosticPage() {
     <>
     <main id="diagnostic" data-authenticated={user ? "true" : "false"} className={styles.page}>
       <h1>{t("title")}</h1>
-      <p>{t("intro")}</p>
-      <label htmlFor="diagnostic-target-date">{t("targetDate")}</label>
-      <input id="diagnostic-target-date" type="date" />
-      <form id="diagnostic-form">
+      <p className={styles.intro}>{t("intro")}</p>
+      <div className={styles.dateField}>
+        <label htmlFor="diagnostic-target-date">{t("targetDate")}</label>
+        <input id="diagnostic-target-date" className={styles.dateInput} type="date" />
+      </div>
+      <form id="diagnostic-form" className={styles.form}>
         {localizedQuestions.map((question, index) => (
-          <fieldset key={question.id} data-question-id={question.id}>
-            <legend>{t("question", { current: index + 1, total: localizedQuestions.length })}: {question.question_display}</legend>
+          <fieldset key={question.id} data-question-id={question.id} className={styles.question}>
+            <legend className={styles.questionTitle}>{t("question", { current: index + 1, total: localizedQuestions.length })}: {question.question_display}</legend>
             {(["a", "b", "c", "d"] as const).map((option) => (
-              <label key={option}>
+              <label key={option} className={styles.option}>
                 <input type="radio" name={question.id} value={option} required />
                 {(question as unknown as Record<string, string>)[`option_${option}_display`]}
               </label>

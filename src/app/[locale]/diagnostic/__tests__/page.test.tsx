@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase";
 import { getQuestionsForTopic, getTopics } from "@/lib/db";
 import { getLocale, getTranslations } from "next-intl/server";
 import { featureEnabled } from "@/lib/feature-flags";
+import styles from "../page.module.css";
 
 vi.mock("next/navigation", () => ({ redirect: vi.fn(() => { throw new Error("redirect"); }) }));
 vi.mock("next/script", () => ({ default: () => null }));
@@ -57,6 +58,12 @@ describe("DiagnosticPage", () => {
     expect(screen.getAllByText(/سؤال بالعربية/)).toHaveLength(12);
     expect(screen.getAllByText("الإجابة أ")).toHaveLength(12);
     expect(screen.queryByText("שאלה בעברית")).toBeNull();
+  });
+
+  it("uses the diagnostic form layout instead of unstyled browser defaults", async () => {
+    const { container } = render(await DiagnosticPage());
+
+    expect(container.querySelector("#diagnostic-form")).toHaveClass(styles.form);
   });
 
   it("redirects when the guest diagnostic feature is disabled", async () => {
