@@ -12,6 +12,12 @@ export function readStablePackageVersion(packageJson) {
   }
 }
 
+export function normalizeStableVersionForChangelog(version) {
+  return typeof version === "string" && VERSION.test(version)
+    ? version.split("+", 1)[0]
+    : null;
+}
+
 function parseVersion(version) {
   const match = VERSION.exec(version);
   return match ? match.slice(1).map(Number) : null;
@@ -36,6 +42,11 @@ export function isSingleSemverIncrement(current, next) {
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   if (process.argv[2] === "--read-package-version") {
     const version = readStablePackageVersion(readFileSync(0, "utf8"));
+
+    if (!version) process.exit(1);
+    process.stdout.write(version);
+  } else if (process.argv[2] === "--normalize-for-changelog") {
+    const version = normalizeStableVersionForChangelog(process.argv[3]);
 
     if (!version) process.exit(1);
     process.stdout.write(version);
