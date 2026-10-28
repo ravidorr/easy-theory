@@ -153,6 +153,9 @@
       if (window.pendo && typeof window.pendo.clearSession === "function") {
         window.pendo.clearSession();
       }
+      // Full reload on purpose: it drops the in-memory Pendo identity and client
+      // router cache. This is a plain script outside React, so router.push is unavailable.
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
       window.location.href = "/auth/login";
     });
   }
