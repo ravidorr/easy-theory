@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 Historical release headings were normalized from their changelog categories: `Added` releases receive a minor increment, except for a clearly test-only addition; all other categories receive a patch increment. No historical major increment was inferred. One stable SemVer increment and one top-level entry per PR are enforced by the pre-push hook; individual commits within a PR do not bump.
 
+## [0.58.13] - 2026-10-28
+
+### Changed
+
+- Documented why the logout redirect in `more.js` is a full page load and silenced the matching Next.js lint warning.
+
+---
+
 ## [0.58.12] - 2026-10-28
 
 ### Security
