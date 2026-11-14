@@ -3,7 +3,9 @@ import {
   checksumMigrationSource,
   compareLedger,
   discoverMigrations,
+  ledgerHasDrift,
   loadAuditConfig,
+  renderLedgerReport,
 } from "../audit-database-metadata";
 
 describe("database migration ledger audit", () => {
@@ -56,5 +58,41 @@ describe("database migration ledger audit", () => {
       missingOrChanged: ["001 001_first.sql", "002 002_second.sql"],
       unexpected: ["001 001_first.sql", "003 003_third.sql"],
     });
+  });
+});
+
+describe("ledger drift reporting", () => {
+  const file = (version: number) => ({ version, filename: `${String(version).padStart(3, "0")}_x.sql`, checksum: "c" });
+  const row = (version: number, checksum = "c") => ({ ...file(version), checksum, appliedAt: "now" });
+
+  it("returns empty differences for an identical ledger", () => {
+    const difference = compareLedger([file(1), file(2)], [row(1), row(2)]);
+    expect(difference).toEqual({ missingOrChanged: [], unexpected: [] });
+    expect(ledgerHasDrift(difference)).toBe(false);
+    expect(renderLedgerReport(difference)).toContain("ALIGNED");
+    expect(renderLedgerReport(difference)).not.toContain("examples");
+  });
+
+  it("treats a filename-only mismatch as drift and pads versions", () => {
+    const difference = compareLedger([file(100)], [{ ...row(100), filename: "100_other.sql" }]);
+    expect(difference.missingOrChanged).toEqual(["100 100_x.sql"]);
+    expect(difference.unexpected).toEqual(["100 100_other.sql"]);
+  });
+
+  it("flags drift in either list on its own", () => {
+    expect(ledgerHasDrift({ missingOrChanged: ["001 a"], unexpected: [] })).toBe(true);
+    expect(ledgerHasDrift({ missingOrChanged: [], unexpected: ["001 a"] })).toBe(true);
+  });
+
+  it("labels each example and caps them at ten", () => {
+    const missingOrChanged = Array.from({ length: 12 }, (_, index) => `${index} m`);
+    const report = renderLedgerReport({ missingOrChanged, unexpected: ["99 u"] });
+    expect(report).toContain("DRIFT FOUND");
+    expect(report).toContain("missing-or-changed=12, unexpected=1");
+    expect(report).toContain("0 m [missing or changed]");
+    expect(report).toContain("9 m [missing or changed]");
+    expect(report).not.toContain("10 m");
+    expect(report).not.toContain("99 u");
+    expect(renderLedgerReport({ missingOrChanged: [], unexpected: ["99 u"] })).toContain("99 u [unexpected]");
   });
 });

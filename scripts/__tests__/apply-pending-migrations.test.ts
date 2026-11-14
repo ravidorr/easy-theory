@@ -24,6 +24,19 @@ describe("pending migration runner", () => {
     expect(() => parseMigrationArguments(["--target", "staging"])).toThrow(/must be production/);
   });
 
+  it("rejects the retired QA target, a missing value, duplicates and unknown flags", () => {
+    expect(() => parseMigrationArguments(["--target", "qa"])).toThrow(/must be production/);
+    expect(() => parseMigrationArguments(["--target"])).toThrow(/must be production/);
+    expect(() => parseMigrationArguments(["--target", "--apply"])).toThrow(/must be production/);
+    expect(() => parseMigrationArguments(["--target", "production", "--target", "production"])).toThrow(
+      /only be supplied once/
+    );
+    expect(() => parseMigrationArguments(["--target", "production", "--force"])).toThrow(
+      /unknown argument: --force/
+    );
+    expect(() => parseMigrationArguments(["--apply"])).toThrow(/--target production is required/);
+  });
+
   it("accepts only an exact committed ledger prefix", () => {
     expect(pendingMigrations(expected, [])).toEqual(expected);
     expect(

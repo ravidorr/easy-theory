@@ -7,7 +7,7 @@ Historical release headings were normalized from their changelog categories: `Ad
 
 ### Removed
 
-- Retired the dedicated QA Supabase project (`clear-road-qa`) and everything built around it: the `/qa-explore` agentic QA harness (`qa/`, `scripts/qa/`, `.claude/skills/qa-explore`, `.env.qa.example`), the two-database `db:compare` and `db:sync-reference` tools, and the Database Alignment workflow. The Database Release workflow no longer has a QA stage, and the migration runner, ledger audit and question-content audit now target production only. Migration-ledger conventions moved to `docs/database-migrations.md`.
+- Retired the dedicated QA Supabase project (`clear-road-qa`) and everything built around it: the `/qa-explore` agentic QA harness (`qa/`, `scripts/qa/`, `.claude/skills/qa-explore`, `.env.qa.example`), the two-database `db:compare` and `db:sync-reference` tools, and the Database Alignment workflow. The Database Release workflow no longer has a QA stage, and the migration runner, ledger audit and question-content audit now target production only. Migration-ledger conventions moved to `docs/database-migrations.md`. The Database Catalog Audit workflow is now **Database Ledger Audit**: `db:audit` checks only the migration ledger, so drift detection for RLS policies, triggers, function definitions, grants, indexes and constraints is dropped with the QA comparison and is not replaced.
 
 ---
 

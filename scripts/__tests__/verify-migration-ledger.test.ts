@@ -1,3 +1,4 @@
+import { discoverMigrations } from "../audit-database-metadata";
 import {
   LedgerVerificationError,
   assertMigrationLedger,
@@ -25,5 +26,16 @@ describe("production migration ledger gate", () => {
         },
       ])
     ).toThrow(/missing-or-changed/);
+  });
+
+  it("passes for a ledger that matches the committed migrations", () => {
+    const ledger = discoverMigrations().map((migration) => ({ ...migration, appliedAt: "now" }));
+    expect(() => assertMigrationLedger(ledger)).not.toThrow();
+  });
+
+  it("reports unexpected rows in the error message", () => {
+    const ledger = discoverMigrations().map((migration) => ({ ...migration, appliedAt: "now" }));
+    ledger.push({ version: 9999, filename: "9999_extra.sql", checksum: "x", appliedAt: "now" });
+    expect(() => assertMigrationLedger(ledger)).toThrow(/unexpected: 9999 9999_extra\.sql/);
   });
 });
