@@ -1,4 +1,4 @@
-name: Database Catalog Audit
+name: Database Ledger Audit
 
 on:
   workflow_dispatch:
@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   audit:
-    name: Direct PostgreSQL catalog and migration ledger
+    name: Direct PostgreSQL migration ledger
     runs-on: ubuntu-latest
     environment: database-audit
 
@@ -29,8 +29,7 @@ jobs:
       - name: Install trusted dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
 
-      - name: Audit direct PostgreSQL metadata and migration ledger
+      - name: Audit production migration ledger
         run: pnpm db:audit
         env:
           PROD_DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
-          QA_DATABASE_URL: ${{ secrets.QA_DATABASE_URL }}

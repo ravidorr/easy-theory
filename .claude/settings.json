@@ -6,8 +6,7 @@
       "Bash(gh issue close*)",
       "Bash(gh issue list*)",
       "Bash(gh label create*)",
-      "Bash(gh label list*)",
-      "Bash(pnpm qa:publish-evidence*)"
+      "Bash(gh label list*)"
     ],
     "deny": [
       "Bash(gh issue edit*)",

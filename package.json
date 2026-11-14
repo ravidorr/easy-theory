@@ -4,7 +4,7 @@
     "url": "https://github.com/sponsors/ravidorr"
   },
   "name": "easy-in-theory",
-  "version": "0.58.13",
+  "version": "0.58.14",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -23,7 +23,6 @@
     "prepare": "husky",
     "generate-explanations": "tsx --env-file=.env.local scripts/generate_explanations.ts",
     "translate-arabic": "tsx --env-file=.env.local scripts/translate_arabic.ts",
-    "db:compare": "tsx scripts/compare-databases.ts",
     "db:audit": "tsx scripts/audit-database-metadata.ts",
     "db:migrate": "tsx scripts/apply-pending-migrations.ts",
     "db:verify-ledger": "tsx scripts/verify-migration-ledger.ts --require",
@@ -31,12 +30,7 @@
     "content:import-signs": "tsx scripts/import-wikipedia-signs.ts",
     "content:validate-questions": "python3 scripts/validate_question_bank.py",
     "content:audit-questions": "tsx scripts/audit-question-content.ts",
-    "content:verify": "tsx scripts/content-release.ts",
-    "db:sync-reference": "tsx scripts/sync-reference-data.ts",
-    "qa:dev": "scripts/qa/qa-dev.sh",
-    "qa:mint": "tsx --env-file=.env.qa scripts/qa/mint-session.ts",
-    "qa:validate-report": "tsx scripts/qa/validate-report.ts",
-    "qa:publish-evidence": "scripts/qa/publish-evidence.sh"
+    "content:verify": "tsx scripts/content-release.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

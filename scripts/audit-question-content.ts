@@ -3,14 +3,54 @@
  *
  * Usage:
  *   pnpm content:audit-questions
- *   pnpm content:audit-questions -- --env .env.qa --target QA
  *   pnpm content:audit-questions -- --output .context/my-audit
  */
 
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { configFromEnv, parseEnv, type DatabaseConfig } from "./compare-databases";
+
+type DatabaseConfig = {
+  label: "production";
+  url: string;
+  serviceRoleKey: string;
+};
+
+export function parseEnv(contents: string): Record<string, string> {
+  const values: Record<string, string> = {};
+  for (const rawLine of contents.split(/\r?\n/)) {
+    let line = rawLine.trim();
+    if (!line || line.startsWith("#")) continue;
+    if (line.startsWith("export ")) line = line.slice("export ".length).trim();
+    const separator = line.indexOf("=");
+    if (separator < 1) continue;
+    const name = line.slice(0, separator).trim();
+    let value = line.slice(separator + 1).trim();
+    if (
+      value.length >= 2 &&
+      ((value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'")))
+    ) {
+      value = value.slice(1, -1);
+    }
+    values[name] = value;
+  }
+  return values;
+}
+
+export function configFromEnv(values: Record<string, string>): DatabaseConfig {
+  const url = values.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/+$/, "");
+  const serviceRoleKey = values.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !serviceRoleKey) {
+    throw new Error("configuration must define NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY");
+  }
+  try {
+    new URL(url);
+  } catch {
+    throw new Error("NEXT_PUBLIC_SUPABASE_URL is invalid");
+  }
+  return { label: "production", url, serviceRoleKey };
+}
 
 const PAGE_SIZE = 1_000;
 const CAR_B = "В"; // Cyrillic capital Ve, used for the private-car licence in the Ministry feed.
@@ -75,7 +115,6 @@ export type AuditReport = {
 
 type AuditOptions = {
   envPath: string;
-  target: DatabaseConfig["label"];
   outputDir: string;
 };
 
@@ -404,26 +443,21 @@ export function writeAuditReport(outputDir: string, report: AuditReport): void {
 
 export function optionsFromArgs(args: string[]): AuditOptions {
   let envPath = ".env.local";
-  let target: DatabaseConfig["label"] = "production";
   let outputDir = join(".context", `question-audit-${new Date().toISOString().replace(/[:.]/g, "-")}`);
   for (let index = 0; index < args.length; index += 1) {
     const value = args[index];
     if (value === "--") continue; // pnpm forwards this separator to the script.
     if (value === "--env") envPath = args[++index] ?? "";
-    else if (value === "--target") {
-      const selected = args[++index];
-      if (selected !== "production" && selected !== "QA") throw new Error("--target must be production or QA");
-      target = selected;
-    } else if (value === "--output") outputDir = args[++index] ?? "";
+    else if (value === "--output") outputDir = args[++index] ?? "";
     else throw new Error(`unknown argument: ${value}`);
   }
   if (!envPath || !outputDir) throw new Error("--env and --output require a value");
-  return { envPath, target, outputDir };
+  return { envPath, outputDir };
 }
 
 async function main(): Promise<void> {
   const options = optionsFromArgs(process.argv.slice(2));
-  const config = configFromEnv(parseEnv(readFileSync(options.envPath, "utf8")), options.target);
+  const config = configFromEnv(parseEnv(readFileSync(options.envPath, "utf8")));
   const xml = readFileSync("seeds/theoryexam.xml", "utf8");
   const sourceChecksum = verifyPinnedQuestionBankChecksum(
     xml,

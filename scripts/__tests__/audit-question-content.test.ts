@@ -1,20 +1,21 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   compareQuestions,
+  configFromEnv,
   fetchAllRows,
   fetchQuestionsForAudit,
   normalizeText,
   optionsFromArgs,
+  parseEnv,
   parseMinistryQuestions,
   renderMarkdown,
   verifyPinnedQuestionBankChecksum,
   type AuditReport,
 } from "../audit-question-content";
-import type { DatabaseConfig } from "../compare-databases";
 
-const config: DatabaseConfig = {
-  label: "QA",
-  url: "https://qa.example.test",
+const config = {
+  label: "production" as const,
+  url: "https://production.example.test",
   serviceRoleKey: "secret",
 };
 
@@ -52,9 +53,8 @@ describe("Ministry question audit", () => {
   });
 
   it("accepts pnpm's forwarded argument separator", () => {
-    expect(optionsFromArgs(["--", "--env", ".env.qa", "--target", "QA", "--output", ".context/audit"])).toEqual({
-      envPath: ".env.qa",
-      target: "QA",
+    expect(optionsFromArgs(["--", "--env", ".env.local", "--output", ".context/audit"])).toEqual({
+      envPath: ".env.local",
       outputDir: ".context/audit",
     });
   });
@@ -152,7 +152,7 @@ describe("Ministry question audit", () => {
   it("renders every mismatch in the Markdown evidence report", () => {
     const report: AuditReport = {
       generatedAt: "2026-08-01T00:00:00.000Z",
-      target: "QA",
+      target: "production",
       activitySource: "is_active",
       sourceChecksum: "abc",
       officialQuestionCount: 1,
@@ -165,5 +165,42 @@ describe("Ministry question audit", () => {
 
     expect(renderMarkdown(report)).toContain("Q693 - correct_option");
     expect(renderMarkdown(report)).toContain("Official: `\"b\"`");
+  });
+});
+
+describe("environment configuration", () => {
+  it("parses exports, quotes, comments, CRLF line endings and equals signs in values", () => {
+    expect(
+      parseEnv(
+        [
+          "# comment",
+          "",
+          "export A=1",
+          'B="two words"',
+          "C='single'",
+          "D=a=b=c",
+          "=ignored",
+          "NOEQUALS",
+          "E=plain\r",
+        ].join("\r\n")
+      )
+    ).toEqual({ A: "1", B: "two words", C: "single", D: "a=b=c", E: "plain" });
+  });
+
+  it("requires a valid URL and service-role key, and strips trailing slashes", () => {
+    expect(() => configFromEnv({})).toThrow(/must define/);
+    expect(() => configFromEnv({ NEXT_PUBLIC_SUPABASE_URL: "https://x.test" })).toThrow(/must define/);
+    expect(() =>
+      configFromEnv({ NEXT_PUBLIC_SUPABASE_URL: "not a url", SUPABASE_SERVICE_ROLE_KEY: "k" })
+    ).toThrow(/invalid/);
+    expect(
+      configFromEnv({ NEXT_PUBLIC_SUPABASE_URL: "https://x.test//", SUPABASE_SERVICE_ROLE_KEY: "k" })
+    ).toEqual({ label: "production", url: "https://x.test", serviceRoleKey: "k" });
+  });
+
+  it("rejects the removed --target flag and missing option values", () => {
+    expect(() => optionsFromArgs(["--target", "qa"])).toThrow(/unknown argument: --target/);
+    expect(() => optionsFromArgs(["--env"])).toThrow(/require a value/);
+    expect(() => optionsFromArgs(["--output"])).toThrow(/require a value/);
   });
 });
