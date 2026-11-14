@@ -1,69 +1,21 @@
 import { readFileSync } from "node:fs";
 import {
   checksumMigrationSource,
-  compareCatalogs,
   compareLedger,
   discoverMigrations,
-  loadAuditConfigs,
-  type CatalogSnapshot,
+  loadAuditConfig,
 } from "../audit-database-metadata";
 
-function emptyCatalog(): CatalogSnapshot {
-  return {
-    tables: [],
-    columns: [],
-    constraints: [],
-    indexes: [],
-    policies: [],
-    triggers: [],
-    functions: [],
-    tableGrants: [],
-    functionGrants: [],
-  };
-}
-
-describe("database catalog audit", () => {
-  it("requires distinct PostgreSQL connection strings", () => {
-    expect(() => loadAuditConfigs({})).toThrow(/PROD_DATABASE_URL/);
+describe("database migration ledger audit", () => {
+  it("requires a PostgreSQL production connection string", () => {
+    expect(() => loadAuditConfig({})).toThrow(/PROD_DATABASE_URL/);
     expect(() =>
-      loadAuditConfigs({
-        PROD_DATABASE_URL: "https://not-a-database.example.test",
-        QA_DATABASE_URL: "postgresql://qa.example.test/postgres",
-      })
+      loadAuditConfig({ PROD_DATABASE_URL: "https://not-a-database.example.test" })
     ).toThrow(/PostgreSQL/);
-    expect(() =>
-      loadAuditConfigs({
-        PROD_DATABASE_URL: "postgresql://same.example.test/postgres",
-        QA_DATABASE_URL: "postgresql://same.example.test/postgres",
-      })
-    ).toThrow(/identical/);
-  });
-
-  it("detects direct-only catalog drift", () => {
-    const production = emptyCatalog();
-    production.policies.push({
-      table: "user_medals",
-      name: "own insert",
-      permissive: "PERMISSIVE",
-      roles: ["authenticated"],
-      command: "INSERT",
-      using: null,
-      withCheck: "(user_id = auth.uid())",
+    expect(loadAuditConfig({ PROD_DATABASE_URL: "postgresql://prod.example.test/postgres" })).toEqual({
+      label: "production",
+      databaseUrl: "postgresql://prod.example.test/postgres",
     });
-    production.triggers.push({
-      table: "user_quiz_responses",
-      name: "user_quiz_responses_record_answer_event",
-      enabled: "O",
-      definition: "CREATE TRIGGER ...",
-    });
-
-    const result = compareCatalogs(production, emptyCatalog());
-
-    expect(result.hasDrift).toBe(true);
-    expect(result.differences.policies.productionOnly).toEqual(["user_medals.own insert"]);
-    expect(result.differences.triggers.productionOnly).toEqual([
-      "user_quiz_responses.user_quiz_responses_record_answer_event",
-    ]);
   });
 
   it("normalizes only the self-referential ledger checksum", () => {
@@ -101,8 +53,8 @@ describe("database catalog audit", () => {
     ];
 
     expect(compareLedger(expected, actual)).toEqual({
-      productionOnly: ["001 001_first.sql", "002 002_second.sql"],
-      qaOnly: ["001 001_first.sql", "003 003_third.sql"],
+      missingOrChanged: ["001 001_first.sql", "002 002_second.sql"],
+      unexpected: ["001 001_first.sql", "003 003_third.sql"],
     });
   });
 });

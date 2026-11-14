@@ -10,11 +10,10 @@ import {
   verifyPinnedQuestionBankChecksum,
   type AuditReport,
 } from "../audit-question-content";
-import type { DatabaseConfig } from "../compare-databases";
 
-const config: DatabaseConfig = {
-  label: "QA",
-  url: "https://qa.example.test",
+const config = {
+  label: "production" as const,
+  url: "https://production.example.test",
   serviceRoleKey: "secret",
 };
 
@@ -52,9 +51,8 @@ describe("Ministry question audit", () => {
   });
 
   it("accepts pnpm's forwarded argument separator", () => {
-    expect(optionsFromArgs(["--", "--env", ".env.qa", "--target", "QA", "--output", ".context/audit"])).toEqual({
-      envPath: ".env.qa",
-      target: "QA",
+    expect(optionsFromArgs(["--", "--env", ".env.local", "--output", ".context/audit"])).toEqual({
+      envPath: ".env.local",
       outputDir: ".context/audit",
     });
   });
@@ -152,7 +150,7 @@ describe("Ministry question audit", () => {
   it("renders every mismatch in the Markdown evidence report", () => {
     const report: AuditReport = {
       generatedAt: "2026-08-01T00:00:00.000Z",
-      target: "QA",
+      target: "production",
       activitySource: "is_active",
       sourceChecksum: "abc",
       officialQuestionCount: 1,

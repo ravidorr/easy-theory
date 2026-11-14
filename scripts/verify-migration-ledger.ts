@@ -23,10 +23,10 @@ export function assertMigrationLedger(
   actual: MigrationLedgerEntry[]
 ): void {
   const difference = compareLedger(discoverMigrations(), actual);
-  if (difference.productionOnly.length > 0 || difference.qaOnly.length > 0) {
+  if (difference.missingOrChanged.length > 0 || difference.unexpected.length > 0) {
     throw new LedgerVerificationError(
-      `migration ledger drift (missing-or-changed: ${difference.productionOnly.join(", ") || "none"}; unexpected: ${
-        difference.qaOnly.join(", ") || "none"
+      `migration ledger drift (missing-or-changed: ${difference.missingOrChanged.join(", ") || "none"}; unexpected: ${
+        difference.unexpected.join(", ") || "none"
       })`
     );
   }

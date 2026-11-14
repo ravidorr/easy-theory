@@ -9,7 +9,7 @@ import {
   type MigrationLedgerEntry,
 } from "./audit-database-metadata";
 
-export type MigrationTarget = "qa" | "production";
+export type MigrationTarget = "production";
 
 export type MigrationArguments = {
   target: MigrationTarget;
@@ -32,8 +32,8 @@ export function parseMigrationArguments(args: string[]): MigrationArguments {
     }
     if (argument === "--target") {
       const value = args[index + 1];
-      if (value !== "qa" && value !== "production") {
-        throw new MigrationApplicationError("--target must be qa or production");
+      if (value !== "production") {
+        throw new MigrationApplicationError("--target must be production");
       }
       if (target) throw new MigrationApplicationError("--target may only be supplied once");
       target = value;
@@ -43,15 +43,15 @@ export function parseMigrationArguments(args: string[]): MigrationArguments {
     throw new MigrationApplicationError(`unknown argument: ${argument}`);
   }
 
-  if (!target) throw new MigrationApplicationError("--target qa|production is required");
+  if (!target) throw new MigrationApplicationError("--target production is required");
   return { target, apply };
 }
 
 export function databaseUrlForTarget(
-  target: MigrationTarget,
+  _target: MigrationTarget,
   values = process.env
 ): string {
-  const variable = target === "qa" ? "QA_DATABASE_URL" : "PROD_DATABASE_URL";
+  const variable = "PROD_DATABASE_URL";
   const value = values[variable];
   if (!value) throw new MigrationApplicationError(`${variable} is required`);
   try {
@@ -81,9 +81,9 @@ export function pendingMigrations(
     ) {
       const difference = compareLedger(expected, actual);
       throw new MigrationApplicationError(
-        `migration ledger is not an exact committed prefix (missing-or-changed: ${difference.productionOnly.join(
+        `migration ledger is not an exact committed prefix (missing-or-changed: ${difference.missingOrChanged.join(
           ", "
-        ) || "none"}; unexpected: ${difference.qaOnly.join(", ") || "none"})`
+        ) || "none"}; unexpected: ${difference.unexpected.join(", ") || "none"})`
       );
     }
   }

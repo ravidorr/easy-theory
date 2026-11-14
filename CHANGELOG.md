@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 Historical release headings were normalized from their changelog categories: `Added` releases receive a minor increment, except for a clearly test-only addition; all other categories receive a patch increment. No historical major increment was inferred. One stable SemVer increment and one top-level entry per PR are enforced by the pre-push hook; individual commits within a PR do not bump.
 
+## [0.58.14] - 2026-11-14
+
+### Removed
+
+- Retired the dedicated QA Supabase project (`clear-road-qa`) and everything built around it: the `/qa-explore` agentic QA harness (`qa/`, `scripts/qa/`, `.claude/skills/qa-explore`, `.env.qa.example`), the two-database `db:compare` and `db:sync-reference` tools, and the Database Alignment workflow. The Database Release workflow no longer has a QA stage, and the migration runner, ledger audit and question-content audit now target production only. Migration-ledger conventions moved to `docs/database-migrations.md`.
+
+---
+
 ## [0.58.13] - 2026-10-28
 
 ### Changed

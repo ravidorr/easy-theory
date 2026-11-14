@@ -13,12 +13,15 @@ const expected = [
 describe("pending migration runner", () => {
   it("requires an explicit target and defaults to dry-run", () => {
     expect(() => parseMigrationArguments([])).toThrow(/--target/);
-    expect(parseMigrationArguments(["--target", "qa"])).toEqual({ target: "qa", apply: false });
+    expect(parseMigrationArguments(["--target", "production"])).toEqual({
+      target: "production",
+      apply: false,
+    });
     expect(parseMigrationArguments(["--target", "production", "--apply"])).toEqual({
       target: "production",
       apply: true,
     });
-    expect(() => parseMigrationArguments(["--target", "staging"])).toThrow(/qa or production/);
+    expect(() => parseMigrationArguments(["--target", "staging"])).toThrow(/must be production/);
   });
 
   it("accepts only an exact committed ledger prefix", () => {
@@ -35,8 +38,8 @@ describe("pending migration runner", () => {
     ).toThrow(MigrationApplicationError);
   });
 
-  it("requires a PostgreSQL URL for the selected target only", () => {
-    expect(() => databaseUrlForTarget("qa", {})).toThrow(/QA_DATABASE_URL/);
+  it("requires a PostgreSQL URL for the production target", () => {
+    expect(() => databaseUrlForTarget("production", {})).toThrow(/PROD_DATABASE_URL/);
     expect(() => databaseUrlForTarget("production", { PROD_DATABASE_URL: "https://example.test" })).toThrow(
       /PostgreSQL/
     );
