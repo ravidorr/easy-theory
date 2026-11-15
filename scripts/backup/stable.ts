@@ -20,8 +20,8 @@ export function sortRows(rows: Row[], key: readonly string[]): Row[] {
   return rows
     .map((row) => sortKeys(row) as Row)
     .sort((a, b) => {
-      const left = rowIdentity(a, key);
-      const right = rowIdentity(b, key);
+      const left = `${rowIdentity(a, key)}${JSON.stringify(a)}`;
+      const right = `${rowIdentity(b, key)}${JSON.stringify(b)}`;
       return left < right ? -1 : left > right ? 1 : 0;
     });
 }

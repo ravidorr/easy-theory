@@ -65,7 +65,7 @@ jobs:
   alert:
     name: Raise the failure alert
     needs: backup
-    if: failure()
+    if: always() && needs.backup.result != 'success'
     runs-on: ubuntu-latest
     permissions:
       issues: write

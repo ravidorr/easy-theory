@@ -7,9 +7,9 @@ Historical release headings were normalized from their changelog categories: `Ad
 
 ### Added
 
-- Daily backup of user and account data to a private GitHub repository, because the Supabase Free plan has no backups. A new Daily Data Backup workflow exports the auth users and 16 personal-data tables (`scripts/backup-export.ts`) to a temporary directory, commits only changes to `ravidorr/easy-theory-backups` over a repository-only deploy key, and opens an issue if a run fails. Output is one stable JSON file per table, and logs show counts only.
-- `scripts/backup-restore.ts`: an additive, idempotent restore in foreign-key order that validates every file before writing and skips rows that already match.
-- Retention: when the backup repository's history is older than 30 days it is replaced by one orphan commit, so deleted accounts leave the backups within 30 days.
+- Daily backup of user and account data to a private GitHub repository, because the Supabase Free plan has no backups. A new Daily Data Backup workflow exports the auth users, 16 personal-data tables and the 4 content tables they reference (`scripts/backup-export.ts`) to a temporary directory, commits only changes to `ravidorr/easy-theory-backups` over a repository-only deploy key, and opens an issue if a run fails. Output is one stable JSON file per table, and logs show counts only.
+- `scripts/backup-restore.ts`: an additive, idempotent restore in foreign-key order that checks every file against the manifest before writing and skips rows that already match. A direct PostgreSQL connection restores with triggers disabled for exact fidelity.
+- Retention: when the backup repository's history is older than 29 days it is replaced by one orphan commit, so deleted accounts leave the backups within about 30 days.
 - `pnpm backup:rehearse`, a restore rehearsal against a local PostgreSQL, and `docs/database-backups.md` (what is backed up and left out, retention, restore, rehearsal result, access review). `SECURITY.md` now describes the backups.
 
 ---

@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { postgresClient, supabaseClient } from "./backup/clients";
@@ -10,12 +10,14 @@ import {
   type RestoreClient,
   type Row,
 } from "./backup/tables";
-import { MANIFEST_FILE, PAGE_SIZE, type Manifest } from "./backup-export";
+import { MANIFEST_FILE, PAGE_SIZE, safeMessage, type Manifest } from "./backup-export";
 
 const CHUNK_SIZE = 500;
 
 function readRows(dir: string, name: string): Row[] {
-  const rows = JSON.parse(readFileSync(path.join(dir, `${name}.json`), "utf8")) as Row[];
+  const file = path.join(dir, `${name}.json`);
+  if (!existsSync(file)) throw new BackupError(`${name}.json is missing from the backup`);
+  const rows = JSON.parse(readFileSync(file, "utf8")) as Row[];
   if (!Array.isArray(rows)) throw new BackupError(`${name}.json is not a list of rows`);
   return rows;
 }
@@ -85,7 +87,7 @@ export async function main(args = process.argv.slice(2)): Promise<void> {
       if ("end" in client) await (client as { end(): Promise<void> }).end();
     }
   } catch (error) {
-    console.error(`backup:restore - ${error instanceof Error ? error.message : "unknown failure"}`);
+    console.error(`backup:restore - ${safeMessage(error)}`);
     process.exitCode = 1;
   }
 }

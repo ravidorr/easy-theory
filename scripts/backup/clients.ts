@@ -22,7 +22,7 @@ export function supabaseClient(
 
   // Error messages from the API can quote row values, so only the code and table are reported.
   const fail = (what: string, error: { code?: string }): never => {
-    throw new BackupError(`${what} failed (${error.code ?? "no code"})`);
+    throw new BackupError(`${what} failed (${error.code || "no code"})`);
   };
 
   return {
@@ -76,6 +76,15 @@ export function pickUserFields(user: Row): Row {
 export function postgresClient(databaseUrl: string): RestoreClient & { end(): Promise<void> } {
   const sql = postgres(databaseUrl, { max: 1, prepare: false, onnotice: () => {} });
 
+  // Triggers such as the quiz answer log and the retired-question check would otherwise rewrite or reject
+  // restored rows. A direct connection lets the restore bring back exactly what the backup holds.
+  const withoutTriggers = (quotedName: string, write: (tx: postgres.TransactionSql) => PromiseLike<unknown>) =>
+    sql.begin(async (tx) => {
+      await tx.unsafe(`ALTER TABLE public.${quotedName} DISABLE TRIGGER USER`);
+      await write(tx);
+      await tx.unsafe(`ALTER TABLE public.${quotedName} ENABLE TRIGGER USER`);
+    });
+
   return {
     end: () => sql.end({ timeout: 5 }),
     async readPage(table, _key, offset, limit) {
@@ -119,16 +128,20 @@ export function postgresClient(databaseUrl: string): RestoreClient & { end(): Pr
       const action = updates.length
         ? `DO UPDATE SET ${updates.map((column) => `${column} = EXCLUDED.${column}`).join(", ")}`
         : "DO NOTHING";
-      await sql.unsafe(
-        `INSERT INTO public.${name} SELECT * FROM jsonb_populate_recordset(null::public.${name}, $1::text::jsonb) ON CONFLICT (${key}) ${action}`,
-        [JSON.stringify(rows)]
+      await withoutTriggers(name, (tx) =>
+        tx.unsafe(
+          `INSERT INTO public.${name} SELECT * FROM jsonb_populate_recordset(null::public.${name}, $1::text::jsonb) ON CONFLICT (${key}) ${action}`,
+          [JSON.stringify(rows)]
+        )
       );
     },
     async insertRows(table, rows) {
       const name = identifier(table.name);
-      await sql.unsafe(
-        `INSERT INTO public.${name} SELECT * FROM jsonb_populate_recordset(null::public.${name}, $1::text::jsonb)`,
-        [JSON.stringify(rows)]
+      await withoutTriggers(name, (tx) =>
+        tx.unsafe(
+          `INSERT INTO public.${name} SELECT * FROM jsonb_populate_recordset(null::public.${name}, $1::text::jsonb)`,
+          [JSON.stringify(rows)]
+        )
       );
     },
   };

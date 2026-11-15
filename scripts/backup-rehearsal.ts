@@ -5,7 +5,7 @@ import { pathToFileURL } from "node:url";
 import postgres from "postgres";
 import { postgresClient } from "./backup/clients";
 import { BACKUP_TABLES, BackupError } from "./backup/tables";
-import { exportBackup } from "./backup-export";
+import { exportBackup, safeMessage } from "./backup-export";
 import { restoreBackup } from "./backup-restore";
 
 /** Migrations whose objects seeds/schema.sql already contains, so they fail with "already exists" on top of it. */
@@ -18,8 +18,16 @@ export const SCHEMA_OVERLAP = new Set([
 
 export function assertLocal(databaseUrl: string | undefined): string {
   if (!databaseUrl) throw new BackupError("REHEARSAL_DATABASE_URL is required");
-  const host = new URL(databaseUrl).hostname;
-  if (host !== "localhost" && host !== "127.0.0.1" && host !== "[::1]") {
+  let url: URL;
+  try {
+    url = new URL(databaseUrl);
+  } catch {
+    throw new BackupError("REHEARSAL_DATABASE_URL is not a valid URL");
+  }
+  const host = url.hostname;
+  // The driver also honours a host query parameter, which would point the wipe somewhere else.
+  const redirected = ["host", "hostaddr", "service"].some((name) => url.searchParams.has(name));
+  if (redirected || (host !== "localhost" && host !== "127.0.0.1" && host !== "[::1]")) {
     throw new BackupError("the rehearsal wipes data and only runs against a local database");
   }
   return databaseUrl;
@@ -84,7 +92,7 @@ export async function main(): Promise<void> {
       await client.end();
     }
   } catch (error) {
-    console.error(`rehearsal - ${error instanceof Error ? error.message : "unknown failure"}`);
+    console.error(`rehearsal - ${safeMessage(error)}`);
     process.exitCode = 1;
   }
 }

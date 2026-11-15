@@ -34,7 +34,7 @@ our reasoning.
 The Supabase Free plan has no backups, so a daily workflow copies user and account data
 into a private GitHub repository (`ravidorr/easy-theory-backups`, hosted in the United
 States, access limited to the maintainer). The history of that repository is replaced when
-it is older than 30 days, so a deleted account leaves the backups within 30 days. The
-backup repository, its deploy key and the `database-backup` environment secrets are part of
-the yearly access review. Details and the restore procedure are in
-[docs/database-backups.md](docs/database-backups.md).
+it is older than 29 days, so a deleted account leaves the backups within about 30 days
+while the daily run keeps succeeding. The backup repository, its deploy key and the
+`database-backup` environment secrets should be included in the yearly access review.
+Details and the restore procedure are in [docs/database-backups.md](docs/database-backups.md).

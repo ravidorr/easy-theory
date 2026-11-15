@@ -41,3 +41,12 @@ INSERT INTO contact_messages (id, user_id, topic, message, locale) VALUES
   ('00000000-0000-0000-0000-0000000000da', '00000000-0000-0000-0000-0000000000c2', 'general', 'rehearsal message', 'he');
 INSERT INTO question_reports (id, user_id, question_id, locale) VALUES
   ('00000000-0000-0000-0000-0000000000db', '00000000-0000-0000-0000-0000000000c2', '00000000-0000-0000-0000-0000000000b1', 'he');
+INSERT INTO signs (id, sign_number, name_he, image_path) VALUES
+  ('00000000-0000-0000-0000-0000000000a2', '900', 'rehearsal', '/signs/sign-900.png');
+INSERT INTO user_srs_cards (id, user_id, sign_id) VALUES
+  ('00000000-0000-0000-0000-0000000000dc', '00000000-0000-0000-0000-0000000000c1', '00000000-0000-0000-0000-0000000000a2');
+INSERT INTO questions (id, topic_id, question_number, question_he, option_a, option_b, option_c, option_d) VALUES
+  ('00000000-0000-0000-0000-0000000000b3', '00000000-0000-0000-0000-0000000000a1', 900003, 'q', 'a', 'b', 'c', 'd');
+INSERT INTO user_quiz_responses (id, user_id, question_id, selected_option, is_correct) VALUES
+  ('00000000-0000-0000-0000-0000000000dd', '00000000-0000-0000-0000-0000000000c1', '00000000-0000-0000-0000-0000000000b3', 'b', false);
+UPDATE questions SET is_active = false WHERE id = '00000000-0000-0000-0000-0000000000b3';

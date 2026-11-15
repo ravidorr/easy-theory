@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { execFileSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdtempSync, rmSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -76,7 +76,7 @@ function temp(): string {
   return dir;
 }
 afterEach(() => {
-  dirs.length = 0;
+  for (const dir of dirs.splice(0)) rmSync(dir, { recursive: true, force: true });
 });
 
 function seeded(): FakeProject {
@@ -93,6 +93,7 @@ function seeded(): FakeProject {
     { user_id: "u1", question_id: "q1", is_correct: true, answered_at: "2026-01-01T00:00:00Z" },
     { user_id: "u1", question_id: "q1", is_correct: false, answered_at: "2026-01-02T00:00:00Z" },
   ]);
+  project.tables.set("questions", [{ id: "q1", topic_id: null }]);
   project.tables.set("user_exam_attempts", [{ id: "a1", user_id: "u1" }]);
   project.tables.set("user_exam_sessions", [{ id: "s1", user_id: "u1", attempt_id: "a1" }]);
   return project;
@@ -124,7 +125,7 @@ describe("export", () => {
     const stats = JSON.parse(readFileSync(path.join(dir, "user_stats.json"), "utf8"));
     expect(stats.map((row: Row) => row.user_id)).toEqual(["u1", "u2"]);
     expect(readFileSync(path.join(dir, "auth_users.json"), "utf8")).toContain('"a": 2,\n      "z": 1');
-    expect(describeCounts(manifest)).toBe("8 rows in 17 tables");
+    expect(describeCounts(manifest)).toBe(`9 rows in ${BACKUP_TABLES.length + 1} tables`);
   });
 
   it("is byte-identical across runs", async () => {
@@ -138,13 +139,13 @@ describe("export", () => {
 
   it("pages through more rows than one page", async () => {
     const project = new FakeProject();
-    project.users = Array.from({ length: PAGE_SIZE + 5 }, (_, index) => ({ id: `u${index}` }));
+    project.users = Array.from({ length: PAGE_SIZE * 2 }, (_, index) => ({ id: `u${index}` }));
     project.tables.set(
       "user_stats",
       Array.from({ length: PAGE_SIZE * 2 }, (_, index) => ({ user_id: `u${index}` }))
     );
     const manifest = await exportBackup(project, temp());
-    expect(manifest.tables.auth_users).toBe(PAGE_SIZE + 5);
+    expect(manifest.tables.auth_users).toBe(PAGE_SIZE * 2);
     expect(manifest.tables.user_stats).toBe(PAGE_SIZE * 2);
   });
 
@@ -172,6 +173,8 @@ describe("export", () => {
 
   it("allows repeated identities in a table without a primary key", async () => {
     const project = new FakeProject();
+    project.users = [{ id: "u1" }];
+    project.tables.set("questions", [{ id: "q1" }]);
     const event = { user_id: "u1", question_id: "q1", is_correct: true, answered_at: "2026-01-01T00:00:00Z" };
     project.tables.set("quiz_answer_events", [event, { ...event }]);
     const manifest = await exportBackup(project, temp());
@@ -287,7 +290,7 @@ describe("retention", () => {
     const repo = backupRepo();
     expect(historyIsStale(repo, new Date())).toBe(false);
     expect(publishBackup(repo, await exportOf(seeded()))).toBe("committed");
-    expect(run(repo, "log", "-1", "--format=%s")).toBe("Backup: 8 rows in 17 tables");
+    expect(run(repo, "log", "-1", "--format=%s")).toBe(`Backup: 9 rows in ${BACKUP_TABLES.length + 1} tables`);
   });
 
   it("does not commit when nothing changed", async () => {
@@ -320,14 +323,13 @@ describe("retention", () => {
     expect(result).toBe("reset");
     expect(run(repo, "rev-list", "--count", "HEAD")).toBe("1");
     expect(run(repo, "rev-parse", "--abbrev-ref", "HEAD")).toBe("main");
-    expect(run(repo, "log", "-1", "--format=%s")).toBe("Backup: 6 rows in 17 tables (history reset)");
+    expect(run(repo, "log", "-1", "--format=%s")).toBe(`Backup: 7 rows in ${BACKUP_TABLES.length + 1} tables (history reset)`);
     const everything = run(repo, "log", "--all", "-p");
     expect(everything).not.toContain("b@example.test");
   });
 
   it("requires an export with a manifest", () => {
     expect(() => publishBackup(backupRepo(), temp())).toThrow(/manifest/);
-    mkdirSync(path.join(temp(), "x"));
   });
 });
 
