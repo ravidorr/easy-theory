@@ -6,7 +6,7 @@ Security fixes are provided for the latest release only.
 
 | Version                           | Supported |
 | --------------------------------- | --------- |
-| 0.58.14                           | ✓         |
+| 0.59.0                            | ✓         |
 | Earlier releases                  | ✘         |
 
 ## Reporting a Vulnerability
@@ -28,3 +28,13 @@ We will acknowledge receipt within five business days and provide progress
 updates at least weekly while we investigate. If we accept the report, we will
 coordinate a fix and disclosure with you. If we decline it, we will explain
 our reasoning.
+
+## Data backups
+
+The Supabase Free plan has no backups, so a daily workflow copies user and account data
+into a private GitHub repository (`ravidorr/easy-theory-backups`, hosted in the United
+States, access limited to the maintainer). The history of that repository is replaced when
+it is older than 29 days, so a deleted account leaves the backups within about 30 days
+while the daily run keeps succeeding. The backup repository, its deploy key and the
+`database-backup` environment secrets should be included in the yearly access review.
+Details and the restore procedure are in [docs/database-backups.md](docs/database-backups.md).

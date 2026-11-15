@@ -22,6 +22,8 @@ const eslintConfig = defineConfig([
     "design-system/**",
     // Conductor workspace scratch dir (attachments, agent collaboration files)
     ".context/**",
+    // Nested git worktrees created by Claude Code sessions
+    ".claude/worktrees/**",
   ]),
 ]);
 
