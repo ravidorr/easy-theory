@@ -31,7 +31,7 @@ function chunks<T>(items: T[]): T[][] {
 async function existingRows(client: RestoreClient, table: string, key: readonly string[]) {
   const existing = new Map<string, string>();
   for (let offset = 0; ; offset += PAGE_SIZE) {
-    const page = await client.readPage(table, offset, PAGE_SIZE);
+    const page = await client.readPage(table, key, offset, PAGE_SIZE);
     for (const row of page.rows) existing.set(rowIdentity(row, key), JSON.stringify(sortKeys(row)));
     if (page.rows.length < PAGE_SIZE) return existing;
   }

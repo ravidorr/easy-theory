@@ -5,7 +5,8 @@ import { pathToFileURL } from "node:url";
 import { BackupError } from "./backup/tables";
 import { describeCounts, MANIFEST_FILE, type Manifest } from "./backup-export";
 
-export const MAX_HISTORY_DAYS = 30;
+// One day under the 30 day promise, so a daily run with schedule jitter never lets history reach 31 days.
+export const MAX_HISTORY_DAYS = 29;
 export type PublishResult = "unchanged" | "committed" | "reset";
 
 const IDENTITY = ["-c", "user.name=backup-bot", "-c", "user.email=backup-bot@users.noreply.github.com"];

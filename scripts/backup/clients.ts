@@ -26,18 +26,20 @@ export function supabaseClient(
   };
 
   return {
-    async readPage(table, offset, limit) {
-      const { data, error, count } = await supabase
-        .from(table)
-        .select("*", { count: "exact" })
-        .range(offset, offset + limit - 1);
+    async readPage(table, key, offset, limit) {
+      // Without an explicit order PostgREST returns rows in scan order, which shifts between pages.
+      let query = supabase.from(table).select("*", { count: "exact" });
+      for (const column of key) query = query.order(column, { ascending: true });
+      const { data, error, count } = await query.range(offset, offset + limit - 1);
       if (error) return fail(`read of ${table}`, error);
       return { rows: (data ?? []) as Row[], count: count ?? 0 };
     },
     async listUsers(page, perPage) {
       const { data, error } = await supabase.auth.admin.listUsers({ page, perPage });
       if (error) return fail("read of auth users", { code: String(error.status ?? "") });
-      return data.users.map((user) => pickUserFields(user as unknown as Row));
+      const total = (data as unknown as { total?: number }).total;
+      if (typeof total !== "number") throw new BackupError("auth user total is missing");
+      return { users: data.users.map((user) => pickUserFields(user as unknown as Row)), total };
     },
     async userExists(id) {
       const { data, error } = await supabase.auth.admin.getUserById(id);
@@ -76,7 +78,7 @@ export function postgresClient(databaseUrl: string): RestoreClient & { end(): Pr
 
   return {
     end: () => sql.end({ timeout: 5 }),
-    async readPage(table, offset, limit) {
+    async readPage(table, _key, offset, limit) {
       const name = identifier(table);
       const [{ count }] = await sql.unsafe(`SELECT count(*)::int AS count FROM public.${name}`);
       const rows = await sql.unsafe(
@@ -85,6 +87,7 @@ export function postgresClient(databaseUrl: string): RestoreClient & { end(): Pr
       return { rows: rows.map((entry) => entry.row as Row), count };
     },
     async listUsers(page, perPage) {
+      const [{ total }] = await sql`SELECT count(*)::int AS total FROM auth.users`;
       const rows = await sql`
         SELECT jsonb_build_object(
           'id', id, 'email', email, 'phone', phone, 'created_at', created_at,
@@ -93,7 +96,7 @@ export function postgresClient(databaseUrl: string): RestoreClient & { end(): Pr
           'app_metadata', coalesce(raw_app_meta_data, '{}'::jsonb)
         ) AS row
         FROM auth.users ORDER BY id OFFSET ${(page - 1) * perPage} LIMIT ${perPage}`;
-      return rows.map((entry) => entry.row as Row);
+      return { users: rows.map((entry) => entry.row as Row), total };
     },
     async userExists(id) {
       const rows = await sql`SELECT 1 FROM auth.users WHERE id = ${id}`;

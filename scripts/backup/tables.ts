@@ -45,10 +45,10 @@ export const BACKUP_TABLES: readonly BackupTable[] = [
 export type Row = Record<string, unknown>;
 
 export type BackupClient = {
-  /** Returns one page of rows (every column) plus the exact table row count. */
-  readPage(table: string, offset: number, limit: number): Promise<{ rows: Row[]; count: number }>;
-  /** Returns one page of auth users, 1-based page numbers. */
-  listUsers(page: number, perPage: number): Promise<Row[]>;
+  /** Returns one page of rows (every column), ordered by `key`, plus the exact table row count. */
+  readPage(table: string, key: readonly string[], offset: number, limit: number): Promise<{ rows: Row[]; count: number }>;
+  /** Returns one page of auth users (1-based pages) plus the total number of users. */
+  listUsers(page: number, perPage: number): Promise<{ users: Row[]; total: number }>;
 };
 
 export type RestoreClient = BackupClient & {

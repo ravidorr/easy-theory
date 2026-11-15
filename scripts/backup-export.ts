@@ -2,11 +2,12 @@ import { mkdirSync, mkdtempSync, renameSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { postgresClient, supabaseClient } from "./backup/clients";
-import { serialize, sortRows } from "./backup/stable";
+import { rowIdentity, serialize, sortRows } from "./backup/stable";
 import {
   BACKUP_TABLES,
   BackupError,
   USERS_FILE,
+  type BackupTable,
   type BackupClient,
   type Row,
 } from "./backup/tables";
@@ -17,30 +18,41 @@ export const MANIFEST_FILE = "manifest.json";
 
 export type Manifest = { tables: Record<string, number> };
 
-async function readTable(client: BackupClient, table: string): Promise<Row[]> {
+function hasDuplicates(rows: Row[], key: readonly string[]): boolean {
+  return new Set(rows.map((row) => rowIdentity(row, key))).size !== rows.length;
+}
+
+async function readTable(client: BackupClient, table: BackupTable): Promise<Row[]> {
   for (let attempt = 1; attempt <= READ_ATTEMPTS; attempt += 1) {
     const rows: Row[] = [];
     let expected = 0;
     for (let offset = 0; ; offset += PAGE_SIZE) {
-      const page = await client.readPage(table, offset, PAGE_SIZE);
+      const page = await client.readPage(table.name, table.key, offset, PAGE_SIZE);
       expected = page.count;
       rows.push(...page.rows);
       if (page.rows.length < PAGE_SIZE) break;
     }
-    // Rows written while paging shift the pages, so a mismatch means this read is not trustworthy.
-    if (rows.length === expected) return rows;
+    // Rows written while paging shift the pages: a different count or a repeated key means a bad read.
+    // Tables without a primary key can hold repeated identities legitimately, so only the count is checked.
+    const repeated = !table.insertMissing && hasDuplicates(rows, table.key);
+    if (rows.length === expected && !repeated) return rows;
   }
-  throw new BackupError(`read of ${table} was inconsistent after ${READ_ATTEMPTS} attempts`);
+  throw new BackupError(`read of ${table.name} was inconsistent after ${READ_ATTEMPTS} attempts`);
 }
 
 async function readUsers(client: BackupClient): Promise<Row[]> {
-  const users: Row[] = [];
-  for (let page = 1; ; page += 1) {
-    const batch = await client.listUsers(page, PAGE_SIZE);
-    users.push(...batch);
-    if (batch.length < PAGE_SIZE) break;
+  for (let attempt = 1; attempt <= READ_ATTEMPTS; attempt += 1) {
+    const users: Row[] = [];
+    let expected = 0;
+    for (let page = 1; ; page += 1) {
+      const batch = await client.listUsers(page, PAGE_SIZE);
+      expected = batch.total;
+      users.push(...batch.users);
+      if (batch.users.length < PAGE_SIZE) break;
+    }
+    if (users.length === expected && !hasDuplicates(users, ["id"])) return users;
   }
-  return users;
+  throw new BackupError(`read of auth users was inconsistent after ${READ_ATTEMPTS} attempts`);
 }
 
 /**
@@ -51,7 +63,7 @@ export async function exportBackup(client: BackupClient, outDir: string): Promis
   const files = new Map<string, Row[]>();
   files.set(USERS_FILE, sortRows(await readUsers(client), ["id"]));
   for (const table of BACKUP_TABLES) {
-    files.set(table.name, sortRows(await readTable(client, table.name), table.key));
+    files.set(table.name, sortRows(await readTable(client, table), table.key));
   }
 
   mkdirSync(outDir, { recursive: true });

@@ -23,18 +23,29 @@ class FakeProject implements RestoreClient {
   calls: string[] = [];
   failOn?: string;
   drift = 0;
+  shuffle = false;
+  userTotalOffset = 0;
 
   constructor() {
     for (const table of BACKUP_TABLES) this.tables.set(table.name, []);
   }
 
-  async readPage(table: string, offset: number, limit: number) {
+  async readPage(table: string, key: readonly string[], offset: number, limit: number) {
     if (this.failOn === table) throw new BackupError(`read of ${table} failed (500)`);
-    const rows = this.tables.get(table)!;
+    let rows = this.tables.get(table)!;
+    if (this.shuffle) {
+      // Unordered scan: rows come back in a different order each call.
+      rows = [...rows].sort(() => Math.random() - 0.5);
+    } else {
+      rows = [...rows].sort((a, b) => (JSON.stringify(key.map((c) => a[c])) < JSON.stringify(key.map((c) => b[c])) ? -1 : 1));
+    }
     return { rows: rows.slice(offset, offset + limit), count: rows.length + (this.drift-- > 0 ? 1 : 0) };
   }
   async listUsers(page: number, perPage: number) {
-    return this.users.slice((page - 1) * perPage, page * perPage);
+    return {
+      users: this.users.slice((page - 1) * perPage, page * perPage),
+      total: this.users.length + this.userTotalOffset,
+    };
   }
   async userExists(id: string) {
     return this.users.some((user) => user.id === id);
@@ -135,6 +146,36 @@ describe("export", () => {
     const manifest = await exportBackup(project, temp());
     expect(manifest.tables.auth_users).toBe(PAGE_SIZE + 5);
     expect(manifest.tables.user_stats).toBe(PAGE_SIZE * 2);
+  });
+
+  it("treats a repeated key in an unordered read as inconsistent", async () => {
+    const project = new FakeProject();
+    project.shuffle = true;
+    project.tables.set(
+      "user_stats",
+      Array.from({ length: PAGE_SIZE + 200 }, (_, index) => ({ user_id: `u${index}` }))
+    );
+    await expect(exportBackup(project, temp())).rejects.toThrow(/inconsistent/);
+  });
+
+  it("fails when the auth user total does not match what was read", async () => {
+    const project = seeded();
+    project.userTotalOffset = 1;
+    await expect(exportBackup(project, temp())).rejects.toThrow(/auth users was inconsistent/);
+  });
+
+  it("fails when auth user ids repeat", async () => {
+    const project = seeded();
+    project.users.push({ ...project.users[0] });
+    await expect(exportBackup(project, temp())).rejects.toThrow(/auth users was inconsistent/);
+  });
+
+  it("allows repeated identities in a table without a primary key", async () => {
+    const project = new FakeProject();
+    const event = { user_id: "u1", question_id: "q1", is_correct: true, answered_at: "2026-01-01T00:00:00Z" };
+    project.tables.set("quiz_answer_events", [event, { ...event }]);
+    const manifest = await exportBackup(project, temp());
+    expect(manifest.tables.quiz_answer_events).toBe(2);
   });
 
   it("fails loudly and writes nothing when a table cannot be read", async () => {
@@ -266,16 +307,16 @@ describe("retention", () => {
     expect(readdirSync(repo)).not.toContain("stale.json");
   });
 
-  it("keeps history inside the window and resets it to one orphan commit after 30 days", async () => {
+  it("keeps history inside the window and resets it to one orphan commit after 29 days", async () => {
     const repo = backupRepo();
     const project = seeded();
     publishBackup(repo, await exportOf(project));
     project.users = project.users.filter((user) => user.id !== "u2");
     project.tables.set("user_stats", [{ user_id: "u1", star_points: 3 }]);
-    expect(publishBackup(repo, await exportOf(project), new Date(Date.now() + 29 * day))).toBe("committed");
+    expect(publishBackup(repo, await exportOf(project), new Date(Date.now() + 28 * day))).toBe("committed");
     expect(run(repo, "rev-list", "--count", "HEAD")).toBe("2");
 
-    const result = publishBackup(repo, await exportOf(project), new Date(Date.now() + 31 * day));
+    const result = publishBackup(repo, await exportOf(project), new Date(Date.now() + 30 * day));
     expect(result).toBe("reset");
     expect(run(repo, "rev-list", "--count", "HEAD")).toBe("1");
     expect(run(repo, "rev-parse", "--abbrev-ref", "HEAD")).toBe("main");

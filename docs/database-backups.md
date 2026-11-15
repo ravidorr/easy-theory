@@ -57,7 +57,7 @@ merges to this repository keep it running; check the Actions tab if that ever st
 ## Retention
 
 The backup repository keeps history, so an account deleted in the app would remain in old
-commits. When the oldest commit is older than 30 days, `backup-publish.ts` replaces the
+commits. When the oldest commit is older than 29 days (one day of margin for a daily run), `backup-publish.ts` replaces the
 whole history with one orphan commit of the current files, and the workflow force-pushes it.
 Deleted accounts therefore leave every reachable commit within 30 days (up to 30 days of
 retention). GitHub may keep unreachable objects on its servers until its own garbage
