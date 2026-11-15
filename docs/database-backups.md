@@ -38,6 +38,19 @@ neither list, so a new table cannot be forgotten silently.
 
 ## How the daily run works
 
+```mermaid
+flowchart TD
+    S[(Supabase: users and 20 tables)] -->|service-role key| E
+    subgraph R[GitHub Actions, daily 03:17 UTC]
+        E[Export: read, order, cross-check] --> V[Verify files against the manifest]
+        V --> C[Clone backup repo with the deploy key]
+        C --> P[Commit and push, only if data changed]
+    end
+    B[(Private backup repo)] -->|clone| C
+    P -->|push, force push after the history reset| B
+    R -.->|failed or cancelled| F[Issue opened with the run link]
+```
+
 `.github/workflows/daily-backup.yml` runs at 03:17 UTC and on manual dispatch, in the
 `database-backup` environment.
 
