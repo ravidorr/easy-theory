@@ -1,0 +1,87 @@
+name: Daily Data Backup
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 3 * * *"
+
+concurrency:
+  group: daily-data-backup
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    name: Back up user data to the private backup repository
+    runs-on: ubuntu-latest
+    environment: database-backup
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install trusted dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Export, commit and push (the only step that sees the secrets)
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          BACKUP_DEPLOY_KEY: ${{ secrets.BACKUP_DEPLOY_KEY }}
+        run: |
+          set -euo pipefail
+          umask 077
+          work="$(mktemp -d "$RUNNER_TEMP/backup.XXXXXX")"
+          trap 'rm -rf "$work"' EXIT
+
+          printf '%s\n' "$BACKUP_DEPLOY_KEY" > "$work/deploy_key"
+          printf 'github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl\n' > "$work/known_hosts"
+          export GIT_SSH_COMMAND="ssh -i $work/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$work/known_hosts"
+
+          pnpm exec tsx scripts/backup-export.ts "$work/export"
+          git clone --quiet git@github.com:${{ github.repository_owner }}/easy-theory-backups.git "$work/repo"
+          result="$(pnpm exec tsx scripts/backup-publish.ts "$work/repo" "$work/export")"
+          echo "$result"
+
+          case "${result##* }" in
+            committed) git -C "$work/repo" push --quiet origin HEAD:main ;;
+            reset) git -C "$work/repo" push --quiet --force origin HEAD:main ;;
+            unchanged) ;;
+            *) echo "unexpected publish result"; exit 1 ;;
+          esac
+
+  alert:
+    name: Raise the failure alert
+    needs: backup
+    if: failure()
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+
+    steps:
+      - name: Open or update the backup failure issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          title="Daily data backup failed"
+          body="The daily data backup failed. Run: $RUN_URL"
+          existing="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "$title in:title" --json number --jq '.[0].number // empty')"
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --repo "$GITHUB_REPOSITORY" --body "$body"
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body "$body"
+          fi

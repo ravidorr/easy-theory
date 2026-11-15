@@ -9,6 +9,7 @@
     ".next/**",
     ".context/**",
     ".agents/**",
+    ".claude/**",
     "CHANGELOG.md",
     "AGENTS.md",
     "CLAUDE.md"
