@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 Historical release headings were normalized from their changelog categories: `Added` releases receive a minor increment, except for a clearly test-only addition; all other categories receive a patch increment. No historical major increment was inferred. One stable SemVer increment and one top-level entry per PR are enforced by the pre-push hook; individual commits within a PR do not bump.
 
+## [0.59.2] - 2026-11-16
+
+### Security
+
+- Bumped `markdownlint-cli2` to 0.24.1, which brings `markdownlint` 0.42.1 and the patched `re2js` 2.9.1 (the advisory fix is 2.8.7). This stops the recurring failed Dependabot security-update runs for `re2js`. The `glob` and `minimatch` advisories remain open: `htmlhint` pins `glob` 13 and ESLint 9 pins `minimatch` 3, so those need upstream or major upgrades.
+
+---
+
 ## [0.59.1] - 2026-11-15
 
 ### Changed

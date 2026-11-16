@@ -4,7 +4,7 @@
     "url": "https://github.com/sponsors/ravidorr"
   },
   "name": "easy-in-theory",
-  "version": "0.59.1",
+  "version": "0.59.2",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -68,7 +68,7 @@
     "htmlhint": "^1.9.2",
     "husky": "^9.1.7",
     "jsdom": "^29.1.1",
-    "markdownlint-cli2": "^0.24.0",
+    "markdownlint-cli2": "^0.24.1",
     "stylelint": "^17.16.0",
     "stylelint-config-standard": "^40.0.0",
     "tsx": "^4.23.0",
