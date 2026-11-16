@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 Historical release headings were normalized from their changelog categories: `Added` releases receive a minor increment, except for a clearly test-only addition; all other categories receive a patch increment. No historical major increment was inferred. One stable SemVer increment and one top-level entry per PR are enforced by the pre-push hook; individual commits within a PR do not bump.
 
+## [0.59.2] - 2026-11-16
+
+### Security
+
+- Upgraded `@sentry/nextjs` from 10.76.1 to 11.12.0, which moves its bundler plugins to the patched `glob` 14. Type check, the 1535 tests and the production build pass unchanged. `htmlhint` still pins `glob` 13, so that Dependabot advisory remains open until `htmlhint` updates.
+
+---
+
 ## [0.59.1] - 2026-11-15
 
 ### Changed
