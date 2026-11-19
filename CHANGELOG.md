@@ -3,6 +3,14 @@
 All notable changes to Easy in theory (קל בתיאוריה) are documented here.
 Historical release headings were normalized from their changelog categories: `Added` releases receive a minor increment, except for a clearly test-only addition; all other categories receive a patch increment. No historical major increment was inferred. One stable SemVer increment and one top-level entry per PR are enforced by the pre-push hook; individual commits within a PR do not bump.
 
+## [0.59.4] - 2026-11-19
+
+### Changed
+
+- Added `.github/dependabot.yml` with version-update PRs disabled and `minimatch` ignored. The only remaining vulnerable copy is the dev-only 3.x pinned by `eslint`, `eslint-plugin-react`, `eslint-plugin-jsx-a11y` and `eslint-plugin-import`, none of which has a patched release, so Dependabot's security-update job could not resolve a fix and failed on every run. Production already resolves `minimatch` 10.x.
+
+---
+
 ## [0.59.3] - 2026-11-16
 
 ### Security
