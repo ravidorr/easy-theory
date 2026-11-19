@@ -1,0 +1,15 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    # Version-update PRs stay off; this entry exists so security updates
+    # honour the ignore rule below.
+    open-pull-requests-limit: 0
+    ignore:
+      # minimatch 3.x is pinned by eslint, eslint-plugin-react,
+      # eslint-plugin-jsx-a11y and eslint-plugin-import (dev-only, no patched
+      # release upstream), so Dependabot cannot resolve a fix and the security
+      # update job fails on every run. Production already resolves 10.x.
+      - dependency-name: minimatch
